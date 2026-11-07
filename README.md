@@ -1,4 +1,6 @@
-# Abyssal Altar — 2D Dark-Fantasy Action Roguelike
+# Dark Summoner (Abyssal Altar) — 2D Dark-Fantasy Action Roguelike
+
+Official Repository: [https://github.com/sundar1236/DarkSummoner.git](https://github.com/sundar1236/DarkSummoner.git)
 
 A 2D dark-fantasy action roguelike game built with **Godot Engine 4.3** and **GDScript**, targeted for **Android first** in portrait mode (720×1280 reference resolution) with complete desktop mouse/keyboard testing support.
 
@@ -98,8 +100,10 @@ AbyssalAltar/
 │       ├── game_over_view.gd      # Defeat and retry dispatcher
 │       └── settings_modal.gd      # Volume sliders & mute toggle
 └── tests/
-    ├── test_runner.gd             # Automated test suite (43 assertion checks)
-    └── test_runner.tscn           # Test scene
+    ├── test_runner.gd             # Core gameplay test suite (116 assertions)
+    ├── test_runner.tscn           # Core test runner scene
+    ├── test_summoning_circle.gd   # Summoning circle altar test suite (34 assertions)
+    └── test_summoning_circle.tscn # Summoning circle test scene
 ```
 
 ---
@@ -113,9 +117,13 @@ The game runs directly with the local portable Godot 4.3 executable:
 & "D:\work drive\tools\godot\Godot_v4.3-stable_win64_console.exe" --path "D:\work drive\AbyssalAltar"
 ```
 
-To run the automated test suite verifying all 20 acceptance criteria:
+To run the automated test suite (150 test assertions passing):
 ```powershell
+# Core gameplay test suite
 & "D:\work drive\tools\godot\Godot_v4.3-stable_win64_console.exe" --headless --path "D:\work drive\AbyssalAltar" tests/test_runner.tscn
+
+# Summoning circle altar test suite
+& "D:\work drive\tools\godot\Godot_v4.3-stable_win64_console.exe" --headless --path "D:\work drive\AbyssalAltar" tests/test_summoning_circle.tscn
 ```
 
 ### Testing on Android

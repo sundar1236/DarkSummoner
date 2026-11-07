@@ -1,0 +1,23 @@
+name: CI Tests
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  test:
+    name: Run Godot Headless Test Suite
+    runs-on: ubuntu-latest
+    container:
+      image: barichello/godot-ci:4.3
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run Core Gameplay Test Suite (116 tests)
+        run: godot -v --headless --path . "res://tests/test_runner.tscn"
+
+      - name: Run Summoning Circle Altar Test Suite (34 tests)
+        run: godot -v --headless --path . "res://tests/test_summoning_circle.tscn"
