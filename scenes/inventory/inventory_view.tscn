@@ -1,0 +1,257 @@
+[gd_scene load_steps=5 format=3 uid="uid://c6inventoryview01"]
+
+[ext_resource type="Script" path="res://scripts/inventory/inventory_view.gd" id="1_inv"]
+[ext_resource type="Script" path="res://scripts/inventory/altar_board.gd" id="2_altar"]
+[ext_resource type="Texture2D" path="res://assets/art/backgrounds/tower_altar_bg.png" id="3_bg"]
+[ext_resource type="Texture2D" path="res://assets/art/items/item_shadow_dagger.png" id="4_ico"]
+
+[node name="InventoryView" type="Control" node_paths=PackedStringArray("altar_board", "backpack_container", "item_details_panel", "item_icon_rect", "lbl_item_name", "lbl_item_tags", "lbl_item_desc", "lbl_item_stats", "btn_rotate", "btn_move", "btn_backpack", "btn_merge", "btn_recycle", "toast_panel", "toast_label", "synergy_list_container", "btn_close", "lbl_grid_size", "lbl_backpack_cap")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_inv")
+altar_board = NodePath("MainLayout/AltarContainer/AltarBoard")
+backpack_container = NodePath("MainLayout/Scroll/Content/BackpackContainer")
+item_details_panel = NodePath("MainLayout/DetailsPanel")
+item_icon_rect = NodePath("MainLayout/DetailsPanel/VBoxAll/TopRow/IconPanel/ItemIcon")
+lbl_item_name = NodePath("MainLayout/DetailsPanel/VBoxAll/TopRow/VBoxText/ItemName")
+lbl_item_tags = NodePath("MainLayout/DetailsPanel/VBoxAll/TopRow/VBoxText/ItemTags")
+lbl_item_desc = NodePath("MainLayout/DetailsPanel/VBoxAll/ItemDesc")
+lbl_item_stats = NodePath("MainLayout/DetailsPanel/VBoxAll/TopRow/VBoxText/ItemStats")
+btn_rotate = NodePath("MainLayout/DetailsPanel/VBoxAll/Actions/BtnRotate")
+btn_move = NodePath("MainLayout/DetailsPanel/VBoxAll/Actions/BtnMove")
+btn_backpack = NodePath("MainLayout/DetailsPanel/VBoxAll/Actions/BtnBackpack")
+btn_merge = NodePath("MainLayout/DetailsPanel/VBoxAll/Actions/BtnMerge")
+btn_recycle = NodePath("MainLayout/DetailsPanel/VBoxAll/Actions/BtnRecycle")
+toast_panel = NodePath("ToastPanel")
+toast_label = NodePath("ToastPanel/ToastLabel")
+synergy_list_container = NodePath("MainLayout/Scroll/Content/SynergyList")
+btn_close = NodePath("MainLayout/Header/BtnClose")
+lbl_grid_size = NodePath("MainLayout/Header/LblGridSize")
+lbl_backpack_cap = NodePath("MainLayout/Scroll/Content/BackpackHeader/LblBackpackCap")
+
+[node name="Bg" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("3_bg")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="DarkOverlay" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.05, 0.03, 0.08, 0.88)
+
+[node name="MainLayout" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 24.0
+offset_top = 28.0
+offset_right = -24.0
+offset_bottom = -24.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 10
+
+[node name="Header" type="HBoxContainer" parent="MainLayout"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Title" type="Label" parent="MainLayout/Header"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.88, 0.45, 1)
+theme_override_font_sizes/font_size = 20
+text = "THE ABYSSAL ALTAR"
+
+[node name="LblGridSize" type="Label" parent="MainLayout/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.75, 0.7, 0.85, 1)
+theme_override_font_sizes/font_size = 14
+text = "Altar Grid: 4x4"
+horizontal_alignment = 1
+
+[node name="BtnClose" type="Button" parent="MainLayout/Header"]
+custom_minimum_size = Vector2(90, 42)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.9, 0.4, 1)
+theme_override_font_sizes/font_size = 15
+text = "DONE"
+
+[node name="AltarContainer" type="CenterContainer" parent="MainLayout"]
+custom_minimum_size = Vector2(0, 390)
+layout_mode = 2
+
+[node name="AltarBoard" type="Control" parent="MainLayout/AltarContainer" node_paths=PackedStringArray("inventory_view")]
+custom_minimum_size = Vector2(380, 380)
+layout_mode = 2
+script = ExtResource("2_altar")
+inventory_view = NodePath("../../..")
+
+[node name="DetailsPanel" type="PanelContainer" parent="MainLayout"]
+layout_mode = 2
+
+[node name="VBoxAll" type="VBoxContainer" parent="MainLayout/DetailsPanel"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="TopRow" type="HBoxContainer" parent="MainLayout/DetailsPanel/VBoxAll"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="IconPanel" type="PanelContainer" parent="MainLayout/DetailsPanel/VBoxAll/TopRow"]
+custom_minimum_size = Vector2(76, 76)
+layout_mode = 2
+
+[node name="ItemIcon" type="TextureRect" parent="MainLayout/DetailsPanel/VBoxAll/TopRow/IconPanel"]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+texture = ExtResource("4_ico")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="VBoxText" type="VBoxContainer" parent="MainLayout/DetailsPanel/VBoxAll/TopRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 3
+
+[node name="ItemName" type="Label" parent="MainLayout/DetailsPanel/VBoxAll/TopRow/VBoxText"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 17
+text = "Shadow Dagger (Tier 1)"
+
+[node name="ItemTags" type="Label" parent="MainLayout/DetailsPanel/VBoxAll/TopRow/VBoxText"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.75, 0.8, 0.95, 1)
+theme_override_font_sizes/font_size = 12
+text = "Tags: weapon, shadow"
+
+[node name="ItemStats" type="Label" parent="MainLayout/DetailsPanel/VBoxAll/TopRow/VBoxText"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 1, 0.6, 1)
+theme_override_font_sizes/font_size = 13
+text = "+6 ATK | +8% Crit | +15% Atk Speed"
+
+[node name="ItemDesc" type="Label" parent="MainLayout/DetailsPanel/VBoxAll"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.85, 0.88, 1)
+theme_override_font_sizes/font_size = 12
+text = "A curved obsidian dagger dripping with void essence."
+autowrap_mode = 3
+
+[node name="Actions" type="HBoxContainer" parent="MainLayout/DetailsPanel/VBoxAll"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="BtnRotate" type="Button" parent="MainLayout/DetailsPanel/VBoxAll/Actions"]
+custom_minimum_size = Vector2(85, 42)
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+text = "ROTATE"
+
+[node name="BtnMove" type="Button" parent="MainLayout/DetailsPanel/VBoxAll/Actions"]
+custom_minimum_size = Vector2(130, 42)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 14
+text = "RELOCATE"
+
+[node name="BtnBackpack" type="Button" parent="MainLayout/DetailsPanel/VBoxAll/Actions"]
+custom_minimum_size = Vector2(110, 42)
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+text = "TO PACK"
+
+[node name="BtnMerge" type="Button" parent="MainLayout/DetailsPanel/VBoxAll/Actions"]
+custom_minimum_size = Vector2(90, 42)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.88, 0.3, 1)
+theme_override_font_sizes/font_size = 14
+text = "MERGE"
+
+[node name="BtnRecycle" type="Button" parent="MainLayout/DetailsPanel/VBoxAll/Actions"]
+custom_minimum_size = Vector2(95, 42)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.45, 0.45, 1)
+theme_override_font_sizes/font_size = 13
+text = "RECYCLE"
+
+[node name="Scroll" type="ScrollContainer" parent="MainLayout"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Content" type="VBoxContainer" parent="MainLayout/Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 10
+
+[node name="BackpackHeader" type="HBoxContainer" parent="MainLayout/Scroll/Content"]
+layout_mode = 2
+
+[node name="Lbl" type="Label" parent="MainLayout/Scroll/Content/BackpackHeader"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.85, 0.95, 1)
+theme_override_font_sizes/font_size = 15
+text = "RESERVE BACKPACK"
+
+[node name="LblBackpackCap" type="Label" parent="MainLayout/Scroll/Content/BackpackHeader"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.7, 0.7, 0.75, 1)
+theme_override_font_sizes/font_size = 14
+text = "0/10"
+horizontal_alignment = 2
+
+[node name="BackpackContainer" type="HFlowContainer" parent="MainLayout/Scroll/Content"]
+custom_minimum_size = Vector2(0, 80)
+layout_mode = 2
+theme_override_constants/h_separation = 8
+theme_override_constants/v_separation = 8
+
+[node name="SynergyHeader" type="Label" parent="MainLayout/Scroll/Content"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.4, 1)
+theme_override_font_sizes/font_size = 15
+text = "✦ ACTIVE ALTAR SYNERGIES"
+
+[node name="SynergyList" type="VBoxContainer" parent="MainLayout/Scroll/Content"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="ToastPanel" type="PanelContainer" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -170.0
+offset_top = -28.0
+offset_right = 170.0
+offset_bottom = 28.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="ToastLabel" type="Label" parent="ToastPanel"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.9, 0.45, 1)
+theme_override_font_sizes/font_size = 15
+text = "Item moved!"
+horizontal_alignment = 1
+vertical_alignment = 1

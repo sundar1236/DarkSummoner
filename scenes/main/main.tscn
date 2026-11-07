@@ -1,0 +1,80 @@
+[gd_scene load_steps=13 format=3 uid="uid://c6mainmaster01"]
+
+[ext_resource type="Script" path="res://scripts/core/main_controller.gd" id="1_ctl"]
+[ext_resource type="PackedScene" uid="uid://c6introscreen01" path="res://scenes/menus/intro_screen.tscn" id="2_intro"]
+[ext_resource type="PackedScene" uid="uid://c6storyintro01" path="res://scenes/menus/story_intro.tscn" id="2_sty"]
+[ext_resource type="PackedScene" uid="uid://c6mainmenu01" path="res://scenes/menus/main_menu.tscn" id="3_mnu"]
+[ext_resource type="PackedScene" uid="uid://c6mainshell01" path="res://scenes/main/main_shell.tscn" id="3_shl"]
+[ext_resource type="PackedScene" uid="uid://c6charselectview01" path="res://scenes/characters/character_select_view.tscn" id="4_csv"]
+[ext_resource type="PackedScene" uid="uid://c6progressionview01" path="res://scenes/characters/progression_view.tscn" id="5_prg"]
+[ext_resource type="PackedScene" uid="uid://c6inventoryview01" path="res://scenes/inventory/inventory_view.tscn" id="6_inv"]
+[ext_resource type="PackedScene" uid="uid://c6shopview01" path="res://scenes/shops/shop_view.tscn" id="7_shp"]
+[ext_resource type="PackedScene" uid="uid://c6rewardview01" path="res://scenes/ui/reward_view.tscn" id="8_rwd"]
+[ext_resource type="PackedScene" uid="uid://c6gameoverview01" path="res://scenes/ui/game_over_view.tscn" id="9_gov"]
+[ext_resource type="PackedScene" uid="uid://c6settingsmodal01" path="res://scenes/ui/settings_modal.tscn" id="10_set"]
+
+[node name="Main" type="Control" node_paths=PackedStringArray("intro_screen", "story_intro", "main_menu", "main_shell", "character_select_view", "progression_view", "inventory_view", "shop_view", "reward_view", "game_over_view", "settings_modal", "combat_container")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_ctl")
+intro_screen = NodePath("IntroScreen")
+story_intro = NodePath("StoryIntro")
+main_menu = NodePath("MainMenu")
+main_shell = NodePath("MainShell")
+character_select_view = NodePath("CharacterSelectView")
+progression_view = NodePath("ProgressionView")
+inventory_view = NodePath("InventoryView")
+shop_view = NodePath("ShopView")
+reward_view = NodePath("RewardView")
+game_over_view = NodePath("GameOverView")
+settings_modal = NodePath("SettingsModal")
+combat_container = NodePath("CombatContainer")
+
+[node name="CombatContainer" type="Node2D" parent="."]
+
+[node name="IntroScreen" parent="." instance=ExtResource("2_intro")]
+layout_mode = 1
+
+[node name="StoryIntro" parent="." instance=ExtResource("2_sty")]
+visible = false
+layout_mode = 1
+
+[node name="MainMenu" parent="." instance=ExtResource("3_mnu")]
+visible = false
+layout_mode = 1
+
+[node name="MainShell" parent="." instance=ExtResource("3_shl")]
+visible = false
+layout_mode = 1
+
+[node name="CharacterSelectView" parent="." instance=ExtResource("4_csv")]
+visible = false
+layout_mode = 1
+
+[node name="ProgressionView" parent="." instance=ExtResource("5_prg")]
+visible = false
+layout_mode = 1
+
+[node name="InventoryView" parent="." instance=ExtResource("6_inv")]
+visible = false
+layout_mode = 1
+
+[node name="ShopView" parent="." instance=ExtResource("7_shp")]
+visible = false
+layout_mode = 1
+
+[node name="RewardView" parent="." instance=ExtResource("8_rwd")]
+visible = false
+layout_mode = 1
+
+[node name="GameOverView" parent="." instance=ExtResource("9_gov")]
+visible = false
+layout_mode = 1
+
+[node name="SettingsModal" parent="." instance=ExtResource("10_set")]
+visible = false
+layout_mode = 1

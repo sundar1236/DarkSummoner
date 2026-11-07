@@ -1,0 +1,186 @@
+[gd_scene load_steps=6 format=3 uid="uid://c6mainmenu01"]
+
+[ext_resource type="Script" path="res://scripts/ui/main_menu.gd" id="1_mnu"]
+[ext_resource type="Theme" path="res://assets/themes/dark_fantasy_theme.tres" id="2_thm"]
+[ext_resource type="Texture2D" path="res://assets/art/backgrounds/tower_altar_bg.png" id="3_bg"]
+[ext_resource type="Texture2D" path="res://assets/art/ui/abyssal_altar_logo.png" id="4_logo"]
+[ext_resource type="Texture2D" path="res://assets/art/ui/icon_shade.png" id="5_shd"]
+
+[node name="MainMenu" type="Control" node_paths=PackedStringArray("logo_rect", "btn_continue", "btn_play", "btn_characters", "btn_sanctuary", "btn_prologue", "btn_settings", "btn_quit", "lbl_shades_quick", "lbl_version")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("2_thm")
+script = ExtResource("1_mnu")
+logo_rect = NodePath("MainLayout/Header/Logo")
+btn_continue = NodePath("MainLayout/ButtonsVBox/BtnContinue")
+btn_play = NodePath("MainLayout/ButtonsVBox/BtnPlay")
+btn_characters = NodePath("MainLayout/ButtonsVBox/BtnCharacters")
+btn_sanctuary = NodePath("MainLayout/ButtonsVBox/BtnSanctuary")
+btn_prologue = NodePath("MainLayout/ButtonsVBox/BtnPrologue")
+btn_settings = NodePath("MainLayout/ButtonsVBox/BtnSettings")
+btn_quit = NodePath("MainLayout/ButtonsVBox/BtnQuit")
+lbl_shades_quick = NodePath("MainLayout/Header/TopBar/ShadesBadge/LblShades")
+lbl_version = NodePath("MainLayout/Footer/LblVersion")
+
+[node name="Bg" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("3_bg")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="DarkVignette" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.05, 0.03, 0.08, 0.5)
+
+[node name="Sparks" type="CPUParticles2D" parent="."]
+position = Vector2(360, 1260)
+amount = 35
+lifetime = 4.5
+emission_shape = 3
+emission_rect_extents = Vector2(340, 10)
+direction = Vector2(0, -1)
+spread = 30.0
+gravity = Vector2(0, -12)
+initial_velocity_min = 40.0
+initial_velocity_max = 95.0
+scale_amount_min = 2.0
+scale_amount_max = 4.5
+color = Color(0.78, 0.4, 0.95, 0.55)
+
+[node name="MainLayout" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 36.0
+offset_top = 40.0
+offset_right = -36.0
+offset_bottom = -30.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 16
+
+[node name="Header" type="VBoxContainer" parent="MainLayout"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="TopBar" type="HBoxContainer" parent="MainLayout/Header"]
+layout_mode = 2
+alignment = 2
+
+[node name="ShadesBadge" type="HBoxContainer" parent="MainLayout/Header/TopBar"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Icon" type="TextureRect" parent="MainLayout/Header/TopBar/ShadesBadge"]
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 2
+texture = ExtResource("5_shd")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="LblShades" type="Label" parent="MainLayout/Header/TopBar/ShadesBadge"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.4, 1)
+theme_override_font_sizes/font_size = 15
+text = "◆ 0 Shades Collected"
+
+[node name="Logo" type="TextureRect" parent="MainLayout/Header"]
+custom_minimum_size = Vector2(0, 190)
+layout_mode = 2
+texture = ExtResource("4_logo")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Subtitle" type="Label" parent="MainLayout/Header"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.75, 0.95, 1)
+theme_override_colors/font_shadow_color = Color(0.25, 0.05, 0.4, 0.9)
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 14
+text = "DARK-FANTASY ACTION ROGUELIKE"
+horizontal_alignment = 1
+
+[node name="Spacer" type="Control" parent="MainLayout"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ButtonsVBox" type="VBoxContainer" parent="MainLayout"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="BtnContinue" type="Button" parent="MainLayout/ButtonsVBox"]
+visible = false
+custom_minimum_size = Vector2(0, 58)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.9, 0.4, 1)
+theme_override_font_sizes/font_size = 19
+text = "RESUME RUN"
+
+[node name="BtnPlay" type="Button" parent="MainLayout/ButtonsVBox"]
+custom_minimum_size = Vector2(0, 58)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.92, 0.6, 1)
+theme_override_font_sizes/font_size = 20
+text = "ENTER THE TOWER"
+
+[node name="BtnCharacters" type="Button" parent="MainLayout/ButtonsVBox"]
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.92, 0.88, 0.98, 1)
+theme_override_font_sizes/font_size = 17
+text = "CHAMPIONS OF THE DEPTHS"
+
+[node name="BtnSanctuary" type="Button" parent="MainLayout/ButtonsVBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 52)
+theme_override_colors/font_color = Color(0.92, 0.88, 0.98, 1)
+theme_override_font_sizes/font_size = 17
+text = "SANCTUARY & UPGRADES"
+
+[node name="BtnPrologue" type="Button" parent="MainLayout/ButtonsVBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 48)
+theme_override_colors/font_color = Color(0.85, 0.75, 1, 1)
+theme_override_font_sizes/font_size = 16
+text = "PROLOGUE & LORE"
+
+[node name="BtnSettings" type="Button" parent="MainLayout/ButtonsVBox"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.82, 0.92, 1)
+theme_override_font_sizes/font_size = 16
+text = "AUDIO & SETTINGS"
+
+[node name="BtnQuit" type="Button" parent="MainLayout/ButtonsVBox"]
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.68, 0.78, 1)
+theme_override_font_sizes/font_size = 15
+text = "QUIT"
+
+[node name="Footer" type="VBoxContainer" parent="MainLayout"]
+layout_mode = 2
+alignment = 1
+
+[node name="LblVersion" type="Label" parent="MainLayout/Footer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.55, 0.5, 0.65, 0.85)
+theme_override_font_sizes/font_size = 12
+text = "Abyssal Altar v1.2.0 • Godot 4.3 Mobile"
+horizontal_alignment = 1

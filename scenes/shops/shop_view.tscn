@@ -1,0 +1,94 @@
+[gd_scene load_steps=2 format=3 uid="uid://c6shopview01"]
+
+[ext_resource type="Script" path="res://scripts/shops/shop_view.gd" id="1_shp"]
+
+[node name="ShopView" type="Control" node_paths=PackedStringArray("btn_tab_blacksmith", "btn_tab_potion", "btn_tab_relic", "items_grid", "lbl_gold", "btn_leave")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_shp")
+btn_tab_blacksmith = NodePath("VBox/Tabs/BtnBlacksmith")
+btn_tab_potion = NodePath("VBox/Tabs/BtnPotion")
+btn_tab_relic = NodePath("VBox/Tabs/BtnRelic")
+items_grid = NodePath("VBox/Scroll/ItemsGrid")
+lbl_gold = NodePath("VBox/Header/LblGold")
+btn_leave = NodePath("VBox/Header/BtnLeave")
+
+[node name="Bg" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.08, 0.06, 0.1, 0.98)
+
+[node name="VBox" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 12
+
+[node name="Header" type="HBoxContainer" parent="VBox"]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="VBox/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 22
+theme_override_colors/font_color = Color(1, 0.85, 0.4, 1)
+text = "ABYSSAL BAZAAR"
+
+[node name="LblGold" type="Label" parent="VBox/Header"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(1, 0.9, 0.2, 1)
+text = "Run Gold: 30"
+
+[node name="BtnLeave" type="Button" parent="VBox/Header"]
+custom_minimum_size = Vector2(80, 36)
+layout_mode = 2
+text = "LEAVE"
+
+[node name="Tabs" type="HBoxContainer" parent="VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="BtnBlacksmith" type="Button" parent="VBox/Tabs"]
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "BLACKSMITH"
+
+[node name="BtnPotion" type="Button" parent="VBox/Tabs"]
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "POTIONS"
+
+[node name="BtnRelic" type="Button" parent="VBox/Tabs"]
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "RELICS"
+
+[node name="Scroll" type="ScrollContainer" parent="VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ItemsGrid" type="HFlowContainer" parent="VBox/Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/h_separation = 12
+theme_override_constants/v_separation = 12

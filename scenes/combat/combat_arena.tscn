@@ -1,0 +1,309 @@
+[gd_scene load_steps=6 format=3 uid="uid://c6combatarena01"]
+
+[ext_resource type="Script" path="res://scripts/combat/combat_manager.gd" id="1_mgr"]
+[ext_resource type="Script" path="res://scripts/combat/arena_background.gd" id="2_bg"]
+[ext_resource type="Script" path="res://scripts/combat/player_controller.gd" id="3_ply"]
+[ext_resource type="Script" path="res://scripts/ui/combat_hud.gd" id="4_hud"]
+[ext_resource type="Script" path="res://scripts/ui/virtual_joystick.gd" id="5_joy"]
+[ext_resource type="Script" path="res://scripts/combat/combat_camera.gd" id="6_cam"]
+
+[node name="CombatArena" type="Node2D" node_paths=PackedStringArray("player", "boss_health_bar", "boss_title_label")]
+y_sort_enabled = true
+script = ExtResource("1_mgr")
+player = NodePath("Player")
+boss_health_bar = NodePath("HUDLayer/CombatHUD/TopContainer/BossBar")
+boss_title_label = NodePath("HUDLayer/CombatHUD/TopContainer/BossLabel")
+
+[node name="Background" type="Node2D" parent="."]
+z_index = -10
+script = ExtResource("2_bg")
+
+[node name="Camera2D" type="Camera2D" parent="." node_paths=PackedStringArray("target")]
+position = Vector2(360, 640)
+script = ExtResource("6_cam")
+target = NodePath("../Player")
+
+[node name="Player" type="CharacterBody2D" parent="." node_paths=PackedStringArray("move_joystick")]
+y_sort_enabled = true
+position = Vector2(360, 780)
+script = ExtResource("3_ply")
+move_joystick = NodePath("../HUDLayer/CombatHUD/MoveJoystick")
+
+[node name="HUDLayer" type="CanvasLayer" parent="."]
+
+[node name="CombatHUD" type="Control" parent="HUDLayer" node_paths=PackedStringArray("move_joystick", "player_hp_bar", "player_hp_label", "floor_level_label", "gold_label", "shades_label", "boss_bar", "boss_label", "btn_dodge", "btn_skill", "btn_potion", "potion_count_label", "btn_pause", "btn_speed", "xp_bar", "xp_label", "timer_label", "wave_objective_label", "revive_objective_label")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("4_hud")
+move_joystick = NodePath("MoveJoystick")
+player_hp_bar = NodePath("TopContainer/StatsRow/HpBar")
+player_hp_label = NodePath("TopContainer/StatsRow/HpBar/HpLabel")
+floor_level_label = NodePath("TopContainer/FloorLevelLabel")
+gold_label = NodePath("TopContainer/CurrenciesRow/GoldLabel")
+shades_label = NodePath("TopContainer/CurrenciesRow/ShadesLabel")
+boss_bar = NodePath("TopContainer/BossBar")
+boss_label = NodePath("TopContainer/BossLabel")
+btn_dodge = NodePath("ActionButtons/BtnDodge")
+btn_skill = NodePath("ActionButtons/BtnSkill")
+btn_potion = NodePath("ActionButtons/BtnPotion")
+potion_count_label = NodePath("ActionButtons/BtnPotion/PotionLabel")
+btn_pause = NodePath("TopContainer/StatsRow/BtnPause")
+btn_speed = NodePath("TopContainer/StatsRow/BtnSpeed")
+xp_bar = NodePath("TopContainer/XpBar")
+xp_label = NodePath("TopContainer/XpBar/XpLabel")
+timer_label = NodePath("RightObjectiveColumn/TimerBadge/Label")
+wave_objective_label = NodePath("RightObjectiveColumn/WaveBadge/Label")
+revive_objective_label = NodePath("RightObjectiveColumn/ReviveBadge/Label")
+
+[node name="TopContainer" type="VBoxContainer" parent="HUDLayer/CombatHUD"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 20.0
+offset_top = 15.0
+offset_right = -20.0
+offset_bottom = 140.0
+grow_horizontal = 2
+theme_override_constants/separation = 6
+
+[node name="FloorLevelLabel" type="Label" parent="HUDLayer/CombatHUD/TopContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+theme_override_colors/font_color = Color(0.9, 0.75, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.9)
+text = "FLOOR 1 — LEVEL 1"
+horizontal_alignment = 1
+
+[node name="StatsRow" type="HBoxContainer" parent="HUDLayer/CombatHUD/TopContainer"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="HpBar" type="ProgressBar" parent="HUDLayer/CombatHUD/TopContainer/StatsRow"]
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+size_flags_horizontal = 3
+show_percentage = false
+
+[node name="HpLabel" type="Label" parent="HUDLayer/CombatHUD/TopContainer/StatsRow/HpBar"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
+text = "100 / 100"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="BtnPause" type="Button" parent="HUDLayer/CombatHUD/TopContainer/StatsRow"]
+custom_minimum_size = Vector2(36, 28)
+layout_mode = 2
+text = "||"
+
+[node name="BtnSpeed" type="Button" parent="HUDLayer/CombatHUD/TopContainer/StatsRow"]
+custom_minimum_size = Vector2(36, 28)
+layout_mode = 2
+text = "x1"
+
+[node name="XpBar" type="ProgressBar" parent="HUDLayer/CombatHUD/TopContainer"]
+custom_minimum_size = Vector2(0, 14)
+layout_mode = 2
+show_percentage = false
+
+[node name="XpLabel" type="Label" parent="HUDLayer/CombatHUD/TopContainer/XpBar"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 10
+theme_override_colors/font_color = Color(1, 0.9, 0.4, 1)
+text = "Lv.1  Wave 1/5"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="CurrenciesRow" type="HBoxContainer" parent="HUDLayer/CombatHUD/TopContainer"]
+layout_mode = 2
+theme_override_constants/separation = 20
+
+[node name="GoldTag" type="Label" parent="HUDLayer/CombatHUD/TopContainer/CurrenciesRow"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
+text = "Gold:"
+
+[node name="GoldLabel" type="Label" parent="HUDLayer/CombatHUD/TopContainer/CurrenciesRow"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.9, 0.4, 1)
+text = "30"
+
+[node name="ShadesTag" type="Label" parent="HUDLayer/CombatHUD/TopContainer/CurrenciesRow"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.4, 1, 1)
+text = "Shades:"
+
+[node name="ShadesLabel" type="Label" parent="HUDLayer/CombatHUD/TopContainer/CurrenciesRow"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.6, 1, 1)
+text = "0"
+
+[node name="BossLabel" type="Label" parent="HUDLayer/CombatHUD/TopContainer"]
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.25, 0.35, 1)
+theme_override_font_sizes/font_size = 16
+text = "LORD MALAKAR — ABYSSAL DREAD"
+horizontal_alignment = 1
+
+[node name="BossBar" type="ProgressBar" parent="HUDLayer/CombatHUD/TopContainer"]
+visible = false
+custom_minimum_size = Vector2(0, 16)
+layout_mode = 2
+show_percentage = false
+
+[node name="RightObjectiveColumn" type="VBoxContainer" parent="HUDLayer/CombatHUD"]
+layout_mode = 1
+anchors_preset = 11
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -70.0
+offset_top = 160.0
+offset_right = -14.0
+offset_bottom = -300.0
+grow_horizontal = 0
+grow_vertical = 2
+theme_override_constants/separation = 12
+
+[node name="TimerBadge" type="Panel" parent="HUDLayer/CombatHUD/RightObjectiveColumn"]
+custom_minimum_size = Vector2(52, 52)
+layout_mode = 2
+
+[node name="Label" type="Label" parent="HUDLayer/CombatHUD/RightObjectiveColumn/TimerBadge"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 11
+theme_override_colors/font_color = Color(1, 0.9, 0.45, 1)
+text = "00:00"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="WaveBadge" type="Panel" parent="HUDLayer/CombatHUD/RightObjectiveColumn"]
+custom_minimum_size = Vector2(52, 52)
+layout_mode = 2
+
+[node name="Label" type="Label" parent="HUDLayer/CombatHUD/RightObjectiveColumn/WaveBadge"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 11
+theme_override_colors/font_color = Color(0.4, 0.85, 1, 1)
+text = "0/5"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ReviveBadge" type="Panel" parent="HUDLayer/CombatHUD/RightObjectiveColumn"]
+custom_minimum_size = Vector2(52, 52)
+layout_mode = 2
+
+[node name="Label" type="Label" parent="HUDLayer/CombatHUD/RightObjectiveColumn/ReviveBadge"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_font_sizes/font_size = 11
+theme_override_colors/font_color = Color(0.9, 0.4, 0.4, 1)
+text = "0/0"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="MoveJoystick" type="Control" parent="HUDLayer/CombatHUD"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 160.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+script = ExtResource("5_joy")
+
+[node name="ActionButtons" type="Control" parent="HUDLayer/CombatHUD"]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -240.0
+offset_top = -290.0
+offset_right = -15.0
+offset_bottom = -15.0
+grow_horizontal = 0
+grow_vertical = 0
+mouse_filter = 0
+
+[node name="BtnDodge" type="Button" parent="HUDLayer/CombatHUD/ActionButtons"]
+custom_minimum_size = Vector2(88, 88)
+layout_mode = 1
+anchors_preset = 0
+offset_left = 120.0
+offset_top = 165.0
+offset_right = 208.0
+offset_bottom = 253.0
+theme_override_font_sizes/font_size = 18
+flat = true
+
+[node name="BtnSkill" type="Button" parent="HUDLayer/CombatHUD/ActionButtons"]
+custom_minimum_size = Vector2(88, 88)
+layout_mode = 1
+anchors_preset = 0
+offset_left = 18.0
+offset_top = 105.0
+offset_right = 106.0
+offset_bottom = 193.0
+theme_override_font_sizes/font_size = 18
+flat = true
+
+[node name="BtnPotion" type="Button" parent="HUDLayer/CombatHUD/ActionButtons"]
+custom_minimum_size = Vector2(76, 76)
+layout_mode = 1
+anchors_preset = 0
+offset_left = 125.0
+offset_top = 65.0
+offset_right = 201.0
+offset_bottom = 141.0
+theme_override_font_sizes/font_size = 16
+flat = true
+
+[node name="PotionLabel" type="Label" parent="HUDLayer/CombatHUD/ActionButtons/BtnPotion"]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -28.0
+offset_top = -20.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(0.3, 1, 0.4, 1)
+text = "x3"
+horizontal_alignment = 2

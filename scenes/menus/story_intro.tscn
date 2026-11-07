@@ -1,0 +1,184 @@
+[gd_scene load_steps=3 format=3 uid="uid://c6storyintro01"]
+
+[ext_resource type="Script" path="res://scripts/ui/story_intro.gd" id="1_sty"]
+[ext_resource type="Texture2D" path="res://assets/art/story/story_scene_1_tower.png" id="2_img"]
+
+[node name="StoryIntro" type="Control" node_paths=PackedStringArray("scene_texture_rect", "title_label", "subtitle_label", "narrative_label", "act_dots_container", "btn_skip", "progress_bar")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_sty")
+scene_texture_rect = NodePath("ArtLayer/Illustration")
+title_label = NodePath("UILayer/BottomVBox/ActTitle")
+subtitle_label = NodePath("UILayer/BottomVBox/ActSubtitle")
+narrative_label = NodePath("UILayer/BottomVBox/NarrativePanel/NarrativeText")
+act_dots_container = NodePath("UILayer/BottomVBox/DotsRow")
+btn_skip = NodePath("UILayer/TopBar/BtnSkip")
+progress_bar = NodePath("UILayer/TopBar/ProgressBar")
+
+[node name="BaseBg" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.04, 0.03, 0.06, 1)
+
+[node name="ArtLayer" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Illustration" type="TextureRect" parent="ArtLayer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_img")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="Vignette" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.05, 0.03, 0.08, 0.5)
+
+[node name="BottomShade" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -420.0
+grow_horizontal = 2
+grow_vertical = 0
+color = Color(0.04, 0.02, 0.06, 0.88)
+
+[node name="UILayer" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+
+[node name="TopBar" type="Control" parent="UILayer"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 80.0
+grow_horizontal = 2
+mouse_filter = 1
+
+[node name="ProgressBar" type="ProgressBar" parent="UILayer/TopBar"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 4.0
+grow_horizontal = 2
+max_value = 1.0
+show_percentage = false
+
+[node name="BtnSkip" type="Button" parent="UILayer/TopBar"]
+custom_minimum_size = Vector2(100, 38)
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -120.0
+offset_top = 18.0
+offset_right = -20.0
+offset_bottom = 56.0
+grow_horizontal = 0
+theme_override_font_sizes/font_size = 14
+text = "SKIP >>"
+
+[node name="BottomVBox" type="VBoxContainer" parent="UILayer"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 32.0
+offset_top = -360.0
+offset_right = -32.0
+offset_bottom = -30.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+theme_override_constants/separation = 12
+
+[node name="ActTitle" type="Label" parent="UILayer/BottomVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.35, 1)
+theme_override_font_sizes/font_size = 19
+text = "ACT I : THE BLACK TOWER"
+horizontal_alignment = 1
+
+[node name="ActSubtitle" type="Label" parent="UILayer/BottomVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.78, 0.55, 1, 1)
+theme_override_font_sizes/font_size = 13
+text = "The Cursed Spire of Aethelgard"
+horizontal_alignment = 1
+
+[node name="NarrativePanel" type="PanelContainer" parent="UILayer/BottomVBox"]
+layout_mode = 2
+size_flags_vertical = 3
+mouse_filter = 2
+
+[node name="NarrativeText" type="Label" parent="UILayer/BottomVBox/NarrativePanel"]
+layout_mode = 2
+size_flags_vertical = 1
+theme_override_colors/font_color = Color(0.9, 0.9, 0.95, 1)
+theme_override_font_sizes/font_size = 15
+text = "In the forgotten ages of Aethelgard, the Black Tower pierced the shattered heavens. An obsidian monolith built of condemned souls, rising from the void where sunlight dared not fall."
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 3
+
+[node name="TapHint" type="Label" parent="UILayer/BottomVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.45, 0.45, 0.55, 1)
+theme_override_font_sizes/font_size = 11
+text = "Tap screen to advance"
+horizontal_alignment = 1
+
+[node name="DotsRow" type="HBoxContainer" parent="UILayer/BottomVBox"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 14
+
+[node name="Dot1" type="ColorRect" parent="UILayer/BottomVBox/DotsRow"]
+custom_minimum_size = Vector2(8, 8)
+layout_mode = 2
+color = Color(1, 0.85, 0.2, 1)
+
+[node name="Dot2" type="ColorRect" parent="UILayer/BottomVBox/DotsRow"]
+custom_minimum_size = Vector2(8, 8)
+layout_mode = 2
+color = Color(0.4, 0.4, 0.5, 0.5)
+
+[node name="Dot3" type="ColorRect" parent="UILayer/BottomVBox/DotsRow"]
+custom_minimum_size = Vector2(8, 8)
+layout_mode = 2
+color = Color(0.4, 0.4, 0.5, 0.5)
+
+[node name="Dot4" type="ColorRect" parent="UILayer/BottomVBox/DotsRow"]
+custom_minimum_size = Vector2(8, 8)
+layout_mode = 2
+color = Color(0.4, 0.4, 0.5, 0.5)

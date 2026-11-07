@@ -1,0 +1,196 @@
+[gd_scene load_steps=5 format=3 uid="uid://c6charselectview01"]
+
+[ext_resource type="Script" path="res://scripts/characters/character_select_view.gd" id="1_csv"]
+[ext_resource type="Texture2D" path="res://assets/art/backgrounds/tower_altar_bg.png" id="2_bg"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/shadow_hunter_portrait.png" id="3_por"]
+[ext_resource type="Texture2D" path="res://assets/art/ui/icon_padlock.png" id="4_lck"]
+
+[node name="CharacterSelectView" type="Control" node_paths=PackedStringArray("btn_back", "lbl_shades", "tabs_container", "portrait_rect", "locked_overlay", "lbl_char_name", "lbl_char_title", "lbl_char_weapon", "lbl_char_passive", "lbl_char_active", "lbl_char_stats", "lbl_unlock_requirement", "btn_action")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_csv")
+btn_back = NodePath("VBoxMain/TopBar/BtnBack")
+lbl_shades = NodePath("VBoxMain/TopBar/ShadesBadge/LblShades")
+tabs_container = NodePath("VBoxMain/TabsRow")
+portrait_rect = NodePath("VBoxMain/ShowcasePanel/PortraitRect")
+locked_overlay = NodePath("VBoxMain/ShowcasePanel/LockedOverlay")
+lbl_char_name = NodePath("VBoxMain/InfoCard/VBoxInfo/LblCharName")
+lbl_char_title = NodePath("VBoxMain/InfoCard/VBoxInfo/LblCharTitle")
+lbl_char_weapon = NodePath("VBoxMain/InfoCard/VBoxInfo/LblCharWeapon")
+lbl_char_passive = NodePath("VBoxMain/InfoCard/VBoxInfo/PassiveCard/LblCharPassive")
+lbl_char_active = NodePath("VBoxMain/InfoCard/VBoxInfo/ActiveCard/LblCharActive")
+lbl_char_stats = NodePath("VBoxMain/InfoCard/VBoxInfo/LblCharStats")
+lbl_unlock_requirement = NodePath("VBoxMain/InfoCard/VBoxInfo/LblUnlockReq")
+btn_action = NodePath("VBoxMain/BtnAction")
+
+[node name="Bg" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_bg")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="DarkOverlay" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.04, 0.02, 0.07, 0.78)
+
+[node name="VBoxMain" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 28.0
+offset_top = 32.0
+offset_right = -28.0
+offset_bottom = -28.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 12
+
+[node name="TopBar" type="HBoxContainer" parent="VBoxMain"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="BtnBack" type="Button" parent="VBoxMain/TopBar"]
+custom_minimum_size = Vector2(90, 44)
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = "< BACK"
+
+[node name="Title" type="Label" parent="VBoxMain/TopBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(1, 0.9, 0.5, 1)
+theme_override_font_sizes/font_size = 20
+text = "CHAMPIONS OF THE DEPTHS"
+horizontal_alignment = 1
+
+[node name="ShadesBadge" type="HBoxContainer" parent="VBoxMain/TopBar"]
+layout_mode = 2
+
+[node name="LblShades" type="Label" parent="VBoxMain/TopBar/ShadesBadge"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.75, 1, 1)
+theme_override_font_sizes/font_size = 15
+text = "◆ 0 Shades"
+
+[node name="TabsRow" type="HBoxContainer" parent="VBoxMain"]
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="ShowcasePanel" type="PanelContainer" parent="VBoxMain"]
+custom_minimum_size = Vector2(0, 410)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="PortraitRect" type="TextureRect" parent="VBoxMain/ShowcasePanel"]
+layout_mode = 2
+texture = ExtResource("3_por")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="LockedOverlay" type="VBoxContainer" parent="VBoxMain/ShowcasePanel"]
+visible = false
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="LockIcon" type="TextureRect" parent="VBoxMain/ShowcasePanel/LockedOverlay"]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+texture = ExtResource("4_lck")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="LblLock" type="Label" parent="VBoxMain/ShowcasePanel/LockedOverlay"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.8, 0.45, 1)
+theme_override_font_sizes/font_size = 18
+text = "CHAMPION LOCKED"
+horizontal_alignment = 1
+
+[node name="InfoCard" type="PanelContainer" parent="VBoxMain"]
+layout_mode = 2
+
+[node name="VBoxInfo" type="VBoxContainer" parent="VBoxMain/InfoCard"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="LblCharName" type="Label" parent="VBoxMain/InfoCard/VBoxInfo"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 23
+text = "SHADOW HUNTER"
+horizontal_alignment = 1
+
+[node name="LblCharTitle" type="Label" parent="VBoxMain/InfoCard/VBoxInfo"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.75, 0.9, 1)
+theme_override_font_sizes/font_size = 14
+text = "— The Veiled Blade —"
+horizontal_alignment = 1
+
+[node name="LblCharWeapon" type="Label" parent="VBoxMain/InfoCard/VBoxInfo"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.45, 1)
+theme_override_font_sizes/font_size = 13
+text = "WEAPON: Dual Obsidian Slashes   •   STYLE: Swift Critical Flurries"
+horizontal_alignment = 1
+
+[node name="HSeparator" type="HSeparator" parent="VBoxMain/InfoCard/VBoxInfo"]
+layout_mode = 2
+
+[node name="PassiveCard" type="PanelContainer" parent="VBoxMain/InfoCard/VBoxInfo"]
+layout_mode = 2
+
+[node name="LblCharPassive" type="Label" parent="VBoxMain/InfoCard/VBoxInfo/PassiveCard"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+text = "PASSIVE: Flurry Instinct: Consecutive attacks grant +25% Attack Speed."
+autowrap_mode = 2
+
+[node name="ActiveCard" type="PanelContainer" parent="VBoxMain/InfoCard/VBoxInfo"]
+layout_mode = 2
+
+[node name="LblCharActive" type="Label" parent="VBoxMain/InfoCard/VBoxInfo/ActiveCard"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+text = "ULTIMATE: Shadow Flurry: Explosive 360° ring of 8 piercing blades."
+autowrap_mode = 2
+
+[node name="LblCharStats" type="Label" parent="VBoxMain/InfoCard/VBoxInfo"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.8, 0.88, 1)
+theme_override_font_sizes/font_size = 12
+text = "HEALTH: 120   |   DAMAGE: 18   |   SPEED: 250   |   CRIT: 15%"
+horizontal_alignment = 1
+
+[node name="LblUnlockReq" type="Label" parent="VBoxMain/InfoCard/VBoxInfo"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 1, 0.6, 1)
+theme_override_font_sizes/font_size = 13
+text = "CHAMPION UNLOCKED & READY"
+horizontal_alignment = 1
+
+[node name="BtnAction" type="Button" parent="VBoxMain"]
+custom_minimum_size = Vector2(0, 62)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.92, 0.55, 1)
+theme_override_font_sizes/font_size = 19
+text = "ENTER THE TOWER WITH SHADOW HUNTER"

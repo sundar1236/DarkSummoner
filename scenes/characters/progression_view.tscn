@@ -1,0 +1,162 @@
+[gd_scene load_steps=2 format=3 uid="uid://c6progressionview01"]
+
+[ext_resource type="Script" path="res://scripts/characters/progression_view.gd" id="1_prg"]
+
+[node name="ProgressionView" type="Control" node_paths=PackedStringArray("lbl_shades_balance", "btn_tab_chars", "btn_tab_upgrades", "chars_container", "char_buttons_row", "lbl_char_name", "lbl_char_title", "lbl_char_desc", "lbl_char_passive", "lbl_char_active", "lbl_char_stats", "btn_select_or_unlock_char", "upgrades_container", "upgrades_list", "btn_back")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_prg")
+lbl_shades_balance = NodePath("VBox/Header/LblShades")
+btn_tab_chars = NodePath("VBox/Tabs/BtnChars")
+btn_tab_upgrades = NodePath("VBox/Tabs/BtnUpgrades")
+chars_container = NodePath("VBox/CharsContainer")
+char_buttons_row = NodePath("VBox/CharsContainer/CharsRow")
+lbl_char_name = NodePath("VBox/CharsContainer/DetailsCard/VBox/CharName")
+lbl_char_title = NodePath("VBox/CharsContainer/DetailsCard/VBox/CharTitle")
+lbl_char_desc = NodePath("VBox/CharsContainer/DetailsCard/VBox/CharDesc")
+lbl_char_passive = NodePath("VBox/CharsContainer/DetailsCard/VBox/CharPassive")
+lbl_char_active = NodePath("VBox/CharsContainer/DetailsCard/VBox/CharActive")
+lbl_char_stats = NodePath("VBox/CharsContainer/DetailsCard/VBox/CharStats")
+btn_select_or_unlock_char = NodePath("VBox/CharsContainer/BtnAction")
+upgrades_container = NodePath("VBox/UpgradesContainer")
+upgrades_list = NodePath("VBox/UpgradesContainer/Scroll/UpgradesList")
+btn_back = NodePath("VBox/Header/BtnBack")
+
+[node name="Bg" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.08, 0.05, 0.12, 0.98)
+
+[node name="VBox" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = 20.0
+offset_right = -20.0
+offset_bottom = -20.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 12
+
+[node name="Header" type="HBoxContainer" parent="VBox"]
+layout_mode = 2
+
+[node name="Title" type="Label" parent="VBox/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 22
+theme_override_colors/font_color = Color(0.85, 0.6, 1, 1)
+text = "THE SANCTUARY"
+
+[node name="LblShades" type="Label" parent="VBox/Header"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0.9, 0.5, 1, 1)
+text = "Shades: 0"
+
+[node name="BtnBack" type="Button" parent="VBox/Header"]
+custom_minimum_size = Vector2(80, 36)
+layout_mode = 2
+text = "BACK"
+
+[node name="Tabs" type="HBoxContainer" parent="VBox"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="BtnChars" type="Button" parent="VBox/Tabs"]
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "CHARACTERS"
+
+[node name="BtnUpgrades" type="Button" parent="VBox/Tabs"]
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "PERMANENT UPGRADES"
+
+[node name="CharsContainer" type="VBoxContainer" parent="VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 16
+
+[node name="CharsRow" type="HBoxContainer" parent="VBox/CharsContainer"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 10
+
+[node name="DetailsCard" type="PanelContainer" parent="VBox/CharsContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="VBox" type="VBoxContainer" parent="VBox/CharsContainer/DetailsCard"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="CharName" type="Label" parent="VBox/CharsContainer/DetailsCard/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "Shadow Hunter"
+
+[node name="CharTitle" type="Label" parent="VBox/CharsContainer/DetailsCard/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.7, 0.7, 0.85, 1)
+text = "The Veiled Blade"
+
+[node name="CharDesc" type="Label" parent="VBox/CharsContainer/DetailsCard/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+theme_override_colors/font_color = Color(0.85, 0.85, 0.9, 1)
+text = "A nimble slayer who strikes from shadows."
+autowrap_mode = 3
+
+[node name="CharPassive" type="Label" parent="VBox/CharsContainer/DetailsCard/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+theme_override_colors/font_color = Color(0.4, 0.85, 1, 1)
+text = "Passive: Flurry Instinct"
+autowrap_mode = 3
+
+[node name="CharActive" type="Label" parent="VBox/CharsContainer/DetailsCard/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+theme_override_colors/font_color = Color(1, 0.6, 0.8, 1)
+text = "Active Skill: Shadow Flurry"
+autowrap_mode = 3
+
+[node name="CharStats" type="Label" parent="VBox/CharsContainer/DetailsCard/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+theme_override_colors/font_color = Color(0.5, 1, 0.6, 1)
+text = "Base HP: 120 | ATK: 18 | Speed: 250 | Crit: 15%"
+
+[node name="BtnAction" type="Button" parent="VBox/CharsContainer"]
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "ENTER TOWER WITH SHADOW HUNTER"
+
+[node name="UpgradesContainer" type="VBoxContainer" parent="VBox"]
+visible = false
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Scroll" type="ScrollContainer" parent="VBox/UpgradesContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="UpgradesList" type="VBoxContainer" parent="VBox/UpgradesContainer/Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 10

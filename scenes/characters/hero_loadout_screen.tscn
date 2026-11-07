@@ -1,0 +1,968 @@
+[gd_scene load_steps=12 format=3 uid="uid://c6heroloadoutscreen01"]
+
+[ext_resource type="Script" path="res://scripts/ui/hero_loadout_screen.gd" id="1_scr"]
+[ext_resource type="Script" path="res://scripts/ui/hero_pedestal_view.gd" id="2_ped"]
+[ext_resource type="Script" path="res://scripts/ui/summoning_circle_view.gd" id="3_cir"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bg"]
+bg_color = Color(0.04, 0.05, 0.09, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_subtab_bg"]
+bg_color = Color(0.08, 0.1, 0.16, 0.95)
+border_width_bottom = 2
+border_color = Color(0.2, 0.25, 0.35, 0.8)
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_tabbtn"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_card"]
+bg_color = Color(0.09, 0.12, 0.18, 0.92)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.35, 0.42, 0.58, 0.8)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_gearslot"]
+bg_color = Color(0.08, 0.1, 0.16, 0.92)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.85, 0.68, 0.25, 0.95)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_statpill"]
+bg_color = Color(0.06, 0.08, 0.14, 0.95)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.35, 0.45, 0.6, 0.8)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btnpill"]
+bg_color = Color(0.12, 0.15, 0.24, 0.9)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.38, 0.48, 0.68, 0.8)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_starup"]
+bg_color = Color(0.95, 0.72, 0.2, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 2
+border_color = Color(1, 0.88, 0.4, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
+[node name="HeroLoadoutScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_scr")
+
+[node name="Background" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_bg")
+
+[node name="SubTabHeader" type="Panel" parent="."]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 84.0
+offset_bottom = 132.0
+grow_horizontal = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_subtab_bg")
+
+[node name="HBox" type="HBoxContainer" parent="SubTabHeader"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 1
+theme_override_constants/separation = 32
+
+[node name="BtnCharacters" type="Button" parent="SubTabHeader/HBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("StyleBoxEmpty_tabbtn")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_tabbtn")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_tabbtn")
+text = "Characters"
+
+[node name="BtnGear" type="Button" parent="SubTabHeader/HBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.88, 0.35, 1)
+theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("StyleBoxEmpty_tabbtn")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_tabbtn")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_tabbtn")
+text = "Gear"
+
+[node name="BtnRunes" type="Button" parent="SubTabHeader/HBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("StyleBoxEmpty_tabbtn")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_tabbtn")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_tabbtn")
+text = "Runes"
+
+[node name="ContentContainer" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 132.0
+offset_bottom = -88.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ViewCharacters" type="Control" parent="ContentContainer"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="TopHalf" type="HBoxContainer" parent="ContentContainer/ViewCharacters"]
+custom_minimum_size = Vector2(0, 360)
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 16.0
+offset_top = 8.0
+offset_right = -16.0
+offset_bottom = 368.0
+grow_horizontal = 2
+theme_override_constants/separation = 12
+
+[node name="PedestalContainer" type="Control" parent="ContentContainer/ViewCharacters/TopHalf"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="HeroPedestal" type="Control" parent="ContentContainer/ViewCharacters/TopHalf/PedestalContainer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("2_ped")
+
+[node name="HeroNameBadge" type="Label" parent="ContentContainer/ViewCharacters/TopHalf/PedestalContainer"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 12.0
+offset_bottom = 36.0
+grow_horizontal = 2
+theme_override_colors/font_color = Color(1, 0.88, 0.45, 1)
+theme_override_font_sizes/font_size = 17
+text = "Shadow Hunter"
+horizontal_alignment = 1
+
+[node name="StarRatingRow" type="Label" parent="ContentContainer/ViewCharacters/TopHalf/PedestalContainer"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 38.0
+offset_bottom = 58.0
+grow_horizontal = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
+theme_override_font_sizes/font_size = 14
+text = "★ ★ ☆ ☆ ☆ ☆"
+horizontal_alignment = 1
+
+[node name="OutfitBtn" type="Button" parent="ContentContainer/ViewCharacters/TopHalf/PedestalContainer"]
+custom_minimum_size = Vector2(40, 40)
+layout_mode = 1
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 12.0
+offset_top = -52.0
+offset_right = 52.0
+offset_bottom = -12.0
+grow_vertical = 0
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("StyleBoxFlat_btnpill")
+text = "👗"
+
+[node name="SacredHallBtn" type="Button" parent="ContentContainer/ViewCharacters/TopHalf/PedestalContainer"]
+custom_minimum_size = Vector2(40, 40)
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -52.0
+offset_top = -52.0
+offset_right = -12.0
+offset_bottom = -12.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("StyleBoxFlat_btnpill")
+text = "🏛"
+
+[node name="SkillCardContainer" type="PanelContainer" parent="ContentContainer/ViewCharacters/TopHalf"]
+custom_minimum_size = Vector2(300, 0)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_card")
+
+[node name="VBox" type="VBoxContainer" parent="ContentContainer/ViewCharacters/TopHalf/SkillCardContainer"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Header" type="Label" parent="ContentContainer/ViewCharacters/TopHalf/SkillCardContainer/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.35, 1)
+theme_override_font_sizes/font_size = 14
+text = "Elemental Passive Skills"
+horizontal_alignment = 1
+
+[node name="Scroll" type="ScrollContainer" parent="ContentContainer/ViewCharacters/TopHalf/SkillCardContainer/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="SkillList" type="VBoxContainer" parent="ContentContainer/ViewCharacters/TopHalf/SkillCardContainer/VBox/Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
+[node name="Skill1" type="Label" parent="ContentContainer/ViewCharacters/TopHalf/SkillCardContainer/VBox/Scroll/SkillList"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
+theme_override_font_sizes/font_size = 11
+text = "✦ Lv.1 Shadow Veil [Unlocked]\n+15% Dodge, shadow dash leaves decoy."
+autowrap_mode = 2
+
+[node name="Skill2" type="Label" parent="ContentContainer/ViewCharacters/TopHalf/SkillCardContainer/VBox/Scroll/SkillList"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
+theme_override_font_sizes/font_size = 11
+text = "✦ Lv.2 Abyssal Surge [Unlocked]\nConsecutive hits gain +5% ATK SPD (up to 25%)."
+autowrap_mode = 2
+
+[node name="Skill3" type="Label" parent="ContentContainer/ViewCharacters/TopHalf/SkillCardContainer/VBox/Scroll/SkillList"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.6, 0.65, 0.75, 1)
+theme_override_font_sizes/font_size = 11
+text = "✧ Lv.3 Soul Harvester [Locked - 3★]\nDefeating an elite restores 10% max HP."
+autowrap_mode = 2
+
+[node name="Skill4" type="Label" parent="ContentContainer/ViewCharacters/TopHalf/SkillCardContainer/VBox/Scroll/SkillList"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.6, 0.65, 0.75, 1)
+theme_override_font_sizes/font_size = 11
+text = "✧ Lv.4 Void Singularity [Locked - 5★]\nCrits unleash shockwave dealing 180% damage."
+autowrap_mode = 2
+
+[node name="BottomRoster" type="ScrollContainer" parent="ContentContainer/ViewCharacters"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 16.0
+offset_top = 376.0
+offset_right = -16.0
+offset_bottom = -12.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Grid" type="GridContainer" parent="ContentContainer/ViewCharacters/BottomRoster"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/h_separation = 12
+theme_override_constants/v_separation = 12
+columns = 4
+
+[node name="CardHunter" type="PanelContainer" parent="ContentContainer/ViewCharacters/BottomRoster/Grid"]
+custom_minimum_size = Vector2(160, 220)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_card")
+
+[node name="VBox" type="VBoxContainer" parent="ContentContainer/ViewCharacters/BottomRoster/Grid/CardHunter"]
+layout_mode = 2
+alignment = 1
+
+[node name="Ribbon" type="Label" parent="ContentContainer/ViewCharacters/BottomRoster/Grid/CardHunter/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.2, 0.9, 0.4, 1)
+theme_override_font_sizes/font_size = 12
+text = "● IN USE"
+horizontal_alignment = 1
+
+[node name="Portrait" type="Label" parent="ContentContainer/ViewCharacters/BottomRoster/Grid/CardHunter/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 52
+text = "🗡"
+horizontal_alignment = 1
+
+[node name="Name" type="Label" parent="ContentContainer/ViewCharacters/BottomRoster/Grid/CardHunter/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.88, 0.45, 1)
+theme_override_font_sizes/font_size = 15
+text = "Shadow Hunter"
+horizontal_alignment = 1
+
+[node name="ShardProgress" type="Label" parent="ContentContainer/ViewCharacters/BottomRoster/Grid/CardHunter/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.75, 0.85, 1, 1)
+theme_override_font_sizes/font_size = 12
+text = "Shards: 45/50"
+horizontal_alignment = 1
+
+[node name="StarUpBtn" type="Button" parent="ContentContainer/ViewCharacters/BottomRoster/Grid/CardHunter/VBox"]
+custom_minimum_size = Vector2(130, 34)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_colors/font_color = Color(0.1, 0.08, 0.04, 1)
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("StyleBoxFlat_starup")
+text = "Star Up (3★)"
+
+[node name="CardReaper" type="PanelContainer" parent="ContentContainer/ViewCharacters/BottomRoster/Grid"]
+custom_minimum_size = Vector2(160, 220)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_card")
+
+[node name="VBox" type="VBoxContainer" parent="ContentContainer/ViewCharacters/BottomRoster/Grid/CardReaper"]
+layout_mode = 2
+alignment = 1
+
+[node name="Ribbon" type="Label" parent="ContentContainer/ViewCharacters/BottomRoster/Grid/CardReaper/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 0.8, 1, 1)
+theme_override_font_sizes/font_size = 12
+text = "Lv.14"
+horizontal_alignment = 1
+
+[node name="Portrait" type="Label" parent="ContentContainer/ViewCharacters/BottomRoster/Grid/CardReaper/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 52
+text = "⚡"
+horizontal_alignment = 1
+
+[node name="Name" type="Label" parent="ContentContainer/ViewCharacters/BottomRoster/Grid/CardReaper/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.9, 1, 1)
+theme_override_font_sizes/font_size = 15
+text = "Storm Reaper"
+horizontal_alignment = 1
+
+[node name="ShardProgress" type="Label" parent="ContentContainer/ViewCharacters/BottomRoster/Grid/CardReaper/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.75, 0.85, 1, 1)
+theme_override_font_sizes/font_size = 12
+text = "Shards: 20/50"
+horizontal_alignment = 1
+
+[node name="SelectBtn" type="Button" parent="ContentContainer/ViewCharacters/BottomRoster/Grid/CardReaper/VBox"]
+custom_minimum_size = Vector2(130, 34)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("StyleBoxFlat_btnpill")
+text = "Switch Hero"
+
+[node name="CardBinder" type="PanelContainer" parent="ContentContainer/ViewCharacters/BottomRoster/Grid"]
+custom_minimum_size = Vector2(160, 220)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_card")
+
+[node name="VBox" type="VBoxContainer" parent="ContentContainer/ViewCharacters/BottomRoster/Grid/CardBinder"]
+layout_mode = 2
+alignment = 1
+
+[node name="Ribbon" type="Label" parent="ContentContainer/ViewCharacters/BottomRoster/Grid/CardBinder/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.9, 0.6, 1)
+theme_override_font_sizes/font_size = 12
+text = "Lv.10"
+horizontal_alignment = 1
+
+[node name="Portrait" type="Label" parent="ContentContainer/ViewCharacters/BottomRoster/Grid/CardBinder/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 52
+text = "🔮"
+horizontal_alignment = 1
+
+[node name="Name" type="Label" parent="ContentContainer/ViewCharacters/BottomRoster/Grid/CardBinder/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.9, 1, 1)
+theme_override_font_sizes/font_size = 15
+text = "Soul Binder"
+horizontal_alignment = 1
+
+[node name="ShardProgress" type="Label" parent="ContentContainer/ViewCharacters/BottomRoster/Grid/CardBinder/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.75, 0.85, 1, 1)
+theme_override_font_sizes/font_size = 12
+text = "Shards: 12/50"
+horizontal_alignment = 1
+
+[node name="SelectBtn" type="Button" parent="ContentContainer/ViewCharacters/BottomRoster/Grid/CardBinder/VBox"]
+custom_minimum_size = Vector2(130, 34)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("StyleBoxFlat_btnpill")
+text = "Switch Hero"
+
+[node name="CardValkyrie" type="PanelContainer" parent="ContentContainer/ViewCharacters/BottomRoster/Grid"]
+custom_minimum_size = Vector2(160, 220)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_card")
+
+[node name="VBox" type="VBoxContainer" parent="ContentContainer/ViewCharacters/BottomRoster/Grid/CardValkyrie"]
+layout_mode = 2
+alignment = 1
+
+[node name="Ribbon" type="Label" parent="ContentContainer/ViewCharacters/BottomRoster/Grid/CardValkyrie/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.3, 0.3, 1)
+theme_override_font_sizes/font_size = 12
+text = "🔒 LOCKED"
+horizontal_alignment = 1
+
+[node name="Portrait" type="Label" parent="ContentContainer/ViewCharacters/BottomRoster/Grid/CardValkyrie/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 52
+text = "❄"
+horizontal_alignment = 1
+
+[node name="Name" type="Label" parent="ContentContainer/ViewCharacters/BottomRoster/Grid/CardValkyrie/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.65, 0.7, 0.8, 1)
+theme_override_font_sizes/font_size = 15
+text = "Frost Valkyrie"
+horizontal_alignment = 1
+
+[node name="ShardProgress" type="Label" parent="ContentContainer/ViewCharacters/BottomRoster/Grid/CardValkyrie/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.6, 0.65, 0.75, 1)
+theme_override_font_sizes/font_size = 12
+text = "Shards: 0/50"
+horizontal_alignment = 1
+
+[node name="UnlockBtn" type="Button" parent="ContentContainer/ViewCharacters/BottomRoster/Grid/CardValkyrie/VBox"]
+custom_minimum_size = Vector2(130, 34)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("StyleBoxFlat_btnpill")
+text = "Unlock (100 💎)"
+
+[node name="ViewGear" type="Control" parent="ContentContainer"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="TopHalf" type="Control" parent="ContentContainer/ViewGear"]
+custom_minimum_size = Vector2(0, 340)
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 8.0
+offset_bottom = 348.0
+grow_horizontal = 2
+
+[node name="CenterHero" type="Control" parent="ContentContainer/ViewGear/TopHalf"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="HeroPedestal" type="Control" parent="ContentContainer/ViewGear/TopHalf/CenterHero"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("2_ped")
+
+[node name="LeftSlots" type="VBoxContainer" parent="ContentContainer/ViewGear/TopHalf"]
+layout_mode = 1
+anchors_preset = 9
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = 16.0
+offset_right = 108.0
+offset_bottom = -30.0
+grow_vertical = 2
+theme_override_constants/separation = 12
+
+[node name="SlotWeapon" type="PanelContainer" parent="ContentContainer/ViewGear/TopHalf/LeftSlots"]
+custom_minimum_size = Vector2(88, 88)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_gearslot")
+
+[node name="VBox" type="VBoxContainer" parent="ContentContainer/ViewGear/TopHalf/LeftSlots/SlotWeapon"]
+layout_mode = 2
+alignment = 1
+
+[node name="Icon" type="Label" parent="ContentContainer/ViewGear/TopHalf/LeftSlots/SlotWeapon/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 38
+text = "🗡"
+horizontal_alignment = 1
+
+[node name="Level" type="Label" parent="ContentContainer/ViewGear/TopHalf/LeftSlots/SlotWeapon/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.3, 1)
+theme_override_font_sizes/font_size = 12
+text = "Lv.60 S"
+horizontal_alignment = 1
+
+[node name="SlotAmulet" type="PanelContainer" parent="ContentContainer/ViewGear/TopHalf/LeftSlots"]
+custom_minimum_size = Vector2(88, 88)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_gearslot")
+
+[node name="VBox" type="VBoxContainer" parent="ContentContainer/ViewGear/TopHalf/LeftSlots/SlotAmulet"]
+layout_mode = 2
+alignment = 1
+
+[node name="Icon" type="Label" parent="ContentContainer/ViewGear/TopHalf/LeftSlots/SlotAmulet/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 38
+text = "📿"
+horizontal_alignment = 1
+
+[node name="Level" type="Label" parent="ContentContainer/ViewGear/TopHalf/LeftSlots/SlotAmulet/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.4, 0.9, 1)
+theme_override_font_sizes/font_size = 12
+text = "Lv.55"
+horizontal_alignment = 1
+
+[node name="SlotRing" type="PanelContainer" parent="ContentContainer/ViewGear/TopHalf/LeftSlots"]
+custom_minimum_size = Vector2(88, 88)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_gearslot")
+
+[node name="VBox" type="VBoxContainer" parent="ContentContainer/ViewGear/TopHalf/LeftSlots/SlotRing"]
+layout_mode = 2
+alignment = 1
+
+[node name="Icon" type="Label" parent="ContentContainer/ViewGear/TopHalf/LeftSlots/SlotRing/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 38
+text = "💍"
+horizontal_alignment = 1
+
+[node name="Level" type="Label" parent="ContentContainer/ViewGear/TopHalf/LeftSlots/SlotRing/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 0.8, 1, 1)
+theme_override_font_sizes/font_size = 12
+text = "Lv.58"
+horizontal_alignment = 1
+
+[node name="RightSlots" type="VBoxContainer" parent="ContentContainer/ViewGear/TopHalf"]
+layout_mode = 1
+anchors_preset = 11
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -108.0
+offset_top = 16.0
+offset_right = -20.0
+offset_bottom = -30.0
+grow_horizontal = 0
+grow_vertical = 2
+theme_override_constants/separation = 12
+
+[node name="SlotHelmet" type="PanelContainer" parent="ContentContainer/ViewGear/TopHalf/RightSlots"]
+custom_minimum_size = Vector2(88, 88)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_gearslot")
+
+[node name="VBox" type="VBoxContainer" parent="ContentContainer/ViewGear/TopHalf/RightSlots/SlotHelmet"]
+layout_mode = 2
+alignment = 1
+
+[node name="Icon" type="Label" parent="ContentContainer/ViewGear/TopHalf/RightSlots/SlotHelmet/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 38
+text = "👑"
+horizontal_alignment = 1
+
+[node name="Level" type="Label" parent="ContentContainer/ViewGear/TopHalf/RightSlots/SlotHelmet/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.3, 1)
+theme_override_font_sizes/font_size = 12
+text = "Lv.60 S"
+horizontal_alignment = 1
+
+[node name="SlotArmor" type="PanelContainer" parent="ContentContainer/ViewGear/TopHalf/RightSlots"]
+custom_minimum_size = Vector2(88, 88)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_gearslot")
+
+[node name="VBox" type="VBoxContainer" parent="ContentContainer/ViewGear/TopHalf/RightSlots/SlotArmor"]
+layout_mode = 2
+alignment = 1
+
+[node name="Icon" type="Label" parent="ContentContainer/ViewGear/TopHalf/RightSlots/SlotArmor/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 38
+text = "🥋"
+horizontal_alignment = 1
+
+[node name="Level" type="Label" parent="ContentContainer/ViewGear/TopHalf/RightSlots/SlotArmor/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.3, 1)
+theme_override_font_sizes/font_size = 12
+text = "Lv.60 S"
+horizontal_alignment = 1
+
+[node name="SlotBoots" type="PanelContainer" parent="ContentContainer/ViewGear/TopHalf/RightSlots"]
+custom_minimum_size = Vector2(88, 88)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_gearslot")
+
+[node name="VBox" type="VBoxContainer" parent="ContentContainer/ViewGear/TopHalf/RightSlots/SlotBoots"]
+layout_mode = 2
+alignment = 1
+
+[node name="Icon" type="Label" parent="ContentContainer/ViewGear/TopHalf/RightSlots/SlotBoots/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 38
+text = "👢"
+horizontal_alignment = 1
+
+[node name="Level" type="Label" parent="ContentContainer/ViewGear/TopHalf/RightSlots/SlotBoots/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 0.8, 1, 1)
+theme_override_font_sizes/font_size = 12
+text = "Lv.55"
+horizontal_alignment = 1
+
+[node name="StatPill" type="PanelContainer" parent="ContentContainer/ViewGear/TopHalf"]
+custom_minimum_size = Vector2(300, 42)
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -150.0
+offset_top = -46.0
+offset_right = 150.0
+offset_bottom = -4.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_styles/panel = SubResource("StyleBoxFlat_statpill")
+
+[node name="HBox" type="HBoxContainer" parent="ContentContainer/ViewGear/TopHalf/StatPill"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 18
+
+[node name="Atk" type="Label" parent="ContentContainer/ViewGear/TopHalf/StatPill/HBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.35, 1)
+theme_override_font_sizes/font_size = 14
+text = "⚔ ATK: 4,280"
+
+[node name="Divider" type="Label" parent="ContentContainer/ViewGear/TopHalf/StatPill/HBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 0.5, 0.65, 1)
+text = "|"
+
+[node name="Hp" type="Label" parent="ContentContainer/ViewGear/TopHalf/StatPill/HBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.9, 0.45, 1)
+theme_override_font_sizes/font_size = 14
+text = "❤ HP: 18,920"
+
+[node name="InfoBtn" type="Button" parent="ContentContainer/ViewGear/TopHalf/StatPill/HBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+flat = true
+text = "ℹ"
+
+[node name="MiddleBar" type="HBoxContainer" parent="ContentContainer/ViewGear"]
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 20.0
+offset_top = 356.0
+offset_right = -20.0
+offset_bottom = 398.0
+grow_horizontal = 2
+
+[node name="SortBtn" type="Button" parent="ContentContainer/ViewGear/MiddleBar"]
+custom_minimum_size = Vector2(130, 36)
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("StyleBoxFlat_btnpill")
+text = "▼ By Quality"
+
+[node name="Spacer" type="Control" parent="ContentContainer/ViewGear/MiddleBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="BlacksmithBtn" type="Button" parent="ContentContainer/ViewGear/MiddleBar"]
+custom_minimum_size = Vector2(140, 36)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.88, 0.35, 1)
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("StyleBoxFlat_btnpill")
+text = "🔨 Blacksmith"
+
+[node name="BottomInventory" type="ScrollContainer" parent="ContentContainer/ViewGear"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 16.0
+offset_top = 406.0
+offset_right = -16.0
+offset_bottom = -12.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Grid" type="GridContainer" parent="ContentContainer/ViewGear/BottomInventory"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/h_separation = 10
+theme_override_constants/v_separation = 10
+columns = 5
+
+[node name="Slot1" type="PanelContainer" parent="ContentContainer/ViewGear/BottomInventory/Grid"]
+custom_minimum_size = Vector2(82, 82)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_gearslot")
+
+[node name="Label" type="Label" parent="ContentContainer/ViewGear/BottomInventory/Grid/Slot1"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 36
+text = "🗡"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Slot2" type="PanelContainer" parent="ContentContainer/ViewGear/BottomInventory/Grid"]
+custom_minimum_size = Vector2(82, 82)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_gearslot")
+
+[node name="Label" type="Label" parent="ContentContainer/ViewGear/BottomInventory/Grid/Slot2"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 36
+text = "🛡"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Slot3" type="PanelContainer" parent="ContentContainer/ViewGear/BottomInventory/Grid"]
+custom_minimum_size = Vector2(82, 82)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_gearslot")
+
+[node name="Label" type="Label" parent="ContentContainer/ViewGear/BottomInventory/Grid/Slot3"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 36
+text = "🏹"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Slot4" type="PanelContainer" parent="ContentContainer/ViewGear/BottomInventory/Grid"]
+custom_minimum_size = Vector2(82, 82)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_gearslot")
+
+[node name="Label" type="Label" parent="ContentContainer/ViewGear/BottomInventory/Grid/Slot4"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 36
+text = "💍"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Slot5" type="PanelContainer" parent="ContentContainer/ViewGear/BottomInventory/Grid"]
+custom_minimum_size = Vector2(82, 82)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_gearslot")
+
+[node name="Label" type="Label" parent="ContentContainer/ViewGear/BottomInventory/Grid/Slot5"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 36
+text = "🥋"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ViewRunes" type="Control" parent="ContentContainer"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="TopHalf" type="Control" parent="ContentContainer/ViewRunes"]
+custom_minimum_size = Vector2(0, 350)
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 8.0
+offset_bottom = 358.0
+grow_horizontal = 2
+
+[node name="SummoningCircle" type="Control" parent="ContentContainer/ViewRunes/TopHalf"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("3_cir")
+
+[node name="MiddleBar" type="HBoxContainer" parent="ContentContainer/ViewRunes"]
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 20.0
+offset_top = 364.0
+offset_right = -20.0
+offset_bottom = 406.0
+grow_horizontal = 2
+
+[node name="SortBtn" type="Button" parent="ContentContainer/ViewRunes/MiddleBar"]
+custom_minimum_size = Vector2(120, 36)
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("StyleBoxFlat_btnpill")
+text = "▼ By Tier"
+
+[node name="Spacer" type="Control" parent="ContentContainer/ViewRunes/MiddleBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="WorkshopBtn" type="Button" parent="ContentContainer/ViewRunes/MiddleBar"]
+custom_minimum_size = Vector2(150, 36)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 0.85, 1, 1)
+theme_override_font_sizes/font_size = 13
+theme_override_styles/normal = SubResource("StyleBoxFlat_btnpill")
+text = "✨ Rune Workshop"
+
+[node name="BottomInventory" type="ScrollContainer" parent="ContentContainer/ViewRunes"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 16.0
+offset_top = 412.0
+offset_right = -16.0
+offset_bottom = -12.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Grid" type="GridContainer" parent="ContentContainer/ViewRunes/BottomInventory"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/h_separation = 10
+theme_override_constants/v_separation = 10
+columns = 5
+
+[node name="Rune1" type="PanelContainer" parent="ContentContainer/ViewRunes/BottomInventory/Grid"]
+custom_minimum_size = Vector2(82, 82)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_gearslot")
+
+[node name="Label" type="Label" parent="ContentContainer/ViewRunes/BottomInventory/Grid/Rune1"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 36
+text = "🔥"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Rune2" type="PanelContainer" parent="ContentContainer/ViewRunes/BottomInventory/Grid"]
+custom_minimum_size = Vector2(82, 82)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_gearslot")
+
+[node name="Label" type="Label" parent="ContentContainer/ViewRunes/BottomInventory/Grid/Rune2"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 36
+text = "🐺"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Rune3" type="PanelContainer" parent="ContentContainer/ViewRunes/BottomInventory/Grid"]
+custom_minimum_size = Vector2(82, 82)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_gearslot")
+
+[node name="Label" type="Label" parent="ContentContainer/ViewRunes/BottomInventory/Grid/Rune3"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 36
+text = "⚡"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Rune4" type="PanelContainer" parent="ContentContainer/ViewRunes/BottomInventory/Grid"]
+custom_minimum_size = Vector2(82, 82)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_gearslot")
+
+[node name="Label" type="Label" parent="ContentContainer/ViewRunes/BottomInventory/Grid/Rune4"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 36
+text = "❄"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Rune5" type="PanelContainer" parent="ContentContainer/ViewRunes/BottomInventory/Grid"]
+custom_minimum_size = Vector2(82, 82)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_gearslot")
+
+[node name="Label" type="Label" parent="ContentContainer/ViewRunes/BottomInventory/Grid/Rune5"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 36
+text = "🔮"
+horizontal_alignment = 1
+vertical_alignment = 1

@@ -1,0 +1,17 @@
+# Godot 4+ engine cache & exports
+.godot/
+export/
+*.apk
+*.aab
+*.keystore
+
+# Godot-specific ignores
+*.translation
+.import/
+
+# System / OS ignores
+.DS_Store
+Thumbs.db
+*.tmp
+screenshot_test.*
+

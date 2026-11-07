@@ -1,0 +1,142 @@
+[gd_scene load_steps=3 format=3 uid="uid://c6rewardview01"]
+
+[ext_resource type="Script" path="res://scripts/ui/reward_view.gd" id="1_rwd"]
+[ext_resource type="Texture2D" path="res://assets/art/ui/icon_shade.png" id="2_shd"]
+
+[node name="RewardView" type="Control" node_paths=PackedStringArray("lbl_title", "lbl_gold_earned", "lbl_shades_earned", "choices_container", "btn_refresh", "lbl_refresh_left", "btn_continue")]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_rwd")
+lbl_title = NodePath("VBox/Title")
+lbl_gold_earned = NodePath("VBox/RewardsRow/GoldPanel/HBox/Gold")
+lbl_shades_earned = NodePath("VBox/RewardsRow/ShadesPanel/HBox/Shades")
+choices_container = NodePath("VBox/ChoicesCenter/ChoicesRow")
+btn_refresh = NodePath("VBox/RefreshContainer/BtnRefresh")
+lbl_refresh_left = NodePath("VBox/RefreshContainer/LblRefreshLeft")
+btn_continue = NodePath("VBox/BtnContinue")
+
+[node name="Bg" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.06, 0.04, 0.09, 0.96)
+
+[node name="VBox" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 30.0
+offset_top = 40.0
+offset_right = -30.0
+offset_bottom = -40.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 18
+
+[node name="Title" type="Label" parent="VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.35, 1)
+theme_override_font_sizes/font_size = 23
+text = "✦ VICTORY! CLAIM REWARDS ✦"
+horizontal_alignment = 1
+
+[node name="RewardsRow" type="HBoxContainer" parent="VBox"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 24
+
+[node name="GoldPanel" type="PanelContainer" parent="VBox/RewardsRow"]
+custom_minimum_size = Vector2(130, 36)
+layout_mode = 2
+
+[node name="HBox" type="HBoxContainer" parent="VBox/RewardsRow/GoldPanel"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 6
+
+[node name="Icon" type="TextureRect" parent="VBox/RewardsRow/GoldPanel/HBox"]
+custom_minimum_size = Vector2(18, 18)
+layout_mode = 2
+texture = ExtResource("2_shd")
+expand_mode = 1
+stretch_mode = 5
+modulate = Color(1, 0.85, 0.2, 1)
+
+[node name="Gold" type="Label" parent="VBox/RewardsRow/GoldPanel/HBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
+theme_override_font_sizes/font_size = 16
+text = "+25 Gold"
+
+[node name="ShadesPanel" type="PanelContainer" parent="VBox/RewardsRow"]
+custom_minimum_size = Vector2(130, 36)
+layout_mode = 2
+
+[node name="HBox" type="HBoxContainer" parent="VBox/RewardsRow/ShadesPanel"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 6
+
+[node name="Icon" type="TextureRect" parent="VBox/RewardsRow/ShadesPanel/HBox"]
+custom_minimum_size = Vector2(18, 18)
+layout_mode = 2
+texture = ExtResource("2_shd")
+expand_mode = 1
+stretch_mode = 5
+modulate = Color(0.8, 0.45, 1, 1)
+
+[node name="Shades" type="Label" parent="VBox/RewardsRow/ShadesPanel/HBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.45, 1, 1)
+theme_override_font_sizes/font_size = 16
+text = "+2 Shades"
+
+[node name="Subtitle" type="Label" parent="VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.7, 0.8, 1)
+theme_override_font_sizes/font_size = 14
+text = "Choose 1 Relic or Equipment to add to your inventory:"
+horizontal_alignment = 1
+
+[node name="ChoicesCenter" type="CenterContainer" parent="VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ChoicesRow" type="HBoxContainer" parent="VBox/ChoicesCenter"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="RefreshContainer" type="VBoxContainer" parent="VBox"]
+layout_mode = 2
+theme_override_constants/separation = 4
+alignment = 1
+
+[node name="BtnRefresh" type="Button" parent="VBox/RefreshContainer"]
+custom_minimum_size = Vector2(160, 42)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_colors/font_color = Color(1, 0.9, 0.35, 1)
+theme_override_font_sizes/font_size = 15
+text = "Refresh"
+
+[node name="LblRefreshLeft" type="Label" parent="VBox/RefreshContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.65, 0.8, 1)
+theme_override_font_sizes/font_size = 12
+text = "Skill refreshes left: 1"
+horizontal_alignment = 1
+
+[node name="BtnContinue" type="Button" parent="VBox"]
+custom_minimum_size = Vector2(250, 52)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 18
+text = "CONTINUE JOURNEY"

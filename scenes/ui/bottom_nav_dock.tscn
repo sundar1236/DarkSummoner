@@ -1,0 +1,245 @@
+[gd_scene load_steps=5 format=3 uid="uid://c6bottomnavdock01"]
+
+[ext_resource type="Script" path="res://scripts/ui/bottom_nav_dock.gd" id="1_scr"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bg"]
+bg_color = Color(0.06, 0.07, 0.11, 0.98)
+border_width_top = 2
+border_color = Color(0.22, 0.25, 0.35, 0.8)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_badge"]
+bg_color = Color(0.9, 0.2, 0.25, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_btn"]
+
+[node name="BottomNavDock" type="Control"]
+custom_minimum_size = Vector2(0, 104)
+layout_mode = 3
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -104.0
+grow_horizontal = 2
+grow_vertical = 0
+script = ExtResource("1_scr")
+
+[node name="NavPanel" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_bg")
+
+[node name="TabHBox" type="HBoxContainer" parent="NavPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 1
+
+[node name="TabShop" type="Control" parent="NavPanel/TabHBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="VBox" type="VBoxContainer" parent="NavPanel/TabHBox/TabShop"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 1
+
+[node name="Icon" type="Label" parent="NavPanel/TabHBox/TabShop/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "🛒"
+horizontal_alignment = 1
+
+[node name="Label" type="Label" parent="NavPanel/TabHBox/TabShop/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "Shop"
+horizontal_alignment = 1
+
+[node name="Button" type="Button" parent="NavPanel/TabHBox/TabShop"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/normal = SubResource("StyleBoxEmpty_btn")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_btn")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_btn")
+flat = true
+
+[node name="TabGear" type="Control" parent="NavPanel/TabHBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="VBox" type="VBoxContainer" parent="NavPanel/TabHBox/TabGear"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 1
+
+[node name="Icon" type="Label" parent="NavPanel/TabHBox/TabGear/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "⚔"
+horizontal_alignment = 1
+
+[node name="Label" type="Label" parent="NavPanel/TabHBox/TabGear/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "Gear"
+horizontal_alignment = 1
+
+[node name="Badge" type="Panel" parent="NavPanel/TabHBox/TabGear"]
+custom_minimum_size = Vector2(10, 10)
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -22.0
+offset_top = 8.0
+offset_right = -12.0
+offset_bottom = 18.0
+grow_horizontal = 0
+theme_override_styles/panel = SubResource("StyleBoxFlat_badge")
+
+[node name="Button" type="Button" parent="NavPanel/TabHBox/TabGear"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/normal = SubResource("StyleBoxEmpty_btn")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_btn")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_btn")
+flat = true
+
+[node name="TabCampaign" type="Control" parent="NavPanel/TabHBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="VBox" type="VBoxContainer" parent="NavPanel/TabHBox/TabCampaign"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 1
+
+[node name="Icon" type="Label" parent="NavPanel/TabHBox/TabCampaign/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+text = "🏰"
+horizontal_alignment = 1
+
+[node name="Label" type="Label" parent="NavPanel/TabHBox/TabCampaign/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "Campaign"
+horizontal_alignment = 1
+
+[node name="Button" type="Button" parent="NavPanel/TabHBox/TabCampaign"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/normal = SubResource("StyleBoxEmpty_btn")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_btn")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_btn")
+flat = true
+
+[node name="TabCollectible" type="Control" parent="NavPanel/TabHBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="VBox" type="VBoxContainer" parent="NavPanel/TabHBox/TabCollectible"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 1
+
+[node name="Icon" type="Label" parent="NavPanel/TabHBox/TabCollectible/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "📜"
+horizontal_alignment = 1
+
+[node name="Label" type="Label" parent="NavPanel/TabHBox/TabCollectible/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "Collectible"
+horizontal_alignment = 1
+
+[node name="Button" type="Button" parent="NavPanel/TabHBox/TabCollectible"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/normal = SubResource("StyleBoxEmpty_btn")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_btn")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_btn")
+flat = true
+
+[node name="TabEvents" type="Control" parent="NavPanel/TabHBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="VBox" type="VBoxContainer" parent="NavPanel/TabHBox/TabEvents"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 1
+
+[node name="Icon" type="Label" parent="NavPanel/TabHBox/TabEvents/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "🏆"
+horizontal_alignment = 1
+
+[node name="Label" type="Label" parent="NavPanel/TabHBox/TabEvents/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "Events"
+horizontal_alignment = 1
+
+[node name="Button" type="Button" parent="NavPanel/TabHBox/TabEvents"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/normal = SubResource("StyleBoxEmpty_btn")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_btn")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_btn")
+flat = true
