@@ -1,43 +1,57 @@
-[gd_scene load_steps=8 format=3 uid="uid://c6skilldraftmodal01"]
+[gd_scene load_steps=10 format=3 uid="uid://c6skilldraftmodal01"]
 
 [ext_resource type="Script" path="res://scripts/ui/skill_draft_modal.gd" id="1_scr"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dim"]
-bg_color = Color(0, 0, 0, 0.78)
+bg_color = Color(0.02, 0.03, 0.06, 0.88)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_banner"]
-bg_color = Color(0.12, 0.1, 0.04, 0.95)
+bg_color = Color(0.14, 0.11, 0.05, 0.95)
 border_width_left = 2
 border_width_top = 2
 border_width_right = 2
 border_width_bottom = 2
 border_color = Color(0.95, 0.8, 0.25, 1)
-corner_radius_top_left = 14
-corner_radius_top_right = 14
-corner_radius_bottom_right = 14
-corner_radius_bottom_left = 14
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+shadow_color = Color(0.95, 0.75, 0.2, 0.25)
+shadow_size = 6
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_card_leg"]
-bg_color = Color(0.12, 0.1, 0.18, 0.96)
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_card_base"]
+bg_color = Color(0.10, 0.09, 0.16, 0.97)
 border_width_left = 3
 border_width_top = 3
 border_width_right = 3
 border_width_bottom = 3
 border_color = Color(1, 0.82, 0.25, 1)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+shadow_color = Color(0.95, 0.75, 0.2, 0.35)
+shadow_size = 10
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_iconbox"]
+bg_color = Color(0.06, 0.06, 0.12, 0.92)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.85, 0.7, 0.25, 0.8)
 corner_radius_top_left = 12
 corner_radius_top_right = 12
 corner_radius_bottom_right = 12
 corner_radius_bottom_left = 12
-shadow_color = Color(0.95, 0.75, 0.2, 0.3)
-shadow_size = 8
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_iconbox"]
-bg_color = Color(0.08, 0.08, 0.14, 0.9)
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_rankbadge"]
+bg_color = Color(0.18, 0.14, 0.28, 0.9)
 border_width_left = 1
 border_width_top = 1
 border_width_right = 1
 border_width_bottom = 1
-border_color = Color(0.85, 0.7, 0.25, 0.8)
+border_color = Color(0.7, 0.55, 0.95, 0.7)
 corner_radius_top_left = 8
 corner_radius_top_right = 8
 corner_radius_bottom_right = 8
@@ -50,13 +64,13 @@ border_width_top = 2
 border_width_right = 2
 border_width_bottom = 3
 border_color = Color(1, 0.9, 0.45, 1)
-corner_radius_top_left = 20
-corner_radius_top_right = 20
-corner_radius_bottom_right = 20
-corner_radius_bottom_left = 20
+corner_radius_top_left = 22
+corner_radius_top_right = 22
+corner_radius_bottom_right = 22
+corner_radius_bottom_left = 22
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_learnedbtn"]
-bg_color = Color(0.12, 0.16, 0.26, 0.9)
+bg_color = Color(0.12, 0.16, 0.26, 0.92)
 border_width_left = 1
 border_width_top = 1
 border_width_right = 1
@@ -67,7 +81,22 @@ corner_radius_top_right = 14
 corner_radius_bottom_right = 14
 corner_radius_bottom_left = 14
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_drawer"]
+bg_color = Color(0.08, 0.08, 0.14, 0.98)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.85, 0.7, 0.25, 0.9)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+shadow_color = Color(0, 0, 0, 0.7)
+shadow_size = 12
+
 [node name="SkillDraftModal" type="Control"]
+process_mode = 3
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -90,13 +119,13 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 24.0
-offset_top = 60.0
-offset_right = -24.0
-offset_bottom = -60.0
+offset_left = 20.0
+offset_top = 50.0
+offset_right = -20.0
+offset_bottom = -50.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/separation = 24
+theme_override_constants/separation = 18
 
 [node name="HeaderBanner" type="PanelContainer" parent="Content"]
 custom_minimum_size = Vector2(0, 84)
@@ -110,14 +139,14 @@ alignment = 1
 [node name="Title" type="Label" parent="Content/HeaderBanner/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.9, 0.4, 1)
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 22
 text = "✦ YOU'VE ENCOUNTERED VALKYRIE ✦"
 horizontal_alignment = 1
 
 [node name="Subtitle" type="Label" parent="Content/HeaderBanner/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.85, 0.9, 1, 0.9)
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 16
 text = "Choose a blessing from the Valkyrie"
 horizontal_alignment = 1
 
@@ -125,34 +154,43 @@ horizontal_alignment = 1
 layout_mode = 2
 size_flags_vertical = 3
 alignment = 1
-theme_override_constants/separation = 24
+theme_override_constants/separation = 16
 
 [node name="SkillCard1" type="PanelContainer" parent="Content/CardsHBox"]
-custom_minimum_size = Vector2(300, 480)
+custom_minimum_size = Vector2(320, 500)
 layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_card_leg")
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_card_base")
 
 [node name="VBox" type="VBoxContainer" parent="Content/CardsHBox/SkillCard1"]
 layout_mode = 2
 alignment = 1
-theme_override_constants/separation = 14
+theme_override_constants/separation = 12
 
 [node name="RarityHeader" type="Label" parent="Content/CardsHBox/SkillCard1/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
-theme_override_font_sizes/font_size = 16
-text = "⚔ LEGENDARY ⚔"
+theme_override_font_sizes/font_size = 18
+text = "⚔ LEGENDARY BLESSING ⚔"
+horizontal_alignment = 1
+
+[node name="RankBadge" type="Label" parent="Content/CardsHBox/SkillCard1/VBox"]
+custom_minimum_size = Vector2(0, 26)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 0.9, 1, 1)
+theme_override_font_sizes/font_size = 15
+text = "✦ NEW SKILL ✦"
 horizontal_alignment = 1
 
 [node name="IconBox" type="PanelContainer" parent="Content/CardsHBox/SkillCard1/VBox"]
-custom_minimum_size = Vector2(100, 100)
+custom_minimum_size = Vector2(96, 96)
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_styles/panel = SubResource("StyleBoxFlat_iconbox")
 
 [node name="Icon" type="Label" parent="Content/CardsHBox/SkillCard1/VBox/IconBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 56
+theme_override_font_sizes/font_size = 52
 text = "🗡"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -160,15 +198,23 @@ vertical_alignment = 1
 [node name="Title" type="Label" parent="Content/CardsHBox/SkillCard1/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.92, 0.5, 1)
-theme_override_font_sizes/font_size = 18
-text = "Shadow Strike"
+theme_override_font_sizes/font_size = 22
+text = "Shadow Flurry"
+horizontal_alignment = 1
+
+[node name="StatArrow" type="Label" parent="Content/CardsHBox/SkillCard1/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 1, 0.5, 1)
+theme_override_font_sizes/font_size = 16
+text = "ATK PWR ↑↑↑↑"
 horizontal_alignment = 1
 
 [node name="Desc" type="Label" parent="Content/CardsHBox/SkillCard1/VBox"]
 layout_mode = 2
+size_flags_vertical = 3
 theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
-theme_override_font_sizes/font_size = 13
-text = "Attacks deal +45% bonus shadow damage and pierce through enemies.\n\nATK PWR ↑↑↑↑"
+theme_override_font_sizes/font_size = 16
+text = "Unleashes 2 extra piercing obsidian blades with every combo swing."
 horizontal_alignment = 1
 autowrap_mode = 2
 
@@ -177,31 +223,40 @@ layout_mode = 2
 flat = true
 
 [node name="SkillCard2" type="PanelContainer" parent="Content/CardsHBox"]
-custom_minimum_size = Vector2(300, 480)
+custom_minimum_size = Vector2(320, 500)
 layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_card_leg")
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_card_base")
 
 [node name="VBox" type="VBoxContainer" parent="Content/CardsHBox/SkillCard2"]
 layout_mode = 2
 alignment = 1
-theme_override_constants/separation = 14
+theme_override_constants/separation = 12
 
 [node name="RarityHeader" type="Label" parent="Content/CardsHBox/SkillCard2/VBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
-theme_override_font_sizes/font_size = 16
-text = "⚔ LEGENDARY ⚔"
+theme_override_colors/font_color = Color(0.85, 0.45, 1, 1)
+theme_override_font_sizes/font_size = 18
+text = "⭐ EPIC BLESSING ⭐"
+horizontal_alignment = 1
+
+[node name="RankBadge" type="Label" parent="Content/CardsHBox/SkillCard2/VBox"]
+custom_minimum_size = Vector2(0, 26)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 0.9, 1, 1)
+theme_override_font_sizes/font_size = 15
+text = "✦ NEW SKILL ✦"
 horizontal_alignment = 1
 
 [node name="IconBox" type="PanelContainer" parent="Content/CardsHBox/SkillCard2/VBox"]
-custom_minimum_size = Vector2(100, 100)
+custom_minimum_size = Vector2(96, 96)
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_styles/panel = SubResource("StyleBoxFlat_iconbox")
 
 [node name="Icon" type="Label" parent="Content/CardsHBox/SkillCard2/VBox/IconBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 56
+theme_override_font_sizes/font_size = 52
 text = "⚡"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -209,15 +264,23 @@ vertical_alignment = 1
 [node name="Title" type="Label" parent="Content/CardsHBox/SkillCard2/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.92, 0.5, 1)
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 22
 text = "Thunder Tempest"
+horizontal_alignment = 1
+
+[node name="StatArrow" type="Label" parent="Content/CardsHBox/SkillCard2/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 1, 0.5, 1)
+theme_override_font_sizes/font_size = 16
+text = "LIGHTNING PWR ↑↑↑"
 horizontal_alignment = 1
 
 [node name="Desc" type="Label" parent="Content/CardsHBox/SkillCard2/VBox"]
 layout_mode = 2
+size_flags_vertical = 3
 theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
-theme_override_font_sizes/font_size = 13
-text = "Calls down fork lightning every 3 seconds striking 3 targets.\n\nATK PWR ↑↑↑↑"
+theme_override_font_sizes/font_size = 16
+text = "Calls down fork lightning every 3s, arcing across 3 nearby enemies."
 horizontal_alignment = 1
 autowrap_mode = 2
 
@@ -228,6 +291,7 @@ flat = true
 [node name="BottomBar" type="HBoxContainer" parent="Content"]
 custom_minimum_size = Vector2(0, 72)
 layout_mode = 2
+alignment = 1
 
 [node name="LeftSpacer" type="Control" parent="Content/BottomBar"]
 layout_mode = 2
@@ -236,13 +300,13 @@ size_flags_horizontal = 3
 [node name="CenterRefresh" type="VBoxContainer" parent="Content/BottomBar"]
 layout_mode = 2
 alignment = 1
-theme_override_constants/separation = 6
+theme_override_constants/separation = 4
 
 [node name="RefreshButton" type="Button" parent="Content/BottomBar/CenterRefresh"]
-custom_minimum_size = Vector2(180, 46)
+custom_minimum_size = Vector2(190, 48)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.1, 0.08, 0.04, 1)
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 18
 theme_override_styles/normal = SubResource("StyleBoxFlat_refreshbtn")
 theme_override_styles/hover = SubResource("StyleBoxFlat_refreshbtn")
 text = "🔄 Refresh"
@@ -250,16 +314,66 @@ text = "🔄 Refresh"
 [node name="RefreshCountLabel" type="Label" parent="Content/BottomBar/CenterRefresh"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.8, 0.85, 0.95, 1)
-theme_override_font_sizes/font_size = 11
+theme_override_font_sizes/font_size = 15
 text = "Skill refreshes left: 1"
 horizontal_alignment = 1
 
 [node name="LearnedSkillsBtn" type="Button" parent="Content/BottomBar"]
-custom_minimum_size = Vector2(140, 42)
+custom_minimum_size = Vector2(160, 48)
 layout_mode = 2
 size_flags_horizontal = 10
 size_flags_vertical = 4
 theme_override_colors/font_color = Color(0.85, 0.9, 1, 1)
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 16
 theme_override_styles/normal = SubResource("StyleBoxFlat_learnedbtn")
 text = "📖 Learned Skills"
+
+[node name="LearnedDrawer" type="PanelContainer" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -300.0
+offset_top = -320.0
+offset_right = 300.0
+offset_bottom = 320.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_drawer")
+
+[node name="VBox" type="VBoxContainer" parent="LearnedDrawer"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="Title" type="Label" parent="LearnedDrawer/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.88, 0.35, 1)
+theme_override_font_sizes/font_size = 22
+text = "✦ ACTIVE BLESSINGS & TALENTS ✦"
+horizontal_alignment = 1
+
+[node name="ScrollContainer" type="ScrollContainer" parent="LearnedDrawer/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="LearnedList" type="VBoxContainer" parent="LearnedDrawer/VBox/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 10
+
+[node name="EmptyLabel" type="Label" parent="LearnedDrawer/VBox/ScrollContainer/LearnedList"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.75, 0.85, 1)
+theme_override_font_sizes/font_size = 17
+text = "No blessings acquired yet this run."
+horizontal_alignment = 1
+
+[node name="CloseDrawerBtn" type="Button" parent="LearnedDrawer/VBox"]
+custom_minimum_size = Vector2(200, 48)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_font_sizes/font_size = 18
+text = "Close"

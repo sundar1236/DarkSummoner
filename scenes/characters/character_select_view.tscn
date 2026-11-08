@@ -66,16 +66,16 @@ layout_mode = 2
 theme_override_constants/separation = 12
 
 [node name="BtnBack" type="Button" parent="VBoxMain/TopBar"]
-custom_minimum_size = Vector2(90, 44)
+custom_minimum_size = Vector2(110, 50)
 layout_mode = 2
-theme_override_font_sizes/font_size = 15
+theme_override_font_sizes/font_size = 19
 text = "< BACK"
 
 [node name="Title" type="Label" parent="VBoxMain/TopBar"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(1, 0.9, 0.5, 1)
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 24
 text = "CHAMPIONS OF THE DEPTHS"
 horizontal_alignment = 1
 
@@ -85,13 +85,13 @@ layout_mode = 2
 [node name="LblShades" type="Label" parent="VBoxMain/TopBar/ShadesBadge"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.85, 0.75, 1, 1)
-theme_override_font_sizes/font_size = 15
+theme_override_font_sizes/font_size = 19
 text = "◆ 0 Shades"
 
 [node name="TabsRow" type="HBoxContainer" parent="VBoxMain"]
-custom_minimum_size = Vector2(0, 52)
+custom_minimum_size = Vector2(0, 58)
 layout_mode = 2
-theme_override_constants/separation = 8
+theme_override_constants/separation = 10
 
 [node name="ShowcasePanel" type="PanelContainer" parent="VBoxMain"]
 custom_minimum_size = Vector2(0, 410)
@@ -122,7 +122,7 @@ stretch_mode = 5
 [node name="LblLock" type="Label" parent="VBoxMain/ShowcasePanel/LockedOverlay"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.8, 0.45, 1)
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 22
 text = "CHAMPION LOCKED"
 horizontal_alignment = 1
 
@@ -131,25 +131,25 @@ layout_mode = 2
 
 [node name="VBoxInfo" type="VBoxContainer" parent="VBoxMain/InfoCard"]
 layout_mode = 2
-theme_override_constants/separation = 6
+theme_override_constants/separation = 8
 
 [node name="LblCharName" type="Label" parent="VBoxMain/InfoCard/VBoxInfo"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 23
+theme_override_font_sizes/font_size = 28
 text = "SHADOW HUNTER"
 horizontal_alignment = 1
 
 [node name="LblCharTitle" type="Label" parent="VBoxMain/InfoCard/VBoxInfo"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.8, 0.75, 0.9, 1)
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 18
 text = "— The Veiled Blade —"
 horizontal_alignment = 1
 
 [node name="LblCharWeapon" type="Label" parent="VBoxMain/InfoCard/VBoxInfo"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.85, 0.45, 1)
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 17
 text = "WEAPON: Dual Obsidian Slashes   •   STYLE: Swift Critical Flurries"
 horizontal_alignment = 1
 
@@ -161,7 +161,7 @@ layout_mode = 2
 
 [node name="LblCharPassive" type="Label" parent="VBoxMain/InfoCard/VBoxInfo/PassiveCard"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 17
 text = "PASSIVE: Flurry Instinct: Consecutive attacks grant +25% Attack Speed."
 autowrap_mode = 2
 
@@ -170,27 +170,27 @@ layout_mode = 2
 
 [node name="LblCharActive" type="Label" parent="VBoxMain/InfoCard/VBoxInfo/ActiveCard"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 17
 text = "ULTIMATE: Shadow Flurry: Explosive 360° ring of 8 piercing blades."
 autowrap_mode = 2
 
 [node name="LblCharStats" type="Label" parent="VBoxMain/InfoCard/VBoxInfo"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.8, 0.8, 0.88, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 16
 text = "HEALTH: 120   |   DAMAGE: 18   |   SPEED: 250   |   CRIT: 15%"
 horizontal_alignment = 1
 
 [node name="LblUnlockReq" type="Label" parent="VBoxMain/InfoCard/VBoxInfo"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.4, 1, 0.6, 1)
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 18
 text = "CHAMPION UNLOCKED & READY"
 horizontal_alignment = 1
 
 [node name="BtnAction" type="Button" parent="VBoxMain"]
-custom_minimum_size = Vector2(0, 62)
+custom_minimum_size = Vector2(0, 70)
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.92, 0.55, 1)
-theme_override_font_sizes/font_size = 19
+theme_override_font_sizes/font_size = 23
 text = "ENTER THE TOWER WITH SHADOW HUNTER"

@@ -1,9 +1,12 @@
 class_name VirtualJoystick
 extends Control
 
-# Responsive Archero 2-style Single Movement Virtual Joystick.
-# Features full touch-zone floating support, electric-blue outer guide ring
-# with 4 directional arrows, large glowing thumb knob, and smooth radial clamping.
+# Responsive Mobile Virtual Joystick for Abyssal Altar.
+# Supports both:
+# 1. Left Movement Stick: Electric-blue guide ring with directional chevrons.
+# 2. Right Aim & Attack Stick: Crimson/amber targeting reticle ring with sword aim markers.
+# Features full floating-touch support, smooth radial clamping, touch index isolation,
+# and edge-release cancellation to prevent stuck states.
 
 signal joystick_updated(output: Vector2)
 signal joystick_pressed()
@@ -33,28 +36,42 @@ func _ready() -> void:
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_RESIZED:
 		_update_default_pos()
+	elif what == NOTIFICATION_APPLICATION_FOCUS_OUT or what == NOTIFICATION_PAUSED:
+		_reset_joystick()
 
 func _update_default_pos() -> void:
-	default_rest_pos = Vector2(size.x * 0.5, size.y * 0.76)
+	if is_aim_and_attack:
+		default_rest_pos = Vector2(size.x * 0.5, size.y * 0.72)
+	else:
+		default_rest_pos = Vector2(size.x * 0.5, size.y * 0.76)
+		
 	if not is_pressed:
 		base_center = default_rest_pos
 		knob_offset = Vector2.ZERO
 
 func _draw() -> void:
-	var alpha_mult: float = 1.0 if is_pressed else 0.45
+	var alpha_mult: float = 1.0 if is_pressed else 0.42
 	var ring_radius := clamp_radius + 20.0
 	
-	# 1. Outer Dark Backdrop
-	draw_circle(base_center, ring_radius, Color(0.02, 0.05, 0.12, 0.55 * alpha_mult))
+	# Determine color theme: Fiery Crimson/Gold for Aim & Attack, Electric Blue for Movement
+	var rim_color := Color(1.0, 0.42, 0.15, 0.85 * alpha_mult) if is_aim_and_attack else Color(0.2, 0.65, 1.0, 0.85 * alpha_mult)
+	var glow_color := Color(1.0, 0.75, 0.25, 0.45 * alpha_mult) if is_aim_and_attack else Color(0.4, 0.85, 1.0, 0.4 * alpha_mult)
+	var inner_rim := Color(0.95, 0.35, 0.2, 0.35 * alpha_mult) if is_aim_and_attack else Color(0.18, 0.55, 0.95, 0.35 * alpha_mult)
+	var knob_core := Color(0.95, 0.3, 0.15, 0.95 * alpha_mult) if is_aim_and_attack else Color(0.1, 0.48, 0.95, 0.95 * alpha_mult)
+	var knob_mid := Color(1.0, 0.6, 0.2, 0.95 * alpha_mult) if is_aim_and_attack else Color(0.25, 0.72, 1.0, 0.95 * alpha_mult)
+	var knob_hi := Color(1.0, 0.9, 0.45, 0.98 * alpha_mult) if is_aim_and_attack else Color(0.7, 0.92, 1.0, 0.98 * alpha_mult)
 	
-	# 2. Glowing Electric-Blue Outer Energy Rim
-	draw_arc(base_center, ring_radius, 0.0, TAU, 48, Color(0.2, 0.65, 1.0, 0.85 * alpha_mult), 3.0, true)
-	draw_arc(base_center, ring_radius + 2.0, 0.0, TAU, 48, Color(0.4, 0.85, 1.0, 0.4 * alpha_mult), 1.5, true)
+	# 1. Outer Dark Backdrop
+	draw_circle(base_center, ring_radius, Color(0.04, 0.03, 0.08, 0.55 * alpha_mult))
+	
+	# 2. Glowing Outer Energy Rim
+	draw_arc(base_center, ring_radius, 0.0, TAU, 48, rim_color, 3.0, true)
+	draw_arc(base_center, ring_radius + 2.0, 0.0, TAU, 48, glow_color, 1.5, true)
 	
 	# 3. Inner Concentric Guide Ring
-	draw_arc(base_center, ring_radius * 0.55, 0.0, TAU, 36, Color(0.18, 0.55, 0.95, 0.35 * alpha_mult), 1.5, true)
+	draw_arc(base_center, ring_radius * 0.55, 0.0, TAU, 36, inner_rim, 1.5, true)
 	
-	# 4. 4 Directional Chevron / Arrow Indicators (N, S, E, W)
+	# 4. 4 Directional Chevron / Reticle Indicators (N, S, E, W)
 	for i in range(4):
 		var angle := float(i) * (PI * 0.5)
 		var dir := Vector2.RIGHT.rotated(angle)
@@ -63,29 +80,36 @@ func _draw() -> void:
 		var right_pt := base_center + dir * (ring_radius - 12.0) - dir.orthogonal() * 8.0
 		
 		var chevron := PackedVector2Array([tip, left_pt, right_pt])
-		draw_colored_polygon(chevron, Color(0.3, 0.8, 1.0, 0.9 * alpha_mult))
-		draw_polyline(chevron, Color(0.7, 0.95, 1.0, 0.95 * alpha_mult), 1.5)
+		draw_colored_polygon(chevron, rim_color)
+		draw_polyline(chevron, glow_color, 1.5)
+		
+	# Draw crosshair marks for aim & attack stick
+	if is_aim_and_attack:
+		draw_line(base_center + Vector2(-16, 0), base_center + Vector2(-6, 0), rim_color, 2.0)
+		draw_line(base_center + Vector2(6, 0), base_center + Vector2(16, 0), rim_color, 2.0)
+		draw_line(base_center + Vector2(0, -16), base_center + Vector2(0, -6), rim_color, 2.0)
+		draw_line(base_center + Vector2(0, 6), base_center + Vector2(0, 16), rim_color, 2.0)
 	
 	# Base texture overlay if present
 	if base_texture:
 		var b_size := Vector2(ring_radius * 2.2, ring_radius * 2.2)
-		draw_texture_rect(base_texture, Rect2(base_center - b_size * 0.5, b_size), false, Color(0.6, 0.85, 1.0, 0.35 * alpha_mult))
+		draw_texture_rect(base_texture, Rect2(base_center - b_size * 0.5, b_size), false, Color(1.0, 1.0, 1.0, 0.30 * alpha_mult))
 
-	# 5. Large Glowing Electric-Blue Inner Knob
+	# 5. Glowing Inner Knob
 	var knob_pos := base_center + knob_offset
 	var knob_r := 44.0
 	
 	# Outer shadow & rim
-	draw_circle(knob_pos, knob_r + 4.0, Color(0.04, 0.08, 0.16, 0.85 * alpha_mult))
-	draw_arc(knob_pos, knob_r + 4.0, 0.0, TAU, 36, Color(0.15, 0.45, 0.85, 0.7 * alpha_mult), 2.0, true)
+	draw_circle(knob_pos, knob_r + 4.0, Color(0.04, 0.05, 0.12, 0.85 * alpha_mult))
+	draw_arc(knob_pos, knob_r + 4.0, 0.0, TAU, 36, inner_rim, 2.0, true)
 	
-	# Vibrant core gradient
-	draw_circle(knob_pos, knob_r, Color(0.1, 0.48, 0.95, 0.95 * alpha_mult))
-	draw_circle(knob_pos, knob_r * 0.72, Color(0.25, 0.72, 1.0, 0.95 * alpha_mult))
-	draw_circle(knob_pos, knob_r * 0.38, Color(0.7, 0.92, 1.0, 0.98 * alpha_mult))
+	# Core gradient
+	draw_circle(knob_pos, knob_r, knob_core)
+	draw_circle(knob_pos, knob_r * 0.72, knob_mid)
+	draw_circle(knob_pos, knob_r * 0.38, knob_hi)
 	
 	# Metallic rim highlight
-	draw_arc(knob_pos, knob_r, 0.0, TAU, 36, Color(0.85, 0.96, 1.0, 0.95 * alpha_mult), 2.5, true)
+	draw_arc(knob_pos, knob_r, 0.0, TAU, 36, Color(1.0, 1.0, 1.0, 0.90 * alpha_mult), 2.5, true)
 	
 	# Top specular shine
 	draw_circle(knob_pos + Vector2(-knob_r * 0.28, -knob_r * 0.28), knob_r * 0.22, Color(1.0, 1.0, 1.0, 0.85 * alpha_mult))
@@ -133,6 +157,13 @@ func _gui_input(event: InputEvent) -> void:
 	elif event is InputEventMouseMotion:
 		if touch_index == 0:
 			_handle_touch_position(event.position)
+
+func _unhandled_input(event: InputEvent) -> void:
+	# Catch touch releases that end outside control boundary to prevent stuck joysticks
+	if event is InputEventScreenTouch and not event.pressed and event.index == touch_index:
+		_reset_joystick()
+	elif event is InputEventMouseButton and not event.pressed and event.button_index == MOUSE_BUTTON_LEFT and touch_index == 0:
+		_reset_joystick()
 
 func _handle_touch_position(pos: Vector2) -> void:
 	var diff := pos - base_center

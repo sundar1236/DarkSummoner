@@ -41,12 +41,20 @@ signal tab_changed(tab_index: int)
 	$NavPanel/TabHBox/TabEvents/VBox/Icon
 ]
 
+@onready var badge_shop: Control = $NavPanel/TabHBox/TabShop.get_node_or_null("Badge")
+@onready var badge_gear: Control = $NavPanel/TabHBox/TabGear.get_node_or_null("Badge")
+@onready var badge_collectible: Control = $NavPanel/TabHBox/TabCollectible.get_node_or_null("Badge")
+
 func _ready() -> void:
-	custom_minimum_size = Vector2(0, 92)
+	custom_minimum_size = Vector2(0, 120)
 	for i in range(tab_buttons.size()):
 		var idx := i
 		if tab_buttons[idx]:
 			tab_buttons[idx].pressed.connect(func(): select_tab(idx))
+	if SaveManager:
+		SaveManager.profile_changed.connect(refresh_badges)
+		SaveManager.energy_changed.connect(func(_c, _m): refresh_badges())
+	refresh_badges()
 	_update_tab_visuals()
 
 func select_tab(idx: int) -> void:
@@ -58,6 +66,22 @@ func select_tab(idx: int) -> void:
 	_update_tab_visuals()
 	tab_changed.emit(current_tab)
 
+func refresh_badges() -> void:
+	if not SaveManager: return
+	if badge_shop:
+		# Free daily energy available
+		badge_shop.visible = not SaveManager.daily_free_energy_claimed
+	if badge_gear:
+		# Character can be starred up
+		var shards: int = SaveManager.character_shards.get("shadow_hunter", 0)
+		var stars: int = SaveManager.character_stars.get("shadow_hunter", 1)
+		badge_gear.visible = (shards >= stars * 15 and stars < 6)
+	if badge_collectible:
+		# Can claim/upgrade
+		var storm_card: Variant = SaveManager.talent_cards.get("storm_call", {})
+		var storm_unlocked: bool = storm_card.get("unlocked", false) if storm_card is Dictionary else false
+		badge_collectible.visible = (SaveManager.player_level >= 5 and not storm_unlocked)
+
 func _update_tab_visuals() -> void:
 	for i in range(tab_containers.size()):
 		var is_active := (i == current_tab)
@@ -68,12 +92,13 @@ func _update_tab_visuals() -> void:
 		if is_active:
 			cont.modulate = Color(1.0, 1.0, 1.0, 1.0)
 			lbl.add_theme_color_override("font_color", Color(1.0, 0.88, 0.35, 1.0))
-			lbl.add_theme_font_size_override("font_size", 14)
+			lbl.add_theme_font_size_override("font_size", 20)
 			ico.add_theme_color_override("font_color", Color(1.0, 0.88, 0.35, 1.0))
-			ico.add_theme_font_size_override("font_size", 38)
+			ico.add_theme_font_size_override("font_size", 44)
 		else:
-			cont.modulate = Color(0.65, 0.68, 0.75, 0.8)
-			lbl.add_theme_color_override("font_color", Color(0.6, 0.65, 0.75, 1.0))
-			lbl.add_theme_font_size_override("font_size", 12)
-			ico.add_theme_color_override("font_color", Color(0.6, 0.65, 0.75, 1.0))
-			ico.add_theme_font_size_override("font_size", 30)
+			cont.modulate = Color(0.7, 0.75, 0.85, 0.75)
+			lbl.add_theme_color_override("font_color", Color(0.65, 0.7, 0.8, 1.0))
+			lbl.add_theme_font_size_override("font_size", 17)
+			ico.add_theme_color_override("font_color", Color(0.65, 0.7, 0.8, 1.0))
+			ico.add_theme_font_size_override("font_size", 36)
+	refresh_badges()

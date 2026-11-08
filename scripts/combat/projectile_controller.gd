@@ -1,6 +1,8 @@
 class_name ProjectileController
 extends Area2D
 
+const ImpactSparkVFXClass = preload("res://scripts/combat/impact_spark_vfx.gd")
+
 # Unified projectile controller supporting player weapons, homing souls,
 # chain discharges, pet fireballs, and enemy/boss projectiles.
 
@@ -116,6 +118,21 @@ func _handle_hit(target: Node) -> void:
 	if is_player_projectile:
 		if target.has_method("take_damage"):
 			target.take_damage(damage, is_crit)
+			
+			# Spawn impact spark
+			var spark = ImpactSparkVFXClass.new()
+			var p_tint := Color(0.95, 0.75, 1.0)
+			if sprite and sprite.texture:
+				var path := sprite.texture.resource_path
+				if "lightning" in path:
+					p_tint = Color(0.4, 0.9, 1.0)
+				elif "soul" in path:
+					p_tint = Color(0.3, 1.0, 0.65)
+				elif "fireball" in path:
+					p_tint = Color(1.0, 0.6, 0.2)
+			spark.setup(is_crit, global_position, -direction, p_tint)
+			get_parent().add_child(spark)
+			
 			if has_burn and target.has_method("apply_burn"):
 				target.apply_burn(6.0, 3)
 			if has_life_steal:
@@ -125,12 +142,18 @@ func _handle_hit(target: Node) -> void:
 			if pierce_count <= 0:
 				queue_free()
 		elif target is TileMap or target is StaticBody2D:
-			# Hit wall
+			# Hit wall with spark
+			var spark = ImpactSparkVFXClass.new()
+			spark.setup(false, global_position, -direction, Color(0.8, 0.8, 0.8))
+			get_parent().add_child(spark)
 			queue_free()
 	else:
 		# Enemy projectile hits player
 		if target.has_method("take_player_damage"):
 			target.take_player_damage(damage)
+			var spark = ImpactSparkVFXClass.new()
+			spark.setup(false, global_position, -direction, Color(1.0, 0.3, 0.3))
+			get_parent().add_child(spark)
 			queue_free()
 		elif target is TileMap or target is StaticBody2D:
 			queue_free()

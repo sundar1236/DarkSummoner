@@ -58,26 +58,39 @@ func show_toast(text: String) -> void:
 
 func _setup_card_clicks() -> void:
 	if not grid_container: return
-	var descriptions := [
-		"👑 Glory (5★): +25% Gold Gain & +10% Crit Chance",
-		"📜 Tactics (4★): +20% Skill Cooldown Recovery",
-		"💨 Swift Wind (3★): +15% Movement Speed & Dash Distance",
-		"💥 Super CRIT (4★): +40% Critical Strike Damage",
-		"🛡 Iron Will (3★): +200 Max HP & 10% Damage Resistance",
-		"🩸 Vampiric (3★): Defeating enemies heals 2% Max HP",
-		"🔒 Storm Call: Unlocks after Lv.40 in Dungeon Descent!",
-		"🔒 Flame Burst: Unlocks after Lv.40 in Dungeon Descent!"
+	var card_keys := ["glory", "tactics", "swift_wind", "super_crit", "iron_will", "vampiric", "storm_call", "flame_burst"]
+	var card_info := [
+		{"name": "Glory", "stars": 5, "desc": "+25% Gold Gain & +10% Crit Chance"},
+		{"name": "Tactics", "stars": 4, "desc": "+20% Skill Cooldown Recovery"},
+		{"name": "Swift Wind", "stars": 3, "desc": "+15% Movement Speed & Dash Distance"},
+		{"name": "Super CRIT", "stars": 4, "desc": "+40% Critical Strike Damage"},
+		{"name": "Iron Will", "stars": 3, "desc": "+200 Max HP & 10% Damage Resistance"},
+		{"name": "Vampiric", "stars": 3, "desc": "Defeating enemies heals 2% Max HP"},
+		{"name": "Storm Call", "stars": 1, "desc": "Lightning strikes every 8s. Unlocks at Floor 40"},
+		{"name": "Flame Burst", "stars": 1, "desc": "Fire nova on taking damage. Unlocks at Floor 40"}
 	]
 	
-	for i in range(grid_container.get_child_count()):
+	for i in range(mini(grid_container.get_child_count(), card_info.size())):
 		var card := grid_container.get_child(i) as Control
-		var desc: String = descriptions[i] if i < descriptions.size() else "Talent Card"
+		var key: String = card_keys[i]
+		var info: Dictionary = card_info[i]
 		if card:
 			card.gui_input.connect(func(ev: InputEvent):
 				if ev is InputEventMouseButton and ev.pressed:
 					if AudioManager: AudioManager.play_sfx("ui_click")
-					show_toast(desc)
-					card_clicked.emit("card_%d" % (i + 1))
+					var is_unlocked := true
+					var stars: int = info.stars
+					if SaveManager and SaveManager.talent_cards.has(key):
+						var tc: Dictionary = SaveManager.talent_cards[key]
+						is_unlocked = tc.get("unlocked", true)
+						stars = tc.get("stars", stars)
+					var txt := ""
+					if is_unlocked:
+						txt = "✦ %s (%d★): %s [ACTIVE]" % [info.name, stars, info.desc]
+					else:
+						txt = "🔒 %s (Locked): %s" % [info.name, info.desc]
+					show_toast(txt)
+					card_clicked.emit(key)
 			)
 
 func _set_mode(talent: bool) -> void:

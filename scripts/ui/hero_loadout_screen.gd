@@ -81,8 +81,62 @@ func _ready() -> void:
 		
 	_setup_character_roster_wiring()
 	_setup_gear_slots_wiring()
+	_setup_runes_dock_wiring()
 	_setup_toast_label()
+	
+	if SaveManager and not SaveManager.active_character_id.is_empty():
+		current_char_id = SaveManager.active_character_id
+	refresh_loadout()
 	_switch_subtab(active_subtab)
+
+func _setup_runes_dock_wiring() -> void:
+	var rune_grid := $ContentContainer/ViewRunes/BottomInventory/Grid as Control
+	if not rune_grid: return
+	var runes_info := [
+		{"name": "Fire Rune", "icon": "🔥", "tier": 1},
+		{"name": "Wolf Core", "icon": "🐺", "tier": 1},
+		{"name": "Storm Shard", "icon": "⚡", "tier": 2},
+		{"name": "Frost Rune", "icon": "❄", "tier": 1},
+		{"name": "Void Crystal", "icon": "🔮", "tier": 2}
+	]
+	for i in range(mini(rune_grid.get_child_count(), runes_info.size())):
+		var r_slot := rune_grid.get_child(i) as Control
+		var info: Dictionary = runes_info[i]
+		if r_slot:
+			r_slot.gui_input.connect(func(ev: InputEvent):
+				if ev is InputEventMouseButton and ev.pressed:
+					if AudioManager: AudioManager.play_sfx("item_place")
+					show_toast("✨ %s (T%d) ready for ritual placement!" % [info.name, info.tier])
+			)
+
+func refresh_loadout() -> void:
+	if not SaveManager: return
+	var eq: Dictionary = SaveManager.equipment_levels
+	var slots := [
+		$ContentContainer/ViewGear/TopHalf/LeftSlots/SlotWeapon,
+		$ContentContainer/ViewGear/TopHalf/LeftSlots/SlotAmulet,
+		$ContentContainer/ViewGear/TopHalf/LeftSlots/SlotRing,
+		$ContentContainer/ViewGear/TopHalf/RightSlots/SlotHelmet,
+		$ContentContainer/ViewGear/TopHalf/RightSlots/SlotArmor,
+		$ContentContainer/ViewGear/TopHalf/RightSlots/SlotBoots
+	]
+	var keys := ["weapon", "amulet", "ring", "helmet", "armor", "boots"]
+	var total_lvl := 0
+	for i in range(slots.size()):
+		var slot: Control = slots[i]
+		var k: String = keys[i]
+		var lvl: int = eq.get(k, 60)
+		total_lvl += lvl
+		if slot:
+			var lvl_lbl := slot.get_node_or_null("VBox/Level") as Label
+			if lvl_lbl:
+				lvl_lbl.text = "Lv.%d S" % lvl
+				
+	base_display_atk = 3200 + total_lvl * 8
+	base_display_hp = 14000 + total_lvl * 25
+	if stat_atk_label: stat_atk_label.text = "⚔ ATK: %s" % _format_num(base_display_atk)
+	if stat_hp_label: stat_hp_label.text = "❤ HP: %s" % _format_num(base_display_hp)
+	_update_character_ui()
 
 func _setup_toast_label() -> void:
 	_toast_label = Label.new()
@@ -129,6 +183,9 @@ func _select_character(char_id: String) -> void:
 	current_char_id = char_id
 	if GameManager:
 		GameManager.set_character(char_id)
+	if SaveManager:
+		SaveManager.active_character_id = char_id
+		SaveManager.save_profile()
 	if AudioManager:
 		AudioManager.play_sfx("ui_click")
 		
@@ -140,32 +197,39 @@ func _select_character(char_id: String) -> void:
 	show_toast("Switched Active Hero: %s" % char_name_badge.text)
 
 func _on_star_up_hunter() -> void:
-	if hunter_stars < 6:
-		hunter_stars += 1
-		base_display_atk += 280
-		base_display_hp += 950
-		if AudioManager: AudioManager.play_sfx("upgrade")
-		
-		if star_rating_row:
-			var stars_str := ""
-			for i in range(6):
-				stars_str += "★ " if i < hunter_stars else "☆ "
-			star_rating_row.text = stars_str.strip_edges()
-			
-		if skill_lbl_3 and hunter_stars >= 3:
-			skill_lbl_3.text = "✦ Lv.3 Soul Harvester [Unlocked]\nDefeating an elite restores 10% max HP."
-			skill_lbl_3.add_theme_color_override("font_color", Color(0.9, 0.95, 1.0, 1.0))
-			
-		if stat_atk_label: stat_atk_label.text = "⚔ ATK: %s" % _format_num(base_display_atk)
-		if stat_hp_label: stat_hp_label.text = "❤ HP: %s" % _format_num(base_display_hp)
-		
-		show_toast("★ Shadow Hunter Star Up (%d★)! +280 ATK, +950 HP" % hunter_stars)
-		star_up_requested.emit("shadow_hunter")
+	if SaveManager:
+		if SaveManager.star_up_character("shadow_hunter"):
+			hunter_stars = SaveManager.character_stars.get("shadow_hunter", hunter_stars + 1)
+			base_display_atk += 280
+			base_display_hp += 950
+			_update_character_ui()
+			show_toast("★ Shadow Hunter Star Up (%d★)! +280 ATK, +950 HP" % hunter_stars)
+			star_up_requested.emit("shadow_hunter")
+		else:
+			var cur_s: int = SaveManager.character_stars.get("shadow_hunter", 1)
+			var cost_shards: int = cur_s * 15
+			var cost_gold: int = cur_s * 800
+			var cur_shards: int = SaveManager.character_shards.get("shadow_hunter", 0)
+			if cur_shards < cost_shards:
+				if AudioManager: AudioManager.play_sfx("ui_error")
+				show_toast("Need %d Shadow Shards! (Have %d)" % [cost_shards, cur_shards])
+			else:
+				if AudioManager: AudioManager.play_sfx("ui_error")
+				show_toast("Need 🪙 %d Gold!" % cost_gold)
+	else:
+		if hunter_stars < 6:
+			hunter_stars += 1
+			base_display_atk += 280
+			base_display_hp += 950
+			if AudioManager: AudioManager.play_sfx("upgrade")
+			_update_character_ui()
+			show_toast("★ Shadow Hunter Star Up (%d★)!" % hunter_stars)
+			star_up_requested.emit("shadow_hunter")
 
 func _on_unlock_valkyrie() -> void:
-	var shell := get_parent().get_parent() as MainShellUI
+	var shell = get_parent().get_parent() if get_parent() else null
 	var can_afford := true
-	if shell and shell.top_bar:
+	if shell and "top_bar" in shell and shell.top_bar:
 		can_afford = shell.top_bar.spend_gems(100)
 	
 	if can_afford:
@@ -245,15 +309,27 @@ func _setup_gear_slots_wiring() -> void:
 			)
 
 func _upgrade_gear_slot(slot: Control, slot_name: String) -> void:
-	var lvl_lbl := slot.get_node_or_null("VBox/Level") as Label
-	if lvl_lbl:
-		base_display_atk += 45
-		base_display_hp += 120
-		if AudioManager: AudioManager.play_sfx("upgrade")
-		lvl_lbl.text = "Lv.61 S"
-		if stat_atk_label: stat_atk_label.text = "⚔ ATK: %s" % _format_num(base_display_atk)
-		if stat_hp_label: stat_hp_label.text = "❤ HP: %s" % _format_num(base_display_hp)
-		show_toast("✦ %s Upgraded to Lv.61! (+45 ATK, +120 HP)" % slot_name)
+	var k := slot_name.to_lower()
+	if SaveManager:
+		if SaveManager.upgrade_equipment_slot(k):
+			var new_lvl: int = SaveManager.equipment_levels.get(k, 60)
+			refresh_loadout()
+			show_toast("✦ %s Upgraded to Lv.%d! (+45 ATK, +120 HP)" % [slot_name, new_lvl])
+		else:
+			var cur_l: int = SaveManager.equipment_levels.get(k, 60)
+			var cost: int = cur_l * 50
+			if AudioManager: AudioManager.play_sfx("ui_error")
+			show_toast("Need 🪙 %d Gold to upgrade %s!" % [cost, slot_name])
+	else:
+		var lvl_lbl := slot.get_node_or_null("VBox/Level") as Label
+		if lvl_lbl:
+			base_display_atk += 45
+			base_display_hp += 120
+			if AudioManager: AudioManager.play_sfx("upgrade")
+			lvl_lbl.text = "Lv.61 S"
+			if stat_atk_label: stat_atk_label.text = "⚔ ATK: %s" % _format_num(base_display_atk)
+			if stat_hp_label: stat_hp_label.text = "❤ HP: %s" % _format_num(base_display_hp)
+			show_toast("✦ %s Upgraded to Lv.61!" % slot_name)
 
 func _format_num(val: int) -> String:
 	var thousands := val / 1000

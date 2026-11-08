@@ -1,7 +1,11 @@
 class_name EnemyController
 extends CharacterBody2D
 
+const CoinPickupClass = preload("res://scripts/combat/coin_pickup.gd")
+const XpPickupClass = preload("res://scripts/combat/xp_pickup.gd")
+
 # Unified 2.5D enemy controller for regular swarmers, ranged cultists, and elite brutes.
+# Features distinct telegraph indicators, elite visual auras, crisp hit-flashes, and coin drops.
 
 signal enemy_defeated(enemy_node: Node2D)
 
@@ -12,6 +16,7 @@ var move_speed: float = 140.0
 var contact_damage: float = 12.0
 var attack_cooldown: float = 1.4
 var attack_timer: float = 0.0
+var is_telegraphing: bool = false
 
 var gold_reward: int = 4
 var shade_reward: int = 1
@@ -20,6 +25,7 @@ var player_ref: Node2D
 var shadow_sprite: Sprite2D
 var sprite: Sprite2D
 var health_bar: ProgressBar
+var elite_aura: Node2D
 var burn_stacks: int = 0
 var burn_timer: float = 0.0
 
@@ -107,14 +113,43 @@ func _init_stats(floor_scale: int = 1) -> void:
 			if health_bar:
 				health_bar.size = Vector2(56, 7)
 				health_bar.position = Vector2(-28, -42)
+			_setup_elite_aura()
 			
 	hp = max_hp
 	if health_bar:
 		health_bar.max_value = max_hp
 		health_bar.value = hp
 
+func _setup_elite_aura() -> void:
+	if elite_aura:
+		return
+	elite_aura = Node2D.new()
+	elite_aura.z_index = -1
+	elite_aura.draw.connect(func():
+		# Glowing golden-red menacing ring beneath elite brute
+		var r: float = 32.0 + sin(anim_time * 5.0) * 2.0
+		elite_aura.draw_arc(Vector2(0, 20), r, 0.0, TAU, 32, Color(1.0, 0.75, 0.2, 0.65), 3.0)
+		elite_aura.draw_circle(Vector2(0, 20), r * 0.95, Color(1.0, 0.3, 0.1, 0.12))
+	)
+	add_child(elite_aura)
+	
+	# Crown badge over elite health bar
+	var crown := Label.new()
+	crown.text = "👑 ELITE"
+	crown.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	crown.add_theme_font_size_override("font_size", 10)
+	crown.add_theme_color_override("font_color", Color(1.0, 0.85, 0.25, 1.0))
+	crown.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 1.0))
+	crown.size = Vector2(60, 14)
+	crown.position = Vector2(-30, -58)
+	crown.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(crown)
+
 func _physics_process(delta: float) -> void:
 	anim_time += delta
+	if elite_aura:
+		elite_aura.queue_redraw()
+		
 	if not is_instance_valid(player_ref):
 		var p_nodes := get_tree().get_nodes_in_group("player")
 		if not p_nodes.is_empty():
@@ -131,7 +166,7 @@ func _physics_process(delta: float) -> void:
 	attack_timer += delta
 	
 	# Horizontal Directional Facing
-	if abs(dir.x) > 0.05:
+	if abs(dir.x) > 0.05 and not is_telegraphing:
 		sprite.flip_h = (dir.x < 0.0)
 		
 	match enemy_type:
@@ -148,20 +183,21 @@ func _physics_process(delta: float) -> void:
 				attack_timer = 0.0
 				
 		"cultist":
-			if dist > 220.0:
-				velocity = dir * move_speed
-			elif dist < 140.0:
-				velocity = -dir * move_speed
-			else:
-				velocity = Vector2.ZERO
-			move_and_slide()
+			if not is_telegraphing:
+				if dist > 220.0:
+					velocity = dir * move_speed
+				elif dist < 140.0:
+					velocity = -dir * move_speed
+				else:
+					velocity = Vector2.ZERO
+				move_and_slide()
 			
 			# Levitating hovering bob
 			sprite.rotation = 0.0
 			sprite.position = Vector2(0, -6.0 + sin(anim_time * 3.5) * 4.0) + lunge_offset
 			
-			if attack_timer >= attack_cooldown:
-				_fire_cultist_projectile(dir)
+			if attack_timer >= attack_cooldown and not is_telegraphing:
+				_telegraph_cultist_attack(dir)
 				attack_timer = 0.0
 				
 		"elite":
@@ -182,12 +218,34 @@ func _physics_process(delta: float) -> void:
 func _lunge_attack(dir: Vector2) -> void:
 	lunge_offset = dir * 14.0
 
-func _fire_cultist_projectile(dir: Vector2) -> void:
+func _telegraph_cultist_attack(dir: Vector2) -> void:
+	is_telegraphing = true
+	velocity = Vector2.ZERO
+	
+	# Create telegraph warning lane
+	var telegraph := Node2D.new()
+	telegraph.z_index = -1
+	telegraph.draw.connect(func():
+		var col := Color(1.0, 0.25, 0.35, 0.65)
+		telegraph.draw_line(Vector2.ZERO, dir * 260.0, col, 3.0)
+		telegraph.draw_circle(dir * 260.0, 6.0, col)
+	)
+	add_child(telegraph)
+	
 	# Casting windup animation pulse
 	var tween := create_tween()
-	tween.tween_property(sprite, "scale", Vector2(1.2, 1.2), 0.15)
-	tween.tween_property(sprite, "scale", Vector2(1.0, 1.0), 0.15)
+	tween.tween_property(sprite, "scale", Vector2(1.25, 1.25), 0.18)
+	tween.tween_property(sprite, "scale", Vector2(1.0, 1.0), 0.16)
 	
+	get_tree().create_timer(0.34).timeout.connect(func():
+		if is_instance_valid(telegraph):
+			telegraph.queue_free()
+		is_telegraphing = false
+		if is_instance_valid(self) and hp > 0.0:
+			_fire_cultist_projectile(dir)
+	)
+
+func _fire_cultist_projectile(dir: Vector2) -> void:
 	var proj := ProjectileController.new()
 	get_parent().add_child(proj)
 	proj.global_position = global_position
@@ -222,13 +280,12 @@ func take_damage(amount: float, is_crit: bool) -> void:
 	get_parent().add_child(dmg_num)
 	dmg_num.setup(amount, is_crit, global_position)
 	
-	# Hit flash & flinch
+	# High-readability white hit flash & micro squash flinch
 	var tween := create_tween()
-	sprite.modulate = Color(1.8, 0.35, 0.35, 1.0)
-	if is_crit:
-		sprite.scale = Vector2(1.15, 1.15)
-		tween.tween_property(sprite, "scale", Vector2(1.0, 1.0), 0.15)
-	tween.tween_property(sprite, "modulate", Color(1.0, 1.0, 1.0, 1.0), 0.15)
+	sprite.modulate = Color(2.5, 2.5, 2.5, 1.0)
+	sprite.scale = Vector2(1.18, 0.88)
+	tween.tween_property(sprite, "scale", Vector2(1.0, 1.0), 0.12).set_trans(Tween.TRANS_QUAD)
+	tween.parallel().tween_property(sprite, "modulate", Color(1.0, 1.0, 1.0, 1.0), 0.10)
 	
 	if is_crit:
 		if AudioManager: AudioManager.play_sfx("crit_hit")
@@ -239,11 +296,25 @@ func take_damage(amount: float, is_crit: bool) -> void:
 		_on_death()
 
 func _on_death() -> void:
-	GameManager.add_gold(gold_reward)
 	GameManager.add_run_shades(shade_reward)
 	if AudioManager:
 		AudioManager.play_sfx("enemy_death")
 	enemy_defeated.emit(self)
+	
+	# Spawn collectible gold coins that pop and magnetize
+	var coin_count := clampi(gold_reward, 1, 5)
+	for i in range(coin_count):
+		var coin = CoinPickupClass.new()
+		get_parent().call_deferred("add_child", coin)
+		coin.setup(int(ceil(float(gold_reward) / float(coin_count))), global_position)
+		
+	# Spawn collectible celestial XP soul crystals
+	var xp_val: float = 25.0
+	if enemy_type == "cultist": xp_val = 35.0
+	elif enemy_type == "elite": xp_val = 75.0
+	var xp_crystal = XpPickupClass.new()
+	get_parent().call_deferred("add_child", xp_crystal)
+	xp_crystal.setup(xp_val, global_position)
 	
 	# Death dissolve tween
 	var tween := create_tween()

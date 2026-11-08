@@ -1,6 +1,9 @@
 class_name BossController
 extends CharacterBody2D
 
+const CoinPickupClass = preload("res://scripts/combat/coin_pickup.gd")
+const XpPickupClass = preload("res://scripts/combat/xp_pickup.gd")
+
 # Floor Boss controller: "Lord Malakar, the Abyssal Dread".
 # Features multi-phase combat and readable animated warning telegraph danger zones.
 
@@ -247,8 +250,11 @@ func take_damage(amount: float, is_crit: bool) -> void:
 	dmg_num.setup(amount, is_crit, global_position + Vector2(0, -20))
 	
 	var tween := create_tween()
-	sprite.modulate = Color(1.8, 0.4, 0.4, 1.0)
-	tween.tween_property(sprite, "modulate", Color(1.5, 0.35, 0.35, 1.0) if is_enraged else Color(1.0, 1.0, 1.0, 1.0), 0.15)
+	sprite.modulate = Color(2.2, 2.2, 2.2, 1.0)
+	sprite.scale = Vector2(1.12, 0.9)
+	var rest_col := Color(1.5, 0.35, 0.35, 1.0) if is_enraged else Color(1.0, 1.0, 1.0, 1.0)
+	tween.tween_property(sprite, "scale", Vector2(1.0, 1.0), 0.12).set_trans(Tween.TRANS_QUAD)
+	tween.parallel().tween_property(sprite, "modulate", rest_col, 0.12)
 	
 	if is_crit:
 		if AudioManager: AudioManager.play_sfx("crit_hit")
@@ -264,8 +270,20 @@ func _on_boss_death() -> void:
 		cam.apply_impact(10.0, 0.5)
 		
 	# Award floor victory rewards
-	GameManager.add_gold(60)
 	GameManager.add_run_shades(15)
+	
+	# Spawn boss gold shower
+	for i in range(10):
+		var coin = CoinPickupClass.new()
+		get_parent().call_deferred("add_child", coin)
+		coin.setup(6, global_position + Vector2(randf_range(-30, 30), randf_range(-20, 20)))
+		
+	# Spawn boss celestial XP crystals
+	for i in range(3):
+		var xp_crystal = XpPickupClass.new()
+		get_parent().call_deferred("add_child", xp_crystal)
+		xp_crystal.setup(50.0, global_position + Vector2(randf_range(-40, 40), randf_range(-30, 30)))
+		
 	boss_defeated.emit()
 	GameManager.complete_current_level()
 	

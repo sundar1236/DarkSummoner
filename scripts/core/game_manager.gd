@@ -1,5 +1,7 @@
 extends Node
 
+const RunSkillDatabaseClass = preload("res://scripts/combat/run_skill_database.gd")
+
 # Autoload GameManager for Abyssal Altar
 # Coordinates game state, run progression, floor/level tracking, inventory state, and combat lifecycle.
 
@@ -13,6 +15,9 @@ signal run_shades_changed(new_amount: int)
 signal player_hp_changed(current: float, max_val: float)
 signal potion_count_changed(new_count: int)
 signal inventory_changed()
+signal run_xp_changed(current_xp: float, max_xp: float)
+signal run_level_up(new_level: int)
+signal run_skill_applied(skill_id: String, new_level: int)
 
 # Run State
 var is_in_run: bool = false
@@ -31,6 +36,14 @@ var player_max_hp: float = 100.0
 var potions: int = 3
 const MAX_POTIONS: int = 5
 const BACKPACK_CAPACITY: int = 10
+
+# In-Run Combat Progression & Learned Skills (Phase 5)
+var run_xp: float = 0.0
+var run_xp_to_next: float = 60.0
+var run_player_level: int = 1
+var run_learned_skills: Dictionary = {} # skill_id -> int level (1..3)
+var run_skill_modifiers: Dictionary = {} # Accumulated stat buffs from drafted blessings
+var run_extra_revives: int = 0
 
 # Inventory
 var altar_items: Array[ItemInstance] = []
@@ -120,6 +133,14 @@ func start_new_run(char_id: String, start_floor: int = 1) -> void:
 	run_shades = 0
 	potions = 3
 	
+	# Reset in-run XP & skills
+	run_xp = 0.0
+	run_xp_to_next = 60.0
+	run_player_level = 1
+	run_learned_skills.clear()
+	run_skill_modifiers.clear()
+	run_extra_revives = 0
+	
 	altar_items.clear()
 	backpack_items.clear()
 	
@@ -150,8 +171,9 @@ func recalculate_stats_and_synergies() -> void:
 	var base_hp: float = current_character.base_hp if current_character else 100.0
 	var perm_hp: float = SaveManager.get_permanent_hp_bonus() if SaveManager else 0.0
 	var item_hp: float = cached_synergies.get("total_hp", 0.0)
+	var skill_hp: float = run_skill_modifiers.get("bonus_hp", 0.0)
 	
-	player_max_hp = base_hp + perm_hp + item_hp
+	player_max_hp = base_hp + perm_hp + item_hp + skill_hp
 	player_hp = clampf(player_hp, 0.0, player_max_hp)
 	
 	player_hp_changed.emit(player_hp, player_max_hp)
@@ -167,10 +189,10 @@ func get_player_effective_stats() -> Dictionary:
 	var perm_spd_mult: float = SaveManager.get_permanent_speed_multiplier() if SaveManager else 1.0
 	var perm_crit: float = SaveManager.get_permanent_crit_bonus() if SaveManager else 0.0
 	
-	var item_atk: float = cached_synergies.get("total_atk", 0.0)
-	var item_crit: float = cached_synergies.get("total_crit", 0.0)
-	var item_speed: float = cached_synergies.get("total_speed", 0.0)
-	var item_atk_speed: float = cached_synergies.get("total_atk_speed", 0.0)
+	var item_atk: float = cached_synergies.get("total_atk", 0.0) + run_skill_modifiers.get("bonus_atk", 0.0)
+	var item_crit: float = cached_synergies.get("total_crit", 0.0) + run_skill_modifiers.get("bonus_crit", 0.0)
+	var item_speed: float = cached_synergies.get("total_speed", 0.0) + run_skill_modifiers.get("bonus_speed", 0.0)
+	var item_atk_speed: float = cached_synergies.get("total_atk_speed", 0.0) + run_skill_modifiers.get("bonus_atk_speed", 0.0)
 	
 	var final_atk: float = (base_atk + item_atk) * perm_atk_mult
 	var final_speed: float = (base_speed + item_speed) * perm_spd_mult
@@ -182,8 +204,104 @@ func get_player_effective_stats() -> Dictionary:
 		"speed": final_speed,
 		"crit_chance": final_crit,
 		"attack_rate": final_atk_rate,
+		"burn_on_hit": run_skill_modifiers.get("burn_on_hit", false),
+		"chain_lightning": run_skill_modifiers.get("chain_lightning", false),
+		"life_steal": run_skill_modifiers.get("life_steal", false),
+		"dodge_cdr": run_skill_modifiers.get("dodge_cdr", 0.0),
+		"extra_projectiles": run_skill_modifiers.get("extra_projectiles", 0),
+		"hp_on_kill": run_skill_modifiers.get("hp_on_kill", 0.0),
 		"synergies": cached_synergies
 	}
+
+# In-Run XP & Valkyrie Level Progression
+func add_run_xp(amount: float) -> void:
+	if amount <= 0.0:
+		return
+	run_xp += amount
+	
+	while run_xp >= run_xp_to_next:
+		run_xp -= run_xp_to_next
+		run_player_level += 1
+		# Exponential curve for XP threshold
+		run_xp_to_next = float(int(run_xp_to_next * 1.45))
+		run_level_up.emit(run_player_level)
+		if AudioManager:
+			AudioManager.play_sfx("level_win")
+			
+	run_xp_changed.emit(run_xp, run_xp_to_next)
+
+func apply_run_skill(skill_id: String) -> bool:
+	if skill_id == "valkyrie_boon":
+		# Fallback boon: Full heal + 150 gold
+		heal_player(player_max_hp)
+		add_gold(150)
+		if AudioManager: AudioManager.play_sfx("potion")
+		return true
+	elif skill_id == "abyssal_tithe":
+		# Fallback tithe: +25 permanent shades
+		add_run_shades(25)
+		if AudioManager: AudioManager.play_sfx("item_merge")
+		return true
+		
+	var skill = RunSkillDatabaseClass.get_skill(skill_id)
+	if not skill:
+		return false
+		
+	var cur_lvl: int = run_learned_skills.get(skill_id, 0)
+	var new_lvl: int = mini(cur_lvl + 1, skill.max_level)
+	run_learned_skills[skill_id] = new_lvl
+	
+	# Apply rank stat modifications atomically
+	var rank_info := skill.get_rank_info(new_lvl)
+	var mods: Dictionary = rank_info.get("mods", {})
+	for k in mods:
+		if mods[k] is bool:
+			run_skill_modifiers[k] = mods[k]
+		elif mods[k] is int:
+			run_skill_modifiers[k] = int(mods[k])
+		elif mods[k] is float:
+			run_skill_modifiers[k] = float(mods[k])
+			
+	if mods.has("extra_revive"):
+		run_extra_revives += int(mods["extra_revive"])
+		
+	recalculate_stats_and_synergies()
+	run_skill_applied.emit(skill_id, new_lvl)
+	if AudioManager:
+		AudioManager.play_sfx("item_place")
+	return true
+
+func get_learned_skills_summary() -> Array[Dictionary]:
+	var list: Array[Dictionary] = []
+	for s_id in run_learned_skills:
+		var skill = RunSkillDatabaseClass.get_skill(s_id)
+		if skill:
+			var lvl: int = run_learned_skills[s_id]
+			var rank_info := skill.get_rank_info(lvl)
+			list.append({
+				"id": s_id,
+				"name": skill.name,
+				"level": lvl,
+				"max_level": skill.max_level,
+				"icon_symbol": skill.icon_symbol,
+				"rarity": skill.rarity,
+				"desc": rank_info.get("desc", ""),
+				"stat_arrow": rank_info.get("stat_arrow", "")
+			})
+	return list
+
+func get_available_revives() -> int:
+	return run_extra_revives
+
+func use_revive() -> bool:
+	if run_extra_revives <= 0:
+		return false
+	run_extra_revives -= 1
+	heal_player(player_max_hp * 0.6)
+	is_combat_active = true
+	if AudioManager:
+		AudioManager.play_sfx("potion")
+	return true
 
 func heal_player(amount: float) -> void:
 	if player_hp <= 0:

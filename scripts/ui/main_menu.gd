@@ -22,6 +22,8 @@ signal settings_pressed()
 @export var btn_quit: Button
 @export var lbl_shades_quick: Label
 @export var lbl_version: Label
+@export var hero_pedestal: HeroPedestalView = null
+@export var lbl_active_hero: Label = null
 
 func _ready() -> void:
 	_setup_signals()
@@ -93,6 +95,17 @@ func _refresh_state() -> void:
 		
 	if lbl_version:
 		lbl_version.text = "Abyssal Altar v1.2.0 • Godot 4.3 Mobile"
+		
+	# Refresh Central Hero Display on Home Screen
+	var char_id := "shadow_hunter"
+	var char_name := "Shadow Hunter"
+	if GameManager and GameManager.current_character:
+		char_id = GameManager.current_character.id
+		char_name = GameManager.current_character.name
+	if hero_pedestal:
+		hero_pedestal.character_id = char_id
+	if lbl_active_hero:
+		lbl_active_hero.text = "✦ %s ✦" % char_name.to_upper()
 
 func _update_shades_label() -> void:
 	if lbl_shades_quick and SaveManager:

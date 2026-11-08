@@ -5,6 +5,10 @@ extends Node
 
 func _ready() -> void:
 	print("Starting Abyssal Altar Visual Screen Audit...")
+	get_tree().root.content_scale_size = Vector2i(720, 1280)
+	get_tree().root.content_scale_mode = Window.CONTENT_SCALE_MODE_CANVAS_ITEMS
+	get_tree().root.content_scale_aspect = Window.CONTENT_SCALE_ASPECT_KEEP
+	
 	var main_scene = load("res://scenes/main/main.tscn")
 	if not main_scene:
 		print("ERROR: Failed to load main.tscn")
@@ -119,7 +123,10 @@ func _ready() -> void:
 	if main_node.main_shell:
 		main_node.main_shell._switch_to_tab(1)
 		var hlo = main_node.main_shell.screen_loadout
-		if hlo: hlo._switch_subtab(0)
+		if hlo:
+			hlo._switch_subtab(0)
+			hlo._select_character("storm_reaper")
+			if hlo._toast_label: hlo._toast_label.visible = false
 	for i in range(15): await get_tree().process_frame
 	_save_screen("hero_characters")
 	
@@ -174,12 +181,42 @@ func _ready() -> void:
 	_save_screen("combat_arena_hud")
 	main_node._clear_arena()
 	
+	# 18. Screen: Energy Replenish Modal
+	print("Capturing 18: Energy Replenish Modal...")
+	main_node._show_screen("shell")
+	if main_node.main_shell:
+		main_node.main_shell.open_energy_modal()
+	for i in range(15): await get_tree().process_frame
+	_save_screen("modal_energy_replenish")
+	if main_node.main_shell and main_node.main_shell.modal_energy:
+		main_node.main_shell.modal_energy.visible = false
+		
+	# 19. Screen: Player Profile Modal
+	print("Capturing 19: Player Profile Modal...")
+	if main_node.main_shell:
+		main_node.main_shell.open_profile_modal()
+	for i in range(15): await get_tree().process_frame
+	_save_screen("modal_player_profile")
+	if main_node.main_shell and main_node.main_shell.modal_profile:
+		main_node.main_shell.modal_profile.visible = false
+		
+	# 20. Screen: Blacksmith Forge Modal
+	print("Capturing 20: Blacksmith Forge Modal...")
+	if main_node.main_shell:
+		main_node.main_shell.open_blacksmith_modal()
+	for i in range(15): await get_tree().process_frame
+	_save_screen("modal_blacksmith_forge")
+	if main_node.main_shell and main_node.main_shell.modal_blacksmith:
+		main_node.main_shell.modal_blacksmith.visible = false
+	
 	print("Visual Screen Audit Captures Completed Successfully!")
 	get_tree().quit(0)
 
 func _save_screen(name: String) -> void:
 	var img = get_viewport().get_texture().get_image()
 	if img:
+		if img.get_size() != Vector2i(720, 1280):
+			img.resize(720, 1280, Image.INTERPOLATE_LANCZOS)
 		var path = "res://screenshots/screen_%s.png" % name
 		img.save_png(path)
 		var brain_path = "C:/Users/sundh/.gemini/antigravity/brain/5b758a00-9f80-43f6-953c-dbc11af02afb/screen_%s.png" % name

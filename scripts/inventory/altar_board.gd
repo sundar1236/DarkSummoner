@@ -454,59 +454,64 @@ func _draw_central_hero(center: Vector2, t: float) -> void:
 	var hero_pos := center + Vector2(0, 10.0 + bob)
 	
 	# Hero base shadow
-	draw_circle(center + Vector2(0, 32), 22.0, Color(0.02, 0.04, 0.08, 0.85))
+	draw_circle(center + Vector2(0, 32), 24.0, Color(0.02, 0.04, 0.08, 0.85))
 	
-	# Cape
-	var cape_pts := PackedVector2Array([
-		hero_pos + Vector2(-12, -8),
-		hero_pos + Vector2(12, -8),
-		hero_pos + Vector2(20, 26),
-		hero_pos + Vector2(-20, 26)
-	])
-	draw_colored_polygon(cape_pts, Color(0.09, 0.08, 0.16, 0.95))
-	
-	# Torso & Tunic
-	var tunic_pts := PackedVector2Array([
-		hero_pos + Vector2(-10, -6),
-		hero_pos + Vector2(10, -6),
-		hero_pos + Vector2(14, 16),
-		hero_pos + Vector2(-14, 16)
-	])
-	draw_colored_polygon(tunic_pts, Color(0.18, 0.22, 0.35, 1.0))
-	draw_polyline(tunic_pts, Color(0.85, 0.72, 0.25, 0.85), 1.2)
-	
-	# Gold belt
-	draw_rect(Rect2(hero_pos + Vector2(-9, 7), Vector2(18, 5)), Color(0.9, 0.78, 0.25, 1.0))
-	draw_circle(hero_pos + Vector2(0, 9.5), 2.5, Color(0.95, 0.25, 0.25, 1.0))
-	
-	# Chibi Head
-	var head_pos := hero_pos + Vector2(0, -26)
-	draw_circle(head_pos, 20.0, Color(0.12, 0.1, 0.18, 1.0)) # Cowl/Hair
-	draw_circle(head_pos + Vector2(0, 2), 15.0, Color(0.96, 0.85, 0.78, 1.0)) # Face
-	
-	# Eyes with character-specific glowing iris
 	var char_id := GameManager.current_character.id if GameManager and GameManager.current_character else "shadow_hunter"
 	var iris_col := Color(0.7, 0.3, 1.0, 1.0)
 	if char_id == "storm_reaper": iris_col = Color(0.2, 0.85, 1.0, 1.0)
 	elif char_id == "soul_binder": iris_col = Color(0.25, 0.95, 0.6, 1.0)
 	
-	draw_circle(head_pos + Vector2(-6, 2), 4.0, Color(0.15, 0.15, 0.22, 1.0))
-	draw_circle(head_pos + Vector2(6, 2), 4.0, Color(0.15, 0.15, 0.22, 1.0))
-	draw_circle(head_pos + Vector2(-6, 2), 2.5, iris_col)
-	draw_circle(head_pos + Vector2(6, 2), 2.5, iris_col)
-	draw_circle(head_pos + Vector2(-7, 1), 1.0, Color.WHITE)
-	draw_circle(head_pos + Vector2(5, 1), 1.0, Color.WHITE)
-	
-	# Signature Weapon silhouette (Right hand)
-	var weap_pos := hero_pos + Vector2(22, 2)
-	draw_line(weap_pos + Vector2(0, 20), weap_pos + Vector2(0, -22), Color(0.4, 0.3, 0.2, 1.0), 2.5)
-	var blade_pts := PackedVector2Array([
-		weap_pos + Vector2(0, -22),
-		weap_pos + Vector2(-16, -34),
-		weap_pos + Vector2(-8, -14)
-	])
-	draw_colored_polygon(blade_pts, Color(0.85, 0.9, 1.0, 1.0))
-	draw_polyline(blade_pts, Color(0.85, 0.7, 0.25, 1.0), 1.5)
+	var tex := TextureLoader.get_texture("res://assets/sprites/characters/player_" + char_id + ".png")
+	if tex:
+		var spr_size := Vector2(88, 88)
+		var spr_rect := Rect2(hero_pos - spr_size * 0.5 + Vector2(0, -6), spr_size)
+		draw_texture_rect(tex, spr_rect, false)
+	else:
+		# Cape
+		var cape_pts := PackedVector2Array([
+			hero_pos + Vector2(-12, -8),
+			hero_pos + Vector2(12, -8),
+			hero_pos + Vector2(20, 26),
+			hero_pos + Vector2(-20, 26)
+		])
+		draw_colored_polygon(cape_pts, Color(0.09, 0.08, 0.16, 0.95))
+		
+		# Torso & Tunic
+		var tunic_pts := PackedVector2Array([
+			hero_pos + Vector2(-10, -6),
+			hero_pos + Vector2(10, -6),
+			hero_pos + Vector2(14, 16),
+			hero_pos + Vector2(-14, 16)
+		])
+		draw_colored_polygon(tunic_pts, Color(0.18, 0.22, 0.35, 1.0))
+		draw_polyline(tunic_pts, Color(0.85, 0.72, 0.25, 0.85), 1.2)
+		
+		# Gold belt
+		draw_rect(Rect2(hero_pos + Vector2(-9, 7), Vector2(18, 5)), Color(0.9, 0.78, 0.25, 1.0))
+		draw_circle(hero_pos + Vector2(0, 9.5), 2.5, Color(0.95, 0.25, 0.25, 1.0))
+		
+		# Chibi Head
+		var head_pos := hero_pos + Vector2(0, -26)
+		draw_circle(head_pos, 20.0, Color(0.12, 0.1, 0.18, 1.0)) # Cowl/Hair
+		draw_circle(head_pos + Vector2(0, 2), 15.0, Color(0.96, 0.85, 0.78, 1.0)) # Face
+		
+		draw_circle(head_pos + Vector2(-6, 2), 4.0, Color(0.15, 0.15, 0.22, 1.0))
+		draw_circle(head_pos + Vector2(6, 2), 4.0, Color(0.15, 0.15, 0.22, 1.0))
+		draw_circle(head_pos + Vector2(-6, 2), 2.5, iris_col)
+		draw_circle(head_pos + Vector2(6, 2), 2.5, iris_col)
+		draw_circle(head_pos + Vector2(-7, 1), 1.0, Color.WHITE)
+		draw_circle(head_pos + Vector2(5, 1), 1.0, Color.WHITE)
+		
+		# Signature Weapon silhouette (Right hand)
+		var weap_pos := hero_pos + Vector2(22, 2)
+		draw_line(weap_pos + Vector2(0, 20), weap_pos + Vector2(0, -22), Color(0.4, 0.3, 0.2, 1.0), 2.5)
+		var blade_pts := PackedVector2Array([
+			weap_pos + Vector2(0, -22),
+			weap_pos + Vector2(-16, -34),
+			weap_pos + Vector2(-8, -14)
+		])
+		draw_colored_polygon(blade_pts, Color(0.85, 0.9, 1.0, 1.0))
+		draw_polyline(blade_pts, Color(0.85, 0.7, 0.25, 1.0), 1.5)
 	
 	# Floating Elemental Spirit Companion
 	var comp_pos := hero_pos + Vector2(-36, -34 + sin(t * 3.8) * 5.0)

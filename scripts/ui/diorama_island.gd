@@ -41,16 +41,16 @@ func _draw() -> void:
 	draw_line(center + Vector2(-120, 60), center + Vector2(0, 80), Color(0.18, 0.22, 0.3, 0.8), 2.0)
 	draw_line(center + Vector2(0, 80), center + Vector2(120, 55), Color(0.18, 0.22, 0.3, 0.8), 2.0)
 
-	# 3. Island Top Plateau (Lush Mossy Isometric Surface)
+	# 3. Island Top Plateau (Ancient Abyssal Dark Stone Surface)
 	var top_pts := PackedVector2Array([
 		center + Vector2(0, -75),
 		center + Vector2(195, 10),
 		center + Vector2(0, 55),
 		center + Vector2(-190, 10)
 	])
-	# Gradient green-slate moss
-	draw_colored_polygon(top_pts, Color(0.18, 0.35, 0.26, 1.0))
-	draw_polyline(top_pts, Color(0.35, 0.62, 0.42, 0.9), 3.0)
+	# Deep dark-slate obsidian plateau with subtle dark rune-stone rim
+	draw_colored_polygon(top_pts, Color(0.11, 0.14, 0.21, 1.0))
+	draw_polyline(top_pts, Color(0.24, 0.32, 0.44, 0.8), 2.5)
 	
 	# Inner path / clearing
 	var path_pts := PackedVector2Array([

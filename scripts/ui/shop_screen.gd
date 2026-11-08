@@ -34,6 +34,13 @@ var _toast_label: Label = null
 func _ready() -> void:
 	_setup_buttons()
 	_setup_toast_label()
+	if SaveManager:
+		if SaveManager.chapter_pack_purchased and btn_chapter_pack:
+			btn_chapter_pack.text = "PURCHASED"
+			btn_chapter_pack.disabled = true
+		if SaveManager.daily_free_energy_claimed and btn_item5:
+			btn_item5.text = "CLAIMED"
+			btn_item5.disabled = true
 
 func _setup_toast_label() -> void:
 	_toast_label = Label.new()
@@ -97,11 +104,22 @@ func _setup_buttons() -> void:
 			)
 
 func _on_buy_chapter_pack() -> void:
-	var shell := get_parent().get_parent() as MainShellUI
-	if shell and shell.top_bar:
-		shell.top_bar.add_gems(500)
-		shell.top_bar.add_energy(50)
-		shell.top_bar.add_gold(1500)
+	if SaveManager:
+		if SaveManager.chapter_pack_purchased:
+			show_toast("Chapter 1 Pack already purchased!")
+			return
+		SaveManager.add_gems(500)
+		SaveManager.add_energy(50)
+		SaveManager.add_gold(1500)
+		SaveManager.chapter_pack_purchased = true
+		SaveManager.save_profile()
+	else:
+		var shell = get_parent().get_parent() if get_parent() else null
+		if shell and "top_bar" in shell and shell.top_bar:
+			shell.top_bar.add_gems(500)
+			shell.top_bar.add_energy(50)
+			shell.top_bar.add_gold(1500)
+			
 	if AudioManager: AudioManager.play_sfx("upgrade")
 	if btn_chapter_pack:
 		btn_chapter_pack.text = "PURCHASED"
@@ -110,15 +128,18 @@ func _on_buy_chapter_pack() -> void:
 	item_purchased.emit("chapter_pack_1")
 
 func _buy_daily_item(btn: Button, item_id: String, cost: int, is_gems: bool, success_msg: String) -> void:
-	var shell := get_parent().get_parent() as MainShellUI
 	var success := false
-	if shell and shell.top_bar:
+	if SaveManager:
 		if is_gems:
-			success = shell.top_bar.spend_gems(cost)
+			success = SaveManager.spend_gems(cost)
 		else:
-			success = shell.top_bar.spend_gold(cost)
+			success = SaveManager.spend_gold(cost)
 	else:
-		success = true # Offline fallback
+		var shell = get_parent().get_parent() if get_parent() else null
+		if shell and "top_bar" in shell and shell.top_bar:
+			success = shell.top_bar.spend_gems(cost) if is_gems else shell.top_bar.spend_gold(cost)
+		else:
+			success = true # Offline fallback
 		
 	if success:
 		if AudioManager: AudioManager.play_sfx("shop_buy")
@@ -128,12 +149,21 @@ func _buy_daily_item(btn: Button, item_id: String, cost: int, is_gems: bool, suc
 		item_purchased.emit(item_id)
 	else:
 		if AudioManager: AudioManager.play_sfx("ui_error")
-		show_toast("Not enough %s!" % ("Gems" if is_gems else "Gold"))
+		show_toast("Not enough %s! (Need %d)" % ["Gems" if is_gems else "Gold", cost])
 
 func _claim_free_energy(btn: Button) -> void:
-	var shell := get_parent().get_parent() as MainShellUI
-	if shell and shell.top_bar:
-		shell.top_bar.add_energy(20)
+	if SaveManager:
+		if SaveManager.daily_free_energy_claimed:
+			show_toast("Free energy already claimed today!")
+			return
+		SaveManager.add_energy(20)
+		SaveManager.daily_free_energy_claimed = true
+		SaveManager.save_profile()
+	else:
+		var shell = get_parent().get_parent() if get_parent() else null
+		if shell and "top_bar" in shell and shell.top_bar:
+			shell.top_bar.add_energy(20)
+			
 	if AudioManager: AudioManager.play_sfx("shop_buy")
 	btn.text = "CLAIMED"
 	btn.disabled = true

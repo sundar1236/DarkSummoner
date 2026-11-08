@@ -1,12 +1,63 @@
-[gd_scene load_steps=6 format=3 uid="uid://c6mainmenu01"]
+[gd_scene load_steps=10 format=3 uid="uid://c6mainmenu01"]
 
 [ext_resource type="Script" path="res://scripts/ui/main_menu.gd" id="1_mnu"]
 [ext_resource type="Theme" path="res://assets/themes/dark_fantasy_theme.tres" id="2_thm"]
 [ext_resource type="Texture2D" path="res://assets/art/backgrounds/tower_altar_bg.png" id="3_bg"]
 [ext_resource type="Texture2D" path="res://assets/art/ui/abyssal_altar_logo.png" id="4_logo"]
 [ext_resource type="Texture2D" path="res://assets/art/ui/icon_shade.png" id="5_shd"]
+[ext_resource type="Script" path="res://scripts/ui/hero_pedestal_view.gd" id="6_ped"]
 
-[node name="MainMenu" type="Control" node_paths=PackedStringArray("logo_rect", "btn_continue", "btn_play", "btn_characters", "btn_sanctuary", "btn_prologue", "btn_settings", "btn_quit", "lbl_shades_quick", "lbl_version")]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_cta"]
+bg_color = Color(0.22, 0.15, 0.32, 0.98)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(1, 0.88, 0.45, 1)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+shadow_color = Color(0.7, 0.35, 1, 0.5)
+shadow_size = 8
+shadow_offset = Vector2(0, 4)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_profile"]
+content_margin_left = 14.0
+content_margin_top = 6.0
+content_margin_right = 14.0
+content_margin_bottom = 6.0
+bg_color = Color(0.08, 0.06, 0.12, 0.9)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.75, 0.58, 0.25, 0.85)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_herobadge"]
+content_margin_left = 16.0
+content_margin_top = 6.0
+content_margin_right = 16.0
+content_margin_bottom = 6.0
+bg_color = Color(0.12, 0.08, 0.18, 0.92)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.85, 0.72, 0.35, 0.9)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+shadow_color = Color(0, 0, 0, 0.6)
+shadow_size = 4
+shadow_offset = Vector2(0, 2)
+
+[node name="MainMenu" type="Control" node_paths=PackedStringArray("logo_rect", "btn_continue", "btn_play", "btn_characters", "btn_sanctuary", "btn_prologue", "btn_settings", "btn_quit", "lbl_shades_quick", "lbl_version", "hero_pedestal", "lbl_active_hero")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -18,13 +69,15 @@ script = ExtResource("1_mnu")
 logo_rect = NodePath("MainLayout/Header/Logo")
 btn_continue = NodePath("MainLayout/ButtonsVBox/BtnContinue")
 btn_play = NodePath("MainLayout/ButtonsVBox/BtnPlay")
-btn_characters = NodePath("MainLayout/ButtonsVBox/BtnCharacters")
-btn_sanctuary = NodePath("MainLayout/ButtonsVBox/BtnSanctuary")
-btn_prologue = NodePath("MainLayout/ButtonsVBox/BtnPrologue")
-btn_settings = NodePath("MainLayout/ButtonsVBox/BtnSettings")
+btn_characters = NodePath("MainLayout/ButtonsVBox/QuickNavRow1/BtnCharacters")
+btn_sanctuary = NodePath("MainLayout/ButtonsVBox/QuickNavRow1/BtnSanctuary")
+btn_prologue = NodePath("MainLayout/ButtonsVBox/QuickNavRow2/BtnPrologue")
+btn_settings = NodePath("MainLayout/ButtonsVBox/QuickNavRow2/BtnSettings")
 btn_quit = NodePath("MainLayout/ButtonsVBox/BtnQuit")
 lbl_shades_quick = NodePath("MainLayout/Header/TopBar/ShadesBadge/LblShades")
 lbl_version = NodePath("MainLayout/Footer/LblVersion")
+hero_pedestal = NodePath("MainLayout/HeroShowcase/HeroPedestal")
+lbl_active_hero = NodePath("MainLayout/HeroShowcase/LblActiveHero")
 
 [node name="Bg" type="TextureRect" parent="."]
 layout_mode = 1
@@ -45,11 +98,11 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-color = Color(0.05, 0.03, 0.08, 0.5)
+color = Color(0.04, 0.02, 0.07, 0.55)
 
 [node name="Sparks" type="CPUParticles2D" parent="."]
 position = Vector2(360, 1260)
-amount = 35
+amount = 40
 lifetime = 4.5
 emission_shape = 3
 emission_rect_extents = Vector2(340, 10)
@@ -58,37 +111,65 @@ spread = 30.0
 gravity = Vector2(0, -12)
 initial_velocity_min = 40.0
 initial_velocity_max = 95.0
-scale_amount_min = 2.0
-scale_amount_max = 4.5
-color = Color(0.78, 0.4, 0.95, 0.55)
+scale_amount_min = 2.5
+scale_amount_max = 5.0
+color = Color(0.8, 0.45, 1, 0.6)
 
 [node name="MainLayout" type="VBoxContainer" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 36.0
-offset_top = 40.0
-offset_right = -36.0
-offset_bottom = -30.0
+offset_left = 32.0
+offset_top = 36.0
+offset_right = -32.0
+offset_bottom = -24.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/separation = 16
+theme_override_constants/separation = 12
 
 [node name="Header" type="VBoxContainer" parent="MainLayout"]
 layout_mode = 2
-theme_override_constants/separation = 10
+theme_override_constants/separation = 6
 
 [node name="TopBar" type="HBoxContainer" parent="MainLayout/Header"]
 layout_mode = 2
-alignment = 2
+theme_override_constants/separation = 12
 
-[node name="ShadesBadge" type="HBoxContainer" parent="MainLayout/Header/TopBar"]
+[node name="ProfileBadge" type="PanelContainer" parent="MainLayout/Header/TopBar"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_profile")
+
+[node name="HBox" type="HBoxContainer" parent="MainLayout/Header/TopBar/ProfileBadge"]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="Icon" type="TextureRect" parent="MainLayout/Header/TopBar/ShadesBadge"]
-custom_minimum_size = Vector2(24, 24)
+[node name="Avatar" type="Label" parent="MainLayout/Header/TopBar/ProfileBadge/HBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "🗡️"
+
+[node name="PlayerName" type="Label" parent="MainLayout/Header/TopBar/ProfileBadge/HBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.9, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
+theme_override_font_sizes/font_size = 18
+text = "Hunter Raven • Lv. 5"
+
+[node name="Spacer" type="Control" parent="MainLayout/Header/TopBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ShadesBadge" type="PanelContainer" parent="MainLayout/Header/TopBar"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_profile")
+
+[node name="HBox" type="HBoxContainer" parent="MainLayout/Header/TopBar/ShadesBadge"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Icon" type="TextureRect" parent="MainLayout/Header/TopBar/ShadesBadge/HBox"]
+custom_minimum_size = Vector2(28, 28)
 layout_mode = 2
 texture = ExtResource("5_shd")
 expand_mode = 1
@@ -96,12 +177,13 @@ stretch_mode = 5
 
 [node name="LblShades" type="Label" parent="MainLayout/Header/TopBar/ShadesBadge"]
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.85, 0.4, 1)
-theme_override_font_sizes/font_size = 15
-text = "◆ 0 Shades Collected"
+theme_override_colors/font_color = Color(1, 0.88, 0.42, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
+theme_override_font_sizes/font_size = 19
+text = "◆ 0 Shades"
 
 [node name="Logo" type="TextureRect" parent="MainLayout/Header"]
-custom_minimum_size = Vector2(0, 190)
+custom_minimum_size = Vector2(0, 145)
 layout_mode = 2
 texture = ExtResource("4_logo")
 expand_mode = 1
@@ -109,70 +191,105 @@ stretch_mode = 5
 
 [node name="Subtitle" type="Label" parent="MainLayout/Header"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.85, 0.75, 0.95, 1)
+theme_override_colors/font_color = Color(0.88, 0.78, 1, 1)
 theme_override_colors/font_shadow_color = Color(0.25, 0.05, 0.4, 0.9)
 theme_override_constants/shadow_offset_y = 2
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 18
 text = "DARK-FANTASY ACTION ROGUELIKE"
 horizontal_alignment = 1
 
-[node name="Spacer" type="Control" parent="MainLayout"]
+[node name="HeroShowcase" type="VBoxContainer" parent="MainLayout"]
 layout_mode = 2
 size_flags_vertical = 3
+alignment = 1
+theme_override_constants/separation = 6
+
+[node name="HeroPedestal" type="Control" parent="MainLayout/HeroShowcase"]
+custom_minimum_size = Vector2(240, 180)
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 3
+script = ExtResource("6_ped")
+
+[node name="LblActiveHero" type="Label" parent="MainLayout/HeroShowcase"]
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_colors/font_color = Color(1, 0.86, 0.35, 1)
+theme_override_colors/font_shadow_color = Color(0.3, 0.1, 0.5, 0.9)
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 20
+text = "✦ SHADOW HUNTER ✦"
+horizontal_alignment = 1
 
 [node name="ButtonsVBox" type="VBoxContainer" parent="MainLayout"]
 layout_mode = 2
-theme_override_constants/separation = 14
+theme_override_constants/separation = 12
 
 [node name="BtnContinue" type="Button" parent="MainLayout/ButtonsVBox"]
 visible = false
-custom_minimum_size = Vector2(0, 58)
+custom_minimum_size = Vector2(0, 70)
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.9, 0.4, 1)
-theme_override_font_sizes/font_size = 19
-text = "RESUME RUN"
+theme_override_colors/font_color = Color(1, 0.92, 0.45, 1)
+theme_override_font_sizes/font_size = 24
+theme_override_styles/normal = SubResource("StyleBoxFlat_cta")
+theme_override_styles/hover = SubResource("StyleBoxFlat_cta")
+text = "⚔️ RESUME RUN"
 
 [node name="BtnPlay" type="Button" parent="MainLayout/ButtonsVBox"]
-custom_minimum_size = Vector2(0, 58)
+custom_minimum_size = Vector2(0, 72)
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.92, 0.6, 1)
-theme_override_font_sizes/font_size = 20
-text = "ENTER THE TOWER"
+theme_override_colors/font_color = Color(1, 0.94, 0.55, 1)
+theme_override_font_sizes/font_size = 26
+theme_override_styles/normal = SubResource("StyleBoxFlat_cta")
+theme_override_styles/hover = SubResource("StyleBoxFlat_cta")
+text = "⚔️ ENTER THE TOWER"
 
-[node name="BtnCharacters" type="Button" parent="MainLayout/ButtonsVBox"]
-custom_minimum_size = Vector2(0, 52)
+[node name="QuickNavRow1" type="HBoxContainer" parent="MainLayout/ButtonsVBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.92, 0.88, 0.98, 1)
-theme_override_font_sizes/font_size = 17
-text = "CHAMPIONS OF THE DEPTHS"
+theme_override_constants/separation = 12
 
-[node name="BtnSanctuary" type="Button" parent="MainLayout/ButtonsVBox"]
+[node name="BtnCharacters" type="Button" parent="MainLayout/ButtonsVBox/QuickNavRow1"]
+custom_minimum_size = Vector2(0, 60)
 layout_mode = 2
-custom_minimum_size = Vector2(0, 52)
-theme_override_colors/font_color = Color(0.92, 0.88, 0.98, 1)
-theme_override_font_sizes/font_size = 17
-text = "SANCTUARY & UPGRADES"
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.96, 0.92, 1, 1)
+theme_override_font_sizes/font_size = 21
+text = "👑 CHAMPIONS"
 
-[node name="BtnPrologue" type="Button" parent="MainLayout/ButtonsVBox"]
+[node name="BtnSanctuary" type="Button" parent="MainLayout/ButtonsVBox/QuickNavRow1"]
+custom_minimum_size = Vector2(0, 60)
 layout_mode = 2
-custom_minimum_size = Vector2(0, 48)
-theme_override_colors/font_color = Color(0.85, 0.75, 1, 1)
-theme_override_font_sizes/font_size = 16
-text = "PROLOGUE & LORE"
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.96, 0.92, 1, 1)
+theme_override_font_sizes/font_size = 21
+text = "🏛️ SANCTUARY"
 
-[node name="BtnSettings" type="Button" parent="MainLayout/ButtonsVBox"]
-custom_minimum_size = Vector2(0, 48)
+[node name="QuickNavRow2" type="HBoxContainer" parent="MainLayout/ButtonsVBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.85, 0.82, 0.92, 1)
-theme_override_font_sizes/font_size = 16
-text = "AUDIO & SETTINGS"
+theme_override_constants/separation = 12
+
+[node name="BtnPrologue" type="Button" parent="MainLayout/ButtonsVBox/QuickNavRow2"]
+custom_minimum_size = Vector2(0, 54)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.9, 0.85, 1, 1)
+theme_override_font_sizes/font_size = 19
+text = "📜 PROLOGUE"
+
+[node name="BtnSettings" type="Button" parent="MainLayout/ButtonsVBox/QuickNavRow2"]
+custom_minimum_size = Vector2(0, 54)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.9, 0.85, 1, 1)
+theme_override_font_sizes/font_size = 19
+text = "⚙️ SETTINGS"
 
 [node name="BtnQuit" type="Button" parent="MainLayout/ButtonsVBox"]
-custom_minimum_size = Vector2(0, 44)
+custom_minimum_size = Vector2(0, 48)
 layout_mode = 2
-theme_override_colors/font_color = Color(0.7, 0.68, 0.78, 1)
-theme_override_font_sizes/font_size = 15
-text = "QUIT"
+theme_override_colors/font_color = Color(0.75, 0.72, 0.82, 1)
+theme_override_font_sizes/font_size = 18
+text = "🚪 QUIT GAME"
 
 [node name="Footer" type="VBoxContainer" parent="MainLayout"]
 layout_mode = 2
@@ -180,7 +297,7 @@ alignment = 1
 
 [node name="LblVersion" type="Label" parent="MainLayout/Footer"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.55, 0.5, 0.65, 0.85)
-theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(0.65, 0.6, 0.75, 0.9)
+theme_override_font_sizes/font_size = 15
 text = "Abyssal Altar v1.2.0 • Godot 4.3 Mobile"
 horizontal_alignment = 1

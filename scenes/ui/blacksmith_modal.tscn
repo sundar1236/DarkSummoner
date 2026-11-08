@@ -1,0 +1,126 @@
+[gd_scene load_steps=5 format=3 uid="uid://c6blacksmithmodal01"]
+
+[ext_resource type="Script" path="res://scripts/ui/blacksmith_modal.gd" id="1_scr"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dim"]
+bg_color = Color(0.02, 0.03, 0.06, 0.82)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_card"]
+bg_color = Color(0.08, 0.1, 0.16, 0.98)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 3
+border_color = Color(0.85, 0.72, 0.25, 0.95)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+shadow_color = Color(0, 0, 0, 0.7)
+shadow_size = 12
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn"]
+bg_color = Color(0.18, 0.22, 0.35, 0.95)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 2
+border_color = Color(0.85, 0.7, 0.25, 0.9)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
+[node name="BlacksmithModal" type="Control" node_paths=PackedStringArray("btn_upgrade_weapon", "btn_upgrade_armor", "btn_upgrade_ring", "btn_close", "lbl_gold_balance")]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_scr")
+btn_upgrade_weapon = NodePath("CenterContainer/Card/VBox/BtnWeapon")
+btn_upgrade_armor = NodePath("CenterContainer/Card/VBox/BtnArmor")
+btn_upgrade_ring = NodePath("CenterContainer/Card/VBox/BtnRing")
+btn_close = NodePath("CenterContainer/Card/VBox/BtnClose")
+lbl_gold_balance = NodePath("CenterContainer/Card/VBox/GoldBalance")
+
+[node name="Backdrop" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_dim")
+
+[node name="CenterContainer" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Card" type="PanelContainer" parent="CenterContainer"]
+custom_minimum_size = Vector2(500, 500)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_card")
+
+[node name="VBox" type="VBoxContainer" parent="CenterContainer/Card"]
+layout_mode = 2
+theme_override_constants/separation = 16
+alignment = 1
+
+[node name="Title" type="Label" parent="CenterContainer/Card/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.88, 0.35, 1)
+theme_override_font_sizes/font_size = 28
+text = "🔨 THE ABYSSAL FORGE 🔨"
+horizontal_alignment = 1
+
+[node name="GoldBalance" type="Label" parent="CenterContainer/Card/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.9, 0.45, 1)
+theme_override_font_sizes/font_size = 22
+text = "Available Gold: 🪙 5,000"
+horizontal_alignment = 1
+
+[node name="Separator" type="HSeparator" parent="CenterContainer/Card/VBox"]
+layout_mode = 2
+
+[node name="BtnWeapon" type="Button" parent="CenterContainer/Card/VBox"]
+custom_minimum_size = Vector2(440, 58)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_colors/font_color = Color(1, 0.92, 0.5, 1)
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn")
+text = "Forge Weapon (Lv.60 -> 61) [🪙 300]"
+
+[node name="BtnArmor" type="Button" parent="CenterContainer/Card/VBox"]
+custom_minimum_size = Vector2(440, 58)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_colors/font_color = Color(1, 0.92, 0.5, 1)
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn")
+text = "Reinforce Armor (Lv.60 -> 61) [🪙 250]"
+
+[node name="BtnRing" type="Button" parent="CenterContainer/Card/VBox"]
+custom_minimum_size = Vector2(440, 58)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_colors/font_color = Color(1, 0.92, 0.5, 1)
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn")
+text = "Infuse Ring (Lv.58 -> 59) [🪙 200]"
+
+[node name="BtnClose" type="Button" parent="CenterContainer/Card/VBox"]
+custom_minimum_size = Vector2(240, 52)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_colors/font_color = Color(0.75, 0.8, 0.9, 1)
+theme_override_font_sizes/font_size = 20
+text = "CLOSE"

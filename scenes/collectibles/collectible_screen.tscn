@@ -69,26 +69,26 @@ grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_bg")
 
 [node name="SubNav" type="Control" parent="."]
-custom_minimum_size = Vector2(0, 56)
+custom_minimum_size = Vector2(0, 58)
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
-offset_top = 84.0
-offset_bottom = 140.0
+offset_top = 10.0
+offset_bottom = 68.0
 grow_horizontal = 2
 
 [node name="PillToggle" type="PanelContainer" parent="SubNav"]
-custom_minimum_size = Vector2(280, 36)
+custom_minimum_size = Vector2(340, 46)
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -140.0
-offset_top = -18.0
-offset_right = 140.0
-offset_bottom = 18.0
+offset_left = -170.0
+offset_top = -23.0
+offset_right = 170.0
+offset_bottom = 23.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_subnav")
@@ -101,20 +101,21 @@ alignment = 1
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(1, 0.88, 0.35, 1)
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 20
 theme_override_styles/normal = SubResource("StyleBoxEmpty_pillbtn")
 text = "Talent Cards"
 
 [node name="Divider" type="Label" parent="SubNav/PillToggle/HBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.35, 0.45, 0.6, 1)
+theme_override_font_sizes/font_size = 18
 text = "|"
 
 [node name="BtnArtifact" type="Button" parent="SubNav/PillToggle/HBox"]
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.65, 0.7, 0.8, 0.8)
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 20
 theme_override_styles/normal = SubResource("StyleBoxEmpty_pillbtn")
 text = "Artifact"
 
@@ -124,9 +125,9 @@ anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 16.0
-offset_top = 148.0
+offset_top = 74.0
 offset_right = -16.0
-offset_bottom = -96.0
+offset_bottom = -12.0
 grow_horizontal = 2
 grow_vertical = 2
 
@@ -138,7 +139,7 @@ theme_override_constants/v_separation = 14
 columns = 4
 
 [node name="Card1" type="PanelContainer" parent="ScrollContainer/CardGrid"]
-custom_minimum_size = Vector2(158, 215)
+custom_minimum_size = Vector2(162, 226)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_card_gold")
 
@@ -149,25 +150,25 @@ alignment = 1
 [node name="Stars" type="Label" parent="ScrollContainer/CardGrid/Card1/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 19
 text = "★★★★★"
 horizontal_alignment = 1
 
 [node name="Icon" type="Label" parent="ScrollContainer/CardGrid/Card1/VBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 56
+theme_override_font_sizes/font_size = 62
 text = "👑"
 horizontal_alignment = 1
 
 [node name="Title" type="Label" parent="ScrollContainer/CardGrid/Card1/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.9, 0.5, 1)
-theme_override_font_sizes/font_size = 15
+theme_override_font_sizes/font_size = 20
 text = "Glory"
 horizontal_alignment = 1
 
 [node name="Card2" type="PanelContainer" parent="ScrollContainer/CardGrid"]
-custom_minimum_size = Vector2(158, 215)
+custom_minimum_size = Vector2(162, 226)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_card_gold")
 
@@ -178,25 +179,25 @@ alignment = 1
 [node name="Stars" type="Label" parent="ScrollContainer/CardGrid/Card2/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 19
 text = "★★★★☆"
 horizontal_alignment = 1
 
 [node name="Icon" type="Label" parent="ScrollContainer/CardGrid/Card2/VBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 56
+theme_override_font_sizes/font_size = 62
 text = "📜"
 horizontal_alignment = 1
 
 [node name="Title" type="Label" parent="ScrollContainer/CardGrid/Card2/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.9, 0.5, 1)
-theme_override_font_sizes/font_size = 15
+theme_override_font_sizes/font_size = 20
 text = "Tactics"
 horizontal_alignment = 1
 
 [node name="Card3" type="PanelContainer" parent="ScrollContainer/CardGrid"]
-custom_minimum_size = Vector2(158, 215)
+custom_minimum_size = Vector2(162, 226)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_card_purple")
 
@@ -207,25 +208,25 @@ alignment = 1
 [node name="Stars" type="Label" parent="ScrollContainer/CardGrid/Card3/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 19
 text = "★★★☆☆"
 horizontal_alignment = 1
 
 [node name="Icon" type="Label" parent="ScrollContainer/CardGrid/Card3/VBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 56
+theme_override_font_sizes/font_size = 62
 text = "💨"
 horizontal_alignment = 1
 
 [node name="Title" type="Label" parent="ScrollContainer/CardGrid/Card3/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.9, 0.7, 1, 1)
-theme_override_font_sizes/font_size = 15
+theme_override_font_sizes/font_size = 20
 text = "Swift Wind"
 horizontal_alignment = 1
 
 [node name="Card4" type="PanelContainer" parent="ScrollContainer/CardGrid"]
-custom_minimum_size = Vector2(158, 215)
+custom_minimum_size = Vector2(162, 226)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_card_purple")
 
@@ -236,25 +237,25 @@ alignment = 1
 [node name="Stars" type="Label" parent="ScrollContainer/CardGrid/Card4/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 19
 text = "★★★★☆"
 horizontal_alignment = 1
 
 [node name="Icon" type="Label" parent="ScrollContainer/CardGrid/Card4/VBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 56
+theme_override_font_sizes/font_size = 62
 text = "💥"
 horizontal_alignment = 1
 
 [node name="Title" type="Label" parent="ScrollContainer/CardGrid/Card4/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.9, 0.7, 1, 1)
-theme_override_font_sizes/font_size = 15
+theme_override_font_sizes/font_size = 20
 text = "Super CRIT"
 horizontal_alignment = 1
 
 [node name="Card5" type="PanelContainer" parent="ScrollContainer/CardGrid"]
-custom_minimum_size = Vector2(158, 215)
+custom_minimum_size = Vector2(162, 226)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_card_purple")
 
@@ -265,25 +266,25 @@ alignment = 1
 [node name="Stars" type="Label" parent="ScrollContainer/CardGrid/Card5/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 19
 text = "★★★☆☆"
 horizontal_alignment = 1
 
 [node name="Icon" type="Label" parent="ScrollContainer/CardGrid/Card5/VBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 56
+theme_override_font_sizes/font_size = 62
 text = "🛡"
 horizontal_alignment = 1
 
 [node name="Title" type="Label" parent="ScrollContainer/CardGrid/Card5/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.9, 0.7, 1, 1)
-theme_override_font_sizes/font_size = 15
+theme_override_font_sizes/font_size = 20
 text = "Iron Will"
 horizontal_alignment = 1
 
 [node name="Card6" type="PanelContainer" parent="ScrollContainer/CardGrid"]
-custom_minimum_size = Vector2(158, 215)
+custom_minimum_size = Vector2(162, 226)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_card_purple")
 
@@ -294,25 +295,25 @@ alignment = 1
 [node name="Stars" type="Label" parent="ScrollContainer/CardGrid/Card6/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 19
 text = "★★★☆☆"
 horizontal_alignment = 1
 
 [node name="Icon" type="Label" parent="ScrollContainer/CardGrid/Card6/VBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 56
+theme_override_font_sizes/font_size = 62
 text = "🩸"
 horizontal_alignment = 1
 
 [node name="Title" type="Label" parent="ScrollContainer/CardGrid/Card6/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.9, 0.7, 1, 1)
-theme_override_font_sizes/font_size = 15
+theme_override_font_sizes/font_size = 20
 text = "Vampiric"
 horizontal_alignment = 1
 
 [node name="Card7Locked" type="PanelContainer" parent="ScrollContainer/CardGrid"]
-custom_minimum_size = Vector2(158, 215)
+custom_minimum_size = Vector2(162, 226)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_card_gold")
 
@@ -323,20 +324,20 @@ alignment = 1
 [node name="Stars" type="Label" parent="ScrollContainer/CardGrid/Card7Locked/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.6, 0.6, 0.6, 1)
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 19
 text = "★★★★★"
 horizontal_alignment = 1
 
 [node name="Icon" type="Label" parent="ScrollContainer/CardGrid/Card7Locked/VBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 56
+theme_override_font_sizes/font_size = 62
 text = "⚡"
 horizontal_alignment = 1
 
 [node name="Title" type="Label" parent="ScrollContainer/CardGrid/Card7Locked/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 1)
-theme_override_font_sizes/font_size = 15
+theme_override_font_sizes/font_size = 20
 text = "Storm Call"
 horizontal_alignment = 1
 
@@ -358,13 +359,13 @@ offset_bottom = 20.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_colors/font_color = Color(1, 0.85, 0.4, 1)
-theme_override_font_sizes/font_size = 11
+theme_override_font_sizes/font_size = 16
 text = "🔒 40\nDraw after Lv.40"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="Card8Locked" type="PanelContainer" parent="ScrollContainer/CardGrid"]
-custom_minimum_size = Vector2(158, 215)
+custom_minimum_size = Vector2(162, 226)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_card_gold")
 
@@ -375,20 +376,20 @@ alignment = 1
 [node name="Stars" type="Label" parent="ScrollContainer/CardGrid/Card8Locked/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.6, 0.6, 0.6, 1)
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 19
 text = "★★★★★"
 horizontal_alignment = 1
 
 [node name="Icon" type="Label" parent="ScrollContainer/CardGrid/Card8Locked/VBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 56
+theme_override_font_sizes/font_size = 62
 text = "🔥"
 horizontal_alignment = 1
 
 [node name="Title" type="Label" parent="ScrollContainer/CardGrid/Card8Locked/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 1)
-theme_override_font_sizes/font_size = 15
+theme_override_font_sizes/font_size = 20
 text = "Flame Burst"
 horizontal_alignment = 1
 
@@ -410,7 +411,7 @@ offset_bottom = 20.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_colors/font_color = Color(1, 0.85, 0.4, 1)
-theme_override_font_sizes/font_size = 11
+theme_override_font_sizes/font_size = 16
 text = "🔒 40\nDraw after Lv.40"
 horizontal_alignment = 1
 vertical_alignment = 1

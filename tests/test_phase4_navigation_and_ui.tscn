@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://c6testphase4nav01"]
+
+[ext_resource type="Script" path="res://tests/test_phase4_navigation_and_ui.gd" id="1_test"]
+
+[node name="TestPhase4Nav" type="Node"]
+script = ExtResource("1_test")

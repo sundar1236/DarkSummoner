@@ -94,7 +94,7 @@ max_value = 1.0
 show_percentage = false
 
 [node name="BtnSkip" type="Button" parent="UILayer/TopBar"]
-custom_minimum_size = Vector2(100, 38)
+custom_minimum_size = Vector2(100, 44)
 layout_mode = 1
 anchors_preset = 1
 anchor_left = 1.0
@@ -102,9 +102,9 @@ anchor_right = 1.0
 offset_left = -120.0
 offset_top = 18.0
 offset_right = -20.0
-offset_bottom = 56.0
+offset_bottom = 62.0
 grow_horizontal = 0
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 16
 text = "SKIP >>"
 
 [node name="BottomVBox" type="VBoxContainer" parent="UILayer"]
@@ -125,14 +125,14 @@ theme_override_constants/separation = 12
 [node name="ActTitle" type="Label" parent="UILayer/BottomVBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.85, 0.35, 1)
-theme_override_font_sizes/font_size = 19
+theme_override_font_sizes/font_size = 22
 text = "ACT I : THE BLACK TOWER"
 horizontal_alignment = 1
 
 [node name="ActSubtitle" type="Label" parent="UILayer/BottomVBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.78, 0.55, 1, 1)
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 16
 text = "The Cursed Spire of Aethelgard"
 horizontal_alignment = 1
 
@@ -145,7 +145,7 @@ mouse_filter = 2
 layout_mode = 2
 size_flags_vertical = 1
 theme_override_colors/font_color = Color(0.9, 0.9, 0.95, 1)
-theme_override_font_sizes/font_size = 15
+theme_override_font_sizes/font_size = 18
 text = "In the forgotten ages of Aethelgard, the Black Tower pierced the shattered heavens. An obsidian monolith built of condemned souls, rising from the void where sunlight dared not fall."
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -154,7 +154,7 @@ autowrap_mode = 3
 [node name="TapHint" type="Label" parent="UILayer/BottomVBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.45, 0.45, 0.55, 1)
-theme_override_font_sizes/font_size = 11
+theme_override_font_sizes/font_size = 14
 text = "Tap screen to advance"
 horizontal_alignment = 1
 

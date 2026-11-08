@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://c6mainshell01"]
+[gd_scene load_steps=11 format=3 uid="uid://c6mainshell01"]
 
 [ext_resource type="Script" path="res://scripts/ui/main_shell.gd" id="1_scr"]
 [ext_resource type="PackedScene" uid="uid://c6topresbar01" path="res://scenes/ui/top_resource_bar.tscn" id="2_top"]
@@ -8,6 +8,9 @@
 [ext_resource type="PackedScene" uid="uid://c6campaignscreen01" path="res://scenes/campaign/campaign_screen.tscn" id="6_cmp"]
 [ext_resource type="PackedScene" uid="uid://c6collectiblescreen01" path="res://scenes/collectibles/collectible_screen.tscn" id="7_col"]
 [ext_resource type="PackedScene" uid="uid://c6progressionview01" path="res://scenes/characters/progression_view.tscn" id="8_prg"]
+[ext_resource type="PackedScene" uid="uid://c6energyreplenish01" path="res://scenes/ui/energy_replenish_modal.tscn" id="9_enr"]
+[ext_resource type="PackedScene" uid="uid://c6playerprofilemodal01" path="res://scenes/ui/player_profile_modal.tscn" id="10_prf"]
+[ext_resource type="PackedScene" uid="uid://c6blacksmithmodal01" path="res://scenes/ui/blacksmith_modal.tscn" id="11_bsm"]
 
 [node name="MainShell" type="Control"]
 layout_mode = 3
@@ -17,6 +20,16 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_scr")
+
+[node name="DarkBackdrop" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.04, 0.05, 0.08, 1)
 
 [node name="ScreensContainer" type="Control" parent="."]
 layout_mode = 1
@@ -51,4 +64,16 @@ offset_bottom = -96.0
 layout_mode = 1
 
 [node name="BottomNavDock" parent="." instance=ExtResource("3_bot")]
+layout_mode = 1
+
+[node name="EnergyReplenishModal" parent="." instance=ExtResource("9_enr")]
+visible = false
+layout_mode = 1
+
+[node name="PlayerProfileModal" parent="." instance=ExtResource("10_prf")]
+visible = false
+layout_mode = 1
+
+[node name="BlacksmithModal" parent="." instance=ExtResource("11_bsm")]
+visible = false
 layout_mode = 1

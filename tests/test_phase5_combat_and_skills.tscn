@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://c6testphase501"]
+
+[ext_resource type="Script" path="res://tests/test_phase5_combat_and_skills.gd" id="1_test"]
+
+[node name="TestPhase5CombatAndSkills" type="Node"]
+script = ExtResource("1_test")

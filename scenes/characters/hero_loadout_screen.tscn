@@ -1,8 +1,17 @@
-[gd_scene load_steps=12 format=3 uid="uid://c6heroloadoutscreen01"]
+[gd_scene load_steps=20 format=3 uid="uid://c6heroloadoutscreen01"]
 
 [ext_resource type="Script" path="res://scripts/ui/hero_loadout_screen.gd" id="1_scr"]
 [ext_resource type="Script" path="res://scripts/ui/hero_pedestal_view.gd" id="2_ped"]
 [ext_resource type="Script" path="res://scripts/ui/summoning_circle_view.gd" id="3_cir"]
+[ext_resource type="Texture2D" path="res://assets/art/ui_reference/ref_subnav_bar.png" id="4_snb"]
+[ext_resource type="Texture2D" path="res://assets/art/ui_reference/hero_stage_storm_reaper.png" id="5_stg"]
+[ext_resource type="Texture2D" path="res://assets/art/ui_reference/grimoire_plaque_clean.png" id="6_grm"]
+[ext_resource type="Texture2D" path="res://assets/art/ui_reference/card_full_shadow_hunter.png" id="7_c1"]
+[ext_resource type="Texture2D" path="res://assets/art/ui_reference/card_full_storm_reaper.png" id="8_c2"]
+[ext_resource type="Texture2D" path="res://assets/art/ui_reference/card_full_soul_binder.png" id="9_c3"]
+[ext_resource type="Texture2D" path="res://assets/art/ui_reference/card_full_frost_valkyrie.png" id="10_c4"]
+[ext_resource type="Texture2D" path="res://assets/art/ui_reference/stone_dungeon_floor.png" id="11_flr"]
+[ext_resource type="Texture2D" path="res://assets/art/ui_reference/characters_stage_master.png" id="12_mst"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bg"]
 bg_color = Color(0.04, 0.05, 0.09, 1)
@@ -93,14 +102,24 @@ grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_bg")
 
 [node name="SubTabHeader" type="Panel" parent="."]
-custom_minimum_size = Vector2(0, 48)
+custom_minimum_size = Vector2(0, 52)
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
-offset_top = 84.0
-offset_bottom = 132.0
+offset_top = 116.0
+offset_bottom = 168.0
 grow_horizontal = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_subtab_bg")
+
+[node name="SubTabBgTex" type="TextureRect" parent="SubTabHeader"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("4_snb")
+expand_mode = 1
 
 [node name="HBox" type="HBoxContainer" parent="SubTabHeader"]
 layout_mode = 1
@@ -110,45 +129,55 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 alignment = 1
-theme_override_constants/separation = 32
+theme_override_constants/separation = 40
 
 [node name="BtnCharacters" type="Button" parent="SubTabHeader/HBox"]
+custom_minimum_size = Vector2(130, 48)
 layout_mode = 2
-theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0, 0, 0, 0)
+theme_override_colors/font_focus_color = Color(0, 0, 0, 0)
+theme_override_colors/font_hover_color = Color(0, 0, 0, 0)
+theme_override_colors/font_pressed_color = Color(0, 0, 0, 0)
 theme_override_styles/normal = SubResource("StyleBoxEmpty_tabbtn")
 theme_override_styles/hover = SubResource("StyleBoxEmpty_tabbtn")
 theme_override_styles/pressed = SubResource("StyleBoxEmpty_tabbtn")
-text = "Characters"
+flat = true
 
 [node name="BtnGear" type="Button" parent="SubTabHeader/HBox"]
+custom_minimum_size = Vector2(100, 48)
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.88, 0.35, 1)
-theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0, 0, 0, 0)
+theme_override_colors/font_focus_color = Color(0, 0, 0, 0)
+theme_override_colors/font_hover_color = Color(0, 0, 0, 0)
+theme_override_colors/font_pressed_color = Color(0, 0, 0, 0)
 theme_override_styles/normal = SubResource("StyleBoxEmpty_tabbtn")
 theme_override_styles/hover = SubResource("StyleBoxEmpty_tabbtn")
 theme_override_styles/pressed = SubResource("StyleBoxEmpty_tabbtn")
-text = "Gear"
+flat = true
 
 [node name="BtnRunes" type="Button" parent="SubTabHeader/HBox"]
+custom_minimum_size = Vector2(100, 48)
 layout_mode = 2
-theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0, 0, 0, 0)
+theme_override_colors/font_focus_color = Color(0, 0, 0, 0)
+theme_override_colors/font_hover_color = Color(0, 0, 0, 0)
+theme_override_colors/font_pressed_color = Color(0, 0, 0, 0)
 theme_override_styles/normal = SubResource("StyleBoxEmpty_tabbtn")
 theme_override_styles/hover = SubResource("StyleBoxEmpty_tabbtn")
 theme_override_styles/pressed = SubResource("StyleBoxEmpty_tabbtn")
-text = "Runes"
+flat = true
 
 [node name="ContentContainer" type="Control" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = 132.0
-offset_bottom = -88.0
+offset_top = 168.0
+offset_bottom = -120.0
 grow_horizontal = 2
 grow_vertical = 2
 
 [node name="ViewCharacters" type="Control" parent="ContentContainer"]
-visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -156,23 +185,46 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
+[node name="MasterStageTex" type="TextureRect" parent="ContentContainer/ViewCharacters"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("12_mst")
+expand_mode = 1
+
 [node name="TopHalf" type="HBoxContainer" parent="ContentContainer/ViewCharacters"]
-custom_minimum_size = Vector2(0, 360)
+custom_minimum_size = Vector2(0, 460)
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
-offset_left = 16.0
-offset_top = 8.0
-offset_right = -16.0
-offset_bottom = 368.0
+offset_left = 12.0
+offset_top = 4.0
+offset_right = -12.0
+offset_bottom = 464.0
 grow_horizontal = 2
-theme_override_constants/separation = 12
+theme_override_constants/separation = 8
 
 [node name="PedestalContainer" type="Control" parent="ContentContainer/ViewCharacters/TopHalf"]
 layout_mode = 2
 size_flags_horizontal = 3
 
+[node name="HeroStageImg" type="TextureRect" parent="ContentContainer/ViewCharacters/TopHalf/PedestalContainer"]
+modulate = Color(1, 1, 1, 0)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("5_stg")
+expand_mode = 1
+stretch_mode = 5
+
 [node name="HeroPedestal" type="Control" parent="ContentContainer/ViewCharacters/TopHalf/PedestalContainer"]
+visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -182,77 +234,89 @@ grow_vertical = 2
 script = ExtResource("2_ped")
 
 [node name="HeroNameBadge" type="Label" parent="ContentContainer/ViewCharacters/TopHalf/PedestalContainer"]
+visible = false
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
-offset_top = 12.0
-offset_bottom = 36.0
+offset_top = 10.0
+offset_bottom = 42.0
 grow_horizontal = 2
 theme_override_colors/font_color = Color(1, 0.88, 0.45, 1)
-theme_override_font_sizes/font_size = 17
-text = "Shadow Hunter"
+theme_override_font_sizes/font_size = 28
+text = "Storm Reaper"
 horizontal_alignment = 1
 
 [node name="StarRatingRow" type="Label" parent="ContentContainer/ViewCharacters/TopHalf/PedestalContainer"]
+visible = false
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
-offset_top = 38.0
-offset_bottom = 58.0
+offset_top = 44.0
+offset_bottom = 74.0
 grow_horizontal = 2
 theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
-theme_override_font_sizes/font_size = 14
-text = "★ ★ ☆ ☆ ☆ ☆"
+theme_override_font_sizes/font_size = 26
+text = "★ ★ ★ ★ ☆ ☆"
 horizontal_alignment = 1
 
 [node name="OutfitBtn" type="Button" parent="ContentContainer/ViewCharacters/TopHalf/PedestalContainer"]
-custom_minimum_size = Vector2(40, 40)
+custom_minimum_size = Vector2(44, 44)
 layout_mode = 1
 anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
-offset_left = 12.0
-offset_top = -52.0
-offset_right = 52.0
-offset_bottom = -12.0
+offset_left = 6.0
+offset_top = -185.0
+offset_right = 50.0
+offset_bottom = -141.0
 grow_vertical = 0
-theme_override_font_sizes/font_size = 18
-theme_override_styles/normal = SubResource("StyleBoxFlat_btnpill")
-text = "👗"
+flat = true
 
 [node name="SacredHallBtn" type="Button" parent="ContentContainer/ViewCharacters/TopHalf/PedestalContainer"]
-custom_minimum_size = Vector2(40, 40)
+custom_minimum_size = Vector2(44, 44)
 layout_mode = 1
 anchors_preset = 3
 anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -52.0
-offset_top = -52.0
-offset_right = -12.0
-offset_bottom = -12.0
+offset_left = -50.0
+offset_top = -185.0
+offset_right = -6.0
+offset_bottom = -141.0
 grow_horizontal = 0
 grow_vertical = 0
-theme_override_font_sizes/font_size = 18
-theme_override_styles/normal = SubResource("StyleBoxFlat_btnpill")
-text = "🏛"
+flat = true
 
-[node name="SkillCardContainer" type="PanelContainer" parent="ContentContainer/ViewCharacters/TopHalf"]
-custom_minimum_size = Vector2(300, 0)
+[node name="SkillCardContainer" type="Control" parent="ContentContainer/ViewCharacters/TopHalf"]
+custom_minimum_size = Vector2(265, 340)
 layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_card")
+size_flags_vertical = 4
+
+[node name="GrimoireImg" type="TextureRect" parent="ContentContainer/ViewCharacters/TopHalf/SkillCardContainer"]
+modulate = Color(1, 1, 1, 0)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("6_grm")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="VBox" type="VBoxContainer" parent="ContentContainer/ViewCharacters/TopHalf/SkillCardContainer"]
-layout_mode = 2
-theme_override_constants/separation = 8
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 
 [node name="Header" type="Label" parent="ContentContainer/ViewCharacters/TopHalf/SkillCardContainer/VBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.85, 0.35, 1)
-theme_override_font_sizes/font_size = 14
 text = "Elemental Passive Skills"
-horizontal_alignment = 1
 
 [node name="Scroll" type="ScrollContainer" parent="ContentContainer/ViewCharacters/TopHalf/SkillCardContainer/VBox"]
 layout_mode = 2
@@ -261,233 +325,259 @@ size_flags_vertical = 3
 [node name="SkillList" type="VBoxContainer" parent="ContentContainer/ViewCharacters/TopHalf/SkillCardContainer/VBox/Scroll"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_constants/separation = 6
 
 [node name="Skill1" type="Label" parent="ContentContainer/ViewCharacters/TopHalf/SkillCardContainer/VBox/Scroll/SkillList"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
-theme_override_font_sizes/font_size = 11
-text = "✦ Lv.1 Shadow Veil [Unlocked]\n+15% Dodge, shadow dash leaves decoy."
-autowrap_mode = 2
+text = "✦ Lv.1 Chain Surge [Unlocked]"
 
 [node name="Skill2" type="Label" parent="ContentContainer/ViewCharacters/TopHalf/SkillCardContainer/VBox/Scroll/SkillList"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
-theme_override_font_sizes/font_size = 11
-text = "✦ Lv.2 Abyssal Surge [Unlocked]\nConsecutive hits gain +5% ATK SPD (up to 25%)."
-autowrap_mode = 2
+text = "✦ Lv.2 Tempest Strike [Unlocked]"
 
 [node name="Skill3" type="Label" parent="ContentContainer/ViewCharacters/TopHalf/SkillCardContainer/VBox/Scroll/SkillList"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.6, 0.65, 0.75, 1)
-theme_override_font_sizes/font_size = 11
-text = "✧ Lv.3 Soul Harvester [Locked - 3★]\nDefeating an elite restores 10% max HP."
-autowrap_mode = 2
+text = "✦ Lv.3 Static Overload [Unlocked]"
 
 [node name="Skill4" type="Label" parent="ContentContainer/ViewCharacters/TopHalf/SkillCardContainer/VBox/Scroll/SkillList"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.6, 0.65, 0.75, 1)
-theme_override_font_sizes/font_size = 11
-text = "✧ Lv.4 Void Singularity [Locked - 5★]\nCrits unleash shockwave dealing 180% damage."
-autowrap_mode = 2
+text = "✧ Lv.4 Eye of the Maelstrom [Locked - 5★]"
 
-[node name="BottomRoster" type="ScrollContainer" parent="ContentContainer/ViewCharacters"]
+[node name="BottomRoster" type="Control" parent="ContentContainer/ViewCharacters"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 16.0
-offset_top = 376.0
-offset_right = -16.0
-offset_bottom = -12.0
+offset_left = 12.0
+offset_top = 468.0
+offset_right = -12.0
+offset_bottom = 0.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Grid" type="GridContainer" parent="ContentContainer/ViewCharacters/BottomRoster"]
+[node name="Grid" type="HBoxContainer" parent="ContentContainer/ViewCharacters/BottomRoster"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 10
+alignment = 1
+
+[node name="CardHunter" type="Control" parent="ContentContainer/ViewCharacters/BottomRoster/Grid"]
+custom_minimum_size = Vector2(164, 280)
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_constants/h_separation = 12
-theme_override_constants/v_separation = 12
-columns = 4
 
-[node name="CardHunter" type="PanelContainer" parent="ContentContainer/ViewCharacters/BottomRoster/Grid"]
-custom_minimum_size = Vector2(160, 220)
-layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_card")
+[node name="CardTex" type="TextureRect" parent="ContentContainer/ViewCharacters/BottomRoster/Grid/CardHunter"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("7_c1")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="VBox" type="VBoxContainer" parent="ContentContainer/ViewCharacters/BottomRoster/Grid/CardHunter"]
-layout_mode = 2
-alignment = 1
+modulate = Color(1, 1, 1, 0)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 2
 
 [node name="Ribbon" type="Label" parent="ContentContainer/ViewCharacters/BottomRoster/Grid/CardHunter/VBox"]
+visible = false
 layout_mode = 2
-theme_override_colors/font_color = Color(0.2, 0.9, 0.4, 1)
-theme_override_font_sizes/font_size = 12
-text = "● IN USE"
-horizontal_alignment = 1
+text = "In Use"
 
 [node name="Portrait" type="Label" parent="ContentContainer/ViewCharacters/BottomRoster/Grid/CardHunter/VBox"]
+visible = false
 layout_mode = 2
-theme_override_font_sizes/font_size = 52
 text = "🗡"
-horizontal_alignment = 1
 
 [node name="Name" type="Label" parent="ContentContainer/ViewCharacters/BottomRoster/Grid/CardHunter/VBox"]
+visible = false
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.88, 0.45, 1)
-theme_override_font_sizes/font_size = 15
 text = "Shadow Hunter"
-horizontal_alignment = 1
 
 [node name="ShardProgress" type="Label" parent="ContentContainer/ViewCharacters/BottomRoster/Grid/CardHunter/VBox"]
+visible = false
 layout_mode = 2
-theme_override_colors/font_color = Color(0.75, 0.85, 1, 1)
-theme_override_font_sizes/font_size = 12
 text = "Shards: 45/50"
-horizontal_alignment = 1
 
 [node name="StarUpBtn" type="Button" parent="ContentContainer/ViewCharacters/BottomRoster/Grid/CardHunter/VBox"]
-custom_minimum_size = Vector2(130, 34)
+custom_minimum_size = Vector2(148, 48)
 layout_mode = 2
 size_flags_horizontal = 4
-theme_override_colors/font_color = Color(0.1, 0.08, 0.04, 1)
-theme_override_font_sizes/font_size = 13
-theme_override_styles/normal = SubResource("StyleBoxFlat_starup")
-text = "Star Up (3★)"
+flat = true
 
-[node name="CardReaper" type="PanelContainer" parent="ContentContainer/ViewCharacters/BottomRoster/Grid"]
-custom_minimum_size = Vector2(160, 220)
+[node name="CardReaper" type="Control" parent="ContentContainer/ViewCharacters/BottomRoster/Grid"]
+custom_minimum_size = Vector2(164, 280)
 layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_card")
+size_flags_horizontal = 3
+
+[node name="CardTex" type="TextureRect" parent="ContentContainer/ViewCharacters/BottomRoster/Grid/CardReaper"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("8_c2")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="VBox" type="VBoxContainer" parent="ContentContainer/ViewCharacters/BottomRoster/Grid/CardReaper"]
-layout_mode = 2
-alignment = 1
+modulate = Color(1, 1, 1, 0)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 2
 
 [node name="Ribbon" type="Label" parent="ContentContainer/ViewCharacters/BottomRoster/Grid/CardReaper/VBox"]
+visible = false
 layout_mode = 2
-theme_override_colors/font_color = Color(0.4, 0.8, 1, 1)
-theme_override_font_sizes/font_size = 12
-text = "Lv.14"
-horizontal_alignment = 1
+text = "IN USE"
 
 [node name="Portrait" type="Label" parent="ContentContainer/ViewCharacters/BottomRoster/Grid/CardReaper/VBox"]
+visible = false
 layout_mode = 2
-theme_override_font_sizes/font_size = 52
 text = "⚡"
-horizontal_alignment = 1
 
 [node name="Name" type="Label" parent="ContentContainer/ViewCharacters/BottomRoster/Grid/CardReaper/VBox"]
+visible = false
 layout_mode = 2
-theme_override_colors/font_color = Color(0.85, 0.9, 1, 1)
-theme_override_font_sizes/font_size = 15
 text = "Storm Reaper"
-horizontal_alignment = 1
 
 [node name="ShardProgress" type="Label" parent="ContentContainer/ViewCharacters/BottomRoster/Grid/CardReaper/VBox"]
+visible = false
 layout_mode = 2
-theme_override_colors/font_color = Color(0.75, 0.85, 1, 1)
-theme_override_font_sizes/font_size = 12
 text = "Shards: 20/50"
-horizontal_alignment = 1
 
 [node name="SelectBtn" type="Button" parent="ContentContainer/ViewCharacters/BottomRoster/Grid/CardReaper/VBox"]
-custom_minimum_size = Vector2(130, 34)
+custom_minimum_size = Vector2(148, 48)
 layout_mode = 2
 size_flags_horizontal = 4
-theme_override_font_sizes/font_size = 13
-theme_override_styles/normal = SubResource("StyleBoxFlat_btnpill")
-text = "Switch Hero"
+flat = true
 
-[node name="CardBinder" type="PanelContainer" parent="ContentContainer/ViewCharacters/BottomRoster/Grid"]
-custom_minimum_size = Vector2(160, 220)
+[node name="CardBinder" type="Control" parent="ContentContainer/ViewCharacters/BottomRoster/Grid"]
+custom_minimum_size = Vector2(164, 280)
 layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_card")
+size_flags_horizontal = 3
+
+[node name="CardTex" type="TextureRect" parent="ContentContainer/ViewCharacters/BottomRoster/Grid/CardBinder"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("9_c3")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="VBox" type="VBoxContainer" parent="ContentContainer/ViewCharacters/BottomRoster/Grid/CardBinder"]
-layout_mode = 2
-alignment = 1
+modulate = Color(1, 1, 1, 0)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 2
 
 [node name="Ribbon" type="Label" parent="ContentContainer/ViewCharacters/BottomRoster/Grid/CardBinder/VBox"]
+visible = false
 layout_mode = 2
-theme_override_colors/font_color = Color(0.3, 0.9, 0.6, 1)
-theme_override_font_sizes/font_size = 12
-text = "Lv.10"
-horizontal_alignment = 1
+text = "Select"
 
 [node name="Portrait" type="Label" parent="ContentContainer/ViewCharacters/BottomRoster/Grid/CardBinder/VBox"]
+visible = false
 layout_mode = 2
-theme_override_font_sizes/font_size = 52
 text = "🔮"
-horizontal_alignment = 1
 
 [node name="Name" type="Label" parent="ContentContainer/ViewCharacters/BottomRoster/Grid/CardBinder/VBox"]
+visible = false
 layout_mode = 2
-theme_override_colors/font_color = Color(0.85, 0.9, 1, 1)
-theme_override_font_sizes/font_size = 15
 text = "Soul Binder"
-horizontal_alignment = 1
 
 [node name="ShardProgress" type="Label" parent="ContentContainer/ViewCharacters/BottomRoster/Grid/CardBinder/VBox"]
+visible = false
 layout_mode = 2
-theme_override_colors/font_color = Color(0.75, 0.85, 1, 1)
-theme_override_font_sizes/font_size = 12
 text = "Shards: 12/50"
-horizontal_alignment = 1
 
 [node name="SelectBtn" type="Button" parent="ContentContainer/ViewCharacters/BottomRoster/Grid/CardBinder/VBox"]
-custom_minimum_size = Vector2(130, 34)
+custom_minimum_size = Vector2(148, 48)
 layout_mode = 2
 size_flags_horizontal = 4
-theme_override_font_sizes/font_size = 13
-theme_override_styles/normal = SubResource("StyleBoxFlat_btnpill")
-text = "Switch Hero"
+flat = true
 
-[node name="CardValkyrie" type="PanelContainer" parent="ContentContainer/ViewCharacters/BottomRoster/Grid"]
-custom_minimum_size = Vector2(160, 220)
+[node name="CardValkyrie" type="Control" parent="ContentContainer/ViewCharacters/BottomRoster/Grid"]
+custom_minimum_size = Vector2(164, 280)
 layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_card")
+size_flags_horizontal = 3
+
+[node name="CardTex" type="TextureRect" parent="ContentContainer/ViewCharacters/BottomRoster/Grid/CardValkyrie"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("10_c4")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="VBox" type="VBoxContainer" parent="ContentContainer/ViewCharacters/BottomRoster/Grid/CardValkyrie"]
-layout_mode = 2
-alignment = 1
+modulate = Color(1, 1, 1, 0)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 2
 
 [node name="Ribbon" type="Label" parent="ContentContainer/ViewCharacters/BottomRoster/Grid/CardValkyrie/VBox"]
+visible = false
 layout_mode = 2
-theme_override_colors/font_color = Color(0.9, 0.3, 0.3, 1)
-theme_override_font_sizes/font_size = 12
-text = "🔒 LOCKED"
-horizontal_alignment = 1
+text = "LOCKED"
 
 [node name="Portrait" type="Label" parent="ContentContainer/ViewCharacters/BottomRoster/Grid/CardValkyrie/VBox"]
+visible = false
 layout_mode = 2
-theme_override_font_sizes/font_size = 52
 text = "❄"
-horizontal_alignment = 1
 
 [node name="Name" type="Label" parent="ContentContainer/ViewCharacters/BottomRoster/Grid/CardValkyrie/VBox"]
+visible = false
 layout_mode = 2
-theme_override_colors/font_color = Color(0.65, 0.7, 0.8, 1)
-theme_override_font_sizes/font_size = 15
 text = "Frost Valkyrie"
-horizontal_alignment = 1
 
 [node name="ShardProgress" type="Label" parent="ContentContainer/ViewCharacters/BottomRoster/Grid/CardValkyrie/VBox"]
+visible = false
 layout_mode = 2
-theme_override_colors/font_color = Color(0.6, 0.65, 0.75, 1)
-theme_override_font_sizes/font_size = 12
 text = "Shards: 0/50"
-horizontal_alignment = 1
 
 [node name="UnlockBtn" type="Button" parent="ContentContainer/ViewCharacters/BottomRoster/Grid/CardValkyrie/VBox"]
-custom_minimum_size = Vector2(130, 34)
+custom_minimum_size = Vector2(148, 48)
 layout_mode = 2
 size_flags_horizontal = 4
-theme_override_font_sizes/font_size = 13
-theme_override_styles/normal = SubResource("StyleBoxFlat_btnpill")
-text = "Unlock (100 💎)"
+flat = true
 
 [node name="ViewGear" type="Control" parent="ContentContainer"]
+visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -525,15 +615,15 @@ script = ExtResource("2_ped")
 layout_mode = 1
 anchors_preset = 9
 anchor_bottom = 1.0
-offset_left = 20.0
-offset_top = 16.0
-offset_right = 108.0
+offset_left = 18.0
+offset_top = 10.0
+offset_right = 114.0
 offset_bottom = -30.0
 grow_vertical = 2
 theme_override_constants/separation = 12
 
 [node name="SlotWeapon" type="PanelContainer" parent="ContentContainer/ViewGear/TopHalf/LeftSlots"]
-custom_minimum_size = Vector2(88, 88)
+custom_minimum_size = Vector2(96, 96)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_gearslot")
 
@@ -543,19 +633,19 @@ alignment = 1
 
 [node name="Icon" type="Label" parent="ContentContainer/ViewGear/TopHalf/LeftSlots/SlotWeapon/VBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 38
+theme_override_font_sizes/font_size = 44
 text = "🗡"
 horizontal_alignment = 1
 
 [node name="Level" type="Label" parent="ContentContainer/ViewGear/TopHalf/LeftSlots/SlotWeapon/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.85, 0.3, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 18
 text = "Lv.60 S"
 horizontal_alignment = 1
 
 [node name="SlotAmulet" type="PanelContainer" parent="ContentContainer/ViewGear/TopHalf/LeftSlots"]
-custom_minimum_size = Vector2(88, 88)
+custom_minimum_size = Vector2(96, 96)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_gearslot")
 
@@ -565,19 +655,19 @@ alignment = 1
 
 [node name="Icon" type="Label" parent="ContentContainer/ViewGear/TopHalf/LeftSlots/SlotAmulet/VBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 38
+theme_override_font_sizes/font_size = 44
 text = "📿"
 horizontal_alignment = 1
 
 [node name="Level" type="Label" parent="ContentContainer/ViewGear/TopHalf/LeftSlots/SlotAmulet/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.9, 0.4, 0.9, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 18
 text = "Lv.55"
 horizontal_alignment = 1
 
 [node name="SlotRing" type="PanelContainer" parent="ContentContainer/ViewGear/TopHalf/LeftSlots"]
-custom_minimum_size = Vector2(88, 88)
+custom_minimum_size = Vector2(96, 96)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_gearslot")
 
@@ -587,14 +677,14 @@ alignment = 1
 
 [node name="Icon" type="Label" parent="ContentContainer/ViewGear/TopHalf/LeftSlots/SlotRing/VBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 38
+theme_override_font_sizes/font_size = 44
 text = "💍"
 horizontal_alignment = 1
 
 [node name="Level" type="Label" parent="ContentContainer/ViewGear/TopHalf/LeftSlots/SlotRing/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.4, 0.8, 1, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 18
 text = "Lv.58"
 horizontal_alignment = 1
 
@@ -604,16 +694,16 @@ anchors_preset = 11
 anchor_left = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -108.0
-offset_top = 16.0
-offset_right = -20.0
+offset_left = -114.0
+offset_top = 10.0
+offset_right = -18.0
 offset_bottom = -30.0
 grow_horizontal = 0
 grow_vertical = 2
 theme_override_constants/separation = 12
 
 [node name="SlotHelmet" type="PanelContainer" parent="ContentContainer/ViewGear/TopHalf/RightSlots"]
-custom_minimum_size = Vector2(88, 88)
+custom_minimum_size = Vector2(96, 96)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_gearslot")
 
@@ -623,19 +713,19 @@ alignment = 1
 
 [node name="Icon" type="Label" parent="ContentContainer/ViewGear/TopHalf/RightSlots/SlotHelmet/VBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 38
+theme_override_font_sizes/font_size = 44
 text = "👑"
 horizontal_alignment = 1
 
 [node name="Level" type="Label" parent="ContentContainer/ViewGear/TopHalf/RightSlots/SlotHelmet/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.85, 0.3, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 18
 text = "Lv.60 S"
 horizontal_alignment = 1
 
 [node name="SlotArmor" type="PanelContainer" parent="ContentContainer/ViewGear/TopHalf/RightSlots"]
-custom_minimum_size = Vector2(88, 88)
+custom_minimum_size = Vector2(96, 96)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_gearslot")
 
@@ -645,19 +735,19 @@ alignment = 1
 
 [node name="Icon" type="Label" parent="ContentContainer/ViewGear/TopHalf/RightSlots/SlotArmor/VBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 38
+theme_override_font_sizes/font_size = 44
 text = "🥋"
 horizontal_alignment = 1
 
 [node name="Level" type="Label" parent="ContentContainer/ViewGear/TopHalf/RightSlots/SlotArmor/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.85, 0.3, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 18
 text = "Lv.60 S"
 horizontal_alignment = 1
 
 [node name="SlotBoots" type="PanelContainer" parent="ContentContainer/ViewGear/TopHalf/RightSlots"]
-custom_minimum_size = Vector2(88, 88)
+custom_minimum_size = Vector2(96, 96)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_gearslot")
 
@@ -667,29 +757,29 @@ alignment = 1
 
 [node name="Icon" type="Label" parent="ContentContainer/ViewGear/TopHalf/RightSlots/SlotBoots/VBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 38
+theme_override_font_sizes/font_size = 44
 text = "👢"
 horizontal_alignment = 1
 
 [node name="Level" type="Label" parent="ContentContainer/ViewGear/TopHalf/RightSlots/SlotBoots/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.4, 0.8, 1, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 18
 text = "Lv.55"
 horizontal_alignment = 1
 
 [node name="StatPill" type="PanelContainer" parent="ContentContainer/ViewGear/TopHalf"]
-custom_minimum_size = Vector2(300, 42)
+custom_minimum_size = Vector2(360, 52)
 layout_mode = 1
 anchors_preset = 7
 anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = -150.0
-offset_top = -46.0
-offset_right = 150.0
-offset_bottom = -4.0
+offset_left = -180.0
+offset_top = -54.0
+offset_right = 180.0
+offset_bottom = -2.0
 grow_horizontal = 2
 grow_vertical = 0
 theme_override_styles/panel = SubResource("StyleBoxFlat_statpill")
@@ -702,41 +792,42 @@ theme_override_constants/separation = 18
 [node name="Atk" type="Label" parent="ContentContainer/ViewGear/TopHalf/StatPill/HBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.85, 0.35, 1)
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 20
 text = "⚔ ATK: 4,280"
 
 [node name="Divider" type="Label" parent="ContentContainer/ViewGear/TopHalf/StatPill/HBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.4, 0.5, 0.65, 1)
+theme_override_font_sizes/font_size = 18
 text = "|"
 
 [node name="Hp" type="Label" parent="ContentContainer/ViewGear/TopHalf/StatPill/HBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.3, 0.9, 0.45, 1)
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 20
 text = "❤ HP: 18,920"
 
 [node name="InfoBtn" type="Button" parent="ContentContainer/ViewGear/TopHalf/StatPill/HBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 18
 flat = true
 text = "ℹ"
 
 [node name="MiddleBar" type="HBoxContainer" parent="ContentContainer/ViewGear"]
-custom_minimum_size = Vector2(0, 42)
+custom_minimum_size = Vector2(0, 52)
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
 offset_left = 20.0
 offset_top = 356.0
 offset_right = -20.0
-offset_bottom = 398.0
+offset_bottom = 408.0
 grow_horizontal = 2
 
 [node name="SortBtn" type="Button" parent="ContentContainer/ViewGear/MiddleBar"]
-custom_minimum_size = Vector2(130, 36)
+custom_minimum_size = Vector2(150, 48)
 layout_mode = 2
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 19
 theme_override_styles/normal = SubResource("StyleBoxFlat_btnpill")
 text = "▼ By Quality"
 
@@ -745,10 +836,10 @@ layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="BlacksmithBtn" type="Button" parent="ContentContainer/ViewGear/MiddleBar"]
-custom_minimum_size = Vector2(140, 36)
+custom_minimum_size = Vector2(160, 48)
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.88, 0.35, 1)
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 19
 theme_override_styles/normal = SubResource("StyleBoxFlat_btnpill")
 text = "🔨 Blacksmith"
 
@@ -758,7 +849,7 @@ anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 16.0
-offset_top = 406.0
+offset_top = 412.0
 offset_right = -16.0
 offset_bottom = -12.0
 grow_horizontal = 2
@@ -767,66 +858,66 @@ grow_vertical = 2
 [node name="Grid" type="GridContainer" parent="ContentContainer/ViewGear/BottomInventory"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_constants/h_separation = 10
-theme_override_constants/v_separation = 10
+theme_override_constants/h_separation = 12
+theme_override_constants/v_separation = 12
 columns = 5
 
 [node name="Slot1" type="PanelContainer" parent="ContentContainer/ViewGear/BottomInventory/Grid"]
-custom_minimum_size = Vector2(82, 82)
+custom_minimum_size = Vector2(92, 92)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_gearslot")
 
 [node name="Label" type="Label" parent="ContentContainer/ViewGear/BottomInventory/Grid/Slot1"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 36
+theme_override_font_sizes/font_size = 44
 text = "🗡"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="Slot2" type="PanelContainer" parent="ContentContainer/ViewGear/BottomInventory/Grid"]
-custom_minimum_size = Vector2(82, 82)
+custom_minimum_size = Vector2(92, 92)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_gearslot")
 
 [node name="Label" type="Label" parent="ContentContainer/ViewGear/BottomInventory/Grid/Slot2"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 36
+theme_override_font_sizes/font_size = 44
 text = "🛡"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="Slot3" type="PanelContainer" parent="ContentContainer/ViewGear/BottomInventory/Grid"]
-custom_minimum_size = Vector2(82, 82)
+custom_minimum_size = Vector2(92, 92)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_gearslot")
 
 [node name="Label" type="Label" parent="ContentContainer/ViewGear/BottomInventory/Grid/Slot3"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 36
+theme_override_font_sizes/font_size = 44
 text = "🏹"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="Slot4" type="PanelContainer" parent="ContentContainer/ViewGear/BottomInventory/Grid"]
-custom_minimum_size = Vector2(82, 82)
+custom_minimum_size = Vector2(92, 92)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_gearslot")
 
 [node name="Label" type="Label" parent="ContentContainer/ViewGear/BottomInventory/Grid/Slot4"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 36
+theme_override_font_sizes/font_size = 44
 text = "💍"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="Slot5" type="PanelContainer" parent="ContentContainer/ViewGear/BottomInventory/Grid"]
-custom_minimum_size = Vector2(82, 82)
+custom_minimum_size = Vector2(92, 92)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_gearslot")
 
 [node name="Label" type="Label" parent="ContentContainer/ViewGear/BottomInventory/Grid/Slot5"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 36
+theme_override_font_sizes/font_size = 44
 text = "🥋"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -859,20 +950,20 @@ grow_vertical = 2
 script = ExtResource("3_cir")
 
 [node name="MiddleBar" type="HBoxContainer" parent="ContentContainer/ViewRunes"]
-custom_minimum_size = Vector2(0, 42)
+custom_minimum_size = Vector2(0, 52)
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
 offset_left = 20.0
 offset_top = 364.0
 offset_right = -20.0
-offset_bottom = 406.0
+offset_bottom = 416.0
 grow_horizontal = 2
 
 [node name="SortBtn" type="Button" parent="ContentContainer/ViewRunes/MiddleBar"]
-custom_minimum_size = Vector2(120, 36)
+custom_minimum_size = Vector2(150, 48)
 layout_mode = 2
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 19
 theme_override_styles/normal = SubResource("StyleBoxFlat_btnpill")
 text = "▼ By Tier"
 
@@ -881,10 +972,10 @@ layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="WorkshopBtn" type="Button" parent="ContentContainer/ViewRunes/MiddleBar"]
-custom_minimum_size = Vector2(150, 36)
+custom_minimum_size = Vector2(170, 48)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.4, 0.85, 1, 1)
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 19
 theme_override_styles/normal = SubResource("StyleBoxFlat_btnpill")
 text = "✨ Rune Workshop"
 
@@ -894,7 +985,7 @@ anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 16.0
-offset_top = 412.0
+offset_top = 420.0
 offset_right = -16.0
 offset_bottom = -12.0
 grow_horizontal = 2
@@ -903,66 +994,66 @@ grow_vertical = 2
 [node name="Grid" type="GridContainer" parent="ContentContainer/ViewRunes/BottomInventory"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_constants/h_separation = 10
-theme_override_constants/v_separation = 10
+theme_override_constants/h_separation = 12
+theme_override_constants/v_separation = 12
 columns = 5
 
 [node name="Rune1" type="PanelContainer" parent="ContentContainer/ViewRunes/BottomInventory/Grid"]
-custom_minimum_size = Vector2(82, 82)
+custom_minimum_size = Vector2(92, 92)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_gearslot")
 
 [node name="Label" type="Label" parent="ContentContainer/ViewRunes/BottomInventory/Grid/Rune1"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 36
+theme_override_font_sizes/font_size = 44
 text = "🔥"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="Rune2" type="PanelContainer" parent="ContentContainer/ViewRunes/BottomInventory/Grid"]
-custom_minimum_size = Vector2(82, 82)
+custom_minimum_size = Vector2(92, 92)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_gearslot")
 
 [node name="Label" type="Label" parent="ContentContainer/ViewRunes/BottomInventory/Grid/Rune2"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 36
+theme_override_font_sizes/font_size = 44
 text = "🐺"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="Rune3" type="PanelContainer" parent="ContentContainer/ViewRunes/BottomInventory/Grid"]
-custom_minimum_size = Vector2(82, 82)
+custom_minimum_size = Vector2(92, 92)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_gearslot")
 
 [node name="Label" type="Label" parent="ContentContainer/ViewRunes/BottomInventory/Grid/Rune3"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 36
+theme_override_font_sizes/font_size = 44
 text = "⚡"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="Rune4" type="PanelContainer" parent="ContentContainer/ViewRunes/BottomInventory/Grid"]
-custom_minimum_size = Vector2(82, 82)
+custom_minimum_size = Vector2(92, 92)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_gearslot")
 
 [node name="Label" type="Label" parent="ContentContainer/ViewRunes/BottomInventory/Grid/Rune4"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 36
+theme_override_font_sizes/font_size = 44
 text = "❄"
 horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="Rune5" type="PanelContainer" parent="ContentContainer/ViewRunes/BottomInventory/Grid"]
-custom_minimum_size = Vector2(82, 82)
+custom_minimum_size = Vector2(92, 92)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_gearslot")
 
 [node name="Label" type="Label" parent="ContentContainer/ViewRunes/BottomInventory/Grid/Rune5"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 36
+theme_override_font_sizes/font_size = 44
 text = "🔮"
 horizontal_alignment = 1
 vertical_alignment = 1

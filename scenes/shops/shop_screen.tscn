@@ -82,12 +82,12 @@ grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_bg")
 
 [node name="MarketAwning" type="Panel" parent="."]
-custom_minimum_size = Vector2(0, 52)
+custom_minimum_size = Vector2(0, 58)
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
-offset_top = 84.0
-offset_bottom = 136.0
+offset_top = 10.0
+offset_bottom = 68.0
 grow_horizontal = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_awning")
 
@@ -99,7 +99,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_colors/font_color = Color(1, 0.92, 0.5, 1)
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 24
 text = "🎪 Abyssal Bazaar & Daily Armory"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -110,9 +110,9 @@ anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 16.0
-offset_top = 142.0
+offset_top = 74.0
 offset_right = -16.0
-offset_bottom = -134.0
+offset_bottom = -72.0
 grow_horizontal = 2
 grow_vertical = 2
 
@@ -122,7 +122,7 @@ size_flags_horizontal = 3
 theme_override_constants/separation = 16
 
 [node name="ChapterPackCard" type="PanelContainer" parent="ScrollContainer/VBox"]
-custom_minimum_size = Vector2(0, 160)
+custom_minimum_size = Vector2(0, 190)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_chapterpack")
 
@@ -134,10 +134,10 @@ theme_override_constants/separation = 8
 layout_mode = 2
 
 [node name="ValueRibbon" type="Label" parent="ScrollContainer/VBox/ChapterPackCard/Content/TopRow"]
-custom_minimum_size = Vector2(100, 26)
+custom_minimum_size = Vector2(130, 34)
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 18
 theme_override_styles/normal = SubResource("StyleBoxFlat_valuebadge")
 text = "600% VALUE"
 horizontal_alignment = 1
@@ -147,13 +147,13 @@ vertical_alignment = 1
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(1, 0.88, 0.45, 1)
-theme_override_font_sizes/font_size = 15
+theme_override_font_sizes/font_size = 24
 text = "Chapter 1 Conqueror Pack"
 
 [node name="Tag" type="Label" parent="ScrollContainer/VBox/ChapterPackCard/Content/TopRow"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.8, 0.85, 0.95, 1)
-theme_override_font_sizes/font_size = 11
+theme_override_font_sizes/font_size = 17
 text = "One-time only  "
 
 [node name="RewardsRow" type="HBoxContainer" parent="ScrollContainer/VBox/ChapterPackCard/Content"]
@@ -182,11 +182,11 @@ theme_override_font_sizes/font_size = 38
 text = "⚡ +50"
 
 [node name="BuyBtn" type="Button" parent="ScrollContainer/VBox/ChapterPackCard/Content"]
-custom_minimum_size = Vector2(220, 42)
+custom_minimum_size = Vector2(250, 56)
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_colors/font_color = Color(0.1, 0.1, 0.15, 1)
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 22
 theme_override_styles/normal = SubResource("StyleBoxFlat_buybtn")
 text = "$4.99 USD"
 
@@ -201,13 +201,13 @@ layout_mode = 2
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(1, 0.88, 0.35, 1)
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 24
 text = "Daily Deals"
 
 [node name="TimerLabel" type="Label" parent="ScrollContainer/VBox/DailyShopSection/DailyHeader"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.75, 0.85, 0.95, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 18
 text = "Refresh in 06:48:04"
 
 [node name="Grid3x2" type="GridContainer" parent="ScrollContainer/VBox/DailyShopSection"]
@@ -217,7 +217,7 @@ theme_override_constants/v_separation = 12
 columns = 3
 
 [node name="Item1" type="PanelContainer" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2"]
-custom_minimum_size = Vector2(210, 185)
+custom_minimum_size = Vector2(216, 215)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_dailycard")
 
@@ -226,43 +226,43 @@ layout_mode = 2
 alignment = 1
 
 [node name="Discount" type="Label" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2/Item1/VBox"]
-custom_minimum_size = Vector2(60, 20)
+custom_minimum_size = Vector2(80, 26)
 layout_mode = 2
 size_flags_horizontal = 0
-theme_override_font_sizes/font_size = 11
+theme_override_font_sizes/font_size = 15
 theme_override_styles/normal = SubResource("StyleBoxFlat_discount")
 text = " 20% OFF "
 
 [node name="Icon" type="Label" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2/Item1/VBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 48
+theme_override_font_sizes/font_size = 54
 text = "🔥"
 horizontal_alignment = 1
 
 [node name="Name" type="Label" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2/Item1/VBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 19
 text = "Fire Rune"
 horizontal_alignment = 1
 
 [node name="Left" type="Label" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2/Item1/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.65, 0.7, 0.8, 1)
-theme_override_font_sizes/font_size = 11
+theme_override_font_sizes/font_size = 16
 text = "Purchases left: 1"
 horizontal_alignment = 1
 
 [node name="Btn" type="Button" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2/Item1/VBox"]
-custom_minimum_size = Vector2(140, 36)
+custom_minimum_size = Vector2(150, 48)
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_colors/font_color = Color(0.1, 0.1, 0.15, 1)
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 18
 theme_override_styles/normal = SubResource("StyleBoxFlat_buybtn")
 text = "🪙 80 Gold"
 
 [node name="Item2" type="PanelContainer" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2"]
-custom_minimum_size = Vector2(210, 185)
+custom_minimum_size = Vector2(216, 215)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_dailycard")
 
@@ -271,43 +271,43 @@ layout_mode = 2
 alignment = 1
 
 [node name="Discount" type="Label" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2/Item2/VBox"]
-custom_minimum_size = Vector2(60, 20)
+custom_minimum_size = Vector2(80, 26)
 layout_mode = 2
 size_flags_horizontal = 0
-theme_override_font_sizes/font_size = 11
+theme_override_font_sizes/font_size = 15
 theme_override_styles/normal = SubResource("StyleBoxFlat_discount")
 text = " 20% OFF "
 
 [node name="Icon" type="Label" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2/Item2/VBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 48
+theme_override_font_sizes/font_size = 54
 text = "🐺"
 horizontal_alignment = 1
 
 [node name="Name" type="Label" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2/Item2/VBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 19
 text = "Wolf Core"
 horizontal_alignment = 1
 
 [node name="Left" type="Label" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2/Item2/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.65, 0.7, 0.8, 1)
-theme_override_font_sizes/font_size = 11
+theme_override_font_sizes/font_size = 16
 text = "Purchases left: 1"
 horizontal_alignment = 1
 
 [node name="Btn" type="Button" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2/Item2/VBox"]
-custom_minimum_size = Vector2(140, 36)
+custom_minimum_size = Vector2(150, 48)
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_colors/font_color = Color(0.1, 0.1, 0.15, 1)
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 18
 theme_override_styles/normal = SubResource("StyleBoxFlat_buybtn")
 text = "🪙 100 Gold"
 
 [node name="Item3" type="PanelContainer" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2"]
-custom_minimum_size = Vector2(210, 185)
+custom_minimum_size = Vector2(216, 215)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_dailycard")
 
@@ -316,43 +316,43 @@ layout_mode = 2
 alignment = 1
 
 [node name="Discount" type="Label" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2/Item3/VBox"]
-custom_minimum_size = Vector2(60, 20)
+custom_minimum_size = Vector2(80, 26)
 layout_mode = 2
 size_flags_horizontal = 0
-theme_override_font_sizes/font_size = 11
+theme_override_font_sizes/font_size = 15
 theme_override_styles/normal = SubResource("StyleBoxFlat_discount")
 text = " 30% OFF "
 
 [node name="Icon" type="Label" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2/Item3/VBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 48
+theme_override_font_sizes/font_size = 54
 text = "⚡"
 horizontal_alignment = 1
 
 [node name="Name" type="Label" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2/Item3/VBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 19
 text = "Storm Shard"
 horizontal_alignment = 1
 
 [node name="Left" type="Label" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2/Item3/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.65, 0.7, 0.8, 1)
-theme_override_font_sizes/font_size = 11
+theme_override_font_sizes/font_size = 16
 text = "Purchases left: 2"
 horizontal_alignment = 1
 
 [node name="Btn" type="Button" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2/Item3/VBox"]
-custom_minimum_size = Vector2(140, 36)
+custom_minimum_size = Vector2(150, 48)
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_colors/font_color = Color(0.1, 0.1, 0.15, 1)
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 18
 theme_override_styles/normal = SubResource("StyleBoxFlat_buybtn")
 text = "💎 50 Gems"
 
 [node name="Item4" type="PanelContainer" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2"]
-custom_minimum_size = Vector2(210, 185)
+custom_minimum_size = Vector2(216, 215)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_dailycard")
 
@@ -361,43 +361,43 @@ layout_mode = 2
 alignment = 1
 
 [node name="Discount" type="Label" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2/Item4/VBox"]
-custom_minimum_size = Vector2(60, 20)
+custom_minimum_size = Vector2(80, 26)
 layout_mode = 2
 size_flags_horizontal = 0
-theme_override_font_sizes/font_size = 11
+theme_override_font_sizes/font_size = 15
 theme_override_styles/normal = SubResource("StyleBoxFlat_discount")
 text = " 20% OFF "
 
 [node name="Icon" type="Label" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2/Item4/VBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 48
+theme_override_font_sizes/font_size = 54
 text = "🗝"
 horizontal_alignment = 1
 
 [node name="Name" type="Label" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2/Item4/VBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 19
 text = "Gold Key"
 horizontal_alignment = 1
 
 [node name="Left" type="Label" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2/Item4/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.65, 0.7, 0.8, 1)
-theme_override_font_sizes/font_size = 11
+theme_override_font_sizes/font_size = 16
 text = "Purchases left: 1"
 horizontal_alignment = 1
 
 [node name="Btn" type="Button" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2/Item4/VBox"]
-custom_minimum_size = Vector2(140, 36)
+custom_minimum_size = Vector2(150, 48)
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_colors/font_color = Color(0.1, 0.1, 0.15, 1)
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 18
 theme_override_styles/normal = SubResource("StyleBoxFlat_buybtn")
 text = "💎 120 Gems"
 
 [node name="Item5" type="PanelContainer" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2"]
-custom_minimum_size = Vector2(210, 185)
+custom_minimum_size = Vector2(216, 215)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_dailycard")
 
@@ -406,43 +406,43 @@ layout_mode = 2
 alignment = 1
 
 [node name="Discount" type="Label" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2/Item5/VBox"]
-custom_minimum_size = Vector2(60, 20)
+custom_minimum_size = Vector2(80, 26)
 layout_mode = 2
 size_flags_horizontal = 0
-theme_override_font_sizes/font_size = 11
+theme_override_font_sizes/font_size = 15
 theme_override_styles/normal = SubResource("StyleBoxFlat_discount")
 text = " FREE "
 
 [node name="Icon" type="Label" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2/Item5/VBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 48
+theme_override_font_sizes/font_size = 54
 text = "⚡"
 horizontal_alignment = 1
 
 [node name="Name" type="Label" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2/Item5/VBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 19
 text = "+20 Energy"
 horizontal_alignment = 1
 
 [node name="Left" type="Label" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2/Item5/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.65, 0.7, 0.8, 1)
-theme_override_font_sizes/font_size = 11
+theme_override_font_sizes/font_size = 16
 text = "Purchases left: 1"
 horizontal_alignment = 1
 
 [node name="Btn" type="Button" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2/Item5/VBox"]
-custom_minimum_size = Vector2(140, 36)
+custom_minimum_size = Vector2(150, 48)
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_colors/font_color = Color(0.1, 0.1, 0.15, 1)
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 18
 theme_override_styles/normal = SubResource("StyleBoxFlat_buybtn")
 text = "Claim Free"
 
 [node name="Item6" type="PanelContainer" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2"]
-custom_minimum_size = Vector2(210, 185)
+custom_minimum_size = Vector2(216, 215)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_dailycard")
 
@@ -451,50 +451,50 @@ layout_mode = 2
 alignment = 1
 
 [node name="Discount" type="Label" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2/Item6/VBox"]
-custom_minimum_size = Vector2(60, 20)
+custom_minimum_size = Vector2(80, 26)
 layout_mode = 2
 size_flags_horizontal = 0
-theme_override_font_sizes/font_size = 11
+theme_override_font_sizes/font_size = 15
 theme_override_styles/normal = SubResource("StyleBoxFlat_discount")
 text = " 25% OFF "
 
 [node name="Icon" type="Label" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2/Item6/VBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 48
+theme_override_font_sizes/font_size = 54
 text = "🧪"
 horizontal_alignment = 1
 
 [node name="Name" type="Label" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2/Item6/VBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 19
 text = "Healing Elixir"
 horizontal_alignment = 1
 
 [node name="Left" type="Label" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2/Item6/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.65, 0.7, 0.8, 1)
-theme_override_font_sizes/font_size = 11
+theme_override_font_sizes/font_size = 16
 text = "Purchases left: 3"
 horizontal_alignment = 1
 
 [node name="Btn" type="Button" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2/Item6/VBox"]
-custom_minimum_size = Vector2(140, 36)
+custom_minimum_size = Vector2(150, 48)
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_colors/font_color = Color(0.1, 0.1, 0.15, 1)
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 18
 theme_override_styles/normal = SubResource("StyleBoxFlat_buybtn")
 text = "🪙 45 Gold"
 
 [node name="BottomSubTabs" type="Panel" parent="."]
-custom_minimum_size = Vector2(0, 44)
+custom_minimum_size = Vector2(0, 56)
 layout_mode = 1
 anchors_preset = 12
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = -132.0
-offset_bottom = -88.0
+offset_top = -68.0
+offset_bottom = -10.0
 grow_horizontal = 2
 grow_vertical = 0
 theme_override_styles/panel = SubResource("StyleBoxFlat_subtabs")
@@ -512,34 +512,34 @@ theme_override_constants/separation = 16
 [node name="Tab1" type="Button" parent="BottomSubTabs/HBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.88, 0.35, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 19
 flat = true
 text = "Daily Shop"
 
 [node name="Tab2" type="Button" parent="BottomSubTabs/HBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.65, 0.7, 0.8, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 19
 flat = true
 text = "Gear Chest"
 
 [node name="Tab3" type="Button" parent="BottomSubTabs/HBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.65, 0.7, 0.8, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 19
 flat = true
 text = "Wish"
 
 [node name="Tab4" type="Button" parent="BottomSubTabs/HBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.65, 0.7, 0.8, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 19
 flat = true
 text = "Limited Offer"
 
 [node name="Tab5" type="Button" parent="BottomSubTabs/HBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.65, 0.7, 0.8, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 19
 flat = true
 text = "Top Up"

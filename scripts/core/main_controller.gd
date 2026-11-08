@@ -23,7 +23,9 @@ var is_inventory_from_pause: bool = false
 
 func _ready() -> void:
 	_connect_subsystems()
-	if intro_screen:
+	if main_shell:
+		_show_screen("shell")
+	elif intro_screen:
 		_show_screen("intro")
 	else:
 		_show_screen("menu")
@@ -118,7 +120,10 @@ func _connect_subsystems() -> void:
 			GameManager.retry_current_floor()
 		)
 		game_over_view.sanctuary_requested.connect(func():
-			_show_screen("menu")
+			_show_screen("shell" if main_shell else "menu")
+		)
+		game_over_view.revive_requested.connect(func():
+			_show_screen("combat")
 		)
 
 	# 10. Settings Modal Signals
@@ -136,7 +141,7 @@ func _connect_subsystems() -> void:
 			get_tree().paused = false
 			settings_modal.visible = false
 			_clear_arena()
-			_show_screen("menu")
+			_show_screen("shell" if main_shell else "menu")
 		)
 
 func _show_screen(screen_name: String) -> void:

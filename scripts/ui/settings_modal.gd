@@ -18,6 +18,8 @@ signal abandon_run_requested()
 @export var btn_inventory: Button
 @export var btn_abandon: Button
 
+var is_confirming_abandon: bool = false
+
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_setup_signals()
@@ -25,11 +27,17 @@ func _ready() -> void:
 
 func _setup_signals() -> void:
 	if btn_resume:
-		btn_resume.pressed.connect(func(): resume_requested.emit())
+		btn_resume.pressed.connect(func():
+			_reset_confirm_state()
+			resume_requested.emit()
+		)
 	if btn_inventory:
-		btn_inventory.pressed.connect(func(): inventory_requested.emit())
+		btn_inventory.pressed.connect(func():
+			_reset_confirm_state()
+			inventory_requested.emit()
+		)
 	if btn_abandon:
-		btn_abandon.pressed.connect(func(): abandon_run_requested.emit())
+		btn_abandon.pressed.connect(_on_abandon_clicked)
 		
 	if slider_master:
 		slider_master.value_changed.connect(func(val: float):
@@ -56,6 +64,24 @@ func _setup_signals() -> void:
 			AudioManager.set_muted(toggled)
 			SaveManager.save_profile()
 		)
+
+func _on_abandon_clicked() -> void:
+	if not is_confirming_abandon:
+		is_confirming_abandon = true
+		if btn_abandon:
+			btn_abandon.text = "CONFIRM ABANDON? (Progress lost)"
+			btn_abandon.modulate = Color(1.0, 0.4, 0.4)
+		if AudioManager:
+			AudioManager.play_sfx("ui_click")
+	else:
+		_reset_confirm_state()
+		abandon_run_requested.emit()
+
+func _reset_confirm_state() -> void:
+	is_confirming_abandon = false
+	if btn_abandon:
+		btn_abandon.text = "RETURN TO CAMPAIGN"
+		btn_abandon.modulate = Color(1.0, 1.0, 1.0)
 
 func _load_current_values() -> void:
 	if slider_master: slider_master.value = AudioManager.master_vol

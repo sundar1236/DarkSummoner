@@ -27,11 +27,17 @@ var player_power: int = 14850
 var player_level: int = 24
 
 func _ready() -> void:
-	custom_minimum_size = Vector2(0, 96)
+	custom_minimum_size = Vector2(0, 116)
 	_setup_signals()
 	refresh_display()
 	if SaveManager:
+		SaveManager.energy_changed.connect(func(_c, _m): refresh_display())
+		SaveManager.gold_changed.connect(func(_val): refresh_display())
+		SaveManager.gems_changed.connect(func(_val): refresh_display())
 		SaveManager.shades_changed.connect(func(_val): refresh_display())
+		SaveManager.profile_changed.connect(func(): refresh_display())
+	if GameManager:
+		GameManager.gold_changed.connect(func(_g): refresh_display())
 
 func _setup_signals() -> void:
 	var btn_energy := $HeaderContent/RightCluster/EnergyPill/HBox/PlusBtn as Button
@@ -47,61 +53,53 @@ func _setup_signals() -> void:
 	if btn_avatar: btn_avatar.pressed.connect(func(): avatar_clicked.emit())
 
 func refresh_display() -> void:
+	var lvl: int = SaveManager.player_level if SaveManager else 5
+	var p_name: String = SaveManager.player_name if SaveManager else "Hunter Raven"
+	var power: int = SaveManager.calculate_combat_power() if SaveManager else 14850
+	var cur_eng: int = SaveManager.energy if SaveManager else 45
+	var max_eng: int = SaveManager.max_energy if SaveManager else 50
+	var g: int = GameManager.run_gold if (GameManager and GameManager.is_in_run) else (SaveManager.profile_gold if SaveManager else 5000)
+	var gem_val: int = SaveManager.gems if SaveManager else 150
+	
 	if level_label:
-		level_label.text = "%d" % player_level
+		level_label.text = "%d" % lvl
 	if name_label:
-		name_label.text = "Shadow Slayer"
+		name_label.text = p_name
 	if power_label:
-		power_label.text = "⚔ %s" % _format_number(player_power)
+		power_label.text = "⚔ %s" % _format_number(power)
 	if energy_label:
-		energy_label.text = "%d/%d" % [current_energy, max_energy]
+		energy_label.text = "%d/%d" % [cur_eng, max_eng]
 	if gold_label:
-		var g := GameManager.run_gold if GameManager and GameManager.is_in_run else current_gold
 		gold_label.text = _format_number(g)
 	if gems_label:
-		var sh := SaveManager.shades if SaveManager else current_gems
-		gems_label.text = _format_number(sh)
+		gems_label.text = _format_number(gem_val)
 
 func spend_energy(amount: int) -> bool:
-	if current_energy >= amount:
-		current_energy -= amount
-		refresh_display()
-		return true
-	return false
+	if SaveManager:
+		return SaveManager.spend_energy(amount)
+	return true
 
 func add_energy(amount: int) -> void:
-	current_energy += amount
-	refresh_display()
+	if SaveManager:
+		SaveManager.add_energy(amount)
 
 func spend_gold(amount: int) -> bool:
-	if current_gold >= amount:
-		current_gold -= amount
-		refresh_display()
-		return true
-	return false
+	if SaveManager:
+		return SaveManager.spend_gold(amount)
+	return true
 
 func add_gold(amount: int) -> void:
-	current_gold += amount
-	refresh_display()
+	if SaveManager:
+		SaveManager.add_gold(amount)
 
 func spend_gems(amount: int) -> bool:
-	if SaveManager and SaveManager.spend_shades(amount):
-		current_gems = SaveManager.shades
-		refresh_display()
-		return true
-	elif current_gems >= amount:
-		current_gems -= amount
-		refresh_display()
-		return true
-	return false
+	if SaveManager:
+		return SaveManager.spend_gems(amount)
+	return true
 
 func add_gems(amount: int) -> void:
 	if SaveManager:
-		SaveManager.add_shades(amount)
-		current_gems = SaveManager.shades
-	else:
-		current_gems += amount
-	refresh_display()
+		SaveManager.add_gems(amount)
 
 func _format_number(val: int) -> String:
 	if val >= 1000000:

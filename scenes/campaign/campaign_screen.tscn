@@ -88,14 +88,14 @@ grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_bg")
 
 [node name="TopBannerSection" type="Control" parent="."]
-custom_minimum_size = Vector2(0, 72)
+custom_minimum_size = Vector2(0, 104)
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
 offset_left = 18.0
-offset_top = 100.0
+offset_top = 14.0
 offset_right = -18.0
-offset_bottom = 172.0
+offset_bottom = 118.0
 grow_horizontal = 2
 
 [node name="EventBanner" type="Panel" parent="TopBannerSection"]
@@ -112,15 +112,15 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 14.0
-offset_right = -14.0
+offset_left = 16.0
+offset_right = -16.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/separation = 12
+theme_override_constants/separation = 16
 
 [node name="Trophy" type="Label" parent="TopBannerSection/EventBanner/HBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 28
+theme_override_font_sizes/font_size = 48
 text = "🏆"
 
 [node name="VBox" type="VBoxContainer" parent="TopBannerSection/EventBanner/HBox"]
@@ -131,44 +131,60 @@ alignment = 1
 [node name="Title" type="Label" parent="TopBannerSection/EventBanner/HBox/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.9, 0.5, 1)
-theme_override_font_sizes/font_size = 15
+theme_override_font_sizes/font_size = 26
 text = "All-Star Cup — Season 4"
 
 [node name="Subtitle" type="Label" parent="TopBannerSection/EventBanner/HBox/VBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.75, 0.82, 0.95, 1)
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 19
 text = "Climb the tower for Mythic Relics! (2d 14h left)"
+
+[node name="Dots" type="Label" parent="TopBannerSection/EventBanner/HBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.3, 0.9)
+theme_override_font_sizes/font_size = 18
+text = "● ○ ○"
+vertical_alignment = 1
+
+[node name="BannerBtn" type="Button" parent="TopBannerSection/EventBanner"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+flat = true
 
 [node name="LeftSidebar" type="VBoxContainer" parent="."]
 layout_mode = 1
 anchors_preset = 9
 anchor_bottom = 1.0
 offset_left = 16.0
-offset_top = 190.0
-offset_right = 72.0
-offset_bottom = -240.0
+offset_top = 132.0
+offset_right = 92.0
+offset_bottom = -290.0
 grow_vertical = 2
-theme_override_constants/separation = 14
+theme_override_constants/separation = 16
 
 [node name="PrivilegeBtn" type="Button" parent="LeftSidebar"]
-custom_minimum_size = Vector2(52, 52)
+custom_minimum_size = Vector2(74, 74)
 layout_mode = 2
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 38
 theme_override_styles/normal = SubResource("StyleBoxFlat_sidebtn")
 text = "👑"
 
 [node name="GreatValueBtn" type="Button" parent="LeftSidebar"]
-custom_minimum_size = Vector2(52, 52)
+custom_minimum_size = Vector2(74, 74)
 layout_mode = 2
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 38
 theme_override_styles/normal = SubResource("StyleBoxFlat_sidebtn")
 text = "🎁"
 
 [node name="RankingsBtn" type="Button" parent="LeftSidebar"]
-custom_minimum_size = Vector2(52, 52)
+custom_minimum_size = Vector2(74, 74)
 layout_mode = 2
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 38
 theme_override_styles/normal = SubResource("StyleBoxFlat_sidebtn")
 text = "🏅"
 
@@ -178,32 +194,32 @@ anchors_preset = 11
 anchor_left = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -72.0
-offset_top = 190.0
+offset_left = -92.0
+offset_top = 132.0
 offset_right = -16.0
-offset_bottom = -240.0
+offset_bottom = -290.0
 grow_horizontal = 0
 grow_vertical = 2
-theme_override_constants/separation = 14
+theme_override_constants/separation = 16
 
 [node name="TasksBtn" type="Button" parent="RightSidebar"]
-custom_minimum_size = Vector2(52, 52)
+custom_minimum_size = Vector2(74, 74)
 layout_mode = 2
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 38
 theme_override_styles/normal = SubResource("StyleBoxFlat_sidebtn")
 text = "📜"
 
 [node name="FriendsBtn" type="Button" parent="RightSidebar"]
-custom_minimum_size = Vector2(52, 52)
+custom_minimum_size = Vector2(74, 74)
 layout_mode = 2
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 38
 theme_override_styles/normal = SubResource("StyleBoxFlat_sidebtn")
 text = "👥"
 
 [node name="TopUpBtn" type="Button" parent="RightSidebar"]
-custom_minimum_size = Vector2(52, 52)
+custom_minimum_size = Vector2(74, 74)
 layout_mode = 2
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 38
 theme_override_styles/normal = SubResource("StyleBoxFlat_sidebtn")
 text = "💎"
 
@@ -212,8 +228,8 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = 180.0
-offset_bottom = -230.0
+offset_top = 126.0
+offset_bottom = -280.0
 grow_horizontal = 2
 grow_vertical = 2
 
@@ -221,13 +237,13 @@ grow_vertical = 2
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
-offset_top = 8.0
-offset_bottom = 76.0
+offset_top = 6.0
+offset_bottom = 100.0
 grow_horizontal = 2
 alignment = 1
 
 [node name="ChapterShield" type="PanelContainer" parent="IslandStage/ChapterHeader"]
-custom_minimum_size = Vector2(280, 42)
+custom_minimum_size = Vector2(400, 60)
 layout_mode = 2
 size_flags_horizontal = 4
 theme_override_styles/panel = SubResource("StyleBoxFlat_shield")
@@ -235,7 +251,7 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_shield")
 [node name="ChapterLabel" type="Label" parent="IslandStage/ChapterHeader/ChapterShield"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.9, 0.45, 1)
-theme_override_font_sizes/font_size = 15
+theme_override_font_sizes/font_size = 24
 text = "[1] Moonlight Forest — Cleared"
 horizontal_alignment = 1
 vertical_alignment = 1
@@ -243,9 +259,35 @@ vertical_alignment = 1
 [node name="StarsRow" type="Label" parent="IslandStage/ChapterHeader"]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 32
 text = "★ ★ ★"
 horizontal_alignment = 1
+
+[node name="DifficultyHBox" type="HBoxContainer" parent="IslandStage/ChapterHeader"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 12
+
+[node name="BtnNormal" type="Button" parent="IslandStage/ChapterHeader/DifficultyHBox"]
+custom_minimum_size = Vector2(126, 46)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("StyleBoxFlat_pill")
+text = "Normal 1.0x"
+
+[node name="BtnHard" type="Button" parent="IslandStage/ChapterHeader/DifficultyHBox"]
+custom_minimum_size = Vector2(126, 46)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("StyleBoxFlat_pill")
+text = "Hard 1.5x"
+
+[node name="BtnTorment" type="Button" parent="IslandStage/ChapterHeader/DifficultyHBox"]
+custom_minimum_size = Vector2(126, 46)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("StyleBoxFlat_pill")
+text = "Torment 2.0x"
 
 [node name="DioramaIsland" type="Control" parent="IslandStage"]
 layout_mode = 1
@@ -263,12 +305,12 @@ anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 16.0
-offset_top = -228.0
+offset_top = -280.0
 offset_right = -16.0
-offset_bottom = -96.0
+offset_bottom = -12.0
 grow_horizontal = 2
 grow_vertical = 0
-theme_override_constants/separation = 8
+theme_override_constants/separation = 12
 
 [node name="QuickAccessRow" type="HBoxContainer" parent="BottomControls"]
 layout_mode = 2
@@ -276,23 +318,23 @@ alignment = 1
 theme_override_constants/separation = 16
 
 [node name="HuntBtn" type="Button" parent="BottomControls/QuickAccessRow"]
-custom_minimum_size = Vector2(110, 36)
+custom_minimum_size = Vector2(142, 54)
 layout_mode = 2
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 19
 theme_override_styles/normal = SubResource("StyleBoxFlat_pill")
 text = "🗡 Hunt (+2.4k)"
 
 [node name="ChestBtn" type="Button" parent="BottomControls/QuickAccessRow"]
-custom_minimum_size = Vector2(110, 36)
+custom_minimum_size = Vector2(142, 54)
 layout_mode = 2
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 19
 theme_override_styles/normal = SubResource("StyleBoxFlat_pill")
 text = "🎁 Stage Chest"
 
 [node name="GuildBtn" type="Button" parent="BottomControls/QuickAccessRow"]
-custom_minimum_size = Vector2(110, 36)
+custom_minimum_size = Vector2(142, 54)
 layout_mode = 2
-theme_override_font_sizes/font_size = 12
+theme_override_font_sizes/font_size = 19
 theme_override_styles/normal = SubResource("StyleBoxFlat_pill")
 text = "🛡 Guild"
 
@@ -302,30 +344,30 @@ alignment = 1
 theme_override_constants/separation = 16
 
 [node name="CampBtn" type="Button" parent="BottomControls/MainActionRow"]
-custom_minimum_size = Vector2(80, 52)
+custom_minimum_size = Vector2(106, 74)
 layout_mode = 2
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 21
 theme_override_styles/normal = SubResource("StyleBoxFlat_pill")
 text = "⛺ Camp"
 
 [node name="StartButton" type="Button" parent="BottomControls/MainActionRow"]
-custom_minimum_size = Vector2(190, 54)
+custom_minimum_size = Vector2(256, 80)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.1, 0.08, 0.04, 1)
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 30
 theme_override_styles/normal = SubResource("StyleBoxFlat_startbtn")
 theme_override_styles/hover = SubResource("StyleBoxFlat_startbtn")
 text = "Start (x5 ⚡)"
 
 [node name="RumbleBtn" type="Button" parent="BottomControls/MainActionRow"]
-custom_minimum_size = Vector2(80, 52)
+custom_minimum_size = Vector2(106, 74)
 layout_mode = 2
-theme_override_font_sizes/font_size = 13
+theme_override_font_sizes/font_size = 21
 theme_override_styles/normal = SubResource("StyleBoxFlat_pill")
 text = "⚔ Rumble"
 
 [node name="ChatTicker" type="PanelContainer" parent="BottomControls"]
-custom_minimum_size = Vector2(0, 24)
+custom_minimum_size = Vector2(0, 42)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_pill")
 
@@ -336,6 +378,6 @@ layout_mode = 2
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.7, 0.78, 0.9, 0.85)
-theme_override_font_sizes/font_size = 10
+theme_override_font_sizes/font_size = 18
 text = " [System] Hunter Raven unlocked Hellhound Evolution on Floor 3!"
 vertical_alignment = 1

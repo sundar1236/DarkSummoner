@@ -1,10 +1,14 @@
 class_name PlayerController
 extends CharacterBody2D
 
+const CharacterAnimationControllerClass = preload("res://scripts/combat/character_animation_controller.gd")
+const OverheadHealthBarClass = preload("res://scripts/combat/overhead_health_bar.gd")
+
 # Lone Hunter player controller for Abyssal Altar.
-# Handles independent dual-stick movement and aim, continuous hold-to-attack firing,
-# 2.5D character animations, weapon sockets, dodge shadow afterimages, active skills,
-# and autonomous pet coordination.
+# Handles Archero 2-style stutter-step auto-aiming & movement, 3-stage combo attacks,
+# state-driven 2.5D chibi animations, overhead floating health bar, weapon sockets,
+# character-specific visual ambience (Shadow Hunter streaks, Storm Reaper lightning sparks,
+# Soul Binder orbiting spirit companion), dodge shadow afterimages, and active skills.
 
 signal skill_cooldown_updated(current: float, max_val: float)
 signal dodge_cooldown_updated(current: float, max_val: float)
@@ -37,17 +41,26 @@ var skill_timer: float = 0.0
 var soul_auto_timer: float = 0.0
 var lightning_auto_timer: float = 0.0
 
-# Animation & Visuals
+# Animation & Visual Subsystems
+var anim_ctrl: CharacterAnimationController
+var overhead_hp_bar: OverheadHealthBar
 var anim_time: float = 0.0
 var footstep_timer: float = 0.0
-var attack_lurch_offset: Vector2 = Vector2.ZERO
 
 var shadow_sprite: Sprite2D
+var ground_ring: Node2D
 var sprite: Sprite2D
 var weapon_sprite: Sprite2D
 var aim_indicator: Node2D
 var pet_container: Node2D
 var weapon_socket: Marker2D
+
+# Character-Specific Visuals
+var spirit_wisp: Node2D
+var storm_sparks: Node2D
+var combo_streak: int = 0
+var combo_streak_timer: float = 0.0
+var combo_streak_label: Label
 
 func _ready() -> void:
 	add_to_group("player")
@@ -59,30 +72,42 @@ func _ready() -> void:
 	_spawn_pets()
 	
 	GameManager.inventory_changed.connect(_on_inventory_changed)
+	GameManager.player_hp_changed.connect(_on_player_hp_changed)
+	GameManager.run_skill_applied.connect(func(_id, _lvl): _refresh_stats(); _spawn_pets())
+	
+	if overhead_hp_bar:
+		overhead_hp_bar.set_health(GameManager.player_hp, GameManager.player_max_hp)
 
 func _setup_visuals() -> void:
 	# 1. Ground contact shadow (Archero 2 style soft oval shadow)
 	shadow_sprite = Sprite2D.new()
 	shadow_sprite.texture = TextureLoader.get_texture("res://assets/sprites/vfx/ground_shadow.png")
 	shadow_sprite.position = Vector2(0, 22)
-	shadow_sprite.modulate = Color(1.0, 1.0, 1.0, 0.75)
-	shadow_sprite.z_index = -1
+	shadow_sprite.scale = Vector2(1.15, 1.15)
+	shadow_sprite.modulate = Color(1.0, 1.0, 1.0, 0.78)
+	shadow_sprite.z_index = -2
 	add_child(shadow_sprite)
 	
-	# 2. Main Character Sprite
+	# 2. Ground subtle hero indicator ring
+	ground_ring = Node2D.new()
+	ground_ring.z_index = -1
+	ground_ring.draw.connect(_draw_ground_ring)
+	add_child(ground_ring)
+	
+	# 3. Main Character Sprite
 	sprite = Sprite2D.new()
 	_update_character_sprite()
 	sprite.position = Vector2(0, -6)
 	add_child(sprite)
 	
-	# 3. Collision shape
+	# 4. Collision shape
 	var col := CollisionShape2D.new()
 	var shape := CircleShape2D.new()
 	shape.radius = 18.0
 	col.shape = shape
 	add_child(col)
 	
-	# 4. Weapon socket for projectile/slash spawning
+	# 5. Weapon socket for projectile/slash spawning
 	weapon_socket = Marker2D.new()
 	weapon_socket.position = Vector2(16, 0)
 	add_child(weapon_socket)
@@ -92,14 +117,100 @@ func _setup_visuals() -> void:
 	weapon_sprite.position = Vector2(2, 0)
 	weapon_socket.add_child(weapon_sprite)
 	
-	# 5. Aim reticle indicator line
+	# 6. Animation Controller
+	anim_ctrl = CharacterAnimationControllerClass.new()
+	add_child(anim_ctrl)
+	anim_ctrl.setup(sprite, weapon_socket, weapon_sprite)
+	
+	# 7. Aim reticle indicator line
 	aim_indicator = Node2D.new()
 	aim_indicator.draw.connect(_draw_aim_reticle)
 	add_child(aim_indicator)
 	
-	# 6. Companions container
+	# 8. Overhead floating health bar
+	overhead_hp_bar = OverheadHealthBarClass.new()
+	overhead_hp_bar.position = Vector2(0, -42)
+	add_child(overhead_hp_bar)
+	
+	# 9. Combo streak badge label
+	combo_streak_label = Label.new()
+	combo_streak_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	combo_streak_label.add_theme_font_size_override("font_size", 10)
+	combo_streak_label.add_theme_color_override("font_color", Color(1.0, 0.85, 0.2, 1.0))
+	combo_streak_label.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 1.0))
+	combo_streak_label.size = Vector2(80, 16)
+	combo_streak_label.position = Vector2(-40, -58)
+	combo_streak_label.visible = false
+	combo_streak_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(combo_streak_label)
+	
+	# 10. Companions container
 	pet_container = Node2D.new()
 	add_child(pet_container)
+	
+	# 11. Character-Specific Ambience Nodes
+	_setup_character_ambience()
+
+func _setup_character_ambience() -> void:
+	var char_id := "shadow_hunter"
+	if GameManager.current_character:
+		char_id = GameManager.current_character.id
+		
+	# Clean up previous ambience
+	if spirit_wisp:
+		spirit_wisp.queue_free()
+		spirit_wisp = null
+	if storm_sparks:
+		storm_sparks.queue_free()
+		storm_sparks = null
+		
+	match char_id:
+		"soul_binder":
+			# Clearly visible floating spirit companion orbiting Soul Binder
+			spirit_wisp = Node2D.new()
+			spirit_wisp.z_index = 5
+			spirit_wisp.draw.connect(_draw_spirit_wisp)
+			add_child(spirit_wisp)
+		"storm_reaper":
+			# Ambient electric crackle sparks for Storm Reaper
+			storm_sparks = Node2D.new()
+			storm_sparks.z_index = 4
+			storm_sparks.draw.connect(_draw_storm_sparks)
+			add_child(storm_sparks)
+
+func _draw_ground_ring() -> void:
+	# Subtle hero circle indicator matching character primary color
+	var col := Color(0.8, 0.4, 1.0, 0.4)
+	if GameManager.current_character:
+		col = Color(GameManager.current_character.primary_color.r, GameManager.current_character.primary_color.g, GameManager.current_character.primary_color.b, 0.35)
+	ground_ring.draw_arc(Vector2(0, 22), 22.0, 0.0, TAU, 32, col, 1.5, true)
+
+func _draw_spirit_wisp() -> void:
+	if not spirit_wisp:
+		return
+	# Orbit around player at radius 36.0, height -16.0
+	var orbit_angle := anim_time * 3.2
+	var wisp_pos := Vector2(cos(orbit_angle) * 36.0, -16.0 + sin(orbit_angle) * 12.0)
+	
+	# Outer soft soul glow
+	spirit_wisp.draw_circle(wisp_pos, 8.0, Color(0.2, 0.95, 0.6, 0.35))
+	# Inner bright spirit core
+	spirit_wisp.draw_circle(wisp_pos, 4.5, Color(0.5, 1.0, 0.8, 0.9))
+	spirit_wisp.draw_circle(wisp_pos + Vector2(1, -1), 1.8, Color(1.0, 1.0, 1.0, 0.95))
+	# Little ethereal tail
+	var tail_pos := wisp_pos - Vector2(cos(orbit_angle + 0.3), sin(orbit_angle + 0.3)) * 6.0
+	spirit_wisp.draw_circle(tail_pos, 2.5, Color(0.2, 0.9, 0.55, 0.4))
+
+func _draw_storm_sparks() -> void:
+	if not storm_sparks:
+		return
+	# Crackling intermittent cyan electric arcs around the storm armor
+	var spark_cycle: float = fmod(anim_time * 6.0, 1.0)
+	if spark_cycle < 0.4:
+		var p1 := Vector2(randf_range(-14, 14), randf_range(-24, 6))
+		var p2 := p1 + Vector2(randf_range(-10, 10), randf_range(-10, 10))
+		var p3 := p2 + Vector2(randf_range(-8, 8), randf_range(-8, 8))
+		storm_sparks.draw_polyline([p1, p2, p3], Color(0.4, 0.9, 1.0, 0.85), 1.6)
 
 func _update_character_sprite() -> void:
 	if not sprite:
@@ -142,9 +253,13 @@ func _refresh_stats() -> void:
 	current_speed = stats.get("speed", 240.0)
 	attack_rate = stats.get("attack_rate", 2.2)
 	
+	var cdr: float = stats.get("dodge_cdr", 0.0)
+	dodge_cooldown = maxf(0.45, 1.3 * (1.0 - cdr))
+	
 	if GameManager.current_character:
 		skill_cooldown = GameManager.current_character.active_skill_cooldown
 	_update_character_sprite()
+	_setup_character_ambience()
 
 func _spawn_pets() -> void:
 	for child in pet_container.get_children():
@@ -165,6 +280,10 @@ func _on_inventory_changed() -> void:
 	_refresh_stats()
 	_spawn_pets()
 
+func _on_player_hp_changed(curr: float, max_v: float) -> void:
+	if overhead_hp_bar:
+		overhead_hp_bar.set_health(curr, max_v)
+
 func _physics_process(delta: float) -> void:
 	anim_time += delta
 	_handle_movement(delta)
@@ -172,6 +291,7 @@ func _physics_process(delta: float) -> void:
 	_handle_animations(delta)
 	_handle_cooldowns(delta)
 	_handle_autonomous_projectiles(delta)
+	_handle_combo_streak(delta)
 
 func _handle_movement(_delta: float) -> void:
 	if is_dodging:
@@ -208,7 +328,13 @@ func _handle_aim_and_attack(delta: float) -> void:
 		
 	var is_moving: bool = move_vec.length_squared() > 0.04 or velocity.length_squared() > 100.0
 	
-	if is_moving:
+	# 1. Independent Aim & Attack Joystick (Dual-Stick Mobile Controls)
+	if aim_joystick and aim_joystick.is_pressed and (aim_joystick.output_vector.length_squared() > 0.01 or aim_joystick.is_aim_and_attack):
+		if aim_joystick.output_vector.length_squared() > 0.01:
+			aim_direction = aim_joystick.output_vector.normalized()
+		is_attacking = true
+	# 2. Movement / Auto-Aim (Single Stick or when Aim Stick is idle)
+	elif is_moving:
 		# Archero Stutter-Step Mechanic: Single joystick controls movement and orienting.
 		# Moving suppresses attack; hunter must stop to shoot, making positioning tactical.
 		if move_vec.length_squared() > 0.01:
@@ -235,7 +361,12 @@ func _handle_aim_and_attack(delta: float) -> void:
 	weapon_socket.rotation = aim_direction.angle()
 	
 	# Attack continuous firing while stationary and targeting an enemy
-	var fire_interval: float = 1.0 / maxf(attack_rate, 0.5)
+	# Shadow Hunter consecutive hits slightly accelerate firing speed
+	var effective_attack_rate := attack_rate
+	if combo_streak >= 3:
+		effective_attack_rate *= (1.0 + float(combo_streak) * 0.05)
+		
+	var fire_interval: float = 1.0 / maxf(effective_attack_rate, 0.5)
 	if is_attacking:
 		attack_timer += delta
 		if attack_timer >= fire_interval:
@@ -259,24 +390,25 @@ func _find_nearest_enemy() -> Node2D:
 func _handle_animations(delta: float) -> void:
 	var is_moving: bool = velocity.length_squared() > 100.0
 	
-	# Directional Facing: Flip horizontally based on movement when running, or enemy aim when shooting
-	var face_left: bool = (velocity.x < 0.0) if is_moving else (aim_direction.x < 0.0)
-	sprite.flip_h = face_left
-	
-	if is_moving:
-		# Dynamic running stride with forward lean
-		var target_rot: float = (velocity.x / current_speed) * 0.12
-		sprite.rotation = lerp_angle(sprite.rotation, target_rot, 12.0 * delta)
-		var stride_bounce: float = abs(sin(anim_time * 14.0)) * 3.5
-		sprite.position = Vector2(0, -6.0 - stride_bounce) + attack_lurch_offset
-	else:
-		# Idle breathing bob
-		sprite.rotation = lerp_angle(sprite.rotation, 0.0, 10.0 * delta)
-		var idle_bob: float = sin(anim_time * 3.5) * 1.8
-		sprite.position = Vector2(0, -6.0 + idle_bob) + attack_lurch_offset
+	if anim_ctrl:
+		if is_moving and not is_dodging:
+			anim_ctrl.play_run()
+		elif not is_dodging and not is_attacking and anim_ctrl.current_state != CharacterAnimationController.AnimState.ATTACK:
+			anim_ctrl.play_idle()
+		anim_ctrl.update(delta, velocity, aim_direction, current_speed)
+		
+	if spirit_wisp:
+		spirit_wisp.queue_redraw()
+	if storm_sparks:
+		storm_sparks.queue_redraw()
 
-	# Decay attack recoil lurch smoothly
-	attack_lurch_offset = attack_lurch_offset.move_toward(Vector2.ZERO, 50.0 * delta)
+func _handle_combo_streak(delta: float) -> void:
+	if combo_streak_timer > 0.0:
+		combo_streak_timer -= delta
+		if combo_streak_timer <= 0.0:
+			combo_streak = 0
+			if combo_streak_label:
+				combo_streak_label.visible = false
 
 func _fire_basic_attack() -> void:
 	var stats := GameManager.get_player_effective_stats()
@@ -300,17 +432,31 @@ func _fire_basic_attack() -> void:
 				attack_type = "slash"
 				sfx_name = "shoot_slash"
 			
-	# Attack recoil lurch in aim direction
-	attack_lurch_offset = aim_direction * 6.0
-	
-	# Weapon sprite thrust/swing
-	if weapon_sprite:
-		weapon_sprite.position = Vector2(8, 0)
-		var w_tw := weapon_sprite.create_tween()
-		w_tw.tween_property(weapon_sprite, "position", Vector2(2, 0), 0.1).set_trans(Tween.TRANS_QUAD)
+	# Trigger 3-stage combo via CharacterAnimationController
+	var combo_stage: int = 0
+	if anim_ctrl:
+		combo_stage = anim_ctrl.trigger_attack(aim_direction, attack_type)
+		
+	# Combo stage scaling: Stage 2 (heavy thrust) deals +30% bonus damage
+	if combo_stage == 2:
+		final_dmg *= 1.30
+		_trigger_camera_impact(2.0, 0.1)
+		
+	# Shadow Hunter consecutive streak tracking
+	var char_id := "shadow_hunter"
+	if GameManager.current_character:
+		char_id = GameManager.current_character.id
+	if char_id == "shadow_hunter":
+		combo_streak = mini(combo_streak + 1, 10)
+		combo_streak_timer = 1.4
+		if combo_streak >= 2 and combo_streak_label:
+			combo_streak_label.text = "COMBO x%d!" % combo_streak
+			combo_streak_label.visible = true
+			if combo_streak >= 4:
+				_spawn_afterimage()
 		
 	# Slash crescent visual swing
-	_spawn_slash_vfx(aim_direction, attack_type)
+	_spawn_slash_vfx(aim_direction, attack_type, combo_stage)
 	
 	var proj := ProjectileController.new()
 	get_parent().add_child(proj)
@@ -319,20 +465,44 @@ func _fire_basic_attack() -> void:
 	var p_speed := 720.0 if attack_type == "lightning" else 600.0
 	proj.setup(final_dmg, is_crit, aim_direction, p_speed, attack_type, true)
 	
-	if stats.get("synergies", {}).get("has_burn_on_hit", false):
+	if stats.get("burn_on_hit", false) or stats.get("synergies", {}).get("has_burn_on_hit", false):
 		proj.has_burn = true
-	if stats.get("synergies", {}).get("has_life_steal", false):
+	if stats.get("life_steal", false) or stats.get("synergies", {}).get("has_life_steal", false):
 		proj.has_life_steal = true
+		
+	# Spawn extra spread projectiles from Shadow Flurry or blessing skills
+	var extra_projs: int = stats.get("extra_projectiles", 0)
+	for i in range(extra_projs):
+		var sign_mult := 1.0 if i % 2 == 0 else -1.0
+		var spread_angle := (float(i / 2 + 1) * 0.18) * sign_mult
+		var side_dir := aim_direction.rotated(spread_angle)
+		var extra_proj := ProjectileController.new()
+		get_parent().add_child(extra_proj)
+		extra_proj.global_position = weapon_socket.global_position
+		extra_proj.setup(final_dmg * 0.75, is_crit, side_dir, p_speed, attack_type, true)
+		if proj.has_burn: extra_proj.has_burn = true
+		if proj.has_life_steal: extra_proj.has_life_steal = true
 		
 	if AudioManager:
 		AudioManager.play_sfx(sfx_name, 0.06)
 
-func _spawn_slash_vfx(dir: Vector2, atk_type: String) -> void:
+func _spawn_slash_vfx(dir: Vector2, atk_type: String, stage_idx: int = 0) -> void:
 	var slash := Sprite2D.new()
 	slash.texture = TextureLoader.get_texture("res://assets/sprites/projectiles/proj_slash.png")
 	slash.global_position = weapon_socket.global_position + dir * 10.0
 	slash.rotation = dir.angle()
-	slash.scale = Vector2(0.65, 0.65)
+	
+	# Combo stage visual variance
+	var initial_scale := Vector2(0.65, 0.65)
+	var target_scale := Vector2(1.3, 1.1)
+	if stage_idx == 1:
+		initial_scale = Vector2(0.7, -0.7) # Reverse mirrored swing
+		target_scale = Vector2(1.35, -1.15)
+	elif stage_idx == 2:
+		initial_scale = Vector2(0.8, 0.8) # Heavy piercing thrust
+		target_scale = Vector2(1.6, 1.25)
+		
+	slash.scale = initial_scale
 	var col := Color(0.95, 0.75, 1.0, 0.85)
 	match atk_type:
 		"lightning":
@@ -346,8 +516,8 @@ func _spawn_slash_vfx(dir: Vector2, atk_type: String) -> void:
 	get_parent().add_child(slash)
 	
 	var tw := slash.create_tween()
-	tw.tween_property(slash, "scale", Vector2(1.3, 1.1), 0.09).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-	tw.parallel().tween_property(slash, "modulate:a", 0.0, 0.11).set_trans(Tween.TRANS_QUAD)
+	tw.tween_property(slash, "scale", target_scale, 0.10).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tw.parallel().tween_property(slash, "modulate:a", 0.0, 0.12).set_trans(Tween.TRANS_QUAD)
 	tw.tween_callback(slash.queue_free)
 
 func trigger_dodge() -> bool:
@@ -365,13 +535,12 @@ func trigger_dodge() -> bool:
 		dash_dir = aim_direction
 	velocity = dash_dir * (current_speed * dodge_speed_mult)
 	
+	# Cleanly interrupt attack with dodge in animation controller
+	if anim_ctrl:
+		anim_ctrl.trigger_dodge(dash_dir)
+		
 	# Spawn initial shadow afterimage
 	_spawn_afterimage()
-	
-	# Visual ghost flash
-	var tween := create_tween()
-	tween.tween_property(sprite, "modulate:a", 0.35, 0.08)
-	tween.tween_property(sprite, "modulate:a", 1.0, 0.16)
 	
 	if AudioManager:
 		AudioManager.play_sfx("dodge")
@@ -399,6 +568,9 @@ func trigger_active_skill() -> bool:
 	skill_timer = skill_cooldown
 	if AudioManager:
 		AudioManager.play_sfx("skill")
+		
+	if anim_ctrl:
+		anim_ctrl.trigger_skill()
 		
 	var char_id := GameManager.current_character.id if GameManager.current_character else "shadow_hunter"
 	var stats := GameManager.get_player_effective_stats()
@@ -520,14 +692,21 @@ func take_player_damage(amount: float) -> void:
 	GameManager.damage_player(amount)
 	_trigger_camera_impact(5.5, 0.16)
 	
-	# Hit flash & flinch recoil
-	var tween := create_tween()
-	sprite.modulate = Color(1.8, 0.3, 0.3, 1.0)
-	attack_lurch_offset = -aim_direction * 8.0
-	tween.tween_property(sprite, "modulate", Color(1.0, 1.0, 1.0, 1.0), 0.18)
+	# Hurt interrupt in animation controller
+	if anim_ctrl:
+		anim_ctrl.trigger_hurt(aim_direction)
+		
+	# Combo streak reset on damage taken
+	combo_streak = 0
+	if combo_streak_label:
+		combo_streak_label.visible = false
 	
 	if AudioManager:
 		AudioManager.play_sfx("enemy_hit")
+
+func trigger_victory() -> void:
+	if anim_ctrl:
+		anim_ctrl.trigger_victory()
 
 func _trigger_camera_impact(intensity: float, duration: float) -> void:
 	var cam := get_viewport().get_camera_2d()

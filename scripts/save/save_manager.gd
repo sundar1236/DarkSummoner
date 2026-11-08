@@ -7,15 +7,67 @@ const SAVE_PATH: String = "user://abyssal_altar_profile.json"
 const SAVE_VERSION: int = 1
 
 signal shades_changed(new_amount: int)
+signal energy_changed(current: int, max_val: int)
+signal gold_changed(new_amount: int)
+signal gems_changed(new_amount: int)
+signal profile_changed()
 signal profile_loaded()
 
 var shades: int = 0
+var gems: int = 150
+var energy: int = 45
+var max_energy: int = 50
+var profile_gold: int = 5000
+var player_name: String = "Hunter Raven"
+var player_level: int = 5
+var active_character_id: String = "shadow_hunter"
+var difficulty: String = "normal" # "normal", "hard", "torment"
+var patrol_last_claim: int = 0
+var chapter_stars: Dictionary = { 1: 3, 2: 1, 3: 0 }
+var daily_free_energy_claimed: bool = false
+var chapter_pack_purchased: bool = false
+
 var highest_floor_unlocked: int = 1
 var unlocked_characters: Array[String] = ["shadow_hunter"]
 var character_levels: Dictionary = {
 	"shadow_hunter": 1,
 	"storm_reaper": 1,
-	"soul_binder": 1
+	"soul_binder": 1,
+	"frost_valkyrie": 1
+}
+
+var character_shards: Dictionary = {
+	"shadow_hunter": 45,
+	"storm_reaper": 20,
+	"soul_binder": 12,
+	"frost_valkyrie": 0
+}
+
+var character_stars: Dictionary = {
+	"shadow_hunter": 2,
+	"storm_reaper": 3,
+	"soul_binder": 2,
+	"frost_valkyrie": 1
+}
+
+var equipment_levels: Dictionary = {
+	"weapon": 60,
+	"amulet": 55,
+	"ring": 58,
+	"helmet": 60,
+	"armor": 60,
+	"boots": 55
+}
+
+var talent_cards: Dictionary = {
+	"glory": 5,
+	"tactics": 4,
+	"swift_wind": 3,
+	"super_crit": 4,
+	"iron_will": 3,
+	"vampiric": 3,
+	"storm_call": 0,
+	"flame_burst": 0
 }
 
 # Permanent upgrade tiers (0 to 5)
@@ -135,6 +187,120 @@ func get_permanent_starting_gold() -> int:
 func get_permanent_potion_heal_bonus() -> float:
 	return permanent_upgrades.get("potion_potency", 0) * 12.0
 
+func spend_energy(amount: int) -> bool:
+	if amount <= 0:
+		return true
+	if energy >= amount:
+		energy -= amount
+		save_profile()
+		energy_changed.emit(energy, max_energy)
+		return true
+	return false
+
+func add_energy(amount: int) -> void:
+	if amount <= 0:
+		return
+	energy += amount
+	save_profile()
+	energy_changed.emit(energy, max_energy)
+
+func spend_gold(amount: int) -> bool:
+	if amount <= 0:
+		return true
+	if profile_gold >= amount:
+		profile_gold -= amount
+		save_profile()
+		gold_changed.emit(profile_gold)
+		return true
+	return false
+
+func add_gold(amount: int) -> void:
+	if amount <= 0:
+		return
+	profile_gold += amount
+	save_profile()
+	gold_changed.emit(profile_gold)
+
+func spend_gems(amount: int) -> bool:
+	if amount <= 0:
+		return true
+	if gems >= amount or shades >= amount:
+		gems = max(0, gems - amount)
+		shades = max(0, shades - amount)
+		save_profile()
+		gems_changed.emit(gems)
+		shades_changed.emit(shades)
+		return true
+	return false
+
+func add_gems(amount: int) -> void:
+	if amount <= 0:
+		return
+	gems += amount
+	shades += amount
+	save_profile()
+	gems_changed.emit(gems)
+	shades_changed.emit(shades)
+
+func set_difficulty(diff: String) -> void:
+	difficulty = diff
+	save_profile()
+	profile_changed.emit()
+
+func set_player_name(new_name: String) -> void:
+	player_name = new_name
+	save_profile()
+	profile_changed.emit()
+
+func star_up_character(char_id: String) -> bool:
+	var cur_stars: int = character_stars.get(char_id, 1)
+	if cur_stars >= 6:
+		return false
+	var shard_cost: int = cur_stars * 15
+	var gold_cost: int = cur_stars * 800
+	var cur_shards: int = character_shards.get(char_id, 0)
+	
+	if cur_shards >= shard_cost and spend_gold(gold_cost):
+		character_shards[char_id] = cur_shards - shard_cost
+		character_stars[char_id] = cur_stars + 1
+		save_profile()
+		profile_changed.emit()
+		if AudioManager: AudioManager.play_sfx("upgrade")
+		return true
+	return false
+
+func upgrade_equipment_slot(slot_name: String) -> bool:
+	var cur_lvl: int = equipment_levels.get(slot_name, 1)
+	var cost: int = cur_lvl * 50
+	if spend_gold(cost):
+		equipment_levels[slot_name] = cur_lvl + 1
+		save_profile()
+		profile_changed.emit()
+		if AudioManager: AudioManager.play_sfx("upgrade")
+		return true
+	return false
+
+func claim_patrol_rewards() -> Dictionary:
+	var base_gold: int = 1200 + (player_level * 150)
+	var base_xp: int = 400 + (player_level * 50)
+	add_gold(base_gold)
+	patrol_last_claim = int(Time.get_unix_time_from_system())
+	save_profile()
+	return { "gold": base_gold, "xp": base_xp }
+
+func calculate_combat_power() -> int:
+	var base_power := 2500 * player_level
+	var gear_power := 0
+	for lvl in equipment_levels.values():
+		gear_power += int(lvl) * 45
+	var star_power := 0
+	for stars in character_stars.values():
+		star_power += int(stars) * 650
+	var card_power := 0
+	for stars in talent_cards.values():
+		card_power += int(stars) * 400
+	return base_power + gear_power + star_power + card_power
+
 func save_profile() -> void:
 	# Capture settings
 	if AudioManager:
@@ -147,9 +313,25 @@ func save_profile() -> void:
 	var data: Dictionary = {
 		"version": SAVE_VERSION,
 		"shades": shades,
+		"gems": gems,
+		"energy": energy,
+		"max_energy": max_energy,
+		"profile_gold": profile_gold,
+		"player_name": player_name,
+		"player_level": player_level,
+		"active_character_id": active_character_id,
+		"difficulty": difficulty,
+		"patrol_last_claim": patrol_last_claim,
+		"chapter_stars": chapter_stars,
+		"daily_free_energy_claimed": daily_free_energy_claimed,
+		"chapter_pack_purchased": chapter_pack_purchased,
 		"highest_floor_unlocked": highest_floor_unlocked,
 		"unlocked_characters": unlocked_characters,
 		"character_levels": character_levels,
+		"character_shards": character_shards,
+		"character_stars": character_stars,
+		"equipment_levels": equipment_levels,
+		"talent_cards": talent_cards,
 		"permanent_upgrades": permanent_upgrades,
 		"settings": settings_data
 	}
@@ -178,7 +360,43 @@ func load_profile() -> void:
 	
 	var dict: Dictionary = parsed
 	shades = dict.get("shades", 0)
+	gems = dict.get("gems", max(150, shades))
+	energy = dict.get("energy", 45)
+	max_energy = dict.get("max_energy", 50)
+	profile_gold = dict.get("profile_gold", 5000)
+	player_name = dict.get("player_name", "Hunter Raven")
+	player_level = dict.get("player_level", 5)
+	active_character_id = dict.get("active_character_id", "shadow_hunter")
+	difficulty = dict.get("difficulty", "normal")
+	patrol_last_claim = dict.get("patrol_last_claim", 0)
+	daily_free_energy_claimed = dict.get("daily_free_energy_claimed", false)
+	chapter_pack_purchased = dict.get("chapter_pack_purchased", false)
 	highest_floor_unlocked = dict.get("highest_floor_unlocked", 1)
+	
+	var ch_stars: Variant = dict.get("chapter_stars", {})
+	if ch_stars is Dictionary:
+		for k in ch_stars.keys():
+			chapter_stars[int(k)] = ch_stars[k]
+			
+	var c_shards: Variant = dict.get("character_shards", {})
+	if c_shards is Dictionary:
+		for k in c_shards.keys():
+			character_shards[str(k)] = c_shards[k]
+			
+	var c_stars: Variant = dict.get("character_stars", {})
+	if c_stars is Dictionary:
+		for k in c_stars.keys():
+			character_stars[str(k)] = c_stars[k]
+			
+	var eq_lvls: Variant = dict.get("equipment_levels", {})
+	if eq_lvls is Dictionary:
+		for k in eq_lvls.keys():
+			equipment_levels[str(k)] = eq_lvls[k]
+			
+	var t_cards: Variant = dict.get("talent_cards", {})
+	if t_cards is Dictionary:
+		for k in t_cards.keys():
+			talent_cards[str(k)] = t_cards[k]
 	
 	var chars: Variant = dict.get("unlocked_characters", ["shadow_hunter"])
 	if chars is Array:
