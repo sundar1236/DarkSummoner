@@ -409,7 +409,7 @@ const GEAR_SET_DEFINITIONS: Dictionary = {
 		"pieces": 4,
 		"bonuses": {
 			2: {"bonus_atk": 8.0, "bonus_crit": 0.03},
-			4: {"bonus_hp": 40.0, "bonus_crit": 0.08}
+			4: {"bonus_hp": 40.0, "bonus_crit": 0.05}
 		}
 	},
 	"stormguard": {
@@ -435,9 +435,14 @@ func get_active_gear_sets() -> Array[Dictionary]:
 		var count: int = int(counts.get(set_id, 0))
 		var thresholds: Dictionary = definition.get("bonuses", {})
 		var active_threshold := 0
+		var active_bonus := {"bonus_atk": 0.0, "bonus_hp": 0.0, "bonus_crit": 0.0, "bonus_speed": 0.0, "bonus_atk_speed": 0.0}
 		for threshold in thresholds:
-			if count >= int(threshold):
-				active_threshold = maxi(active_threshold, int(threshold))
+			if count < int(threshold):
+				continue
+			active_threshold = maxi(active_threshold, int(threshold))
+			var threshold_bonus: Dictionary = thresholds[threshold]
+			for stat_name in active_bonus:
+				active_bonus[stat_name] += float(threshold_bonus.get(stat_name, 0.0))
 		active.append({
 			"id": set_id,
 			"name": str(definition.get("name", set_id)),
@@ -446,7 +451,7 @@ func get_active_gear_sets() -> Array[Dictionary]:
 			"required": int(definition.get("pieces", 0)),
 			"active_threshold": active_threshold,
 			"next_threshold": _get_next_gear_set_threshold(thresholds, count),
-			"bonus": thresholds.get(active_threshold, {}).duplicate(true) if active_threshold > 0 else {}
+			"bonus": active_bonus if active_threshold > 0 else {}
 		})
 	return active
 
