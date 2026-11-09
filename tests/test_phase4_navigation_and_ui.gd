@@ -135,7 +135,7 @@ func test_main_shell_orchestration() -> void:
 	await get_tree().process_frame
 	await get_tree().process_frame
 	assert_test(shell.current_tab == 0 and shell.screen_shop.visible, "Campaign daily-tasks shortcut opens the Shop screen")
-	assert_test(shell.screen_shop.get_node("ScrollContainer").scroll_vertical > 0, "Daily-tasks shortcut scrolls to the mission panel")
+	assert_test((shell.screen_shop.get_node("ScrollContainer") as ScrollContainer).scroll_vertical > 0, "Daily-tasks shortcut scrolls to the mission panel")
 	
 	# Switch to tab 1 (HeroLoadout)
 	shell.nav_dock.select_tab(1)
@@ -177,11 +177,11 @@ func test_campaign_screen_features() -> void:
 	# Campaign hub shows only real, implemented actions.
 	assert_test(camp.banner_title.text == "Tower Expedition", "Campaign banner describes the actual tower progression")
 	assert_test(not camp.banner_btn.visible, "Non-functional live-event carousel is not clickable")
-	assert_test(not camp.get_node("LeftSidebar").visible, "Unimplemented VIP, gift, and ranking shortcuts are hidden")
+	assert_test(not (camp.get_node("LeftSidebar") as Control).visible, "Unimplemented VIP, gift, and ranking shortcuts are hidden")
 	assert_test(not camp.btn_friends.visible, "Unimplemented social shortcut is hidden")
-	assert_test(not camp.get_node("BottomControls/QuickAccessRow/ChestBtn").visible, "Repeatable placeholder chest reward is hidden")
-	assert_test(not camp.get_node("BottomControls/QuickAccessRow/GuildBtn").visible, "Unimplemented guild shortcut is hidden")
-	assert_test(not camp.get_node("BottomControls/ChatTicker").visible, "Fake online-player ticker is hidden")
+	assert_test(not (camp.get_node("BottomControls/QuickAccessRow/ChestBtn") as Button).visible, "Repeatable placeholder chest reward is hidden")
+	assert_test(not (camp.get_node("BottomControls/QuickAccessRow/GuildBtn") as Button).visible, "Unimplemented guild shortcut is hidden")
+	assert_test(not (camp.get_node("BottomControls/ChatTicker") as Control).visible, "Fake online-player ticker is hidden")
 	var tasks_requested := [false]
 	camp.daily_tasks_requested.connect(func(): tasks_requested[0] = true)
 	camp.btn_tasks.pressed.emit()
