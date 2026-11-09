@@ -151,6 +151,10 @@ func start_new_run(char_id: String, start_floor: int = 1) -> void:
 	for item_id in starter_ids:
 		var data := ItemDatabase.get_item(item_id)
 		if data:
+			# Persistent equipment is handled by the six character gear slots.
+			# The in-run Summoning Circle only receives runes, cores, and relics.
+			if not data.equipment_slot.is_empty():
+				continue
 			var inst := ItemInstance.new(data, Vector2i(slot_x, slot_y), 0)
 			if grid_manager.can_place_item(inst, inst.grid_pos, altar_items):
 				altar_items.append(inst)
