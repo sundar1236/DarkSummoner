@@ -1,9 +1,12 @@
-[gd_scene load_steps=5 format=3 uid="uid://c6charselectview01"]
+[gd_scene load_steps=8 format=3 uid="uid://c6charselectview01"]
 
 [ext_resource type="Script" path="res://scripts/characters/character_select_view.gd" id="1_csv"]
 [ext_resource type="Texture2D" path="res://assets/art/backgrounds/tower_altar_bg.png" id="2_bg"]
 [ext_resource type="Texture2D" path="res://assets/art/characters/shadow_hunter_portrait.png" id="3_por"]
 [ext_resource type="Texture2D" path="res://assets/art/ui/icon_padlock.png" id="4_lck"]
+[ext_resource type="Texture2D" path="res://assets/art/ui_reference/card_full_shadow_hunter.png" id="5_hunter"]
+[ext_resource type="Texture2D" path="res://assets/art/ui_reference/card_full_storm_reaper.png" id="6_reaper"]
+[ext_resource type="Texture2D" path="res://assets/art/ui_reference/card_full_soul_binder.png" id="7_binder"]
 
 [node name="CharacterSelectView" type="Control" node_paths=PackedStringArray("btn_back", "lbl_shades", "tabs_container", "portrait_rect", "locked_overlay", "lbl_char_name", "lbl_char_title", "lbl_char_weapon", "lbl_char_passive", "lbl_char_active", "lbl_char_stats", "lbl_unlock_requirement", "btn_action")]
 layout_mode = 3
@@ -76,7 +79,7 @@ layout_mode = 2
 size_flags_horizontal = 3
 theme_override_colors/font_color = Color(1, 0.9, 0.5, 1)
 theme_override_font_sizes/font_size = 24
-text = "CHAMPIONS OF THE DEPTHS"
+text = "CHOOSE YOUR CHAMPION"
 horizontal_alignment = 1
 
 [node name="ShadesBadge" type="HBoxContainer" parent="VBoxMain/TopBar"]
@@ -89,12 +92,12 @@ theme_override_font_sizes/font_size = 19
 text = "◆ 0 Shades"
 
 [node name="TabsRow" type="HBoxContainer" parent="VBoxMain"]
-custom_minimum_size = Vector2(0, 58)
+custom_minimum_size = Vector2(0, 250)
 layout_mode = 2
 theme_override_constants/separation = 10
 
 [node name="ShowcasePanel" type="PanelContainer" parent="VBoxMain"]
-custom_minimum_size = Vector2(0, 410)
+custom_minimum_size = Vector2(0, 350)
 layout_mode = 2
 size_flags_vertical = 3
 
