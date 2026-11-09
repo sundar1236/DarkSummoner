@@ -245,23 +245,19 @@ func add_gold(amount: int) -> void:
 func spend_gems(amount: int) -> bool:
 	if amount <= 0:
 		return true
-	if gems >= amount or shades >= amount:
-		gems = max(0, gems - amount)
-		shades = max(0, shades - amount)
-		save_profile()
-		gems_changed.emit(gems)
-		shades_changed.emit(shades)
-		return true
-	return false
+	if gems < amount:
+		return false
+	gems -= amount
+	save_profile()
+	gems_changed.emit(gems)
+	return true
 
 func add_gems(amount: int) -> void:
 	if amount <= 0:
 		return
 	gems += amount
-	shades += amount
 	save_profile()
 	gems_changed.emit(gems)
-	shades_changed.emit(shades)
 
 func set_difficulty(diff: String) -> void:
 	difficulty = diff
