@@ -113,7 +113,7 @@ func test_persistent_equipment_slots() -> void:
 
 	var gear_stats: Dictionary = SaveManager.get_equipped_gear_stats()
 	assert_true(gear_stats.get("bonus_hp", 0.0) >= 18.0, "Equipped gear contributes passive HP")
-	var old_upgrade_level: int = restored_helm.upgrade_level
+	var old_upgrade_level: int = equipped_helm.upgrade_level
 	assert_true(SaveManager.upgrade_equipped_gear("helmet"), "Blacksmith upgrades the equipped item")
 	var upgraded_helm := SaveManager.get_equipped_gear("helmet")
 	assert_true(upgraded_helm != null and upgraded_helm.upgrade_level == old_upgrade_level + 1, "Gear upgrade level is stored on the item instance")
