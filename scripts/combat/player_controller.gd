@@ -275,6 +275,13 @@ func _spawn_pets() -> void:
 		pet.setup(p_info.get("id", "wolf"), p_info.get("damage", 12.0), self)
 		offset_x += 100.0
 
+	var skill_stats := GameManager.get_player_effective_stats()
+	if skill_stats.get("pet", false):
+		var skill_pet := PetController.new()
+		pet_container.add_child(skill_pet)
+		skill_pet.target_offset = Vector2(offset_x, -35.0)
+		skill_pet.setup("wolf", 15.0 + float(skill_stats.get("pet_damage", 0.0)), self)
+
 func _on_inventory_changed() -> void:
 	_refresh_stats()
 	_spawn_pets()
@@ -372,6 +379,10 @@ func _find_nearest_enemy() -> Node2D:
 	var min_dist_sq: float = 1600.0 * 1600.0 # Full screen arena targeting
 	for e in enemies:
 		if is_instance_valid(e) and e is Node2D:
+			if "is_dead" in e and e.is_dead:
+				continue
+			if "hp" in e and e.hp <= 0.0:
+				continue
 			if "current_hp" in e and e.current_hp <= 0:
 				continue
 			var d_sq := global_position.distance_squared_to(e.global_position)
