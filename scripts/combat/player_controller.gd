@@ -14,7 +14,7 @@ signal skill_cooldown_updated(current: float, max_val: float)
 signal dodge_cooldown_updated(current: float, max_val: float)
 
 @export var move_joystick: VirtualJoystick
-@export var aim_joystick: VirtualJoystick
+@export var aim_joystick: VirtualJoystick = null
 
 var base_speed: float = 240.0
 var current_speed: float = 240.0
@@ -328,15 +328,14 @@ func _handle_aim_and_attack(delta: float) -> void:
 		
 	var is_moving: bool = move_vec.length_squared() > 0.04 or velocity.length_squared() > 100.0
 	
-	# 1. Independent Aim & Attack Joystick (Dual-Stick Mobile Controls)
+	# 1. Dedicated aim joystick override (if explicitly provided in test / custom mode)
 	if aim_joystick and aim_joystick.is_pressed and (aim_joystick.output_vector.length_squared() > 0.01 or aim_joystick.is_aim_and_attack):
 		if aim_joystick.output_vector.length_squared() > 0.01:
 			aim_direction = aim_joystick.output_vector.normalized()
 		is_attacking = true
-	# 2. Movement / Auto-Aim (Single Stick or when Aim Stick is idle)
+	# 2. Responsive Single Directional Movement Pad (Archero Stutter-Step Tactical Combat)
 	elif is_moving:
-		# Archero Stutter-Step Mechanic: Single joystick controls movement and orienting.
-		# Moving suppresses attack; hunter must stop to shoot, making positioning tactical.
+		# Moving suppresses attack; hunter aims toward movement vector for intuitive tactical positioning
 		if move_vec.length_squared() > 0.01:
 			aim_direction = move_vec.normalized()
 		elif velocity.length_squared() > 0.01:
@@ -345,7 +344,7 @@ func _handle_aim_and_attack(delta: float) -> void:
 		# Prime the attack timer so as soon as movement stops, hunter immediately auto-fires
 		attack_timer = minf(attack_timer + delta * 0.85, 1.0 / maxf(attack_rate, 0.5))
 	else:
-		# Stationary: Lock onto nearest alive enemy in the arena and auto-fire
+		# Stationary: Automatically lock onto nearest alive enemy in the arena and unleash continuous attacks
 		var target := _find_nearest_enemy()
 		if target:
 			var diff := target.global_position - global_position

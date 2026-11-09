@@ -108,7 +108,7 @@ func test_hud_reactivity_and_game_speed() -> void:
 	var hud := arena.get_node_or_null("HUDLayer/CombatHUD") as CombatHUD
 	assert_true(hud != null, "CombatHUD node exists in CombatArena")
 	assert_true(hud.move_joystick != null, "MoveJoystick connected in CombatHUD")
-	assert_true(hud.aim_joystick != null, "AimJoystick connected in CombatHUD")
+	assert_true(hud.get_node_or_null("AimJoystick") == null, "Duplicate AimJoystick eliminated from CombatHUD")
 	assert_true(hud.xp_bar != null, "XpBar exists in TopContainer")
 	assert_true(hud.btn_speed != null, "Game speed button exists")
 	

@@ -2,7 +2,7 @@ class_name CombatHUD
 extends Control
 
 # Coordinates the Combat HUD elements:
-# - Independent dual virtual joysticks (Move on left, Aim & Continuous Attack on right)
+# - Clean, responsive single directional movement pad with inner floating thumbstick ring
 # - Ergonomic action buttons (Dodge, Skill, Potion) with cooldown overlays
 # - Reactive Top Bar (Smooth XP bar with Tween, Level badge, HP bar, Game speed 1x/2x, Pause, Currencies)
 # - Right-Side Objective Column (Stage timer, Wave progress, Revive counter)
@@ -75,7 +75,8 @@ func setup(player: PlayerController) -> void:
 	player_ref = player
 	if is_instance_valid(player_ref):
 		player_ref.move_joystick = move_joystick
-		player_ref.aim_joystick = aim_joystick
+		if aim_joystick:
+			player_ref.aim_joystick = aim_joystick
 		player_ref.dodge_cooldown_updated.connect(_on_dodge_cooldown)
 		player_ref.skill_cooldown_updated.connect(_on_skill_cooldown)
 

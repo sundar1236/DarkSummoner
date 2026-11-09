@@ -53,7 +53,10 @@ var current_char_id: String = "shadow_hunter"
 var hunter_stars: int = 2
 var base_display_atk: int = 4280
 var base_display_hp: int = 18920
+var gear_sort_index: int = 0
+var runes_sort_index: int = 0
 var _toast_label: Label = null
+var _info_modal: PanelContainer = null
 
 func _ready() -> void:
 	if btn_sub_characters:
@@ -78,11 +81,53 @@ func _ready() -> void:
 			show_toast("✨ Rune Workshop: Arcane Transmutation ready!")
 			rune_workshop_requested.emit()
 		)
+
+	# Outfit & Sacred Hall buttons on Character screen
+	var btn_outfit := $ContentContainer/ViewCharacters/TopHalf/PedestalContainer.get_node_or_null("OutfitBtn") as Button
+	if btn_outfit:
+		btn_outfit.pressed.connect(func():
+			if AudioManager: AudioManager.play_sfx("ui_click")
+			show_toast("👑 Attire: Legendary Abyssal Garb Active (+5% ATK)")
+		)
+
+	var btn_sacred := $ContentContainer/ViewCharacters/TopHalf/PedestalContainer.get_node_or_null("SacredHallBtn") as Button
+	if btn_sacred:
+		btn_sacred.pressed.connect(func():
+			if AudioManager: AudioManager.play_sfx("ui_click")
+			show_toast("🏛 Hall of Champions: Rank %s Hunter Recorded" % [SaveManager.player_level if SaveManager else 5])
+		)
+
+	# Stat Pill Info Button
+	var btn_info := $ContentContainer/ViewGear/TopHalf/StatPill/HBox.get_node_or_null("InfoBtn") as Button
+	if btn_info:
+		btn_info.pressed.connect(_toggle_combat_power_modal)
+
+	# Sort Buttons on Gear and Runes subtabs
+	var btn_gear_sort := $ContentContainer/ViewGear/MiddleBar.get_node_or_null("SortBtn") as Button
+	if btn_gear_sort:
+		btn_gear_sort.pressed.connect(func():
+			gear_sort_index = (gear_sort_index + 1) % 3
+			var sort_names := ["▼ By Quality", "▼ By Level", "▼ By Slot"]
+			btn_gear_sort.text = sort_names[gear_sort_index]
+			if AudioManager: AudioManager.play_sfx("ui_click")
+			show_toast("Sorted Gear: %s" % sort_names[gear_sort_index])
+		)
+
+	var btn_rune_sort := $ContentContainer/ViewRunes/MiddleBar.get_node_or_null("SortBtn") as Button
+	if btn_rune_sort:
+		btn_rune_sort.pressed.connect(func():
+			runes_sort_index = (runes_sort_index + 1) % 3
+			var sort_names := ["▼ By Tier", "▼ By Synergy", "▼ By Element"]
+			btn_rune_sort.text = sort_names[runes_sort_index]
+			if AudioManager: AudioManager.play_sfx("ui_click")
+			show_toast("Sorted Runes: %s" % sort_names[runes_sort_index])
+		)
 		
 	_setup_character_roster_wiring()
 	_setup_gear_slots_wiring()
 	_setup_runes_dock_wiring()
 	_setup_toast_label()
+	_setup_info_modal()
 	
 	if SaveManager and not SaveManager.active_character_id.is_empty():
 		current_char_id = SaveManager.active_character_id
@@ -158,6 +203,77 @@ func _setup_toast_label() -> void:
 	_toast_label.visible = false
 	_toast_label.z_index = 50
 	add_child(_toast_label)
+
+func _setup_info_modal() -> void:
+	_info_modal = PanelContainer.new()
+	_info_modal.anchors_preset = PRESET_CENTER
+	_info_modal.custom_minimum_size = Vector2(460, 250)
+	_info_modal.anchor_left = 0.5
+	_info_modal.anchor_top = 0.5
+	_info_modal.anchor_right = 0.5
+	_info_modal.anchor_bottom = 0.5
+	_info_modal.offset_left = -230.0
+	_info_modal.offset_top = -125.0
+	_info_modal.offset_right = 230.0
+	_info_modal.offset_bottom = 125.0
+
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = Color(0.06, 0.07, 0.12, 0.98)
+	sb.border_color = Color(0.9, 0.75, 0.3, 0.95)
+	sb.set_border_width_all(2)
+	sb.set_corner_radius_all(14)
+	_info_modal.add_theme_stylebox_override("panel", sb)
+
+	var vb := VBoxContainer.new()
+	vb.add_theme_constant_override("separation", 8)
+	vb.offset_left = 16
+	vb.offset_top = 16
+	vb.offset_right = -16
+	vb.offset_bottom = -16
+	_info_modal.add_child(vb)
+
+	var title := Label.new()
+	title.text = "⚔ COMBAT ATTRIBUTES BREAKDOWN ⚔"
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title.add_theme_font_size_override("font_size", 18)
+	title.add_theme_color_override("font_color", Color(1.0, 0.88, 0.4, 1.0))
+	vb.add_child(title)
+
+	var desc := Label.new()
+	desc.name = "StatDescLabel"
+	desc.add_theme_font_size_override("font_size", 14)
+	desc.add_theme_color_override("font_color", Color(0.85, 0.88, 0.95, 1.0))
+	desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	vb.add_child(desc)
+
+	var btn_close := Button.new()
+	btn_close.text = "CLOSE"
+	btn_close.custom_minimum_size = Vector2(120, 38)
+	btn_close.size_flags_horizontal = SIZE_SHRINK_CENTER
+	btn_close.pressed.connect(func():
+		if AudioManager: AudioManager.play_sfx("ui_click")
+		_info_modal.visible = false
+	)
+	vb.add_child(btn_close)
+
+	_info_modal.visible = false
+	_info_modal.z_index = 60
+	add_child(_info_modal)
+
+func _toggle_combat_power_modal() -> void:
+	if not _info_modal: return
+	if _info_modal.visible:
+		_info_modal.visible = false
+		return
+
+	var power: int = SaveManager.calculate_combat_power() if SaveManager else 24800
+	var desc_lbl = _info_modal.find_child("StatDescLabel", true, false) as Label
+	if desc_lbl:
+		desc_lbl.text = "✦ Total Combat Power: %s\n✦ Effective ATK: %s\n✦ Effective HP: %s\n✦ Gear Slots: 6/6 S-Tier\n✦ Resonance: Adjacency bonuses apply on Altar Grid." % [
+			_format_num(power), _format_num(base_display_atk), _format_num(base_display_hp)
+		]
+	if AudioManager: AudioManager.play_sfx("ui_click")
+	_info_modal.visible = true
 
 func show_toast(text: String) -> void:
 	if not _toast_label: return

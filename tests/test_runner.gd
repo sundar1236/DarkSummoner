@@ -21,6 +21,7 @@ func _ready() -> void:
 	test_boss_defeat_same_floor_level_1_rule()
 	test_duplicate_reward_prevention()
 	test_permanent_shades_and_save_persistence()
+	test_storage_reset_and_clean_uninstall()
 	test_characters_data_and_abilities()
 	test_audio_buses_and_volumes()
 	test_character_selection_and_unlock_flow()
@@ -231,6 +232,30 @@ func test_permanent_shades_and_save_persistence() -> void:
 	SaveManager.save_profile()
 	SaveManager.load_profile()
 	assert_true(SaveManager.shades == initial_shades + 25, "Permanent Shades persist through profile reload")
+
+func test_storage_reset_and_clean_uninstall() -> void:
+	print("--- Test 11b: Local Storage Reset & Clean Uninstall Purge ---")
+	SaveManager.shades = 500
+	SaveManager.profile_gold = 99999
+	SaveManager.player_level = 20
+	SaveManager.equipment_levels["weapon"] = 99
+	SaveManager.save_profile()
+
+	var high_power := SaveManager.calculate_combat_power()
+	assert_true(high_power > 50000, "High combat power calculated for leveled profile")
+
+	# Execute reset_all_data to simulate app data clear or clean reinstall
+	SaveManager.reset_all_data()
+
+	assert_true(SaveManager.shades == 0, "Player shades reset cleanly to 0")
+	assert_true(SaveManager.profile_gold == 5000, "Player gold reset to default initial 5000")
+	assert_true(SaveManager.player_level == 5, "Player level reset to default initial 5")
+	assert_true(SaveManager.equipment_levels["weapon"] == 60, "Equipment reset to clean baseline")
+	assert_true(SaveManager.calculate_combat_power() < high_power, "Player combat power reset cleanly on reinstall/data wipe")
+	assert_true(not FileAccess.file_exists(SaveManager.SAVE_PATH), "Save file removed completely from disk")
+
+	# Restore normal testing state
+	SaveManager.save_profile()
 
 # 12. Test Playable Characters Data & Unlocks
 func test_characters_data_and_abilities() -> void:
