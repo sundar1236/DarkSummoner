@@ -113,15 +113,6 @@ func _ready() -> void:
 			show_toast("Gear sorted: %s" % sort_names[gear_sort_index])
 		)
 
-	var btn_rune_sort := $ContentContainer/ViewRunes/MiddleBar.get_node_or_null("SortBtn") as Button
-	if btn_rune_sort:
-		btn_rune_sort.pressed.connect(func():
-			runes_sort_index = (runes_sort_index + 1) % 3
-			var sort_names := ["▼ By Tier", "▼ By Synergy", "▼ By Element"]
-			btn_rune_sort.text = sort_names[runes_sort_index]
-			if AudioManager: AudioManager.play_sfx("ui_click")
-			show_toast("Sorted Runes: %s" % sort_names[runes_sort_index])
-		)
 		
 	_setup_character_roster_wiring()
 	_setup_gear_slots_wiring()
