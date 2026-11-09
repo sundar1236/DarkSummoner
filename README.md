@@ -8,16 +8,16 @@ A 2D dark-fantasy action roguelike game built with **Godot Engine 4.3** and **GD
 
 ## 1. Project Overview & Gameplay Architecture
 
-The player controls a lone hunter ascending a perilous dark-fantasy tower. Between battles, the player organizes weapons, runes, monster cores, and relics on a mystical **Altar Grid** to trigger powerful item synergies and summon companions. In combat, the player moves, aims, and attacks manually, supported by autonomous companions and item-generated abilities.
+The player controls a lone hunter ascending a perilous dark-fantasy tower. In the sanctuary, the player equips six persistent gear slots and upgrades the hunter. During a run, the player builds a separate **Summoning Circle** loadout of run-specific runes, monster cores, and relics. Combat uses one movement joystick: the hunter automatically targets and attacks the nearest enemy while stationary, then resumes movement on demand.
 
 ### Core Gameplay Loop
-1. **Prepare the Hunter & Organize the Altar**: Place, rotate, and merge equipment on the Altar Grid.
-2. **Activate Synergies**: Adjacency bonuses (e.g. Fire Rune adjacent to Wolf Core creates an evolved Hellhound) and tag sets (Shadow, Lightning, Runic, Beast).
-3. **Engage in Combat**: Dual-stick mobile controls — left joystick moves, right joystick aims and continuously fires basic attacks on hold. Dodge with invulnerability frames, trigger character active skills, and quaff healing potions.
-4. **Autonomous Assistance**: Spectral companions and passive relics target and attack automatically.
-5. **Claim Spoils**: Victory grants Run Gold, permanent Shades, and a choice of 3 relics/equipment.
-6. **Visit the Bazaar**: Blacksmith, Potion Merchant, and Relic Merchant offer run upgrades.
-7. **Ascend Floors**: 5 levels per floor. Level 5 is always the Floor Boss (Lord Malakar).
+1. **Prepare in the Sanctuary**: Choose a hunter, equip six persistent gear slots, upgrade equipment, and spend Shades on permanent progression.
+2. **Build the Run Loadout**: Arrange run-specific runes, monster cores, and relics in the Summoning Circle to activate adjacency and tag synergies.
+3. **Enter Combat**: Use the single movement joystick. While stationary, the hunter automatically targets and attacks the nearest enemy; moving suppresses basic attacks. Dodge, activate character skills, and use healing potions when needed.
+4. **Clear Enemy Waves**: Regular encounters contain two progressively harder waves. Elite encounters include an elite enemy; floor bosses use their own multi-phase fight.
+5. **Choose Blessings**: Collect XP, select from three run-skill offers on level-up, and upgrade skills through duplicate picks.
+6. **Claim Rewards**: Earn run Gold, permanent Shades, and item choices before preparing for the next encounter.
+7. **Ascend Floors**: Each floor has five levels; Level 5 is the floor boss (Lord Malakar).
 8. **Boss Victory & Defeat Rules**:
    - Defeating the boss unlocks the next floor at Level 1.
    - Defeat on the boss resets the player to **Level 1 of the same floor** (never sent back to Floor 1).
@@ -65,7 +65,7 @@ AbyssalAltar/
 │   │   ├── main_controller.gd     # Screen transitions and coordinator
 │   │   └── texture_loader.gd      # Universal texture loader (ImageTexture fallback)
 │   ├── combat/
-│   │   ├── player_controller.gd   # Dual-stick controls, attacks, dodge, skills
+│   │   ├── player_controller.gd   # Single-stick movement, auto-targeting, attacks, dodge, skills
 │   │   ├── enemy_controller.gd    # Swarmer, Cultist, and Elite AI
 │   │   ├── boss_controller.gd     # Lord Malakar: phases, telegraphed attacks
 │   │   ├── projectile_controller.gd # Unified projectile physics & collisions
@@ -142,13 +142,13 @@ To install on a connected Android phone via ADB:
 | Control | Mobile Touchscreen | Desktop Keyboard / Mouse |
 | :--- | :--- | :--- |
 | **Movement** | Drag Left Virtual Joystick | WASD or Arrow Keys |
-| **Aim & Attack** | Drag & Hold Right Joystick | Left Click / Hold & Drag Mouse |
+| **Basic Attack** | Automatic nearest-target attack while stationary | Automatic nearest-target attack while stationary |
 | **Dodge Dash** | Tap "DODGE" Button | Spacebar |
 | **Active Skill** | Tap "SKILL" Button | E Key |
 | **Healing Potion** | Tap "POTION" Button | Q Key |
 | **Pause / Settings** | Tap "\|\|" Button | Escape Key |
 
-*Note: Movement and aiming operate completely independently. The player can move left while aiming and firing right.*
+*Note: There is only one movement joystick. Basic attacks automatically target the nearest enemy while the hunter is stationary.*
 
 ---
 

@@ -14,6 +14,7 @@ func _ready() -> void:
 	
 	test_single_stick_and_touch_safety()
 	test_hud_reactivity_and_game_speed()
+	test_combat_wave_progression()
 	test_xp_progression_and_level_up()
 	test_valkyrie_draft_modal_and_offers()
 	test_skill_stat_application_and_progression()
@@ -129,7 +130,25 @@ func test_hud_reactivity_and_game_speed() -> void:
 	
 	arena.queue_free()
 
-# 3. Test In-Run XP Progression & Level-Up
+
+# 3. Test two-wave encounter progression and duplicate defeat protection
+func test_combat_wave_progression() -> void:
+	print("--- 3. Combat Wave Progression ---")
+	var arena := CombatManager.new()
+	arena.current_wave = 1
+	arena.total_waves = 2
+	arena.enemies_remaining = 1
+	arena._on_enemy_defeated(Node2D.new())
+
+	assert_true(arena.current_wave == 2, "Clearing wave one advances to wave two")
+	assert_true(arena.enemies_remaining == arena._get_wave_enemy_count(GameManager.level_number, 2), "Second wave spawns its own enemy group")
+	assert_true(arena.enemies_remaining > 0, "Encounter remains active between waves")
+	assert_true(arena._get_wave_enemy_count(1, 2) > arena._get_wave_enemy_count(1, 1), "Second wave increases enemy count")
+	assert_true(arena._get_wave_enemy_type(0, true) == "elite", "Elite encounters include an elite enemy")
+	assert_true(arena._get_wave_enemy_type(1, false) == "cultist", "Wave composition includes ranged cultists")
+	arena.free()
+
+# 4. Test In-Run XP Progression & Level-Up
 func test_xp_progression_and_level_up() -> void:
 	print("--- 3. In-Run XP Progression & Level-Up ---")
 	GameManager.run_xp = 0.0

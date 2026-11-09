@@ -16,6 +16,7 @@ var total_waves: int = 2
 var arena_bounds := Rect2(40, 100, 640, 1000)
 
 var hud_ref: CombatHUD = null
+var encounter_completed: bool = false
 
 func _ready() -> void:
 	GameManager.is_combat_active = true
@@ -61,35 +62,50 @@ func _spawn_wave_encounter(floor_num: int, level_num: int, enc_type: String) -> 
 		boss_health_bar.visible = false
 	if boss_title_label:
 		boss_title_label.visible = false
-		
-	var enemy_count: int = 4 + (level_num * 2)
+
+	current_wave = 1
+	total_waves = 2
+	encounter_completed = false
+	_spawn_wave_group(floor_num, level_num, enc_type)
+
+func _spawn_wave_group(floor_num: int, level_num: int, enc_type: String) -> void:
+	var enemy_count: int = _get_wave_enemy_count(level_num, current_wave)
 	enemies_remaining = enemy_count
-	
 	var is_elite_room: bool = (enc_type == "elite")
-	
+
 	if hud_ref:
 		hud_ref.update_wave_progress(current_wave, total_waves, enemies_remaining)
 		if is_elite_room:
-			hud_ref.show_announcement("⚠ ELITE HORDE DETECTED ⚠", 2.2, Color(1.0, 0.45, 0.2))
+			hud_ref.show_announcement("⚠ ELITE HORDE — WAVE %d/%d ⚠" % [current_wave, total_waves], 2.2, Color(1.0, 0.45, 0.2))
 		else:
-			hud_ref.show_announcement("✦ Wave %d: Defeat the Abyssal Swarm ✦" % current_wave, 2.0, Color(0.4, 0.85, 1.0))
-			
+			hud_ref.show_announcement("✦ WAVE %d/%d — DEFEAT THE ABYSSAL SWARM ✦" % [current_wave, total_waves], 2.0, Color(0.4, 0.85, 1.0))
+
 	for i in range(enemy_count):
 		var enemy := EnemyController.new()
 		add_child(enemy)
-		
-		# Random spawn position along periphery
-		var spawn_pos := _get_random_arena_edge_pos()
-		enemy.global_position = spawn_pos
-		
-		var e_type: String = "swarmer"
-		if is_elite_room and i == 0:
-			e_type = "elite"
-		elif i % 2 == 1:
-			e_type = "cultist"
-			
-		enemy.setup(e_type, floor_num)
+		enemy.global_position = _get_random_arena_edge_pos()
+
+		var enemy_type: String = _get_wave_enemy_type(i, is_elite_room)
+		enemy.setup(enemy_type, floor_num)
 		enemy.enemy_defeated.connect(_on_enemy_defeated)
+
+func _get_wave_enemy_count(level_num: int, wave_num: int) -> int:
+	return 4 + (level_num * 2) + ((wave_num - 1) * 2)
+
+func _get_wave_enemy_type(index: int, is_elite_room: bool) -> String:
+	if is_elite_room and index == 0:
+		return "elite"
+	if index % 2 == 1:
+		return "cultist"
+	return "swarmer"
+
+func _start_next_wave() -> void:
+	if encounter_completed or current_wave >= total_waves:
+		return
+	current_wave += 1
+	if hud_ref:
+		hud_ref.show_announcement("⚔ INCOMING — WAVE %d ⚔" % current_wave, 1.8, Color(1.0, 0.72, 0.3))
+	_spawn_wave_group(GameManager.floor_number, GameManager.level_number, GameManager.current_encounter_type)
 
 func _spawn_boss_encounter(floor_num: int) -> void:
 	if boss_health_bar:
@@ -132,14 +148,24 @@ func _get_random_arena_edge_pos() -> Vector2:
 		_: return Vector2(640, randf_range(160, 1000)) # Right
 
 func _on_enemy_defeated(_enemy: Node2D) -> void:
+	if encounter_completed or enemies_remaining <= 0:
+		return
+
 	enemies_remaining -= 1
 	if hud_ref:
-		hud_ref.update_wave_progress(current_wave, total_waves, max(0, enemies_remaining))
-		
-	if enemies_remaining <= 0:
-		if hud_ref:
-			hud_ref.show_announcement("✦ VICTORY! ENCOUNTER CLEARED ✦", 2.2, Color(0.4, 1.0, 0.6))
-		if is_instance_valid(player) and player.has_method("trigger_victory"):
-			player.trigger_victory()
-		GameManager.complete_current_level()
-		combat_finished.emit(true)
+		hud_ref.update_wave_progress(current_wave, total_waves, enemies_remaining)
+
+	if enemies_remaining > 0:
+		return
+
+	if current_wave < total_waves:
+		_start_next_wave()
+		return
+
+	encounter_completed = true
+	if hud_ref:
+		hud_ref.show_announcement("✦ VICTORY! ENCOUNTER CLEARED ✦", 2.2, Color(0.4, 1.0, 0.6))
+	if is_instance_valid(player) and player.has_method("trigger_victory"):
+		player.trigger_victory()
+	GameManager.complete_current_level()
+	combat_finished.emit(true)
