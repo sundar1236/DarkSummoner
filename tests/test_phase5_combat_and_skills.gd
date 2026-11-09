@@ -15,6 +15,7 @@ func _ready() -> void:
 	test_single_stick_and_touch_safety()
 	test_projectile_collision_roles_and_homing_filter()
 	test_floor_theme_selection()
+	test_floor_enemy_composition()
 	test_difficulty_scaling_and_mini_boss()
 	test_hud_reactivity_and_game_speed()
 	test_combat_wave_progression()
@@ -149,7 +150,38 @@ func test_floor_theme_selection() -> void:
 	assert_true(background.floor_theme_name == first_theme_name, "Floor themes cycle predictably after the fifth floor")
 	background.free()
 
-# 4. Test difficulty scaling and the elite-room mini-boss.
+# 4. Test floor-specific enemy group composition.
+func test_floor_enemy_composition() -> void:
+	print("--- 4. Floor-Specific Enemy Composition ---")
+	var original_floor: int = GameManager.floor_number
+	var arena := CombatManager.new()
+	arena.current_wave = 1
+
+	GameManager.floor_number = 1
+	assert_true(arena._get_wave_enemy_type(0, false) == "swarmer", "Abyssal Ruins begins with swarmers")
+	assert_true(arena._get_wave_enemy_type(1, false) == "cultist", "Abyssal Ruins includes ranged cultists")
+	assert_true(arena._get_wave_enemy_type(4, false) == "charger", "Abyssal Ruins includes charging enemies")
+
+	GameManager.floor_number = 2
+	assert_true(arena._get_wave_enemy_type(0, false) == "charger", "Ember Catacombs prioritises chargers")
+	assert_true(arena._get_wave_enemy_type(1, false) == "cultist", "Ember Catacombs mixes in cultists")
+
+	GameManager.floor_number = 3
+	assert_true(arena._get_wave_enemy_type(0, false) == "cultist", "Frostbound Crypt prioritises cultists")
+	assert_true(arena._get_wave_enemy_type(3, false) == "charger", "Frostbound Crypt includes occasional chargers")
+
+	GameManager.floor_number = 4
+	assert_true(arena._get_wave_enemy_type(3, false) == "elite", "Blighted Sanctum introduces elite guards")
+	assert_true(arena._get_wave_enemy_type(0, false) == "cultist", "Blighted Sanctum also uses ranged support")
+
+	GameManager.floor_number = 5
+	assert_true(arena._get_wave_enemy_type(5, false) == "elite", "Crimson Throne includes elite guards")
+	assert_true(arena._get_wave_enemy_type(0, false) == "charger", "Crimson Throne begins with aggressive chargers")
+
+	GameManager.floor_number = original_floor
+	arena.free()
+
+# 5. Test difficulty scaling and the elite-room mini-boss.
 func test_difficulty_scaling_and_mini_boss() -> void:
 	print("--- 4. Difficulty Scaling & Mini-Boss Encounter ---")
 	var original_difficulty: String = SaveManager.difficulty
