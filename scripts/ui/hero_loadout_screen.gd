@@ -404,6 +404,16 @@ func _build_gear_comparison_text(item: ItemInstance, equipped: ItemInstance) -> 
 		_format_gear_delta(candidate_stats["bonus_atk_speed"] - current_stats["bonus_atk_speed"], true)
 	]
 
+func _format_gear_set_bonus(bonus: Dictionary) -> String:
+	var labels: Array[String] = []
+	var names := {"bonus_atk": "ATK", "bonus_hp": "HP", "bonus_crit": "CRIT", "bonus_speed": "MOVE SPD", "bonus_atk_speed": "ATK SPD"}
+	for stat_name in bonus:
+		var value := float(bonus[stat_name])
+		var percent := stat_name in ["bonus_crit", "bonus_atk_speed"]
+		var display_value := value * 100.0 if percent else value
+		labels.append("%s +%s%s" % [names.get(stat_name, stat_name), _format_gear_stat(display_value), "%" if percent else ""])
+	return ", ".join(labels)
+
 func _format_gear_stat(value: float) -> String:
 	return "%d" % roundi(value) if is_equal_approx(value, roundf(value)) else "%.2f" % value
 
@@ -526,13 +536,28 @@ func _toggle_combat_power_modal() -> void:
 		for slot_name in SaveManager.EQUIPMENT_SLOTS:
 			if SaveManager.get_equipped_gear(slot_name):
 				equipped_count += 1
+	var set_lines := PackedStringArray()
+	for set_info in breakdown.get("active_gear_sets", []):
+		var count: int = int(set_info.get("count", 0))
+		var threshold: int = int(set_info.get("active_threshold", 0))
+		var next_threshold: int = int(set_info.get("next_threshold", 0))
+		var status := "ACTIVE %d-PIECE" % threshold if threshold > 0 else "INCOMPLETE"
+		var progress := "%d/%d" % [count, int(set_info.get("required", 0))]
+		if next_threshold > 0:
+			progress += "  · next bonus at %d" % next_threshold
+		set_lines.append("%s  %s  [%s]" % [str(set_info.get("name", "Gear Set")), progress, status])
+		var bonus: Dictionary = set_info.get("bonus", {})
+		if not bonus.is_empty():
+			set_lines.append("  Active: %s" % _format_gear_set_bonus(bonus))
+	var set_text := "\\n".join(set_lines) if not set_lines.is_empty() else "No gear sets equipped."
 	var desc_lbl := _info_modal.find_child("StatDescLabel", true, false) as Label
 	if desc_lbl:
-		desc_lbl.text = "TOTAL COMBAT POWER  %s\n\nPOWER SOURCES\nHunter level       %s\nEquipment (legacy)  %s\nEquipped gear       %s\nCharacter stars     %s\nTalent cards        %s\n\nEQUIPPED GEAR BONUSES\nATK  +%s     HP  +%s\nCRIT  +%.1f%%     MOVE SPD  +%s\nATK SPD  +%.1f%%\n\nEquipment slots: %d/6\nRune resonance is calculated separately during runs." % [
+		desc_lbl.text = "TOTAL COMBAT POWER  %s\\n\\nPOWER SOURCES\\nHunter level       %s\\nEquipment (legacy)  %s\\nEquipped gear       %s\\nGear set bonuses    %s\\nCharacter stars     %s\\nTalent cards        %s\\n\\nTOTAL EQUIPPED BONUSES\\nATK  +%s     HP  +%s\\nCRIT  +%.1f%%     MOVE SPD  +%s\\nATK SPD  +%.1f%%\\n\\nGEAR SET PROGRESS\\n%s\\n\\nEquipment slots: %d/6\\nRune resonance is calculated separately during runs." % [
 			_format_num(int(breakdown.get("total", 0))),
 			_format_num(int(breakdown.get("base", 0))),
 			_format_num(int(breakdown.get("legacy_gear", 0))),
 			_format_num(int(breakdown.get("equipped_gear", 0))),
+			_format_num(int(breakdown.get("set_bonus", 0))),
 			_format_num(int(breakdown.get("character", 0))),
 			_format_num(int(breakdown.get("talents", 0))),
 			_format_gear_stat(gear_stats.get("bonus_atk", 0.0)),
@@ -540,6 +565,7 @@ func _toggle_combat_power_modal() -> void:
 			float(gear_stats.get("bonus_crit", 0.0)) * 100.0,
 			_format_gear_stat(gear_stats.get("bonus_speed", 0.0)),
 			float(gear_stats.get("bonus_atk_speed", 0.0)) * 100.0,
+			set_text,
 			equipped_count
 		]
 	if AudioManager:

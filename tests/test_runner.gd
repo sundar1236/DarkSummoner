@@ -15,6 +15,7 @@ func _ready() -> void:
 	test_gear_item_details_and_comparison()
 	test_gear_inventory_sorting()
 	test_combat_power_breakdown()
+	test_gear_set_bonuses()
 	test_blacksmith_gear_purchases()
 	test_boss_gear_rewards_are_persistent()
 	test_run_altar_excludes_persistent_gear()
@@ -113,7 +114,7 @@ func test_persistent_equipment_slots() -> void:
 	assert_true(not SaveManager.add_gear_item(helm), "Duplicate gear UID is rejected")
 	assert_true(not SaveManager.add_gear_item(rune), "Runes cannot enter the equipment inventory")
 	assert_true(SaveManager.equip_gear_item(helm.uid), "Gear item equips into its declared slot")
-	var equipped_helm := SaveManager.get_equipped_gear("helmet")
+	var equipped_helm: ItemInstance = SaveManager.get_equipped_gear("helmet")
 	assert_true(equipped_helm != null and equipped_helm.uid == helm.uid, "Helmet slot returns the equipped item")
 	assert_true(not SaveManager.equip_gear_item(rune.uid), "Runes cannot be equipped as gear")
 
@@ -122,12 +123,12 @@ func test_persistent_equipment_slots() -> void:
 	var old_upgrade_level: int = equipped_helm.upgrade_level
 	var old_combat_power: int = SaveManager.calculate_combat_power()
 	assert_true(SaveManager.upgrade_equipped_gear("helmet"), "Blacksmith upgrades the equipped item")
-	var upgraded_helm := SaveManager.get_equipped_gear("helmet")
+	var upgraded_helm: ItemInstance = SaveManager.get_equipped_gear("helmet")
 	assert_true(upgraded_helm != null and upgraded_helm.upgrade_level == old_upgrade_level + 1, "Gear upgrade level is stored on the item instance")
 	assert_true(SaveManager.calculate_combat_power() > old_combat_power, "Equipped gear upgrade increases combat power")
 	SaveManager.save_profile()
 	SaveManager.load_profile()
-	var restored_helm := SaveManager.get_equipped_gear("helmet")
+	var restored_helm: ItemInstance = SaveManager.get_equipped_gear("helmet")
 	assert_true(restored_helm != null and restored_helm.uid == helm.uid, "Equipped item UID persists across profile reload")
 
 	assert_true(SaveManager.unequip_gear_slot("helmet"), "Equipped gear can be unequipped")
@@ -165,7 +166,7 @@ func test_gear_item_details_and_comparison() -> void:
 	assert_true(loadout._gear_detail_equip_button.text == "EQUIP", "Unequipped item exposes the Equip action")
 
 	loadout._on_gear_detail_equip_pressed()
-	var equipped_after_swap := SaveManager.get_equipped_gear("helmet")
+	var equipped_after_swap: ItemInstance = SaveManager.get_equipped_gear("helmet")
 	assert_true(equipped_after_swap != null and equipped_after_swap.uid == upgrade_helm.uid, "Equip action replaces the current item in its slot")
 	assert_true(loadout._gear_detail_unequip_button.visible, "Equipped item exposes the Unequip action")
 	loadout._on_gear_detail_unequip_pressed()
@@ -249,11 +250,65 @@ func test_combat_power_breakdown() -> void:
 	SaveManager.save_profile()
 
 
+func test_gear_set_bonuses() -> void:
+	print("--- Test: Persistent Gear Set Bonuses ---")
+	var original_inventory: Array[Dictionary] = SaveManager.gear_inventory.duplicate(true)
+	var original_equipped: Dictionary = SaveManager.equipped_gear.duplicate(true)
+	var original_level: int = SaveManager.player_level
+	var original_equipment_levels: Dictionary = SaveManager.equipment_levels.duplicate(true)
+	var original_stars: Dictionary = SaveManager.character_stars.duplicate(true)
+	var original_cards: Dictionary = SaveManager.talent_cards.duplicate(true)
+	SaveManager.gear_inventory.clear()
+	SaveManager.equipped_gear = {"weapon": "", "helmet": "", "armor": "", "boots": "", "amulet": "", "ring": ""}
+	var dagger := ItemInstance.new(ItemDatabase.get_item("shadow_dagger"))
+	var helm := ItemInstance.new(ItemDatabase.get_item("void_helm"))
+	var shield := ItemInstance.new(ItemDatabase.get_item("void_shield"))
+	var pendant := ItemInstance.new(ItemDatabase.get_item("void_pendant"))
+	for gear in [dagger, helm, shield, pendant]:
+		assert_true(SaveManager.add_gear_item(gear), "%s is added for set test" % gear.data.name)
+	assert_true(SaveManager.equip_gear_item(dagger.uid), "Abyssal weapon equips")
+	assert_true(SaveManager.equip_gear_item(helm.uid), "Abyssal helmet equips")
+	var abyssal: Dictionary = {}
+	for entry in SaveManager.get_active_gear_sets():
+		if entry.id == "abyssal_regalia":
+			abyssal = entry
+	assert_true(int(abyssal.get("count", 0)) == 2, "Two matching Abyssal pieces are counted")
+	assert_true(int(abyssal.get("active_threshold", 0)) == 2, "Two-piece Abyssal threshold activates")
+	var two_piece: Dictionary = SaveManager.get_gear_set_bonus_stats()
+	assert_true(is_equal_approx(float(two_piece.bonus_atk), 8.0), "Two-piece set grants attack bonus")
+	assert_true(is_equal_approx(float(two_piece.bonus_crit), 0.03), "Two-piece set grants critical bonus")
+	assert_true(SaveManager.equip_gear_item(shield.uid), "Abyssal armor equips")
+	assert_true(SaveManager.equip_gear_item(pendant.uid), "Abyssal amulet equips")
+	for entry in SaveManager.get_active_gear_sets():
+		if entry.id == "abyssal_regalia":
+			abyssal = entry
+	assert_true(int(abyssal.get("active_threshold", 0)) == 4, "Four-piece threshold activates")
+	var four_piece: Dictionary = SaveManager.get_gear_set_bonus_stats()
+	assert_true(is_equal_approx(float(four_piece.bonus_hp), 40.0), "Four-piece set grants HP bonus")
+	assert_true(is_equal_approx(float(four_piece.bonus_crit), 0.08), "Four-piece bonus stacks with the two-piece bonus")
+	var breakdown: Dictionary = SaveManager.get_combat_power_breakdown()
+	assert_true(int(breakdown.get("set_bonus", 0)) > 0, "Set bonuses contribute to combat power")
+	assert_true(int(breakdown.total) == SaveManager.calculate_combat_power(), "Set bonus total matches combat power API")
+	assert_true(SaveManager.unequip_gear_slot("amulet"), "A set piece can be unequipped")
+	for entry in SaveManager.get_active_gear_sets():
+		if entry.id == "abyssal_regalia":
+			abyssal = entry
+	assert_true(int(abyssal.get("active_threshold", 0)) == 2, "Unequipping drops to two-piece threshold")
+	assert_true(is_equal_approx(float(SaveManager.get_gear_set_bonus_stats().bonus_crit), 0.03), "Two-piece bonus returns after unequip")
+	SaveManager.gear_inventory = original_inventory
+	SaveManager.equipped_gear = original_equipped
+	SaveManager.player_level = original_level
+	SaveManager.equipment_levels = original_equipment_levels
+	SaveManager.character_stars = original_stars
+	SaveManager.talent_cards = original_cards
+	SaveManager.save_profile()
+
+
 func test_blacksmith_gear_purchases() -> void:
 	print("--- Test: Blacksmith Persistent Gear Purchases ---")
 	var original_inventory: Array[Dictionary] = SaveManager.gear_inventory.duplicate(true)
 	var original_equipped: Dictionary = SaveManager.equipped_gear.duplicate(true)
-	var original_gold := SaveManager.profile_gold
+	var original_gold: int = SaveManager.profile_gold
 	var target := ItemDatabase.get_item("void_pendant")
 	assert_true(target != null and target.equipment_slot == "amulet", "Forge catalogue item is valid persistent gear")
 	if not target:
@@ -438,7 +493,7 @@ func test_boss_defeat_same_floor_level_1_rule() -> void:
 	GameManager.level_number = 5
 	GameManager.run_shades = 10
 	
-	var pre_shades := SaveManager.shades
+	var pre_shades: int = SaveManager.shades
 	GameManager.retry_current_floor()
 	
 	assert_true(GameManager.floor_number == 3, "Losing to Floor 3 boss does NOT send player back to Floor 1!")
@@ -458,7 +513,7 @@ func test_duplicate_reward_prevention() -> void:
 # 11. Test Permanent Shades and Save Persistence
 func test_permanent_shades_and_save_persistence() -> void:
 	print("--- Test 11: Save/Load Profile Persistence ---")
-	var initial_shades := SaveManager.shades
+	var initial_shades: int = SaveManager.shades
 	SaveManager.add_shades(25)
 	assert_true(SaveManager.shades == initial_shades + 25, "Permanent Shades increase correctly")
 	
@@ -474,7 +529,7 @@ func test_storage_reset_and_clean_uninstall() -> void:
 	SaveManager.equipment_levels["weapon"] = 99
 	SaveManager.save_profile()
 
-	var high_power := SaveManager.calculate_combat_power()
+	var high_power: int = SaveManager.calculate_combat_power()
 	assert_true(high_power > 50000, "High combat power calculated for leveled profile")
 
 	# Execute reset_all_data to simulate app data clear or clean reinstall
@@ -529,7 +584,7 @@ func test_character_selection_and_unlock_flow() -> void:
 	# Select Storm Reaper
 	csv._select_character("storm_reaper")
 	assert_true(csv.selected_character_id == "storm_reaper", "Switches to Storm Reaper")
-	var reaper_unlocked := SaveManager.is_character_unlocked("storm_reaper")
+	var reaper_unlocked: bool = SaveManager.is_character_unlocked("storm_reaper")
 	if not reaper_unlocked:
 		assert_true(csv.locked_overlay.visible, "Locked overlay visible for locked champion")
 		assert_true(csv.lbl_unlock_requirement.text.contains("40 SHADES"), "Shows 40 Shades unlock requirement")
@@ -537,7 +592,7 @@ func test_character_selection_and_unlock_flow() -> void:
 	# Select Soul Binder
 	csv._select_character("soul_binder")
 	assert_true(csv.selected_character_id == "soul_binder", "Switches to Soul Binder")
-	var binder_unlocked := SaveManager.is_character_unlocked("soul_binder")
+	var binder_unlocked: bool = SaveManager.is_character_unlocked("soul_binder")
 	if not binder_unlocked:
 		assert_true(csv.locked_overlay.visible, "Locked overlay visible for Soul Binder")
 		assert_true(csv.lbl_unlock_requirement.text.contains("80 SHADES"), "Shows 80 Shades unlock requirement")

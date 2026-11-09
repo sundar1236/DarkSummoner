@@ -402,6 +402,83 @@ func get_equipped_gear_stats() -> Dictionary:
 		totals["bonus_atk_speed"] += item.data.bonus_atk_speed + (level * 0.005)
 	return totals
 
+const GEAR_SET_DEFINITIONS: Dictionary = {
+	"abyssal_regalia": {
+		"name": "Abyssal Regalia",
+		"description": "Void-forged hunter equipment",
+		"pieces": 4,
+		"bonuses": {
+			2: {"bonus_atk": 8.0, "bonus_crit": 0.03},
+			4: {"bonus_hp": 40.0, "bonus_crit": 0.05}
+		}
+	},
+	"stormguard": {
+		"name": "Stormguard",
+		"description": "Storm-charged defensive equipment",
+		"pieces": 2,
+		"bonuses": {
+			2: {"bonus_speed": 10.0, "bonus_atk_speed": 0.08}
+		}
+	}
+}
+
+func get_active_gear_sets() -> Array[Dictionary]:
+	var counts: Dictionary = {}
+	for slot_name in EQUIPMENT_SLOTS:
+		var item := get_equipped_gear(slot_name)
+		if not item or not item.data or item.data.gear_set_id.is_empty():
+			continue
+		counts[item.data.gear_set_id] = int(counts.get(item.data.gear_set_id, 0)) + 1
+	var active: Array[Dictionary] = []
+	for set_id in GEAR_SET_DEFINITIONS:
+		var definition: Dictionary = GEAR_SET_DEFINITIONS[set_id]
+		var count: int = int(counts.get(set_id, 0))
+		var thresholds: Dictionary = definition.get("bonuses", {})
+		var active_threshold := 0
+		var active_bonus := {"bonus_atk": 0.0, "bonus_hp": 0.0, "bonus_crit": 0.0, "bonus_speed": 0.0, "bonus_atk_speed": 0.0}
+		for threshold in thresholds:
+			if count < int(threshold):
+				continue
+			active_threshold = maxi(active_threshold, int(threshold))
+			var threshold_bonus: Dictionary = thresholds[threshold]
+			for stat_name in active_bonus:
+				active_bonus[stat_name] += float(threshold_bonus.get(stat_name, 0.0))
+		active.append({
+			"id": set_id,
+			"name": str(definition.get("name", set_id)),
+			"description": str(definition.get("description", "")),
+			"count": count,
+			"required": int(definition.get("pieces", 0)),
+			"active_threshold": active_threshold,
+			"next_threshold": _get_next_gear_set_threshold(thresholds, count),
+			"bonus": active_bonus if active_threshold > 0 else {}
+		})
+	return active
+
+func _get_next_gear_set_threshold(thresholds: Dictionary, count: int) -> int:
+	var next_threshold := 0
+	for threshold in thresholds:
+		var value := int(threshold)
+		if value > count and (next_threshold == 0 or value < next_threshold):
+			next_threshold = value
+	return next_threshold
+
+func get_gear_set_bonus_stats() -> Dictionary:
+	var totals := {"bonus_atk": 0.0, "bonus_hp": 0.0, "bonus_crit": 0.0, "bonus_speed": 0.0, "bonus_atk_speed": 0.0}
+	for set_info in get_active_gear_sets():
+		var bonus: Dictionary = set_info.get("bonus", {})
+		for stat_name in totals:
+			totals[stat_name] += float(bonus.get(stat_name, 0.0))
+	return totals
+
+func get_total_gear_stats() -> Dictionary:
+	var totals := get_equipped_gear_stats()
+	var set_bonus := get_gear_set_bonus_stats()
+	for stat_name in totals:
+		totals[stat_name] += float(set_bonus.get(stat_name, 0.0))
+	return totals
+
+
 
 func get_gear_upgrade_cost(slot_name: String) -> int:
 	var item := get_equipped_gear(slot_name)
@@ -455,14 +532,11 @@ func get_combat_power_breakdown() -> Dictionary:
 	var legacy_gear_power := 0
 	for lvl in equipment_levels.values():
 		legacy_gear_power += int(lvl) * 45
-	var equipped_stats: Dictionary = get_equipped_gear_stats()
-	var equipped_gear_power := int(
-		equipped_stats.get("bonus_atk", 0.0) * 20.0
-		+ equipped_stats.get("bonus_hp", 0.0) * 2.0
-		+ equipped_stats.get("bonus_crit", 0.0) * 500.0
-		+ equipped_stats.get("bonus_speed", 0.0) * 2.0
-		+ equipped_stats.get("bonus_atk_speed", 0.0) * 300.0
-	)
+	var raw_gear_stats: Dictionary = get_equipped_gear_stats()
+	var set_stats: Dictionary = get_gear_set_bonus_stats()
+	var equipped_gear_power := _calculate_gear_stat_power(raw_gear_stats)
+	var set_bonus_power := _calculate_gear_stat_power(set_stats)
+	var equipped_stats: Dictionary = get_total_gear_stats()
 	var character_power := 0
 	for stars in character_stars.values():
 		character_power += int(stars) * 650
@@ -473,11 +547,23 @@ func get_combat_power_breakdown() -> Dictionary:
 		"base": base_power,
 		"legacy_gear": legacy_gear_power,
 		"equipped_gear": equipped_gear_power,
+		"set_bonus": set_bonus_power,
 		"character": character_power,
 		"talents": talent_power,
-		"total": base_power + legacy_gear_power + equipped_gear_power + character_power + talent_power,
-		"gear_stats": equipped_stats
+		"total": base_power + legacy_gear_power + equipped_gear_power + set_bonus_power + character_power + talent_power,
+		"gear_stats": equipped_stats,
+		"gear_set_stats": set_stats,
+		"active_gear_sets": get_active_gear_sets()
 	}
+
+func _calculate_gear_stat_power(stats: Dictionary) -> int:
+	return int(
+		float(stats.get("bonus_atk", 0.0)) * 20.0
+		+ float(stats.get("bonus_hp", 0.0)) * 2.0
+		+ float(stats.get("bonus_crit", 0.0)) * 500.0
+		+ float(stats.get("bonus_speed", 0.0)) * 2.0
+		+ float(stats.get("bonus_atk_speed", 0.0)) * 300.0
+	)
 
 func calculate_combat_power() -> int:
 	return int(get_combat_power_breakdown().get("total", 0))

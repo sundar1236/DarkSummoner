@@ -19,6 +19,7 @@ static func init_database() -> void:
 	dagger.tier = 1
 	dagger.tags = ["weapon", "shadow"]
 	dagger.equipment_slot = "weapon"
+	dagger.gear_set_id = "abyssal_regalia"
 	dagger.shape = [Vector2i(0, 0)]
 	dagger.color = Color(0.7, 0.25, 0.95)
 	dagger.icon_symbol = "dagger"
@@ -152,6 +153,7 @@ static func init_database() -> void:
 	v_shield.tier = 2
 	v_shield.tags = ["armor", "defense", "shadow"]
 	v_shield.equipment_slot = "armor"
+	v_shield.gear_set_id = "abyssal_regalia"
 	v_shield.shape = [Vector2i(0, 0), Vector2i(1, 0)]
 	v_shield.color = Color(0.3, 0.35, 0.7)
 	v_shield.icon_symbol = "shield_void"
@@ -212,6 +214,7 @@ static func init_database() -> void:
 	helm.description = "A light helm forged from hardened voidsteel."
 	helm.tags = ["gear", "helmet"]
 	helm.equipment_slot = "helmet"
+	helm.gear_set_id = "abyssal_regalia"
 	helm.icon_symbol = "helmet"
 	helm.bonus_hp = 18.0
 	helm.price = 45
@@ -260,6 +263,7 @@ static func init_database() -> void:
 	circlet.tier = 2
 	circlet.tags = ["gear", "helmet"]
 	circlet.equipment_slot = "helmet"
+	circlet.gear_set_id = "stormguard"
 	circlet.icon_symbol = "helmet"
 	circlet.bonus_hp = 30.0
 	circlet.bonus_crit = 0.03
@@ -273,6 +277,7 @@ static func init_database() -> void:
 	greaves.tier = 2
 	greaves.tags = ["gear", "boots"]
 	greaves.equipment_slot = "boots"
+	greaves.gear_set_id = "stormguard"
 	greaves.icon_symbol = "boots"
 	greaves.bonus_hp = 20.0
 	greaves.bonus_speed = 20.0
@@ -286,6 +291,7 @@ static func init_database() -> void:
 	pendant.tier = 2
 	pendant.tags = ["gear", "amulet"]
 	pendant.equipment_slot = "amulet"
+	pendant.gear_set_id = "abyssal_regalia"
 	pendant.icon_symbol = "amulet"
 	pendant.bonus_atk = 10.0
 	pendant.bonus_crit = 0.04
