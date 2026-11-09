@@ -54,6 +54,15 @@ func _ready() -> void:
 		_refresh_achievements()
 	_update_timer_text()
 
+func focus_daily_missions() -> void:
+	var scroll_container := get_node_or_null("ScrollContainer") as ScrollContainer
+	if not scroll_container or not daily_mission_list:
+		return
+	await get_tree().process_frame
+	var mission_card := daily_mission_list.get_parent().get_parent() as Control
+	if mission_card:
+		scroll_container.scroll_vertical = maxi(0, int(mission_card.position.y))
+
 func _setup_toast_label() -> void:
 	_toast_label = Label.new()
 	_toast_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
