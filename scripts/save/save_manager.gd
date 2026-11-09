@@ -103,8 +103,8 @@ var settings_data: Dictionary = {
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	load_profile()
-	refresh_daily_shop_state()
 	_ensure_starter_gear()
+	refresh_daily_shop_state()
 
 func get_upgrade_cost(stat_name: String) -> int:
 	var current_level: int = permanent_upgrades.get(stat_name, 0)
