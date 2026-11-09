@@ -366,7 +366,7 @@ func get_equipped_gear_stats() -> Dictionary:
 		var item := get_equipped_gear(slot_name)
 		if not item or not item.data:
 			continue
-		var level := max(0, item.upgrade_level)
+		var level: int = maxi(0, item.upgrade_level)
 		totals["bonus_atk"] += item.data.bonus_atk + level
 		totals["bonus_hp"] += item.data.bonus_hp + (level * 5.0)
 		totals["bonus_crit"] += item.data.bonus_crit + (level * 0.001)
