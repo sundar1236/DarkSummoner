@@ -612,9 +612,16 @@ func test_initial_three_character_draft() -> void:
 	assert_true(scene != null, "First-run character selection scene loads")
 	if not scene:
 		return
+	assert_true(ResourceLoader.exists("res://assets/art/ui_reference/card_full_shadow_hunter.png"), "Shadow Hunter full character artwork is available")
+	assert_true(ResourceLoader.exists("res://assets/art/ui_reference/card_full_storm_reaper.png"), "Storm Reaper full character artwork is available")
+	assert_true(ResourceLoader.exists("res://assets/art/ui_reference/card_full_soul_binder.png"), "Soul Binder full character artwork is available")
 	var picker := scene.instantiate() as CharacterSelectView
 	add_child(picker)
-	picker.set_initial_selection_mode(true)
+	var controller := MainController.new()
+	controller.character_select_view = picker
+	add_child(controller)
+	assert_true(picker.visible and picker.is_initial_selection, "First launch opens the character draft after the story")
+	assert_true(not picker.btn_back.visible, "Initial character choice cannot be skipped")
 	assert_true(picker.tabs_container.get_child_count() == 3, "All three illustrated champions are displayed together")
 	assert_true(not picker.btn_action.disabled, "Any of the three champions can be chosen on first launch")
 	picker._select_character("soul_binder")
@@ -625,11 +632,13 @@ func test_initial_three_character_draft() -> void:
 	assert_true(SaveManager.active_character_id == "soul_binder", "Chosen champion becomes the active character")
 	assert_true(SaveManager.is_character_unlocked("soul_binder"), "Chosen champion is permanently unlocked")
 	assert_true(chosen_signal.character_id == "soul_binder", "Selection confirmation emits the chosen character ID")
+	assert_true(not picker.visible, "Confirming the first champion continues into the hub")
 	SaveManager.unlocked_characters = original_unlocked
 	SaveManager.active_character_id = original_active_id
 	SaveManager.has_completed_initial_character_selection = original_selection_complete
 	GameManager.current_character = original_current_character
 	SaveManager.save_profile()
+	controller.queue_free()
 	picker.queue_free()
 
 # 15. Test Opening Experience & Main Menu Navigation
