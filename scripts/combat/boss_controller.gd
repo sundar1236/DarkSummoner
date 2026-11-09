@@ -160,6 +160,11 @@ func _attack_void_eruption() -> void:
 	, 0.0, 1.0, 1.0)
 	
 	get_tree().create_timer(1.0).timeout.connect(func():
+		if is_dead or not is_inside_tree():
+			if is_instance_valid(warn_node):
+				warn_node.queue_free()
+			is_performing_attack = false
+			return
 		if is_instance_valid(warn_node):
 			if AudioManager:
 				AudioManager.play_sfx("boss_hit")
@@ -204,12 +209,14 @@ func _attack_abyssal_charge() -> void:
 	get_tree().create_timer(0.8).timeout.connect(func():
 		if is_instance_valid(line_node):
 			line_node.queue_free()
-			
+		if is_dead or not is_inside_tree():
+			is_performing_attack = false
+			return
 		velocity = charge_dir * 520.0
 		var charge_time := 0.48
 		var timer := 0.0
 		while timer < charge_time:
-			if not is_inside_tree(): break
+			if not is_inside_tree() or is_dead: break
 			move_and_slide()
 			# Check contact with player
 			if is_instance_valid(player_ref) and global_position.distance_to(player_ref.global_position) < 58.0:
@@ -232,6 +239,9 @@ func _attack_nova_ring() -> void:
 	tween.tween_property(sprite, "modulate", Color(1.5, 0.35, 0.35, 1.0) if is_enraged else Color(1.0, 1.0, 1.0, 1.0), 0.3)
 	
 	get_tree().create_timer(0.6).timeout.connect(func():
+		if is_dead or not is_inside_tree():
+			is_performing_attack = false
+			return
 		var count: int = 14 if is_enraged else 11
 		for i in range(count):
 			var angle := (TAU / float(count)) * float(i)
