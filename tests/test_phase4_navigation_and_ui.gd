@@ -218,6 +218,7 @@ func test_campaign_screen_features() -> void:
 	assert_test(int(SaveManager.get_patrol_reward_status().get("seconds_remaining", 0)) > 0, "Patrol claim starts the eight-hour cooldown")
 	SaveManager.patrol_last_claim = old_patrol_claim
 	SaveManager.profile_gold = old_profile_gold
+	SaveManager.save_profile()
 	
 	camp.queue_free()
 	await get_tree().process_frame
