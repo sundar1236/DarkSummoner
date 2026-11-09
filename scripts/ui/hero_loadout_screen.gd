@@ -155,33 +155,80 @@ func _setup_runes_dock_wiring() -> void:
 			)
 
 func refresh_loadout() -> void:
-	if not SaveManager: return
-	var eq: Dictionary = SaveManager.equipment_levels
-	var slots := [
-		$ContentContainer/ViewGear/TopHalf/LeftSlots/SlotWeapon,
-		$ContentContainer/ViewGear/TopHalf/LeftSlots/SlotAmulet,
-		$ContentContainer/ViewGear/TopHalf/LeftSlots/SlotRing,
-		$ContentContainer/ViewGear/TopHalf/RightSlots/SlotHelmet,
-		$ContentContainer/ViewGear/TopHalf/RightSlots/SlotArmor,
-		$ContentContainer/ViewGear/TopHalf/RightSlots/SlotBoots
-	]
-	var keys := ["weapon", "amulet", "ring", "helmet", "armor", "boots"]
-	var total_lvl := 0
-	for i in range(slots.size()):
-		var slot: Control = slots[i]
-		var k: String = keys[i]
-		var lvl: int = eq.get(k, 60)
-		total_lvl += lvl
-		if slot:
-			var lvl_lbl := slot.get_node_or_null("VBox/Level") as Label
-			if lvl_lbl:
-				lvl_lbl.text = "Lv.%d S" % lvl
+	if not SaveManager:
+		return
+
+	var slots := {
+		"weapon": $ContentContainer/ViewGear/TopHalf/LeftSlots/SlotWeapon,
+		"amulet": $ContentContainer/ViewGear/TopHalf/LeftSlots/SlotAmulet,
+		"ring": $ContentContainer/ViewGear/TopHalf/LeftSlots/SlotRing,
+		"helmet": $ContentContainer/ViewGear/TopHalf/RightSlots/SlotHelmet,
+		"armor": $ContentContainer/ViewGear/TopHalf/RightSlots/SlotArmor,
+		"boots": $ContentContainer/ViewGear/TopHalf/RightSlots/SlotBoots
+	}
+	var slot_icons := {
+		"weapon": "🗡", "amulet": "📿", "ring": "💍",
+		"helmet": "👑", "armor": "🥋", "boots": "👢"
+	}
+	for slot_name in slots:
+		var slot: Control = slots[slot_name]
+		var item: ItemInstance = SaveManager.get_equipped_gear(slot_name)
+		var icon_lbl := slot.get_node_or_null("VBox/Icon") as Label
+		var level_lbl := slot.get_node_or_null("VBox/Level") as Label
+		if icon_lbl:
+			icon_lbl.text = slot_icons[slot_name] if not item else slot_icons[slot_name]
+		if level_lbl:
+			if item and item.data:
+				level_lbl.text = "%s\n+%d" % [item.data.name, item.upgrade_level]
+			else:
+				level_lbl.text = "Empty"
 				
-	base_display_atk = 3200 + total_lvl * 8
-	base_display_hp = 14000 + total_lvl * 25
-	if stat_atk_label: stat_atk_label.text = "⚔ ATK: %s" % _format_num(base_display_atk)
-	if stat_hp_label: stat_hp_label.text = "❤ HP: %s" % _format_num(base_display_hp)
+	var gear_stats: Dictionary = SaveManager.get_equipped_gear_stats()
+	base_display_atk = 3200 + int(gear_stats.get("bonus_atk", 0.0) * 10.0)
+	base_display_hp = 14000 + int(gear_stats.get("bonus_hp", 0.0) * 10.0)
 	_update_character_ui()
+	_refresh_gear_inventory_grid()
+
+func _refresh_gear_inventory_grid() -> void:
+	var gear_grid := $ContentContainer/ViewGear/BottomInventory/Grid as GridContainer
+	if not gear_grid or not SaveManager:
+		return
+	for child in gear_grid.get_children():
+		gear_grid.remove_child(child)
+		child.queue_free()
+
+	var slot_icons := {
+		"weapon": "🗡", "amulet": "📿", "ring": "💍",
+		"helmet": "👑", "armor": "🥋", "boots": "👢"
+	}
+	var items: Array[ItemInstance] = SaveManager.get_gear_items()
+	for item in items:
+		if not item or not item.data:
+			continue
+		var slot_name := item.data.equipment_slot
+		var button := Button.new()
+		button.custom_minimum_size = Vector2(104, 96)
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		var equipped := str(SaveManager.equipped_gear.get(slot_name, "")) == item.uid
+		button.text = "%s\n%s\n%s" % [
+			slot_icons.get(slot_name, "◆"),
+			item.data.name,
+			"Equipped" if equipped else item.rarity.capitalize()
+		]
+		button.add_theme_font_size_override("font_size", 13)
+		button.pressed.connect(func():
+			_equip_gear_item(item.uid)
+		)
+		gear_grid.add_child(button)
+
+func _equip_gear_item(uid: String) -> void:
+	if SaveManager and SaveManager.equip_gear_item(uid):
+		if AudioManager:
+			AudioManager.play_sfx("item_place")
+		refresh_loadout()
+		show_toast("Equipment updated")
+	else:
+		show_toast("This item cannot be equipped")
 
 func _setup_toast_label() -> void:
 	_toast_label = Label.new()
@@ -406,23 +453,32 @@ func _update_character_ui() -> void:
 			if stat_hp_label: stat_hp_label.text = "❤ HP: %s" % _format_num(base_display_hp)
 
 func _setup_gear_slots_wiring() -> void:
-	var slots := [
-		$ContentContainer/ViewGear/TopHalf/LeftSlots/SlotWeapon,
-		$ContentContainer/ViewGear/TopHalf/LeftSlots/SlotAmulet,
-		$ContentContainer/ViewGear/TopHalf/LeftSlots/SlotRing,
-		$ContentContainer/ViewGear/TopHalf/RightSlots/SlotHelmet,
-		$ContentContainer/ViewGear/TopHalf/RightSlots/SlotArmor,
-		$ContentContainer/ViewGear/TopHalf/RightSlots/SlotBoots
-	]
-	var names := ["Weapon", "Amulet", "Ring", "Helmet", "Armor", "Boots"]
-	for i in range(slots.size()):
-		var slot: Control = slots[i]
-		var s_name: String = names[i]
-		if slot:
-			slot.gui_input.connect(func(ev: InputEvent):
-				if ev is InputEventMouseButton and ev.pressed:
-					_upgrade_gear_slot(slot, s_name)
-			)
+	var slots := {
+		"weapon": $ContentContainer/ViewGear/TopHalf/LeftSlots/SlotWeapon,
+		"amulet": $ContentContainer/ViewGear/TopHalf/LeftSlots/SlotAmulet,
+		"ring": $ContentContainer/ViewGear/TopHalf/LeftSlots/SlotRing,
+		"helmet": $ContentContainer/ViewGear/TopHalf/RightSlots/SlotHelmet,
+		"armor": $ContentContainer/ViewGear/TopHalf/RightSlots/SlotArmor,
+		"boots": $ContentContainer/ViewGear/TopHalf/RightSlots/SlotBoots
+	}
+	for slot_name in slots:
+		var slot: Control = slots[slot_name]
+		slot.gui_input.connect(func(ev: InputEvent):
+			if ev is InputEventMouseButton and ev.pressed and ev.button_index == MOUSE_BUTTON_LEFT:
+				_on_gear_slot_pressed(slot_name)
+		)
+
+func _on_gear_slot_pressed(slot_name: String) -> void:
+	if not SaveManager:
+		return
+	if SaveManager.unequip_gear_slot(slot_name):
+		if AudioManager:
+			AudioManager.play_sfx("item_place")
+		refresh_loadout()
+		show_toast("Unequipped %s" % slot_name.capitalize())
+	else:
+		show_toast("No %s equipped" % slot_name.capitalize())
+
 
 func _upgrade_gear_slot(slot: Control, slot_name: String) -> void:
 	var k := slot_name.to_lower()
