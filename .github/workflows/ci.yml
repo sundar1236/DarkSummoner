@@ -16,6 +16,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Scan project, generate global class cache, and import assets
+        run: godot --headless --editor --path . --import --quit
+
       - name: Run Core Gameplay Test Suite (116 tests)
         run: godot -v --headless --path . "res://tests/test_runner.tscn"
 
