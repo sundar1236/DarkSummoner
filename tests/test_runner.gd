@@ -14,6 +14,7 @@ func _ready() -> void:
 	test_persistent_equipment_slots()
 	test_gear_item_details_and_comparison()
 	test_gear_inventory_sorting()
+	test_combat_power_breakdown()
 	test_blacksmith_gear_purchases()
 	test_boss_gear_rewards_are_persistent()
 	test_run_altar_excludes_persistent_gear()
@@ -207,6 +208,45 @@ func test_gear_inventory_sorting() -> void:
 	assert_true(by_slot[1].data.equipment_slot == "boots", "Boots follow helmet in slot sort")
 	assert_true(by_slot[2].data.equipment_slot == "ring", "Ring follows boots in slot sort")
 	loadout.queue_free()
+
+
+func test_combat_power_breakdown() -> void:
+	print("--- Test: Combat Power Source Breakdown ---")
+	var original_level: int = SaveManager.player_level
+	var original_equipment_levels: Dictionary = SaveManager.equipment_levels.duplicate(true)
+	var original_stars: Dictionary = SaveManager.character_stars.duplicate(true)
+	var original_cards: Dictionary = SaveManager.talent_cards.duplicate(true)
+	var original_inventory: Array[Dictionary] = SaveManager.gear_inventory.duplicate(true)
+	var original_equipped: Dictionary = SaveManager.equipped_gear.duplicate(true)
+
+	SaveManager.player_level = 3
+	SaveManager.equipment_levels = {"weapon": 2, "armor": 1}
+	SaveManager.character_stars = {"shadow_hunter": 2}
+	SaveManager.talent_cards = {"glory": 1}
+	SaveManager.gear_inventory.clear()
+	SaveManager.equipped_gear = {"weapon": "", "helmet": "", "armor": "", "boots": "", "amulet": "", "ring": ""}
+	var helm := ItemInstance.new(ItemDatabase.get_item("void_helm"))
+	assert_true(SaveManager.add_gear_item(helm), "Breakdown test gear is added")
+	assert_true(SaveManager.equip_gear_item(helm.uid), "Breakdown test gear equips")
+
+	var breakdown: Dictionary = SaveManager.get_combat_power_breakdown()
+	assert_true(int(breakdown.get("base", 0)) == 7500, "Base power matches player level")
+	assert_true(int(breakdown.get("legacy_gear", 0)) == 135, "Legacy equipment contribution remains included")
+	assert_true(int(breakdown.get("character", 0)) == 1300, "Character star contribution is exposed")
+	assert_true(int(breakdown.get("talents", 0)) == 400, "Talent card contribution is exposed")
+	assert_true(int(breakdown.get("equipped_gear", 0)) > 0, "Equipped gear contribution is calculated")
+	var expected_total := int(breakdown.base) + int(breakdown.legacy_gear) + int(breakdown.equipped_gear) + int(breakdown.character) + int(breakdown.talents)
+	assert_true(int(breakdown.total) == expected_total, "Combat power total equals the sum of all sources")
+	assert_true(SaveManager.calculate_combat_power() == expected_total, "Existing combat power API stays consistent")
+	assert_true(breakdown.gear_stats.has("bonus_crit") and breakdown.gear_stats.has("bonus_atk_speed"), "Breakdown exposes all equipped gear stat categories")
+
+	SaveManager.player_level = original_level
+	SaveManager.equipment_levels = original_equipment_levels
+	SaveManager.character_stars = original_stars
+	SaveManager.talent_cards = original_cards
+	SaveManager.gear_inventory = original_inventory
+	SaveManager.equipped_gear = original_equipped
+	SaveManager.save_profile()
 
 
 func test_blacksmith_gear_purchases() -> void:

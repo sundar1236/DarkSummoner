@@ -450,26 +450,37 @@ func claim_patrol_rewards() -> Dictionary:
 	save_profile()
 	return { "gold": base_gold, "xp": base_xp }
 
-func calculate_combat_power() -> int:
+func get_combat_power_breakdown() -> Dictionary:
 	var base_power := 2500 * player_level
-	var gear_power := 0
+	var legacy_gear_power := 0
 	for lvl in equipment_levels.values():
-		gear_power += int(lvl) * 45
+		legacy_gear_power += int(lvl) * 45
 	var equipped_stats: Dictionary = get_equipped_gear_stats()
-	var equipped_power := int(
+	var equipped_gear_power := int(
 		equipped_stats.get("bonus_atk", 0.0) * 20.0
 		+ equipped_stats.get("bonus_hp", 0.0) * 2.0
 		+ equipped_stats.get("bonus_crit", 0.0) * 500.0
 		+ equipped_stats.get("bonus_speed", 0.0) * 2.0
 		+ equipped_stats.get("bonus_atk_speed", 0.0) * 300.0
 	)
-	var star_power := 0
+	var character_power := 0
 	for stars in character_stars.values():
-		star_power += int(stars) * 650
-	var card_power := 0
+		character_power += int(stars) * 650
+	var talent_power := 0
 	for stars in talent_cards.values():
-		card_power += int(stars) * 400
-	return base_power + gear_power + equipped_power + star_power + card_power
+		talent_power += int(stars) * 400
+	return {
+		"base": base_power,
+		"legacy_gear": legacy_gear_power,
+		"equipped_gear": equipped_gear_power,
+		"character": character_power,
+		"talents": talent_power,
+		"total": base_power + legacy_gear_power + equipped_gear_power + character_power + talent_power,
+		"gear_stats": equipped_stats
+	}
+
+func calculate_combat_power() -> int:
+	return int(get_combat_power_breakdown().get("total", 0))
 
 const WEB_STORAGE_KEY: String = "dark_summoner_save_profile"
 const WEB_RUN_KEY: String = "dark_summoner_run_state"
