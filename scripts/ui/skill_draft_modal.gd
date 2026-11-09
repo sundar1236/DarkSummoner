@@ -3,7 +3,7 @@ extends Control
 
 # Valkyrie Blessing Draft Modal (Phase 5 & Ref Image 8)
 # Presents full-screen dimmed overlay with gold winged banner ("You've encountered Valkyrie"),
-# 2 tall ornate vertical Legendary/Epic/Rare skill cards side-by-side,
+# 3 compact ornate Legendary/Epic/Rare skill cards side-by-side,
 # rank progression badges (New Skill / Upgrade Lv.1 -> Lv.2), stat preview arrows (ATK PWR ↑↑↑↑),
 # Learned Skills slide-out drawer, and dynamic Refresh mechanic with deterministic testing support.
 
