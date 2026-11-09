@@ -669,19 +669,25 @@ func _handle_touch_motion(pos: Vector2) -> void:
 func _handle_touch_up(pos: Vector2) -> void:
 	if not is_dragging:
 		return
+
+	# Resolve the destination from the release event itself. The final mouse/touch
+	# position is not guaranteed to have produced a preceding motion event.
+	var release_socket := get_socket_at_pos(pos)
+	hover_socket = release_socket
 	is_dragging = false
-	
-	if inventory_view and inventory_view.selected_item and hover_socket != -1:
+
+	if inventory_view and inventory_view.selected_item and release_socket != -1:
 		var sel := inventory_view.selected_item
-		var target_cell: Vector2i = SOCKET_TO_CELL.get(hover_socket, Vector2i(-999, -999))
-		if hover_socket != drag_from_socket and is_item_compatible(sel, hover_socket):
+		var target_cell: Vector2i = SOCKET_TO_CELL.get(release_socket, Vector2i(-999, -999))
+		if release_socket != drag_from_socket and is_item_compatible(sel, release_socket):
 			if GameManager.can_move_item_to(sel, target_cell):
 				inventory_view.commit_move(target_cell)
 			else:
 				if AudioManager: AudioManager.play_sfx("ui_error")
-		elif hover_socket != drag_from_socket:
+		elif release_socket != drag_from_socket:
 			if AudioManager: AudioManager.play_sfx("ui_error")
-			
+
+	# Releasing outside a socket cancels the relocation without changing the item.
 	hover_socket = -1
 	drag_from_socket = -1
 	hover_cell = Vector2i(-999, -999)
