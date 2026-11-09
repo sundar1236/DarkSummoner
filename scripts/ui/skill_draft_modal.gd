@@ -25,8 +25,8 @@ var is_choice_locked: bool = false
 @onready var card_2_panel: PanelContainer = $Content/CardsHBox/SkillCard2
 @onready var card_1_btn: Button = $Content/CardsHBox/SkillCard1/CardButton
 @onready var card_2_btn: Button = $Content/CardsHBox/SkillCard2/CardButton
-var card_3_panel: PanelContainer
-var card_3_btn: Button
+@onready var card_3_panel: PanelContainer = $Content/CardsHBox/SkillCard3
+@onready var card_3_btn: Button = $Content/CardsHBox/SkillCard3/CardButton
 
 @onready var learned_drawer: PanelContainer = $LearnedDrawer
 @onready var learned_list: VBoxContainer = $LearnedDrawer/VBox/ScrollContainer/LearnedList
@@ -48,12 +48,13 @@ func _ready() -> void:
 	card_2_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var cards_row := $Content/CardsHBox as HBoxContainer
 	cards_row.add_theme_constant_override("separation", 8)
-	card_3_panel = card_2_panel.duplicate() as PanelContainer
-	card_3_panel.name = "SkillCard3"
-	card_3_panel.custom_minimum_size = Vector2(0, 500)
-	card_3_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	cards_row.add_child(card_3_panel)
-	card_3_btn = card_3_panel.get_node("CardButton") as Button
+	for panel in [card_1_panel, card_2_panel, card_3_panel]:
+		panel.custom_minimum_size = Vector2(0, 500)
+		panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		var card_vbox := panel.get_node("VBox") as VBoxContainer
+		card_vbox.add_theme_constant_override("separation", 6)
+		var icon_box := panel.get_node("VBox/IconBox") as PanelContainer
+		icon_box.custom_minimum_size = Vector2(60, 60)
 
 	if refresh_btn:
 		refresh_btn.pressed.connect(_on_refresh_pressed)
