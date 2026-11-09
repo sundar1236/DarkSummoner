@@ -459,15 +459,15 @@ func _setup_toast_label() -> void:
 func _setup_info_modal() -> void:
 	_info_modal = PanelContainer.new()
 	_info_modal.anchors_preset = PRESET_CENTER
-	_info_modal.custom_minimum_size = Vector2(460, 250)
+	_info_modal.custom_minimum_size = Vector2(500, 430)
 	_info_modal.anchor_left = 0.5
 	_info_modal.anchor_top = 0.5
 	_info_modal.anchor_right = 0.5
 	_info_modal.anchor_bottom = 0.5
-	_info_modal.offset_left = -230.0
-	_info_modal.offset_top = -125.0
-	_info_modal.offset_right = 230.0
-	_info_modal.offset_bottom = 125.0
+	_info_modal.offset_left = -250.0
+	_info_modal.offset_top = -215.0
+	_info_modal.offset_right = 250.0
+	_info_modal.offset_bottom = 215.0
 
 	var sb := StyleBoxFlat.new()
 	sb.bg_color = Color(0.06, 0.07, 0.12, 0.98)
@@ -519,8 +519,8 @@ func _toggle_combat_power_modal() -> void:
 		_info_modal.visible = false
 		return
 
-	var power: int = SaveManager.calculate_combat_power() if SaveManager else 24800
-	var gear_stats: Dictionary = SaveManager.get_equipped_gear_stats() if SaveManager else {}
+	var breakdown: Dictionary = SaveManager.get_combat_power_breakdown() if SaveManager else {}
+	var gear_stats: Dictionary = breakdown.get("gear_stats", {})
 	var equipped_count := 0
 	if SaveManager:
 		for slot_name in SaveManager.EQUIPMENT_SLOTS:
@@ -528,10 +528,18 @@ func _toggle_combat_power_modal() -> void:
 				equipped_count += 1
 	var desc_lbl := _info_modal.find_child("StatDescLabel", true, false) as Label
 	if desc_lbl:
-		desc_lbl.text = "✦ Total Combat Power: %s\n✦ Gear ATK: +%d\n✦ Gear HP: +%d\n✦ Equipment Slots: %d/6\n✦ Rune resonance is calculated separately during runs." % [
-			_format_num(power),
-			int(gear_stats.get("bonus_atk", 0.0)),
-			int(gear_stats.get("bonus_hp", 0.0)),
+		desc_lbl.text = "TOTAL COMBAT POWER  %s\\n\\nPOWER SOURCES\\nHunter level       %s\\nEquipment (legacy)  %s\\nEquipped gear       %s\\nCharacter stars     %s\\nTalent cards        %s\\n\\nEQUIPPED GEAR BONUSES\\nATK  +%s     HP  +%s\\nCRIT  +%.1f%%     MOVE SPD  +%s\\nATK SPD  +%.1f%%\\n\\nEquipment slots: %d/6\\nRune resonance is calculated separately during runs." % [
+			_format_num(int(breakdown.get("total", 0))),
+			_format_num(int(breakdown.get("base", 0))),
+			_format_num(int(breakdown.get("legacy_gear", 0))),
+			_format_num(int(breakdown.get("equipped_gear", 0))),
+			_format_num(int(breakdown.get("character", 0))),
+			_format_num(int(breakdown.get("talents", 0))),
+			_format_gear_stat(gear_stats.get("bonus_atk", 0.0)),
+			_format_gear_stat(gear_stats.get("bonus_hp", 0.0)),
+			float(gear_stats.get("bonus_crit", 0.0)) * 100.0,
+			_format_gear_stat(gear_stats.get("bonus_speed", 0.0)),
+			float(gear_stats.get("bonus_atk_speed", 0.0)) * 100.0,
 			equipped_count
 		]
 	if AudioManager:
