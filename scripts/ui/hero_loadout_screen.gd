@@ -51,8 +51,6 @@ signal rune_workshop_requested()
 
 var current_char_id: String = "shadow_hunter"
 var hunter_stars: int = 2
-var base_display_atk: int = 4280
-var base_display_hp: int = 18920
 var gear_sort_index: int = 0
 var runes_sort_index: int = 0
 var _toast_label: Label = null
@@ -183,9 +181,6 @@ func refresh_loadout() -> void:
 			else:
 				level_lbl.text = "Empty"
 				
-	var gear_stats: Dictionary = SaveManager.get_equipped_gear_stats()
-	base_display_atk = 3200 + int(gear_stats.get("bonus_atk", 0.0) * 10.0)
-	base_display_hp = 14000 + int(gear_stats.get("bonus_hp", 0.0) * 10.0)
 	_update_character_ui()
 	_refresh_gear_inventory_grid()
 
@@ -496,29 +491,6 @@ func _on_gear_slot_pressed(slot_name: String) -> void:
 	else:
 		show_toast("No %s equipped" % slot_name.capitalize())
 
-
-func _upgrade_gear_slot(slot: Control, slot_name: String) -> void:
-	var k := slot_name.to_lower()
-	if SaveManager:
-		if SaveManager.upgrade_equipment_slot(k):
-			var new_lvl: int = SaveManager.equipment_levels.get(k, 60)
-			refresh_loadout()
-			show_toast("✦ %s Upgraded to Lv.%d! (+45 ATK, +120 HP)" % [slot_name, new_lvl])
-		else:
-			var cur_l: int = SaveManager.equipment_levels.get(k, 60)
-			var cost: int = cur_l * 50
-			if AudioManager: AudioManager.play_sfx("ui_error")
-			show_toast("Need 🪙 %d Gold to upgrade %s!" % [cost, slot_name])
-	else:
-		var lvl_lbl := slot.get_node_or_null("VBox/Level") as Label
-		if lvl_lbl:
-			base_display_atk += 45
-			base_display_hp += 120
-			if AudioManager: AudioManager.play_sfx("upgrade")
-			lvl_lbl.text = "Lv.61 S"
-			if stat_atk_label: stat_atk_label.text = "⚔ ATK: %s" % _format_num(base_display_atk)
-			if stat_hp_label: stat_hp_label.text = "❤ HP: %s" % _format_num(base_display_hp)
-			show_toast("✦ %s Upgraded to Lv.61!" % slot_name)
 
 func _format_num(val: int) -> String:
 	var thousands := val / 1000
