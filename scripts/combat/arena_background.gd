@@ -93,10 +93,10 @@ func _draw() -> void:
 			draw_rect(tile_rect, stone_col, true)
 			# 2.5D top/left highlight bevel
 			draw_line(Vector2(tile_rect.position.x, tile_rect.position.y), Vector2(tile_rect.end.x, tile_rect.position.y), tile_highlight_color, 1.0)
-			draw_line(Vector2(tile_rect.position.x, tile_rect.position.y), Vector2(tile_rect.position.x, tile_rect.end.y), Color(0.18, 0.13, 0.25, 0.6), 1.0)
+			draw_line(Vector2(tile_rect.position.x, tile_rect.position.y), Vector2(tile_rect.position.x, tile_rect.end.y), tile_highlight_color, 1.0)
 			# Bottom/right shadow bevel
-			draw_line(Vector2(tile_rect.position.x, tile_rect.end.y), Vector2(tile_rect.end.x, tile_rect.end.y), Color(0.03, 0.02, 0.05, 0.8), 1.5)
-			draw_line(Vector2(tile_rect.end.x, tile_rect.position.y), Vector2(tile_rect.end.x, tile_rect.end.y), Color(0.03, 0.02, 0.05, 0.8), 1.5)
+			draw_line(Vector2(tile_rect.position.x, tile_rect.end.y), Vector2(tile_rect.end.x, tile_rect.end.y), tile_base_color.darkened(0.7), 1.5)
+			draw_line(Vector2(tile_rect.end.x, tile_rect.position.y), Vector2(tile_rect.end.x, tile_rect.end.y), tile_base_color.darkened(0.7), 1.5)
 
 	# Outer border boundary stone walls with depth shadow
 	draw_rect(Rect2(20, 60, 680, 1100), border_color, false, 5.0)
@@ -108,7 +108,7 @@ func _draw() -> void:
 	var pulse := (1.0 + sin(t * 2.0)) * 0.5
 	
 	# Glowing runes
-	draw_circle(center, 220.0, _shade_color(floor_background_color, 0.04))
+	draw_circle(center, 220.0, Color(floor_background_color.r, floor_background_color.g, floor_background_color.b, 0.45))
 	draw_arc(center, 220.0, 0, TAU, 64, _shade_color(rune_color, pulse * 0.12), 3.0)
 	draw_arc(center, 180.0, 0, TAU, 48, Color(rune_color.r, rune_color.g, rune_color.b, 0.45), 2.0)
 	draw_arc(center, 120.0, 0, TAU, 32, Color(rune_color.r, rune_color.g, rune_color.b, 0.62), 2.0)
