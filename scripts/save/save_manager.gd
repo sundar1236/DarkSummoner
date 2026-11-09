@@ -375,6 +375,35 @@ func get_equipped_gear_stats() -> Dictionary:
 		totals["bonus_atk_speed"] += item.data.bonus_atk_speed + (level * 0.005)
 	return totals
 
+
+func get_gear_upgrade_cost(slot_name: String) -> int:
+	var item := get_equipped_gear(slot_name)
+	if not item or not item.data:
+		return 0
+	return (item.upgrade_level + 1) * 50 * item.data.tier
+
+func upgrade_equipped_gear(slot_name: String) -> bool:
+	if not EQUIPMENT_SLOTS.has(slot_name):
+		return false
+	var item := get_equipped_gear(slot_name)
+	if not item or not item.data:
+		return false
+	var cost := get_gear_upgrade_cost(slot_name)
+	if profile_gold < cost:
+		return false
+	profile_gold -= cost
+	item.upgrade_level += 1
+	for index in range(gear_inventory.size()):
+		if str(gear_inventory[index].get("uid", "")) == item.uid:
+			gear_inventory[index] = item.to_dict()
+			break
+	save_profile()
+	gold_changed.emit(profile_gold)
+	profile_changed.emit()
+	if AudioManager:
+		AudioManager.play_sfx("upgrade")
+	return true
+
 func upgrade_equipment_slot(slot_name: String) -> bool:
 	var cur_lvl: int = equipment_levels.get(slot_name, 1)
 	var cost: int = cur_lvl * 50
