@@ -285,7 +285,7 @@ func test_gear_set_bonuses() -> void:
 	assert_true(int(abyssal.get("active_threshold", 0)) == 4, "Four-piece threshold activates")
 	var four_piece: Dictionary = SaveManager.get_gear_set_bonus_stats()
 	assert_true(is_equal_approx(float(four_piece.bonus_hp), 40.0), "Four-piece set grants HP bonus")
-	assert_true(is_equal_approx(float(four_piece.bonus_crit), 0.08), "Four-piece threshold replaces two-piece bonus")
+	assert_true(is_equal_approx(float(four_piece.bonus_crit), 0.08), "Four-piece bonus stacks with the two-piece bonus")
 	var breakdown: Dictionary = SaveManager.get_combat_power_breakdown()
 	assert_true(int(breakdown.get("set_bonus", 0)) > 0, "Set bonuses contribute to combat power")
 	assert_true(int(breakdown.total) == SaveManager.calculate_combat_power(), "Set bonus total matches combat power API")
