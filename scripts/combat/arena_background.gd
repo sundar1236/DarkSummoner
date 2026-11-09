@@ -107,15 +107,18 @@ func _draw() -> void:
 		var angle := (TAU / 8.0) * float(i)
 		var p1 := center + Vector2.RIGHT.rotated(angle) * 180.0
 		var p2 := center + Vector2.RIGHT.rotated(angle + PI * 0.75) * 180.0
-		draw_line(p1, p2, Color(ring_color.r, ring_color.g, ring_color.b, 0.4), 1.8)
-		draw_circle(p1, 6.0, Color(ring_color.r, ring_color.g, ring_color.b, 0.85))
+		draw_line(p1, p2, Color(rune_color.r, rune_color.g, rune_color.b, 0.45), 1.8)
+		# Glowing node sigils
+		draw_circle(p1, 6.0, rune_color.lightened(0.15))
 		draw_circle(p1, 2.5, Color(1.0, 1.0, 1.0, 0.95))
 
 	var corners := [Vector2(75, 115), Vector2(645, 115), Vector2(75, 1105), Vector2(645, 1105)]
-	var flicker: float = 0.0 if reduced_motion else sin(time_seconds * 8.0) * 3.0 + cos(time_seconds * 13.0) * 2.0
-	for corner in corners:
-		draw_circle(corner, 48.0 + flicker, Color(brazier_color.r, brazier_color.g, brazier_color.b, 0.15))
-		draw_circle(corner, 28.0 + flicker * 0.5, Color(brazier_color.r, brazier_color.g, brazier_color.b, 0.25))
-		draw_circle(corner, 16.0, Color(0.18, 0.1, 0.22, 0.95))
-		draw_circle(corner, 11.0, brazier_color)
-		draw_circle(corner, 5.0, Color(1.0, 0.9, 0.4, 1.0))
+	var flk := sin(t * 8.0) * 3.0 + cos(t * 13.0) * 2.0
+	for c in corners:
+		# Ambient glowing light pool
+		draw_circle(c, 48.0 + flk, brazier_glow_color)
+		draw_circle(c, 28.0 + flk * 0.5, Color(brazier_flame_color.r, brazier_flame_color.g, brazier_flame_color.b, 0.25))
+		# Brazier stone pillar
+		draw_circle(c, 16.0, tile_highlight_color.darkened(0.45))
+		draw_circle(c, 11.0, brazier_flame_color)
+		draw_circle(c, 5.0, Color(1.0, 0.9, 0.4, 1.0))

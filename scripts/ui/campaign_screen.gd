@@ -3,22 +3,18 @@ extends Control
 
 # Campaign World Hub (Screen A - Ref Image 2)
 # Features 2.5D floating diorama island, chapter shield, difficulty selector,
-# interactive event carousel, sidebars, quick-access hunt rewards, and primary Start (x5 Energy) CTA.
+# real daily-task navigation, patrol rewards, and primary Start (x5 Energy) CTA.
 
 signal start_run_requested()
 signal insufficient_energy()
 signal difficulty_changed(diff_name: String)
-signal event_clicked(event_idx: int)
 signal hunt_clicked()
-signal chest_clicked()
-signal guild_clicked()
 signal camp_clicked()
-signal rumble_clicked()
+signal daily_tasks_requested()
 
 @onready var island_container: Control = $IslandStage/DioramaIsland
 @onready var chapter_label: Label = $IslandStage/ChapterHeader/ChapterShield/ChapterLabel
 @onready var start_button: Button = $BottomControls/MainActionRow/StartButton
-@onready var chat_label: Label = $BottomControls/ChatTicker/HBox/ChatLabel
 
 # Event Carousel
 @onready var banner_trophy: Label = $TopBannerSection/EventBanner/HBox/Trophy
@@ -45,25 +41,6 @@ var current_chapter: int = 1
 var is_cleared: bool = true
 var _toast_label: Label = null
 
-# Event Carousel Data
-var events_data: Array[Dictionary] = [
-	{"icon": "🏆", "title": "All-Star Cup — Season 4", "sub": "Climb the tower for Mythic Relics! (2d 14h left)"},
-	{"icon": "💀", "title": "Abyssal Incursion — Raid", "sub": "Defeat the Void Harvester with Guild! (18h left)"},
-	{"icon": "🏰", "title": "Tower of Torment — Floor 10", "sub": "Double Shades & High-Tier Runes Active! (5d left)"}
-]
-var current_event_idx: int = 0
-var _event_timer: float = 0.0
-
-# Chat Ticker Data
-var chat_messages: Array[String] = [
-	" [System] Hunter Raven unlocked Hellhound Evolution on Floor 3!",
-	" [World] Shadowblade harvested 12,000 Shades in Torment mode!",
-	" [Guild] Frost Valkyrie defeated Void Goliath on Floor 8!",
-	" [Altar] Arcane Convergence active: +20% Rune Resonance!",
-	" [Broadcast] Player Moros forged a Mythic Abyssal Blade (+7)!"
-]
-var current_chat_idx: int = 0
-var _chat_timer: float = 0.0
 
 func _ready() -> void:
 	if start_button:
@@ -73,21 +50,32 @@ func _ready() -> void:
 	if btn_hunt: btn_hunt.pressed.connect(_on_hunt_pressed)
 	
 	var btn_chest := $BottomControls/QuickAccessRow/ChestBtn as Button
-	if btn_chest: btn_chest.pressed.connect(_on_chest_pressed)
-	
+	if btn_chest:
+		btn_chest.visible = false
+		btn_chest.disabled = true
+
 	var btn_guild := $BottomControls/QuickAccessRow/GuildBtn as Button
-	if btn_guild: btn_guild.pressed.connect(_on_guild_pressed)
+	if btn_guild:
+		btn_guild.visible = false
+		btn_guild.disabled = true
+
+	var hunt_button := $BottomControls/QuickAccessRow/HuntBtn as Button
+	if hunt_button:
+		hunt_button.text = "🗡 Patrol Rewards"
+
+	var chat_ticker := get_node_or_null("BottomControls/ChatTicker") as Control
+	if chat_ticker:
+		chat_ticker.visible = false
+
+	var rumble_button := get_node_or_null("BottomControls/MainActionRow/RumbleBtn") as Button
+	if rumble_button:
+		rumble_button.visible = false
+		rumble_button.disabled = true
 	
 	var btn_camp := $BottomControls/MainActionRow/CampBtn as Button
 	if btn_camp: btn_camp.pressed.connect(func():
 		if AudioManager: AudioManager.play_sfx("ui_click")
 		camp_clicked.emit()
-	)
-	
-	var btn_rumble := $BottomControls/MainActionRow/RumbleBtn as Button
-	if btn_rumble: btn_rumble.pressed.connect(func():
-		if AudioManager: AudioManager.play_sfx("ui_click")
-		rumble_clicked.emit()
 	)
 	
 	_setup_difficulty_buttons()
@@ -112,10 +100,15 @@ func _select_difficulty(diff: String) -> void:
 		SaveManager.set_difficulty(diff)
 	_update_difficulty_visuals(diff)
 	
-	var mult_str := "1.0x"
-	if diff == "hard": mult_str = "1.5x"
-	elif diff == "torment": mult_str = "2.0x"
-	show_toast("⚔ Difficulty Set: %s Mode (%s Multiplier)" % [diff.capitalize(), mult_str])
+	var enemy_hp_mult := 1.0
+	var enemy_damage_mult := 1.0
+	if diff == "hard":
+		enemy_hp_mult = 1.5
+		enemy_damage_mult = 1.25
+	elif diff == "torment":
+		enemy_hp_mult = 2.0
+		enemy_damage_mult = 1.5
+	show_toast("⚔ %s — Enemy HP x%.1f · Damage x%.2f" % [diff.capitalize(), enemy_hp_mult, enemy_damage_mult])
 	difficulty_changed.emit(diff)
 
 func _update_difficulty_visuals(active_diff: String) -> void:
@@ -130,53 +123,30 @@ func _update_difficulty_visuals(active_diff: String) -> void:
 		btn_diff_torment.add_theme_color_override("font_color", active_col if active_diff == "torment" else inactive_col)
 
 func _setup_event_banner() -> void:
-	if banner_btn:
-		banner_btn.pressed.connect(_cycle_event)
-	_update_event_visuals()
-
-func _cycle_event() -> void:
-	current_event_idx = (current_event_idx + 1) % events_data.size()
-	_update_event_visuals()
-	if AudioManager: AudioManager.play_sfx("ui_click")
-	show_toast("📌 Event: %s" % events_data[current_event_idx].title)
-	event_clicked.emit(current_event_idx)
-
-func _update_event_visuals() -> void:
-	var ev: Dictionary = events_data[current_event_idx]
-	if banner_trophy: banner_trophy.text = ev.icon
-	if banner_title: banner_title.text = ev.title
-	if banner_subtitle: banner_subtitle.text = ev.sub
+	if banner_trophy:
+		banner_trophy.text = "🏰"
+	if banner_title:
+		banner_title.text = "Tower Expedition"
+	if banner_subtitle:
+		banner_subtitle.text = "Clear five levels, defeat Lord Malakar, and unlock the next floor."
 	if banner_dots:
-		var dots_str := ""
-		for i in range(events_data.size()):
-			dots_str += "● " if i == current_event_idx else "○ "
-		banner_dots.text = dots_str.strip_edges()
+		banner_dots.visible = false
+	if banner_btn:
+		banner_btn.visible = false
 
 func _setup_sidebar_buttons() -> void:
-	if btn_privilege:
-		btn_privilege.pressed.connect(func():
-			if AudioManager: AudioManager.play_sfx("ui_click")
-			show_toast("👑 VIP Privilege: Daily +10 ⚡ & +15% Patrol Gold active!")
-		)
-	if btn_great_value:
-		btn_great_value.pressed.connect(func():
-			if AudioManager: AudioManager.play_sfx("ui_click")
-			show_toast("🎁 7-Day Festival: Day 3/7 Claimable in Sanctuary Tab!")
-		)
-	if btn_rankings:
-		btn_rankings.pressed.connect(func():
-			if AudioManager: AudioManager.play_sfx("ui_click")
-			show_toast("🏅 Leaderboard: #142 Hunter Raven (Top 5% Global)")
-		)
+	var left_sidebar := get_node_or_null("LeftSidebar") as Control
+	if left_sidebar:
+		left_sidebar.visible = false
+	for placeholder in [btn_privilege, btn_great_value, btn_rankings, btn_friends]:
+		if placeholder:
+			placeholder.visible = false
+			placeholder.disabled = true
 	if btn_tasks:
+		btn_tasks.tooltip_text = "Open daily missions and achievements"
 		btn_tasks.pressed.connect(func():
 			if AudioManager: AudioManager.play_sfx("ui_click")
-			show_toast("📜 Daily Quests: 3/5 Completed (+120 💎 ready to claim)")
-		)
-	if btn_friends:
-		btn_friends.pressed.connect(func():
-			if AudioManager: AudioManager.play_sfx("ui_click")
-			show_toast("👥 Abyssal Alliance: 6 Guildmates currently online")
+			daily_tasks_requested.emit()
 		)
 	if btn_topup:
 		btn_topup.pressed.connect(func():
@@ -233,44 +203,21 @@ func _on_start_pressed() -> void:
 	start_run_requested.emit()
 
 func _on_hunt_pressed() -> void:
+	if not SaveManager:
+		show_toast("Patrol rewards are unavailable.")
+		return
+	var claimed: Dictionary = SaveManager.claim_patrol_rewards()
+	if not bool(claimed.get("ready", false)):
+		var remaining: int = int(claimed.get("seconds_remaining", 0))
+		var hours: int = remaining / 3600
+		var minutes: int = (remaining % 3600) / 60
+		show_toast("Patrol rewards ready in %02d:%02d" % [hours, minutes])
+		return
 	if AudioManager: AudioManager.play_sfx("shop_buy")
-	if SaveManager:
-		var claimed: Dictionary = SaveManager.claim_patrol_rewards()
-		show_toast("🏆 Patrol Hunt Claimed! +%d Gold, +%d Shades" % [claimed.get("gold", 2400), claimed.get("shades", 60)])
-	else:
-		show_toast("🏆 Patrol Hunt Claimed! +2,400 Gold")
+	show_toast("🏆 Patrol Rewards Claimed! +%d Gold" % int(claimed.get("gold", 0)))
 	hunt_clicked.emit()
-
-func _on_chest_pressed() -> void:
-	if AudioManager: AudioManager.play_sfx("upgrade")
-	if SaveManager:
-		SaveManager.add_gold(500)
-		SaveManager.add_gems(50)
-	show_toast("🎁 Chapter 1 Chest Claimed! +500 🪙, +50 💎")
-	chest_clicked.emit()
-
-func _on_guild_pressed() -> void:
-	if AudioManager: AudioManager.play_sfx("ui_click")
-	show_toast("🛡 Guild Outpost: Unlocks at Chapter 3 (24/30 Members)")
-	guild_clicked.emit()
 
 func _process(delta: float) -> void:
 	_t += delta
-	# Subtle floating bob on the central diorama island
 	if island_container:
 		island_container.position.y = sin(_t * 1.5) * 6.0
-		
-	# Carousel auto-cycling
-	_event_timer += delta
-	if _event_timer >= 5.0:
-		_event_timer = 0.0
-		current_event_idx = (current_event_idx + 1) % events_data.size()
-		_update_event_visuals()
-		
-	# Chat ticker auto-cycling
-	_chat_timer += delta
-	if _chat_timer >= 4.0:
-		_chat_timer = 0.0
-		current_chat_idx = (current_chat_idx + 1) % chat_messages.size()
-		if chat_label:
-			chat_label.text = chat_messages[current_chat_idx]

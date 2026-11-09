@@ -14,12 +14,12 @@ The player controls a lone hunter ascending a perilous dark-fantasy tower. In th
 1. **Prepare in the Sanctuary**: Choose a hunter, equip six persistent gear slots, upgrade equipment, and spend Shades on permanent progression.
 2. **Build the Run Loadout**: Arrange run-specific runes, monster cores, and relics in the Summoning Circle to activate adjacency and tag synergies.
 3. **Enter Combat**: Use the single movement joystick. While stationary, the hunter automatically targets and attacks the nearest enemy; moving suppresses basic attacks. Dodge, activate character skills, and use healing potions when needed.
-4. **Clear Enemy Waves**: Regular encounters contain two progressively harder waves. Elite encounters include an elite enemy; floor bosses use their own multi-phase fight.
+4. **Clear Enemy Waves**: Regular encounters contain two progressively harder waves. Enemy composition changes by floor: Ember favours chargers, Frost favours cultists, and later floors introduce elite guards. Level 3 elite encounters begin with an Abyssal Champion mini-boss and follow with an elite brute. Floor bosses use their own multi-phase fight.
 5. **Choose Blessings**: Collect XP and choose from three skill offers on level-up. Duplicate picks upgrade skills; mastering paired skills can unlock powerful evolutions.
 6. **Daily Hunts & Achievements**: Defeats, encounter clears, and boss kills progress three daily missions and three lifetime achievements. Claim Gold and Shades once when each target is reached.
 7. **Daily Shop**: Claim energy once per local day and buy run supplies, Storm Reaper shards, or profile Gold. Purchased run supplies are delivered to the next run; unimplemented store tabs and real-money billing remain disabled.
 8. **Claim Rewards**: Earn run Gold, permanent Shades, and item choices before preparing for the next encounter.
-9. **Ascend Floors**: Each floor has five levels; Level 5 is the floor boss (Lord Malakar).
+9. **Choose Difficulty & Ascend Floors**: Normal, Hard, and Torment adjust enemy and boss health and damage, with better Gold rewards at higher difficulties. Each floor has five levels; Level 5 is the floor boss (Lord Malakar).
 8. **Boss Victory & Defeat Rules**:
    - Defeating the boss unlocks the next floor at Level 1.
    - Defeat on the boss resets the player to **Level 1 of the same floor** (never sent back to Floor 1).
@@ -68,13 +68,13 @@ AbyssalAltar/
 │   │   └── texture_loader.gd      # Universal texture loader (ImageTexture fallback)
 │   ├── combat/
 │   │   ├── player_controller.gd   # Single-stick movement, auto-targeting, attacks, dodge, skills
-│   │   ├── enemy_controller.gd    # Swarmer, Cultist, and Elite AI
+│   │   ├── enemy_controller.gd    # Swarmer, Cultist, Charger, Elite and Champion AI
 │   │   ├── boss_controller.gd     # Lord Malakar: phases, telegraphed attacks
 │   │   ├── projectile_controller.gd # Unified projectile physics & collisions
 │   │   ├── pet_controller.gd      # Autonomous companion AI & auto-targeting
 │   │   ├── combat_manager.gd      # Wave spawning and encounter management
 │   │   ├── damage_number.gd       # Floating crit/hit indicators
-│   │   └── arena_background.gd    # Procedural dark-fantasy rune floor
+│   │   └── arena_background.gd    # Five floor-specific dark-fantasy arena themes
 │   ├── inventory/
 │   │   ├── grid_manager.gd        # 2D cell occupancy, bounds & adjacency logic
 │   │   ├── item_synergy_manager.gd # Adjacency recipes & tag bonuses

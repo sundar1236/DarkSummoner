@@ -1,8 +1,7 @@
 class_name SettingsModal
 extends Control
 
-# Pause & Audio settings modal.
-# Adjusts Master, Music, SFX, and Ambience buses, with mute toggle.
+# Pause, audio, and mobile visual-performance settings.
 
 signal resume_requested()
 signal inventory_requested()

@@ -5,6 +5,7 @@ extends Node
 
 const SAVE_PATH: String = "user://abyssal_altar_profile.json"
 const SAVE_VERSION: int = 1
+const PATROL_REWARD_COOLDOWN_SECONDS: int = 8 * 60 * 60
 
 const DAILY_MISSION_DEFINITIONS: Dictionary = {
 	"enemy_slayer": {"title": "Abyssal Slayer", "description": "Defeat 20 enemies", "target": 20, "reward_gold": 250, "reward_shades": 5},
@@ -480,7 +481,18 @@ func claim_achievement_reward(achievement_id: String) -> bool:
 		AudioManager.play_sfx("upgrade")
 	return true
 
+func get_difficulty_multipliers() -> Dictionary:
+	match difficulty:
+		"hard":
+			return {"enemy_hp": 1.5, "enemy_damage": 1.25, "boss_hp": 1.5, "boss_damage": 1.25, "rewards": 1.25}
+		"torment":
+			return {"enemy_hp": 2.0, "enemy_damage": 1.5, "boss_hp": 2.0, "boss_damage": 1.5, "rewards": 1.5}
+		_:
+			return {"enemy_hp": 1.0, "enemy_damage": 1.0, "boss_hp": 1.0, "boss_damage": 1.0, "rewards": 1.0}
+
 func set_difficulty(diff: String) -> void:
+	if not ["normal", "hard", "torment"].has(diff):
+		return
 	difficulty = diff
 	save_profile()
 	profile_changed.emit()
@@ -750,13 +762,25 @@ func upgrade_equipment_slot(slot_name: String) -> bool:
 		return true
 	return false
 
+func get_patrol_reward_status() -> Dictionary:
+	var now := int(Time.get_unix_time_from_system())
+	var elapsed := now - patrol_last_claim
+	var remaining := 0 if patrol_last_claim <= 0 else maxi(0, PATROL_REWARD_COOLDOWN_SECONDS - elapsed)
+	return {
+		"ready": patrol_last_claim <= 0 or remaining == 0,
+		"seconds_remaining": remaining,
+		"gold": 1200 + (player_level * 150)
+	}
+
 func claim_patrol_rewards() -> Dictionary:
-	var base_gold: int = 1200 + (player_level * 150)
-	var base_xp: int = 400 + (player_level * 50)
+	var status := get_patrol_reward_status()
+	if not bool(status.get("ready", false)):
+		return {"ready": false, "seconds_remaining": int(status.get("seconds_remaining", 0))}
+	var base_gold: int = int(status.get("gold", 0))
 	add_gold(base_gold)
 	patrol_last_claim = int(Time.get_unix_time_from_system())
 	save_profile()
-	return { "gold": base_gold, "xp": base_xp }
+	return {"ready": true, "gold": base_gold}
 
 func get_combat_power_breakdown() -> Dictionary:
 	var base_power := 2500 * player_level

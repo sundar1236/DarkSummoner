@@ -105,6 +105,17 @@ func _physics_process(delta: float) -> void:
 			
 	global_position += direction * speed * delta
 
+func _is_valid_enemy_target(target: Node2D) -> bool:
+	if not is_instance_valid(target):
+		return false
+	if "is_dead" in target and bool(target.get("is_dead")):
+		return false
+	if "hp" in target and float(target.get("hp")) <= 0.0:
+		return false
+	if "current_hp" in target and float(target.get("current_hp")) <= 0.0:
+		return false
+	return true
+
 func _find_nearest_enemy() -> Node2D:
 	var enemies := get_tree().get_nodes_in_group("enemies")
 	var nearest: Node2D = null

@@ -28,8 +28,8 @@ jobs:
       - name: Run Phase 3 Character Animation & Combat Tests (58 tests)
         run: godot -v --headless --path . "res://tests/test_character_animation_and_combat.tscn"
 
-      - name: Run Phase 4 Navigation & UI Tests (56 tests)
+      - name: Run Phase 4 Navigation & UI Tests
         run: godot -v --headless --path . "res://tests/test_phase4_navigation_and_ui.tscn"
 
-      - name: Run Phase 5 Combat, HUD & Skills Tests (73 tests)
+      - name: Run Phase 5 Combat, HUD & Skills Tests
         run: godot -v --headless --path . "res://tests/test_phase5_combat_and_skills.tscn"

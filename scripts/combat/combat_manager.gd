@@ -23,6 +23,9 @@ var encounter_completed: bool = false
 func _ready() -> void:
 	GameManager.is_combat_active = true
 	hud_ref = get_node_or_null("HUDLayer/CombatHUD") as CombatHUD
+	var arena_background := get_node_or_null("Background") as ArenaBackground
+	if arena_background:
+		arena_background.set_floor_theme(GameManager.floor_number)
 	_setup_arena_boundaries()
 	_start_encounter()
 
@@ -101,11 +104,39 @@ func _get_wave_enemy_count(level_num: int, wave_num: int) -> int:
 
 func _get_wave_enemy_type(index: int, is_elite_room: bool) -> String:
 	if is_elite_room and index == 0:
-		return "elite"
-	if index % 5 == 4:
-		return "charger"
-	if index % 2 == 1:
-		return "cultist"
+		return "mini_boss" if current_wave == 1 else "elite"
+
+	var floor_theme_index := posmod(maxi(GameManager.floor_number, 1) - 1, 5)
+	match floor_theme_index:
+		0:
+			if index % 5 == 4:
+				return "charger"
+			if index % 2 == 1:
+				return "cultist"
+		1:
+			if index % 3 == 0:
+				return "charger"
+			if index % 3 == 1:
+				return "cultist"
+		2:
+			if index % 4 == 3:
+				return "charger"
+			if index % 2 == 0:
+				return "cultist"
+		3:
+			if index % 5 == 3:
+				return "elite"
+			if index % 3 == 0:
+				return "cultist"
+			if index % 2 == 0:
+				return "charger"
+		4:
+			if index % 6 == 5:
+				return "elite"
+			if index % 3 == 0:
+				return "charger"
+			if index % 3 == 1:
+				return "cultist"
 	return "swarmer"
 
 func _start_next_wave() -> void:
