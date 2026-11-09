@@ -26,13 +26,7 @@ func _ready() -> void:
 		sprite = Sprite2D.new()
 		add_child(sprite)
 	
-	# Set collision layers and masks
-	if is_player_projectile:
-		collision_layer = 4 # Layer 3: PlayerProjectile
-		collision_mask = 2 | 16 # Layer 2: Enemy, Layer 5: Walls
-	else:
-		collision_layer = 8 # Layer 4: EnemyProjectile
-		collision_mask = 1 | 16 # Layer 1: Player, Layer 5: Walls
+	_configure_collision()
 		
 	var shape := CircleShape2D.new()
 	shape.radius = 12.0
@@ -42,6 +36,14 @@ func _ready() -> void:
 	
 	body_entered.connect(_on_body_entered)
 	area_entered.connect(_on_area_entered)
+
+func _configure_collision() -> void:
+	if is_player_projectile:
+		collision_layer = 4
+		collision_mask = 2 | 16
+	else:
+		collision_layer = 8
+		collision_mask = 1 | 16
 
 func setup(p_damage: float, p_is_crit: bool, p_dir: Vector2, p_speed: float = 550.0, p_type: String = "slash", p_is_player: bool = true) -> void:
 	damage = p_damage
@@ -74,6 +76,7 @@ func setup(p_damage: float, p_is_crit: bool, p_dir: Vector2, p_speed: float = 55
 			is_player_projectile = false
 			speed = 320.0
 			
+	_configure_collision()
 	sprite.texture = TextureLoader.get_texture(tex_path)
 	rotation = direction.angle()
 
@@ -93,16 +96,29 @@ func _physics_process(delta: float) -> void:
 			
 	global_position += direction * speed * delta
 
+func _is_valid_enemy_target(target: Node2D) -> bool:
+	if not is_instance_valid(target):
+		return false
+	if "is_dead" in target and bool(target.get("is_dead")):
+		return false
+	if "hp" in target and float(target.get("hp")) <= 0.0:
+		return false
+	if "current_hp" in target and float(target.get("current_hp")) <= 0.0:
+		return false
+	return true
+
 func _find_nearest_enemy() -> Node2D:
 	var enemies := get_tree().get_nodes_in_group("enemies")
 	var nearest: Node2D = null
 	var min_dist: float = 600.0
-	for e in enemies:
-		if is_instance_valid(e) and e is Node2D:
-			var d := global_position.distance_to(e.global_position)
-			if d < min_dist:
-				min_dist = d
-				nearest = e
+	for enemy in enemies:
+		var enemy_node := enemy as Node2D
+		if enemy_node == null or not _is_valid_enemy_target(enemy_node):
+			continue
+		var distance := global_position.distance_to(enemy_node.global_position)
+		if distance < min_dist:
+			min_dist = distance
+			nearest = enemy_node
 	return nearest
 
 func _on_body_entered(body: Node2D) -> void:

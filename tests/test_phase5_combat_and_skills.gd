@@ -13,6 +13,7 @@ func _ready() -> void:
 	print("==================================================\n")
 	
 	test_single_stick_and_touch_safety()
+	test_projectile_collision_roles_and_homing_filter()
 	test_hud_reactivity_and_game_speed()
 	test_combat_wave_progression()
 	test_xp_progression_and_level_up()
@@ -87,7 +88,44 @@ func test_single_stick_and_touch_safety() -> void:
 	move_joy.queue_free()
 	enemy.queue_free()
 
-# 2. Test Combat HUD Reactivity & Game Speed
+# 2. Test projectile collision roles and living homing targets.
+func test_projectile_collision_roles_and_homing_filter() -> void:
+	print("--- 2. Projectile Collision Roles & Homing Target Validation ---")
+	var projectile := ProjectileController.new()
+	add_child(projectile)
+	projectile.setup(12.0, false, Vector2.LEFT, 320.0, "enemy", false)
+
+	assert_true(not projectile.is_player_projectile, "Enemy projectile keeps its enemy role after setup")
+	assert_true(projectile.collision_layer == 8, "Enemy projectile uses the EnemyProjectile collision layer")
+	assert_true(projectile.collision_mask == (1 | 16), "Enemy projectile only detects player and arena walls")
+
+	var player_projectile := ProjectileController.new()
+	add_child(player_projectile)
+	player_projectile.setup(12.0, false, Vector2.RIGHT, 600.0, "soul", true)
+	assert_true(player_projectile.collision_layer == 4, "Player projectile uses the PlayerProjectile collision layer")
+	assert_true(player_projectile.collision_mask == (2 | 16), "Player projectile detects enemies and arena walls")
+
+	var dead_enemy := EnemyController.new()
+	dead_enemy.is_dead = true
+	dead_enemy.hp = 0.0
+	var living_enemy := EnemyController.new()
+	living_enemy.is_dead = false
+	living_enemy.hp = 10.0
+	var dead_boss := BossController.new()
+	dead_boss.is_dead = true
+	dead_boss.hp = 0.0
+
+	assert_true(not player_projectile._is_valid_enemy_target(dead_enemy), "Homing ignores enemies already marked dead")
+	assert_true(not player_projectile._is_valid_enemy_target(dead_boss), "Homing ignores defeated bosses")
+	assert_true(player_projectile._is_valid_enemy_target(living_enemy), "Homing accepts a living enemy")
+
+	projectile.queue_free()
+	player_projectile.queue_free()
+	dead_enemy.free()
+	living_enemy.free()
+	dead_boss.free()
+
+# 3. Test Combat HUD Reactivity & Game Speed
 func test_hud_reactivity_and_game_speed() -> void:
 	print("--- 2. BattleArena HUD Reactivity & Game Speed ---")
 	var arena_scene := load("res://scenes/combat/combat_arena.tscn") as PackedScene
