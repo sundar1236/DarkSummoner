@@ -365,7 +365,8 @@ func _format_gear_stat(value: float) -> String:
 
 func _format_gear_delta(value: float, as_percent: bool) -> String:
 	var display_value := value * 100.0 if as_percent else value
-	return "%+.1f%s" % [display_value, "%" if as_percent else ""]
+	var sign := "+" if display_value >= 0.0 else ""
+	return "%s%.1f%s" % [sign, display_value, "%" if as_percent else ""]
 
 func _on_gear_detail_equip_pressed() -> void:
 	if not SaveManager or _selected_gear_uid.is_empty():
