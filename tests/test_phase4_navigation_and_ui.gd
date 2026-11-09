@@ -229,10 +229,12 @@ func test_hero_loadout_subtabs_and_progression() -> void:
 	assert_test(SaveManager.active_character_id == "storm_reaper", "SaveManager saves active_character_id")
 	
 	# Equipment upgrade
-	var pre_weap_lvl: int = SaveManager.equipment_levels.get("weapon", 60)
+	var pre_weapon := SaveManager.get_equipped_gear("weapon")
+	var pre_weap_lvl: int = pre_weapon.upgrade_level if pre_weapon else -1
 	SaveManager.profile_gold = 10000
-	loadout._upgrade_gear_slot(null, "Weapon")
-	assert_test(SaveManager.equipment_levels.get("weapon", 0) == pre_weap_lvl + 1, "Equipment weapon slot leveled up successfully")
+	assert_test(SaveManager.upgrade_equipped_gear("weapon"), "Equipment weapon slot upgraded successfully")
+	var upgraded_weapon := SaveManager.get_equipped_gear("weapon")
+	assert_test(upgraded_weapon != null and upgraded_weapon.upgrade_level == pre_weap_lvl + 1, "Equipment upgrade level stored on weapon item")
 	
 	loadout.queue_free()
 	await get_tree().process_frame
@@ -322,8 +324,10 @@ func test_modals_functionality() -> void:
 	await get_tree().process_frame
 	
 	SaveManager.profile_gold = 5000
-	var cur_w: int = SaveManager.equipment_levels.get("weapon", 60)
+	var current_weapon := SaveManager.get_equipped_gear("weapon")
+	var cur_w: int = current_weapon.upgrade_level if current_weapon else -1
 	b_modal._upgrade_slot("weapon")
-	assert_test(SaveManager.equipment_levels.get("weapon", 0) == cur_w + 1, "Blacksmith modal upgraded weapon slot")
+	var upgraded_weapon := SaveManager.get_equipped_gear("weapon")
+	assert_test(upgraded_weapon != null and upgraded_weapon.upgrade_level == cur_w + 1, "Blacksmith modal upgraded weapon item")
 	b_modal.queue_free()
 	await get_tree().process_frame
