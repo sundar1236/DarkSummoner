@@ -16,7 +16,7 @@ if [[ "$godot_status" -ne 0 ]]; then
   exit "$godot_status"
 fi
 
-if grep -E "SCRIPT ERROR:|Failed to load script|Parse Error:|Compile Error:|FAILED|SOME TESTS FAILED" "$log_file"; then
+if grep -E "SCRIPT ERROR:|Failed to load script|Parse Error:|Compile Error:|FAILED SOME|SOME TESTS FAILED|[1-9][0-9]* FAILED|[1-9][0-9]* failed" "$log_file"; then
   echo "Godot reported a script error or failed assertion."
   exit 1
 fi

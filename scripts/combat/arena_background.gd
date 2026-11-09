@@ -17,6 +17,7 @@ var brazier_flame_color: Color = Color(0.95, 0.25, 0.15, 0.9)
 
 func _ready() -> void:
 	add_to_group("arena_backgrounds")
+	set_floor_theme(GameManager.floor_number)
 	set_reduced_motion(bool(SaveManager.settings_data.get("reduced_motion", false)) if SaveManager else false)
 
 func set_reduced_motion(enabled: bool) -> void:
