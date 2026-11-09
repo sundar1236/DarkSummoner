@@ -428,13 +428,21 @@ func calculate_combat_power() -> int:
 	var gear_power := 0
 	for lvl in equipment_levels.values():
 		gear_power += int(lvl) * 45
+	var equipped_stats: Dictionary = get_equipped_gear_stats()
+	var equipped_power := int(
+		equipped_stats.get("bonus_atk", 0.0) * 20.0
+		+ equipped_stats.get("bonus_hp", 0.0) * 2.0
+		+ equipped_stats.get("bonus_crit", 0.0) * 500.0
+		+ equipped_stats.get("bonus_speed", 0.0) * 2.0
+		+ equipped_stats.get("bonus_atk_speed", 0.0) * 300.0
+	)
 	var star_power := 0
 	for stars in character_stars.values():
 		star_power += int(stars) * 650
 	var card_power := 0
 	for stars in talent_cards.values():
 		card_power += int(stars) * 400
-	return base_power + gear_power + star_power + card_power
+	return base_power + gear_power + equipped_power + star_power + card_power
 
 const WEB_STORAGE_KEY: String = "dark_summoner_save_profile"
 const WEB_RUN_KEY: String = "dark_summoner_run_state"
