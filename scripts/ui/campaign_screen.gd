@@ -203,12 +203,18 @@ func _on_start_pressed() -> void:
 	start_run_requested.emit()
 
 func _on_hunt_pressed() -> void:
+	if not SaveManager:
+		show_toast("Patrol rewards are unavailable.")
+		return
+	var claimed: Dictionary = SaveManager.claim_patrol_rewards()
+	if not bool(claimed.get("ready", false)):
+		var remaining: int = int(claimed.get("seconds_remaining", 0))
+		var hours: int = remaining / 3600
+		var minutes: int = (remaining % 3600) / 60
+		show_toast("Patrol rewards ready in %02d:%02d" % [hours, minutes])
+		return
 	if AudioManager: AudioManager.play_sfx("shop_buy")
-	if SaveManager:
-		var claimed: Dictionary = SaveManager.claim_patrol_rewards()
-		show_toast("🏆 Patrol Hunt Claimed! +%d Gold, +%d Shades" % [claimed.get("gold", 2400), claimed.get("shades", 60)])
-	else:
-		show_toast("🏆 Patrol Hunt Claimed! +2,400 Gold")
+	show_toast("🏆 Patrol Rewards Claimed! +%d Gold · +%d XP" % [int(claimed.get("gold", 0)), int(claimed.get("xp", 0))])
 	hunt_clicked.emit()
 
 func _process(delta: float) -> void:
