@@ -2,6 +2,7 @@ class_name BlacksmithModal
 extends Control
 
 signal gear_upgraded(slot_name: String, new_level: int)
+signal gear_purchased(item_id: String)
 signal closed()
 
 @export var btn_upgrade_weapon: Button
@@ -9,6 +10,7 @@ signal closed()
 @export var btn_upgrade_ring: Button
 @export var btn_close: Button
 @export var lbl_gold_balance: Label
+@export var shop_items_container: VBoxContainer
 
 func _ready() -> void:
 	if btn_close:
@@ -42,6 +44,7 @@ func refresh_modal() -> void:
 	_refresh_upgrade_button(btn_upgrade_weapon, "weapon", "Forge Weapon")
 	_refresh_upgrade_button(btn_upgrade_armor, "armor", "Reinforce Armor")
 	_refresh_upgrade_button(btn_upgrade_ring, "ring", "Infuse Ring")
+	_refresh_shop_items()
 
 func _refresh_upgrade_button(button: Button, slot_name: String, action_name: String) -> void:
 	if not button or not SaveManager:
@@ -56,6 +59,60 @@ func _refresh_upgrade_button(button: Button, slot_name: String, action_name: Str
 		action_name, item.data.name, item.upgrade_level, item.upgrade_level + 1, cost
 	]
 	button.disabled = SaveManager.profile_gold < cost
+
+func _refresh_shop_items() -> void:
+	if not shop_items_container:
+		return
+	for child in shop_items_container.get_children():
+		shop_items_container.remove_child(child)
+		child.queue_free()
+
+	var available_items: Array[ItemData] = []
+	for item_data in ItemDatabase.get_all_items():
+		if item_data.equipment_slot.is_empty() or SaveManager.has_gear_item(item_data.id):
+			continue
+		available_items.append(item_data)
+	available_items.sort_custom(func(a: ItemData, b: ItemData) -> bool:
+		if a.tier == b.tier:
+			return a.price < b.price
+		return a.tier < b.tier
+	)
+
+	if available_items.is_empty():
+		var empty_label := Label.new()
+		empty_label.text = "All available forge designs collected."
+		empty_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		shop_items_container.add_child(empty_label)
+		return
+
+	for item_data in available_items:
+		var item_id := item_data.id
+		var button := Button.new()
+		button.custom_minimum_size = Vector2(420, 48)
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		button.text = "%s · %s · T%d · 🪙 %d" % [
+			item_data.name,
+			item_data.equipment_slot.capitalize(),
+			item_data.tier,
+			item_data.price
+		]
+		button.tooltip_text = item_data.description
+		button.add_theme_font_size_override("font_size", 15)
+		button.disabled = SaveManager.profile_gold < item_data.price
+		button.pressed.connect(func(): _purchase_gear(item_id))
+		shop_items_container.add_child(button)
+
+
+func _purchase_gear(item_id: String) -> void:
+	if not SaveManager:
+		return
+	if SaveManager.buy_gear_item(item_id):
+		refresh_modal()
+		gear_purchased.emit(item_id)
+	else:
+		if AudioManager:
+			AudioManager.play_sfx("ui_error")
+
 
 func _upgrade_slot(slot: String) -> void:
 	if not SaveManager:
