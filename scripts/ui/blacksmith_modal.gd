@@ -8,6 +8,9 @@ signal closed()
 @export var btn_upgrade_weapon: Button
 @export var btn_upgrade_armor: Button
 @export var btn_upgrade_ring: Button
+@export var btn_upgrade_helmet: Button
+@export var btn_upgrade_boots: Button
+@export var btn_upgrade_amulet: Button
 @export var btn_close: Button
 @export var lbl_gold_balance: Label
 @export var shop_items_container: VBoxContainer
@@ -25,6 +28,12 @@ func _ready() -> void:
 		btn_upgrade_armor.pressed.connect(func(): _upgrade_slot("armor"))
 	if btn_upgrade_ring:
 		btn_upgrade_ring.pressed.connect(func(): _upgrade_slot("ring"))
+	if btn_upgrade_helmet:
+		btn_upgrade_helmet.pressed.connect(func(): _upgrade_slot("helmet"))
+	if btn_upgrade_boots:
+		btn_upgrade_boots.pressed.connect(func(): _upgrade_slot("boots"))
+	if btn_upgrade_amulet:
+		btn_upgrade_amulet.pressed.connect(func(): _upgrade_slot("amulet"))
 		
 	refresh_modal()
 	if SaveManager:
@@ -44,6 +53,9 @@ func refresh_modal() -> void:
 	_refresh_upgrade_button(btn_upgrade_weapon, "weapon", "Forge Weapon")
 	_refresh_upgrade_button(btn_upgrade_armor, "armor", "Reinforce Armor")
 	_refresh_upgrade_button(btn_upgrade_ring, "ring", "Infuse Ring")
+	_refresh_upgrade_button(btn_upgrade_helmet, "helmet", "Temper Helmet")
+	_refresh_upgrade_button(btn_upgrade_boots, "boots", "Reinforce Boots")
+	_refresh_upgrade_button(btn_upgrade_amulet, "amulet", "Enchant Amulet")
 	_refresh_shop_items()
 
 func _refresh_upgrade_button(button: Button, slot_name: String, action_name: String) -> void:
