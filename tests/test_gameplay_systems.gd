@@ -70,6 +70,9 @@ func test_persistent_equipment_slots() -> void:
 	print("--- Test: Persistent Six-Slot Equipment ---")
 	var original_inventory := SaveManager.gear_inventory.duplicate(true)
 	var original_equipped := SaveManager.equipped_gear.duplicate(true)
+	assert_true(SaveManager.EQUIPMENT_SLOTS.size() == 6, "Six equipment slots are registered")
+	for slot_name in SaveManager.EQUIPMENT_SLOTS:
+		assert_true(SaveManager.get_equipped_gear(slot_name) != null, "%s has starter equipment" % slot_name.capitalize())
 	var helm := ItemInstance.new(ItemDatabase.get_item("void_helm"))
 	var wrong_slot_item := ItemInstance.new(ItemDatabase.get_item("fire_rune"))
 
@@ -78,6 +81,10 @@ func test_persistent_equipment_slots() -> void:
 	assert_true(not SaveManager.add_gear_item(wrong_slot_item), "Runes cannot be added to equipment inventory")
 	assert_true(SaveManager.equip_gear_item(helm.uid), "Helmet can be equipped into its matching slot")
 	assert_true(SaveManager.get_equipped_gear("helmet") != null, "Equipped helmet can be retrieved by slot")
+	SaveManager.save_profile()
+	SaveManager.load_profile()
+	var restored_helm := SaveManager.get_equipped_gear("helmet")
+	assert_true(restored_helm != null and restored_helm.uid == helm.uid, "Equipped item UID persists after profile reload")
 	assert_true(not SaveManager.equip_gear_item(wrong_slot_item.uid), "Non-equipment item cannot be equipped")
 
 	var stats := SaveManager.get_equipped_gear_stats()
