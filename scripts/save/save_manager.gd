@@ -327,6 +327,25 @@ func has_gear_item(item_id: String) -> bool:
 			return true
 	return false
 
+func buy_gear_item(item_id: String) -> bool:
+	var data := ItemDatabase.get_item(item_id)
+	if not data or not EQUIPMENT_SLOTS.has(data.equipment_slot):
+		return false
+	if has_gear_item(item_id) or data.price <= 0 or profile_gold < data.price:
+		return false
+
+	var item := ItemInstance.new(data)
+	profile_gold -= data.price
+	gear_inventory.append(item.to_dict())
+	_gear_profile_initialized = true
+	save_profile()
+	gold_changed.emit(profile_gold)
+	profile_changed.emit()
+	if AudioManager:
+		AudioManager.play_sfx("upgrade")
+	return true
+
+
 func get_equipped_gear(slot_name: String) -> ItemInstance:
 	if not equipped_gear.has(slot_name):
 		return null

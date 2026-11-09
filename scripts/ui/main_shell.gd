@@ -80,6 +80,12 @@ func _ready() -> void:
 			if screen_loadout and screen_loadout.has_method("refresh_loadout"):
 				screen_loadout.refresh_loadout()
 		)
+		if modal_blacksmith.has_signal("gear_purchased"):
+			modal_blacksmith.gear_purchased.connect(func(_item_id):
+				if top_bar: top_bar.refresh_display()
+				if screen_loadout and screen_loadout.has_method("refresh_loadout"):
+					screen_loadout.refresh_loadout()
+			)
 	if screen_sanctuary:
 		var back_btn = screen_sanctuary.get_node_or_null("VBox/Header/BtnBack") as Control
 		if back_btn: back_btn.visible = false
