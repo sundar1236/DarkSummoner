@@ -333,6 +333,11 @@ func _on_boss_death() -> void:
 		cam.apply_impact(10.0, 0.5)
 		
 	# Award floor victory rewards
+	if SaveManager:
+		SaveManager.record_daily_mission_progress("enemy_slayer", 1)
+		SaveManager.record_daily_mission_progress("boss_hunter", 1)
+		SaveManager.record_achievement_progress("abyssal_slayer", 1)
+		SaveManager.record_achievement_progress("lord_breaker", 1)
 	GameManager.add_run_shades(15)
 	
 	# Spawn boss gold shower
