@@ -31,13 +31,11 @@ func _ready() -> void:
 		queue_free()
 		return
 	add_to_group("projectiles")
-	_apply_collision_profile()
 	if not sprite:
 		sprite = Sprite2D.new()
 		add_child(sprite)
-	
 	_apply_collision_profile()
-		
+	
 	var shape := CircleShape2D.new()
 	shape.radius = 12.0
 	var col := CollisionShape2D.new()
@@ -87,6 +85,7 @@ func setup(p_damage: float, p_is_crit: bool, p_dir: Vector2, p_speed: float = 55
 			is_player_projectile = false
 			speed = 320.0
 			
+	_apply_collision_profile()
 	sprite.texture = TextureLoader.get_texture(tex_path)
 	rotation = direction.angle()
 
@@ -146,7 +145,7 @@ func _handle_hit(target: Node) -> void:
 						p_tint = Color(0.3, 1.0, 0.65)
 					elif "fireball" in path:
 						p_tint = Color(1.0, 0.6, 0.2)
-				 spark.setup(is_crit, global_position, -direction, p_tint)
+				spark.setup(is_crit, global_position, -direction, p_tint)
 				get_parent().add_child(spark)
 			if has_burn and target.has_method("apply_burn"):
 				target.apply_burn(6.0, 3)
@@ -158,9 +157,10 @@ func _handle_hit(target: Node) -> void:
 				queue_free()
 		elif target is TileMap or target is StaticBody2D:
 			# Hit wall with spark
-			var spark = ImpactSparkVFXClass.new()
-			spark.setup(false, global_position, -direction, Color(0.8, 0.8, 0.8))
-			get_parent().add_child(spark)
+			if ImpactSparkVFXClass.can_spawn_spark():
+				var spark = ImpactSparkVFXClass.new()
+				spark.setup(false, global_position, -direction, Color(0.8, 0.8, 0.8))
+				get_parent().add_child(spark)
 			queue_free()
 	else:
 		# Enemy projectile hits player
