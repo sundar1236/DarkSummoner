@@ -68,6 +68,7 @@ func select_tab(idx: int) -> void:
 
 func refresh_badges() -> void:
 	if not SaveManager: return
+	SaveManager.refresh_daily_shop_state()
 	if badge_shop:
 		# Free daily energy available
 		badge_shop.visible = not SaveManager.daily_free_energy_claimed
