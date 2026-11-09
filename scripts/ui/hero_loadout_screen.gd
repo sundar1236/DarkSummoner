@@ -216,8 +216,9 @@ func _refresh_gear_inventory_grid() -> void:
 			"Equipped" if equipped else item.rarity.capitalize()
 		]
 		button.add_theme_font_size_override("font_size", 13)
+		var item_uid := item.uid
 		button.pressed.connect(func():
-			_equip_gear_item(item.uid)
+			_equip_gear_item(item_uid)
 		)
 		gear_grid.add_child(button)
 
