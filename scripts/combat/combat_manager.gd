@@ -21,6 +21,9 @@ var encounter_completed: bool = false
 func _ready() -> void:
 	GameManager.is_combat_active = true
 	hud_ref = get_node_or_null("HUDLayer/CombatHUD") as CombatHUD
+	var arena_background := get_node_or_null("Background") as ArenaBackground
+	if arena_background:
+		arena_background.set_floor_theme(GameManager.floor_number)
 	_setup_arena_boundaries()
 	_start_encounter()
 
