@@ -6,12 +6,26 @@ extends Node
 const SAVE_PATH: String = "user://abyssal_altar_profile.json"
 const SAVE_VERSION: int = 1
 
+const DAILY_MISSION_DEFINITIONS: Dictionary = {
+	"enemy_slayer": {"title": "Abyssal Slayer", "description": "Defeat 20 enemies", "target": 20, "reward_gold": 250, "reward_shades": 5},
+	"encounter_clearer": {"title": "Relentless Hunter", "description": "Clear 3 encounters", "target": 3, "reward_gold": 300, "reward_shades": 8},
+	"boss_hunter": {"title": "Boss Hunter", "description": "Defeat a floor boss", "target": 1, "reward_gold": 500, "reward_shades": 15}
+}
+
+const ACHIEVEMENT_DEFINITIONS: Dictionary = {
+	"abyssal_slayer": {"title": "Abyssal Slayer", "description": "Defeat 100 enemies", "target": 100, "reward_gold": 500, "reward_shades": 10},
+	"tower_climber": {"title": "Tower Climber", "description": "Clear 10 encounters", "target": 10, "reward_gold": 750, "reward_shades": 15},
+	"lord_breaker": {"title": "Lord Breaker", "description": "Defeat 5 floor bosses", "target": 5, "reward_gold": 1500, "reward_shades": 30}
+}
+
 signal shades_changed(new_amount: int)
 signal energy_changed(current: int, max_val: int)
 signal gold_changed(new_amount: int)
 signal gems_changed(new_amount: int)
 signal profile_changed()
 signal profile_loaded()
+signal daily_missions_changed()
+signal achievements_changed()
 
 var shades: int = 0
 var gems: int = 150
@@ -30,6 +44,10 @@ var daily_free_energy_claim_date: String = ""
 var daily_shop_date_key: String = ""
 var daily_shop_purchased_items: Dictionary = {}
 var shop_item_inventory: Dictionary = {}
+var daily_mission_progress: Dictionary = {}
+var daily_mission_claimed: Dictionary = {}
+var achievement_progress: Dictionary = {}
+var achievement_claimed: Dictionary = {}
 var chapter_pack_purchased: bool = false
 
 var highest_floor_unlocked: int = 1
@@ -279,7 +297,10 @@ func refresh_daily_shop_state() -> void:
 	if daily_shop_date_key != today:
 		daily_shop_date_key = today
 		daily_shop_purchased_items.clear()
+		daily_mission_progress.clear()
+		daily_mission_claimed.clear()
 		changed = true
+		daily_missions_changed.emit()
 	var claimed_today := daily_free_energy_claim_date == today
 	if daily_free_energy_claimed != claimed_today:
 		daily_free_energy_claimed = claimed_today
@@ -349,6 +370,112 @@ func add_character_shards(char_id: String, amount: int) -> bool:
 	character_shards[char_id] = int(character_shards.get(char_id, 0)) + amount
 	save_profile()
 	profile_changed.emit()
+	return true
+
+
+func record_daily_mission_progress(mission_id: String, amount: int = 1) -> void:
+	refresh_daily_shop_state()
+	if amount <= 0 or not DAILY_MISSION_DEFINITIONS.has(mission_id) or bool(daily_mission_claimed.get(mission_id, false)):
+		return
+	var definition: Dictionary = DAILY_MISSION_DEFINITIONS[mission_id]
+	var target: int = int(definition.get("target", 1))
+	var current: int = int(daily_mission_progress.get(mission_id, 0))
+	var updated: int = mini(target, current + amount)
+	if updated == current:
+		return
+	daily_mission_progress[mission_id] = updated
+	if updated >= target or updated % 5 == 0:
+		save_profile()
+	daily_missions_changed.emit()
+
+func get_daily_missions() -> Array[Dictionary]:
+	refresh_daily_shop_state()
+	var result: Array[Dictionary] = []
+	for mission_id in DAILY_MISSION_DEFINITIONS:
+		var definition: Dictionary = DAILY_MISSION_DEFINITIONS[mission_id]
+		var target: int = int(definition.get("target", 1))
+		var progress: int = mini(target, int(daily_mission_progress.get(mission_id, 0)))
+		result.append({
+			"id": mission_id,
+			"title": str(definition.get("title", mission_id)),
+			"description": str(definition.get("description", "")),
+			"target": target,
+			"progress": progress,
+			"completed": progress >= target,
+			"claimed": bool(daily_mission_claimed.get(mission_id, false)),
+			"reward_gold": int(definition.get("reward_gold", 0)),
+			"reward_shades": int(definition.get("reward_shades", 0))
+		})
+	return result
+
+func claim_daily_mission_reward(mission_id: String) -> bool:
+	refresh_daily_shop_state()
+	if not DAILY_MISSION_DEFINITIONS.has(mission_id) or bool(daily_mission_claimed.get(mission_id, false)):
+		return false
+	var definition: Dictionary = DAILY_MISSION_DEFINITIONS[mission_id]
+	if int(daily_mission_progress.get(mission_id, 0)) < int(definition.get("target", 1)):
+		return false
+	daily_mission_claimed[mission_id] = true
+	profile_gold += int(definition.get("reward_gold", 0))
+	shades += int(definition.get("reward_shades", 0))
+	save_profile()
+	gold_changed.emit(profile_gold)
+	shades_changed.emit(shades)
+	profile_changed.emit()
+	daily_missions_changed.emit()
+	if AudioManager:
+		AudioManager.play_sfx("upgrade")
+	return true
+
+func record_achievement_progress(achievement_id: String, amount: int = 1) -> void:
+	if amount <= 0 or not ACHIEVEMENT_DEFINITIONS.has(achievement_id) or bool(achievement_claimed.get(achievement_id, false)):
+		return
+	var definition: Dictionary = ACHIEVEMENT_DEFINITIONS[achievement_id]
+	var target: int = int(definition.get("target", 1))
+	var current: int = int(achievement_progress.get(achievement_id, 0))
+	var updated: int = mini(target, current + amount)
+	if updated == current:
+		return
+	achievement_progress[achievement_id] = updated
+	if updated >= target or updated % 10 == 0:
+		save_profile()
+	achievements_changed.emit()
+
+func get_achievements() -> Array[Dictionary]:
+	var result: Array[Dictionary] = []
+	for achievement_id in ACHIEVEMENT_DEFINITIONS:
+		var definition: Dictionary = ACHIEVEMENT_DEFINITIONS[achievement_id]
+		var target: int = int(definition.get("target", 1))
+		var progress: int = mini(target, int(achievement_progress.get(achievement_id, 0)))
+		result.append({
+			"id": achievement_id,
+			"title": str(definition.get("title", achievement_id)),
+			"description": str(definition.get("description", "")),
+			"target": target,
+			"progress": progress,
+			"completed": progress >= target,
+			"claimed": bool(achievement_claimed.get(achievement_id, false)),
+			"reward_gold": int(definition.get("reward_gold", 0)),
+			"reward_shades": int(definition.get("reward_shades", 0))
+		})
+	return result
+
+func claim_achievement_reward(achievement_id: String) -> bool:
+	if not ACHIEVEMENT_DEFINITIONS.has(achievement_id) or bool(achievement_claimed.get(achievement_id, false)):
+		return false
+	var definition: Dictionary = ACHIEVEMENT_DEFINITIONS[achievement_id]
+	if int(achievement_progress.get(achievement_id, 0)) < int(definition.get("target", 1)):
+		return false
+	achievement_claimed[achievement_id] = true
+	profile_gold += int(definition.get("reward_gold", 0))
+	shades += int(definition.get("reward_shades", 0))
+	save_profile()
+	gold_changed.emit(profile_gold)
+	shades_changed.emit(shades)
+	profile_changed.emit()
+	achievements_changed.emit()
+	if AudioManager:
+		AudioManager.play_sfx("upgrade")
 	return true
 
 func set_difficulty(diff: String) -> void:
@@ -728,6 +855,10 @@ func reset_all_data() -> void:
 	daily_shop_date_key = ""
 	daily_shop_purchased_items.clear()
 	shop_item_inventory.clear()
+	daily_mission_progress.clear()
+	daily_mission_claimed.clear()
+	achievement_progress.clear()
+	achievement_claimed.clear()
 	chapter_pack_purchased = false
 	highest_floor_unlocked = 1
 	unlocked_characters = ["shadow_hunter"]
@@ -819,6 +950,10 @@ func save_profile() -> void:
 		"daily_shop_date_key": daily_shop_date_key,
 		"daily_shop_purchased_items": daily_shop_purchased_items,
 		"shop_item_inventory": shop_item_inventory,
+		"daily_mission_progress": daily_mission_progress,
+		"daily_mission_claimed": daily_mission_claimed,
+		"achievement_progress": achievement_progress,
+		"achievement_claimed": achievement_claimed,
 		"chapter_pack_purchased": chapter_pack_purchased,
 		"highest_floor_unlocked": highest_floor_unlocked,
 		"unlocked_characters": unlocked_characters,
@@ -883,6 +1018,14 @@ func load_profile() -> void:
 	daily_shop_purchased_items = saved_daily_purchases.duplicate(true) if saved_daily_purchases is Dictionary else {}
 	var saved_shop_inventory: Variant = dict.get("shop_item_inventory", {})
 	shop_item_inventory = saved_shop_inventory.duplicate(true) if saved_shop_inventory is Dictionary else {}
+	var saved_mission_progress: Variant = dict.get("daily_mission_progress", {})
+	daily_mission_progress = saved_mission_progress.duplicate(true) if saved_mission_progress is Dictionary else {}
+	var saved_mission_claimed: Variant = dict.get("daily_mission_claimed", {})
+	daily_mission_claimed = saved_mission_claimed.duplicate(true) if saved_mission_claimed is Dictionary else {}
+	var saved_achievement_progress: Variant = dict.get("achievement_progress", {})
+	achievement_progress = saved_achievement_progress.duplicate(true) if saved_achievement_progress is Dictionary else {}
+	var saved_achievement_claimed: Variant = dict.get("achievement_claimed", {})
+	achievement_claimed = saved_achievement_claimed.duplicate(true) if saved_achievement_claimed is Dictionary else {}
 	chapter_pack_purchased = bool(dict.get("chapter_pack_purchased", false))
 	highest_floor_unlocked = dict.get("highest_floor_unlocked", 1)
 	
