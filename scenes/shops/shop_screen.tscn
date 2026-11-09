@@ -139,7 +139,7 @@ layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 18
 theme_override_styles/normal = SubResource("StyleBoxFlat_valuebadge")
-text = "600% VALUE"
+text = "DEMO OFFER"
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -154,7 +154,7 @@ text = "Chapter 1 Conqueror Pack"
 layout_mode = 2
 theme_override_colors/font_color = Color(0.8, 0.85, 0.95, 1)
 theme_override_font_sizes/font_size = 17
-text = "One-time only  "
+text = "Billing integration pending"
 
 [node name="RewardsRow" type="HBoxContainer" parent="ScrollContainer/VBox/ChapterPackCard/Content"]
 layout_mode = 2
@@ -188,7 +188,8 @@ size_flags_horizontal = 4
 theme_override_colors/font_color = Color(0.1, 0.1, 0.15, 1)
 theme_override_font_sizes/font_size = 22
 theme_override_styles/normal = SubResource("StyleBoxFlat_buybtn")
-text = "$4.99 USD"
+text = "STORE UNAVAILABLE"
+disabled = true
 
 [node name="DailyShopSection" type="VBoxContainer" parent="ScrollContainer/VBox"]
 layout_mode = 2
@@ -371,13 +372,13 @@ text = " 20% OFF "
 [node name="Icon" type="Label" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2/Item4/VBox"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 54
-text = "🗝"
+text = "🪙"
 horizontal_alignment = 1
 
 [node name="Name" type="Label" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2/Item4/VBox"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 19
-text = "Gold Key"
+text = "Gold Cache"
 horizontal_alignment = 1
 
 [node name="Left" type="Label" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2/Item4/VBox"]
@@ -521,25 +522,34 @@ layout_mode = 2
 theme_override_colors/font_color = Color(0.65, 0.7, 0.8, 1)
 theme_override_font_sizes/font_size = 19
 flat = true
-text = "Gear Chest"
+text = "Gear Chest · Soon"
 
+disabled = true
+tooltip_text = "Not available in this build"
 [node name="Tab3" type="Button" parent="BottomSubTabs/HBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.65, 0.7, 0.8, 1)
 theme_override_font_sizes/font_size = 19
 flat = true
-text = "Wish"
+text = "Wish · Soon"
 
+disabled = true
+tooltip_text = "Not available in this build"
 [node name="Tab4" type="Button" parent="BottomSubTabs/HBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.65, 0.7, 0.8, 1)
 theme_override_font_sizes/font_size = 19
 flat = true
-text = "Limited Offer"
+text = "Offers · Soon"
 
+disabled = true
+tooltip_text = "Not available in this build"
 [node name="Tab5" type="Button" parent="BottomSubTabs/HBox"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.65, 0.7, 0.8, 1)
 theme_override_font_sizes/font_size = 19
 flat = true
-text = "Top Up"
+text = "Top Up · Soon"
+
+disabled = true
+tooltip_text = "Not available in this build"
