@@ -12,6 +12,7 @@ func _ready() -> void:
 	
 	test_independent_movement_and_aim()
 	test_persistent_equipment_slots()
+	test_boss_gear_rewards_are_persistent()
 	test_run_altar_excludes_persistent_gear()
 	test_inventory_footprint_and_rotation()
 	test_inventory_bounds_and_overlap_validation()
@@ -132,6 +133,40 @@ func test_persistent_equipment_slots() -> void:
 	SaveManager.equipped_gear = original_equipped
 	SaveManager.profile_gold = original_gold
 	SaveManager.save_profile()
+
+
+func test_boss_gear_rewards_are_persistent() -> void:
+	print("--- Test: Boss Gear Rewards Enter Persistent Inventory ---")
+	var original_inventory: Array[Dictionary] = SaveManager.gear_inventory.duplicate(true)
+	var reward_scene := load("res://scenes/ui/reward_view.tscn") as PackedScene
+	assert_true(reward_scene != null, "RewardView scene loads for gear reward validation")
+	if not reward_scene:
+		return
+
+	var reward := reward_scene.instantiate() as RewardView
+	add_child(reward)
+	var boss_pool := reward.get_reward_item_pool(true)
+	var normal_pool := reward.get_reward_item_pool(false)
+	assert_true(not boss_pool.is_empty(), "Boss reward pool contains unowned persistent gear")
+	for item_data in boss_pool:
+		assert_true(not item_data.equipment_slot.is_empty(), "Boss reward choices contain persistent gear only")
+		assert_true(not SaveManager.has_gear_item(item_data.id), "Boss reward excludes already-owned gear")
+	for item_data in normal_pool:
+		assert_true(item_data.equipment_slot.is_empty(), "Regular blessing choices exclude persistent gear")
+
+	var reward_item := ItemDatabase.get_item("storm_circlet")
+	reward.selected_item_choice = reward_item
+	reward._on_continue_pressed()
+	assert_true(SaveManager.has_gear_item("storm_circlet"), "Claiming boss gear adds it to the persistent profile")
+	var found_in_run_inventory := false
+	for item in GameManager.backpack_items:
+		if item.data and item.data.id == "storm_circlet":
+			found_in_run_inventory = true
+	assert_true(not found_in_run_inventory, "Persistent gear is not placed in the run backpack")
+
+	SaveManager.gear_inventory = original_inventory
+	SaveManager.save_profile()
+	reward.queue_free()
 
 
 func test_run_altar_excludes_persistent_gear() -> void:

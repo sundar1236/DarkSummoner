@@ -64,13 +64,31 @@ func _on_refresh_pressed() -> void:
 		AudioManager.play_sfx("item_rotate")
 	_generate_item_choices(is_boss_reward)
 
+func get_reward_item_pool(is_boss: bool) -> Array[ItemData]:
+	var pool: Array[ItemData] = []
+	for item_data in ItemDatabase.get_all_items():
+		var is_persistent_gear := not item_data.equipment_slot.is_empty()
+		if is_boss:
+			if is_persistent_gear and not SaveManager.has_gear_item(item_data.id):
+				pool.append(item_data)
+		elif not is_persistent_gear:
+			pool.append(item_data)
+
+	# Once every gear definition has been collected, boss rewards fall back to run items.
+	if pool.is_empty():
+		for item_data in ItemDatabase.get_all_items():
+			if item_data.equipment_slot.is_empty():
+				pool.append(item_data)
+	return pool
+
+
 func _generate_item_choices(is_boss: bool) -> void:
 	if not choices_container:
 		return
 	for c in choices_container.get_children():
 		c.queue_free()
 		
-	var pool: Array[ItemData] = ItemDatabase.get_all_items()
+	var pool: Array[ItemData] = get_reward_item_pool(is_boss)
 	pool.shuffle()
 	
 	var count: int = mini(3, pool.size())
@@ -185,7 +203,7 @@ func _generate_item_choices(is_boss: bool) -> void:
 		# 6. Select Button
 		var btn_pick := Button.new()
 		btn_pick.custom_minimum_size = Vector2(0, 42)
-		btn_pick.text = "SELECT BLESSING"
+		btn_pick.text = "CLAIM GEAR" if not item_data.equipment_slot.is_empty() else "SELECT BLESSING"
 		btn_pick.add_theme_font_size_override("font_size", 13)
 		var cap_data := item_data
 		var cap_card := card
@@ -225,14 +243,21 @@ func _on_continue_pressed() -> void:
 	
 	if selected_item_choice:
 		var inst := ItemInstance.new(selected_item_choice)
-		if GameManager.backpack_items.size() < GameManager.BACKPACK_CAPACITY:
+		if not selected_item_choice.equipment_slot.is_empty():
+			# Boss gear is permanent profile loot, never a run-only altar item.
+			SaveManager.add_gear_item(inst)
+		elif GameManager.backpack_items.size() < GameManager.BACKPACK_CAPACITY:
 			GameManager.add_item_to_backpack(inst)
 		else:
+			var placed := false
 			for y in range(GameManager.grid_manager.height):
 				for x in range(GameManager.grid_manager.width):
 					if GameManager.move_item_to_altar(inst, Vector2i(x, y)):
+						placed = true
 						break
-						
+				if placed:
+					break
+
 	if AudioManager:
 		AudioManager.play_sfx("ui_click")
 	reward_claimed_and_continue.emit()

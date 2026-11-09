@@ -252,6 +252,59 @@ static func init_database() -> void:
 	ring.price = 50
 	_register(ring)
 
+	# Additional tier-two gear gives boss rewards meaningful alternatives in every slot.
+	var circlet := ItemData.new()
+	circlet.id = "storm_circlet"
+	circlet.name = "Storm Circlet"
+	circlet.description = "A charged circlet that sharpens reflexes and protects the mind."
+	circlet.tier = 2
+	circlet.tags = ["gear", "helmet"]
+	circlet.equipment_slot = "helmet"
+	circlet.icon_symbol = "helmet"
+	circlet.bonus_hp = 30.0
+	circlet.bonus_crit = 0.03
+	circlet.price = 90
+	_register(circlet)
+
+	var greaves := ItemData.new()
+	greaves.id = "titan_greaves"
+	greaves.name = "Titan Greaves"
+	greaves.description = "Heavy greaves that turn each step into an unshakable advance."
+	greaves.tier = 2
+	greaves.tags = ["gear", "boots"]
+	greaves.equipment_slot = "boots"
+	greaves.icon_symbol = "boots"
+	greaves.bonus_hp = 20.0
+	greaves.bonus_speed = 20.0
+	greaves.price = 90
+	_register(greaves)
+
+	var pendant := ItemData.new()
+	pendant.id = "void_pendant"
+	pendant.name = "Void Pendant"
+	pendant.description = "A fragment of the abyss that amplifies a hunter's power."
+	pendant.tier = 2
+	pendant.tags = ["gear", "amulet"]
+	pendant.equipment_slot = "amulet"
+	pendant.icon_symbol = "amulet"
+	pendant.bonus_atk = 10.0
+	pendant.bonus_crit = 0.04
+	pendant.price = 100
+	_register(pendant)
+
+	var band := ItemData.new()
+	band.id = "soul_band"
+	band.name = "Soul Band"
+	band.description = "A spectral band that quickens attacks and reinforces vitality."
+	band.tier = 2
+	band.tags = ["gear", "ring"]
+	band.equipment_slot = "ring"
+	band.icon_symbol = "ring"
+	band.bonus_hp = 12.0
+	band.bonus_atk_speed = 0.10
+	band.price = 100
+	_register(band)
+
 static func _register(data: ItemData) -> void:
 	_items[data.id] = data
 
