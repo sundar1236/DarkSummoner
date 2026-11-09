@@ -2,9 +2,7 @@ class_name ShopScreen
 extends Control
 
 # Daily Shop Screen (Screen D - Ref Image 3)
-# Features scalloped market awning, Chapter Pack (600% Value),
-# Daily Shop 3x2 grid with 20% off discount tags and countdown timer,
-# and bottom sub-tabs (Daily Shop, Gear Chest, Wish, Limited Offer, Top Up).
+# Daily rewards and purchasable run supplies. Real-money purchases remain disabled until billing is integrated.
 
 signal item_purchased(item_id: String)
 signal subtab_changed(tab_name: String)
@@ -27,7 +25,7 @@ signal subtab_changed(tab_name: String)
 @onready var btn_tab_limited: Button = $BottomSubTabs/HBox/Tab4
 @onready var btn_tab_topup: Button = $BottomSubTabs/HBox/Tab5
 
-var remaining_seconds: int = 24484 # 06:48:04
+var remaining_seconds: int = 86400
 var _elapsed: float = 0.0
 var _toast_label: Label = null
 
@@ -35,12 +33,13 @@ func _ready() -> void:
 	_setup_buttons()
 	_setup_toast_label()
 	if SaveManager:
-		if SaveManager.chapter_pack_purchased and btn_chapter_pack:
-			btn_chapter_pack.text = "PURCHASED"
+		SaveManager.refresh_daily_shop_state()
+		remaining_seconds = SaveManager.get_seconds_until_daily_reset()
+		if btn_chapter_pack:
+			btn_chapter_pack.text = "STORE UNAVAILABLE"
 			btn_chapter_pack.disabled = true
-		if SaveManager.daily_free_energy_claimed and btn_item5:
-			btn_item5.text = "CLAIMED"
-			btn_item5.disabled = true
+		_refresh_daily_offer_buttons()
+	_update_timer_text()
 
 func _setup_toast_label() -> void:
 	_toast_label = Label.new()
@@ -82,101 +81,108 @@ func _setup_buttons() -> void:
 	if btn_item2:
 		btn_item2.pressed.connect(func(): _buy_daily_item(btn_item2, "wolf_core", 100, false, "🐺 Wolf Core Acquired!"))
 	if btn_item3:
-		btn_item3.pressed.connect(func(): _buy_daily_item(btn_item3, "storm_shard", 50, true, "⚡ Storm Shard x5 Acquired!"))
+		btn_item3.pressed.connect(func(): _buy_daily_item(btn_item3, "storm_shard", 50, true, "⚡ +5 Storm Reaper Shards"))
 	if btn_item4:
-		btn_item4.pressed.connect(func(): _buy_daily_item(btn_item4, "gold_key", 120, true, "🗝 Gold Key Acquired!"))
+		btn_item4.pressed.connect(func(): _buy_daily_item(btn_item4, "gold_cache", 120, true, "🪙 +300 Profile Gold"))
 	if btn_item5:
 		btn_item5.pressed.connect(func(): _claim_free_energy(btn_item5))
 	if btn_item6:
-		btn_item6.pressed.connect(func(): _buy_daily_item(btn_item6, "healing_elixir", 45, false, "🧪 Healing Elixir x3 Acquired!"))
+		btn_item6.pressed.connect(func(): _buy_daily_item(btn_item6, "healing_elixir", 45, false, "🧪 +2 Healing Potions next run"))
 
-	# Subtabs
-	var tabs := [btn_tab_daily, btn_tab_chest, btn_tab_wish, btn_tab_limited, btn_tab_topup]
-	var names := ["Daily Deals", "Gear Chest", "Wish", "Limited Offer", "Top Up"]
-	for i in range(tabs.size()):
-		var b: Button = tabs[i]
-		var t_name: String = names[i]
-		if b:
-			b.pressed.connect(func():
-				if AudioManager: AudioManager.play_sfx("ui_click")
-				show_toast("Switched to: %s" % t_name)
-				subtab_changed.emit(t_name)
-			)
+	# Tabs without implemented backing systems are visibly unavailable, not fake navigation.
+	var unavailable_tabs: Array[Button] = [btn_tab_chest, btn_tab_wish, btn_tab_limited, btn_tab_topup]
+	for tab in unavailable_tabs:
+		if tab:
+			tab.disabled = true
+			tab.tooltip_text = "Not available in this build"
+	if btn_tab_daily:
+		btn_tab_daily.pressed.connect(func():
+			if AudioManager: AudioManager.play_sfx("ui_click")
+			subtab_changed.emit("Daily Deals")
+		)
 
 func _on_buy_chapter_pack() -> void:
-	if SaveManager:
-		if SaveManager.chapter_pack_purchased:
-			show_toast("Chapter 1 Pack already purchased!")
-			return
-		SaveManager.add_gems(500)
-		SaveManager.add_energy(50)
-		SaveManager.add_gold(1500)
-		SaveManager.chapter_pack_purchased = true
-		SaveManager.save_profile()
-	else:
-		var shell = get_parent().get_parent() if get_parent() else null
-		if shell and "top_bar" in shell and shell.top_bar:
-			shell.top_bar.add_gems(500)
-			shell.top_bar.add_energy(50)
-			shell.top_bar.add_gold(1500)
-			
-	if AudioManager: AudioManager.play_sfx("upgrade")
+	# Do not grant paid currency until a platform billing provider confirms a purchase.
 	if btn_chapter_pack:
-		btn_chapter_pack.text = "PURCHASED"
 		btn_chapter_pack.disabled = true
-	show_toast("🎉 Chapter 1 Pack Claimed! (+500 💎, +50 ⚡, +1,500 🪙)")
-	item_purchased.emit("chapter_pack_1")
+		btn_chapter_pack.text = "STORE UNAVAILABLE"
+	show_toast("Real-money purchases are not enabled in this build.")
 
 func _buy_daily_item(btn: Button, item_id: String, cost: int, is_gems: bool, success_msg: String) -> void:
-	var success := false
-	if SaveManager:
-		if is_gems:
-			success = SaveManager.spend_gems(cost)
-		else:
-			success = SaveManager.spend_gold(cost)
-	else:
-		var shell = get_parent().get_parent() if get_parent() else null
-		if shell and "top_bar" in shell and shell.top_bar:
-			success = shell.top_bar.spend_gems(cost) if is_gems else shell.top_bar.spend_gold(cost)
-		else:
-			success = true # Offline fallback
-		
-	if success:
-		if AudioManager: AudioManager.play_sfx("shop_buy")
+	if not SaveManager:
+		show_toast("Shop inventory is unavailable.")
+		return
+	if SaveManager.is_daily_offer_purchased(item_id):
 		btn.text = "SOLD OUT"
 		btn.disabled = true
-		show_toast(success_msg)
-		item_purchased.emit(item_id)
-	else:
+		return
+
+	var valid_offer := item_id in ["fire_rune", "wolf_core", "storm_shard", "gold_cache", "healing_elixir"]
+	if not valid_offer:
+		show_toast("This offer is unavailable.")
+		return
+	var paid := SaveManager.spend_gems(cost) if is_gems else SaveManager.spend_gold(cost)
+	if not paid:
 		if AudioManager: AudioManager.play_sfx("ui_error")
 		show_toast("Not enough %s! (Need %d)" % ["Gems" if is_gems else "Gold", cost])
+		return
+
+	match item_id:
+		"fire_rune", "wolf_core":
+			SaveManager.add_shop_item(item_id, 1)
+		"healing_elixir":
+			SaveManager.add_shop_item(item_id, 2)
+		"storm_shard":
+			SaveManager.add_character_shards("storm_reaper", 5)
+		"gold_cache":
+			SaveManager.add_gold(300)
+	SaveManager.mark_daily_offer_purchased(item_id)
+	if AudioManager: AudioManager.play_sfx("shop_buy")
+	btn.text = "SOLD OUT"
+	btn.disabled = true
+	show_toast(success_msg)
+	item_purchased.emit(item_id)
 
 func _claim_free_energy(btn: Button) -> void:
-	if SaveManager:
-		if SaveManager.daily_free_energy_claimed:
-			show_toast("Free energy already claimed today!")
-			return
-		SaveManager.add_energy(20)
-		SaveManager.daily_free_energy_claimed = true
-		SaveManager.save_profile()
-	else:
-		var shell = get_parent().get_parent() if get_parent() else null
-		if shell and "top_bar" in shell and shell.top_bar:
-			shell.top_bar.add_energy(20)
-			
+	if not SaveManager or not SaveManager.claim_daily_free_energy(20):
+		btn.text = "CLAIMED"
+		btn.disabled = true
+		show_toast("Free energy has already been claimed today.")
+		return
 	if AudioManager: AudioManager.play_sfx("shop_buy")
 	btn.text = "CLAIMED"
 	btn.disabled = true
 	show_toast("⚡ Claimed +20 Free Energy!")
 	item_purchased.emit("free_energy")
 
+func _refresh_daily_offer_buttons() -> void:
+	if not SaveManager:
+		return
+	var offers: Array[Dictionary] = [
+		{"button": btn_item1, "id": "fire_rune"},
+		{"button": btn_item2, "id": "wolf_core"},
+		{"button": btn_item3, "id": "storm_shard"},
+		{"button": btn_item4, "id": "gold_cache"},
+		{"button": btn_item6, "id": "healing_elixir"}
+	]
+	for offer in offers:
+		var offer_button: Button = offer["button"]
+		if SaveManager.is_daily_offer_purchased(str(offer["id"])):
+			offer_button.text = "SOLD OUT"
+			offer_button.disabled = true
+	if SaveManager.daily_free_energy_claimed and btn_item5:
+		btn_item5.text = "CLAIMED"
+		btn_item5.disabled = true
+
 func _process(delta: float) -> void:
 	_elapsed += delta
 	if _elapsed >= 1.0:
 		_elapsed -= 1.0
-		if remaining_seconds > 0:
-			remaining_seconds -= 1
-			_update_timer_text()
+		remaining_seconds = SaveManager.get_seconds_until_daily_reset() if SaveManager else maxi(0, remaining_seconds - 1)
+		if remaining_seconds <= 1 and SaveManager:
+			SaveManager.refresh_daily_shop_state()
+			_refresh_daily_offer_buttons()
+		_update_timer_text()
 
 func _update_timer_text() -> void:
 	var h := remaining_seconds / 3600
