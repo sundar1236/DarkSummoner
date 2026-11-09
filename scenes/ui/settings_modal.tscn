@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://scripts/ui/settings_modal.gd" id="1_set"]
 
-[node name="SettingsModal" type="Control" node_paths=PackedStringArray("slider_master", "slider_music", "slider_sfx", "slider_ambience", "check_mute", "btn_resume", "btn_inventory", "btn_abandon")]
+[node name="SettingsModal" type="Control" node_paths=PackedStringArray("slider_master", "slider_music", "slider_sfx", "slider_ambience", "check_mute", "check_screen_shake", "check_reduced_motion", "btn_resume", "btn_inventory", "btn_abandon")]
 process_mode = 3
 layout_mode = 3
 anchors_preset = 15
@@ -16,6 +16,8 @@ slider_music = NodePath("VBox/Sliders/MusicRow/MusicSlider")
 slider_sfx = NodePath("VBox/Sliders/SfxRow/SfxSlider")
 slider_ambience = NodePath("VBox/Sliders/AmbienceRow/AmbienceSlider")
 check_mute = NodePath("VBox/CheckMute")
+check_screen_shake = NodePath("VBox/CheckScreenShake")
+check_reduced_motion = NodePath("VBox/CheckReducedMotion")
 btn_resume = NodePath("VBox/Buttons/BtnResume")
 btn_inventory = NodePath("VBox/Buttons/BtnInventory")
 btn_abandon = NodePath("VBox/Buttons/BtnAbandon")
@@ -37,9 +39,9 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -280.0
-offset_top = -300.0
+offset_top = -350.0
 offset_right = 280.0
-offset_bottom = 300.0
+offset_bottom = 350.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 18
@@ -132,6 +134,18 @@ custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
 theme_override_font_sizes/font_size = 21
 text = "Mute All Audio"
+
+[node name="CheckScreenShake" type="CheckBox" parent="VBox"]
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Screen Shake"
+
+[node name="CheckReducedMotion" type="CheckBox" parent="VBox"]
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Reduce Motion Effects"
 
 [node name="Buttons" type="VBoxContainer" parent="VBox"]
 layout_mode = 2
