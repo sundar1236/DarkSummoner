@@ -71,10 +71,16 @@ func _setup_signals() -> void:
 			SaveManager.save_profile()
 		)
 	if check_reduced_motion:
-		check_reduced_motion.toggled.connect(func(enabled: bool):
-			SaveManager.settings_data["reduced_motion"] = enabled
-			SaveManager.save_profile()
-		)
+		check_reduced_motion.toggled.connect(_on_reduced_motion_toggled)
+
+func _on_reduced_motion_toggled(enabled: bool) -> void:
+	if not SaveManager:
+		return
+	SaveManager.settings_data["reduced_motion"] = enabled
+	for background in get_tree().get_nodes_in_group("arena_backgrounds"):
+		if background.has_method("set_reduced_motion"):
+			background.set_reduced_motion(enabled)
+	SaveManager.save_profile()
 
 func _on_abandon_clicked() -> void:
 	if not is_confirming_abandon:

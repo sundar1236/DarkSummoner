@@ -427,20 +427,20 @@ func test_modals_functionality() -> void:
 	b_modal.queue_free()
 	await get_tree().process_frame
 
-	# Reduced visual effects are saved and applied to active arena backgrounds.
+	# Reduced motion is saved and applied to active arena backgrounds.
 	var settings_scene := load("res://scenes/ui/settings_modal.tscn") as PackedScene
 	var settings_modal := settings_scene.instantiate() as SettingsModal
 	add_child(settings_modal)
 	var arena_background := ArenaBackground.new()
 	add_child(arena_background)
 	await get_tree().process_frame
-	SaveManager.settings_data["reduced_effects"] = false
-	arena_background.set_reduced_effects(false)
-	settings_modal.check_reduced_effects.toggled.emit(true)
-	assert_test(bool(SaveManager.settings_data.get("reduced_effects", false)), "Reduced visual effects preference is saved")
-	assert_test(arena_background.reduced_effects and not arena_background.is_processing(), "Reduced effects stop continuous arena flicker redraws")
-	settings_modal.check_reduced_effects.toggled.emit(false)
-	assert_test(not arena_background.reduced_effects and arena_background.is_processing(), "Full visual effects can be restored")
+	SaveManager.settings_data["reduced_motion"] = false
+	arena_background.set_reduced_motion(false)
+	settings_modal.check_reduced_motion.toggled.emit(true)
+	assert_test(bool(SaveManager.settings_data.get("reduced_motion", false)), "Reduced motion preference is saved")
+	assert_test(arena_background.reduced_motion_enabled and not arena_background.is_processing(), "Reduced motion stops continuous arena flicker redraws")
+	settings_modal.check_reduced_motion.toggled.emit(false)
+	assert_test(not arena_background.reduced_motion_enabled and arena_background.is_processing(), "Full arena motion can be restored")
 	settings_modal.queue_free()
 	arena_background.queue_free()
 	await get_tree().process_frame
