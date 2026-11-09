@@ -270,7 +270,7 @@ static func get_random_item_by_category(category: String, max_tier: int = 1) -> 
 			continue
 		match category:
 			"blacksmith":
-				if item.tags.has("weapon") or item.tags.has("armor"):
+				if not item.equipment_slot.is_empty():
 					candidates.append(item)
 			"potion_merchant":
 				# merchant category
