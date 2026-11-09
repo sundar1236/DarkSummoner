@@ -12,6 +12,7 @@ signal boss_defeated()
 
 var max_hp: float = 400.0
 var hp: float = 400.0
+var is_dead: bool = false
 var move_speed: float = 90.0
 
 var player_ref: Node2D
@@ -66,6 +67,8 @@ func _setup_visuals() -> void:
 	add_child(col)
 
 func _physics_process(delta: float) -> void:
+	if is_dead:
+		return
 	anim_time += delta
 	if not is_instance_valid(player_ref):
 		var p_nodes := get_tree().get_nodes_in_group("player")
@@ -113,10 +116,11 @@ func _execute_next_attack() -> void:
 	is_performing_attack = true
 	velocity = Vector2.ZERO
 	
-	match attack_index % 3:
+	match attack_index % 4:
 		0: _attack_void_eruption()
 		1: _attack_abyssal_charge()
 		2: _attack_nova_ring()
+		3: _attack_abyssal_cross()
 		
 	attack_index += 1
 
@@ -241,7 +245,48 @@ func _attack_nova_ring() -> void:
 		is_performing_attack = false
 	)
 
+
+func _attack_abyssal_cross() -> void:
+	if AudioManager:
+		AudioManager.play_sfx("boss_warning")
+	var cross_telegraph := Node2D.new()
+	cross_telegraph.global_position = global_position
+	cross_telegraph.z_index = -1
+	cross_telegraph.draw.connect(func():
+		var line_color := Color(1.0, 0.22, 0.36, 0.78)
+		cross_telegraph.draw_line(Vector2(-360, 0), Vector2(360, 0), line_color, 4.0)
+		cross_telegraph.draw_line(Vector2(0, -360), Vector2(0, 360), line_color, 4.0)
+		cross_telegraph.draw_circle(Vector2.ZERO, 34.0, Color(1.0, 0.12, 0.24, 0.18))
+	)
+	get_parent().add_child(cross_telegraph)
+	var pulse := create_tween()
+	pulse.tween_property(sprite, "scale", Vector2(1.18, 1.18), 0.24)
+	pulse.tween_property(sprite, "scale", Vector2.ONE, 0.24)
+	get_tree().create_timer(0.65).timeout.connect(func():
+		if is_instance_valid(cross_telegraph):
+			cross_telegraph.queue_free()
+		if is_dead or not is_inside_tree():
+			is_performing_attack = false
+			return
+		var damage: float = 20.0 if is_enraged else 16.0
+		for angle in [0.0, PI * 0.5, PI, PI * 1.5]:
+			var projectile := ProjectileController.new()
+			get_parent().add_child(projectile)
+			projectile.global_position = global_position
+			projectile.setup(damage, false, Vector2.RIGHT.rotated(angle), 400.0, "enemy", false)
+		if AudioManager:
+			AudioManager.play_sfx("proj_launch")
+		is_performing_attack = false
+	)
+
+static func get_attack_pattern_name(index: int) -> String:
+	var patterns: Array[String] = ["void_eruption", "abyssal_charge", "nova_ring", "abyssal_cross"]
+	return patterns[posmod(index, patterns.size())]
+
+
 func take_damage(amount: float, is_crit: bool) -> void:
+	if is_dead or amount <= 0.0:
+		return
 	hp = maxf(0.0, hp - amount)
 	boss_hp_changed.emit(hp, max_hp)
 	
@@ -264,7 +309,15 @@ func take_damage(amount: float, is_crit: bool) -> void:
 	if hp <= 0.0:
 		_on_boss_death()
 
+func _claim_boss_defeat() -> bool:
+	if is_dead:
+		return false
+	is_dead = true
+	return true
+
 func _on_boss_death() -> void:
+	if not _claim_boss_defeat():
+		return
 	var cam := get_viewport().get_camera_2d()
 	if cam and cam.has_method("apply_impact"):
 		cam.apply_impact(10.0, 0.5)
