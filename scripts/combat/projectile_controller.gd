@@ -2,6 +2,7 @@ class_name ProjectileController
 extends Area2D
 
 const ImpactSparkVFXClass = preload("res://scripts/combat/impact_spark_vfx.gd")
+const MAX_ACTIVE_PROJECTILES: int = 64
 
 # Unified projectile controller supporting player weapons, homing souls,
 # chain discharges, pet fireballs, and enemy/boss projectiles.
@@ -21,18 +22,21 @@ var has_life_steal: bool = false
 var sprite: Sprite2D
 var timer: float = 0.0
 
+static func can_spawn_projectile() -> bool:
+	var tree := Engine.get_main_loop() as SceneTree
+	return tree == null or tree.get_nodes_in_group("projectiles").size() < MAX_ACTIVE_PROJECTILES
+
 func _ready() -> void:
+	if not can_spawn_projectile():
+		queue_free()
+		return
+	add_to_group("projectiles")
+	_apply_collision_profile()
 	if not sprite:
 		sprite = Sprite2D.new()
 		add_child(sprite)
 	
-	# Set collision layers and masks
-	if is_player_projectile:
-		collision_layer = 4 # Layer 3: PlayerProjectile
-		collision_mask = 2 | 16 # Layer 2: Enemy, Layer 5: Walls
-	else:
-		collision_layer = 8 # Layer 4: EnemyProjectile
-		collision_mask = 1 | 16 # Layer 1: Player, Layer 5: Walls
+	_apply_collision_profile()
 		
 	var shape := CircleShape2D.new()
 	shape.radius = 12.0
@@ -43,12 +47,21 @@ func _ready() -> void:
 	body_entered.connect(_on_body_entered)
 	area_entered.connect(_on_area_entered)
 
+func _apply_collision_profile() -> void:
+	if is_player_projectile:
+		collision_layer = 4
+		collision_mask = 2 | 16
+	else:
+		collision_layer = 8
+		collision_mask = 1 | 16
+
 func setup(p_damage: float, p_is_crit: bool, p_dir: Vector2, p_speed: float = 550.0, p_type: String = "slash", p_is_player: bool = true) -> void:
 	damage = p_damage
 	is_crit = p_is_crit
 	direction = p_dir.normalized()
 	speed = p_speed
 	is_player_projectile = p_is_player
+	_apply_collision_profile()
 	
 	if not sprite:
 		sprite = Sprite2D.new()
@@ -99,6 +112,8 @@ func _find_nearest_enemy() -> Node2D:
 	var min_dist: float = 600.0
 	for e in enemies:
 		if is_instance_valid(e) and e is Node2D:
+			if ("is_dead" in e and e.is_dead) or ("hp" in e and e.hp <= 0.0):
+				continue
 			var d := global_position.distance_to(e.global_position)
 			if d < min_dist:
 				min_dist = d
@@ -120,19 +135,19 @@ func _handle_hit(target: Node) -> void:
 			target.take_damage(damage, is_crit)
 			
 			# Spawn impact spark
-			var spark = ImpactSparkVFXClass.new()
-			var p_tint := Color(0.95, 0.75, 1.0)
-			if sprite and sprite.texture:
-				var path := sprite.texture.resource_path
-				if "lightning" in path:
-					p_tint = Color(0.4, 0.9, 1.0)
-				elif "soul" in path:
-					p_tint = Color(0.3, 1.0, 0.65)
-				elif "fireball" in path:
-					p_tint = Color(1.0, 0.6, 0.2)
-			spark.setup(is_crit, global_position, -direction, p_tint)
-			get_parent().add_child(spark)
-			
+			if ImpactSparkVFXClass.can_spawn_spark():
+				var spark = ImpactSparkVFXClass.new()
+				var p_tint := Color(0.95, 0.75, 1.0)
+				if sprite and sprite.texture:
+					var path := sprite.texture.resource_path
+					if "lightning" in path:
+						p_tint = Color(0.4, 0.9, 1.0)
+					elif "soul" in path:
+						p_tint = Color(0.3, 1.0, 0.65)
+					elif "fireball" in path:
+						p_tint = Color(1.0, 0.6, 0.2)
+				 spark.setup(is_crit, global_position, -direction, p_tint)
+				get_parent().add_child(spark)
 			if has_burn and target.has_method("apply_burn"):
 				target.apply_burn(6.0, 3)
 			if has_life_steal:
