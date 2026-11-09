@@ -112,10 +112,15 @@ func _select_difficulty(diff: String) -> void:
 		SaveManager.set_difficulty(diff)
 	_update_difficulty_visuals(diff)
 	
-	var mult_str := "1.0x"
-	if diff == "hard": mult_str = "1.5x"
-	elif diff == "torment": mult_str = "2.0x"
-	show_toast("⚔ Difficulty Set: %s Mode (%s Multiplier)" % [diff.capitalize(), mult_str])
+	var enemy_hp_mult := 1.0
+	var enemy_damage_mult := 1.0
+	if diff == "hard":
+		enemy_hp_mult = 1.5
+		enemy_damage_mult = 1.25
+	elif diff == "torment":
+		enemy_hp_mult = 2.0
+		enemy_damage_mult = 1.5
+	show_toast("⚔ %s — Enemy HP x%.1f · Damage x%.2f" % [diff.capitalize(), enemy_hp_mult, enemy_damage_mult])
 	difficulty_changed.emit(diff)
 
 func _update_difficulty_visuals(active_diff: String) -> void:
