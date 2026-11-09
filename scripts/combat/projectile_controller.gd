@@ -51,7 +51,6 @@ func setup(p_damage: float, p_is_crit: bool, p_dir: Vector2, p_speed: float = 55
 	direction = p_dir.normalized()
 	speed = p_speed
 	is_player_projectile = p_is_player
-	_configure_collision()
 	
 	if not sprite:
 		sprite = Sprite2D.new()
@@ -77,6 +76,7 @@ func setup(p_damage: float, p_is_crit: bool, p_dir: Vector2, p_speed: float = 55
 			is_player_projectile = false
 			speed = 320.0
 			
+	_configure_collision()
 	sprite.texture = TextureLoader.get_texture(tex_path)
 	rotation = direction.angle()
 
@@ -112,12 +112,13 @@ func _find_nearest_enemy() -> Node2D:
 	var nearest: Node2D = null
 	var min_dist: float = 600.0
 	for enemy in enemies:
-		if not (enemy is Node2D) or not _is_valid_enemy_target(enemy):
+		var enemy_node := enemy as Node2D
+		if enemy_node == null or not _is_valid_enemy_target(enemy_node):
 			continue
-		var distance := global_position.distance_to(enemy.global_position)
+		var distance := global_position.distance_to(enemy_node.global_position)
 		if distance < min_dist:
 			min_dist = distance
-			nearest = enemy
+			nearest = enemy_node
 	return nearest
 
 func _on_body_entered(body: Node2D) -> void:
