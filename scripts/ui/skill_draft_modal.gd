@@ -3,7 +3,7 @@ extends Control
 
 # Valkyrie Blessing Draft Modal (Phase 5 & Ref Image 8)
 # Presents full-screen dimmed overlay with gold winged banner ("You've encountered Valkyrie"),
-# 2 tall ornate vertical Legendary/Epic/Rare skill cards side-by-side,
+# 3 compact ornate Legendary/Epic/Rare skill cards side-by-side,
 # rank progression badges (New Skill / Upgrade Lv.1 -> Lv.2), stat preview arrows (ATK PWR ↑↑↑↑),
 # Learned Skills slide-out drawer, and dynamic Refresh mechanic with deterministic testing support.
 
@@ -25,6 +25,8 @@ var is_choice_locked: bool = false
 @onready var card_2_panel: PanelContainer = $Content/CardsHBox/SkillCard2
 @onready var card_1_btn: Button = $Content/CardsHBox/SkillCard1/CardButton
 @onready var card_2_btn: Button = $Content/CardsHBox/SkillCard2/CardButton
+@onready var card_3_panel: PanelContainer = $Content/CardsHBox/SkillCard3
+@onready var card_3_btn: Button = $Content/CardsHBox/SkillCard3/CardButton
 
 @onready var learned_drawer: PanelContainer = $LearnedDrawer
 @onready var learned_list: VBoxContainer = $LearnedDrawer/VBox/ScrollContainer/LearnedList
@@ -32,6 +34,7 @@ var is_choice_locked: bool = false
 
 var card_1_offer: Dictionary = {}
 var card_2_offer: Dictionary = {}
+var card_3_offer: Dictionary = {}
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -39,6 +42,20 @@ func _ready() -> void:
 	if not get_tree().root.size_changed.is_connected(_apply_safe_area):
 		get_tree().root.size_changed.connect(_apply_safe_area)
 		
+	card_1_panel.custom_minimum_size = Vector2(0, 500)
+	card_2_panel.custom_minimum_size = Vector2(0, 500)
+	card_1_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	card_2_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var cards_row := $Content/CardsHBox as HBoxContainer
+	cards_row.add_theme_constant_override("separation", 8)
+	for panel in [card_1_panel, card_2_panel, card_3_panel]:
+		panel.custom_minimum_size = Vector2(0, 500)
+		panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		var card_vbox := panel.get_node("VBox") as VBoxContainer
+		card_vbox.add_theme_constant_override("separation", 6)
+		var icon_box := panel.get_node("VBox/IconBox") as PanelContainer
+		icon_box.custom_minimum_size = Vector2(60, 60)
+
 	if refresh_btn:
 		refresh_btn.pressed.connect(_on_refresh_pressed)
 	if learned_btn:
@@ -49,6 +66,8 @@ func _ready() -> void:
 		card_1_btn.pressed.connect(func(): _choose_card(1))
 	if card_2_btn:
 		card_2_btn.pressed.connect(func(): _choose_card(2))
+	if card_3_btn:
+		card_3_btn.pressed.connect(func(): _choose_card(3))
 		
 	_update_refresh_label()
 
@@ -61,6 +80,7 @@ func show_draft(seed_val: int = -1) -> void:
 		learned_drawer.visible = false
 	if card_1_btn: card_1_btn.disabled = false
 	if card_2_btn: card_2_btn.disabled = false
+	if card_3_btn: card_3_btn.disabled = false
 	
 	_generate_cards(seed_val)
 	_update_refresh_label()
@@ -85,21 +105,16 @@ func _on_refresh_pressed() -> void:
 	_generate_cards()
 
 func _generate_cards(seed_val: int = -1) -> void:
-	var offers := RunSkillDatabaseClass.generate_offers(GameManager.run_learned_skills, 2, seed_val)
-	if offers.size() >= 2:
-		card_1_offer = offers[0]
-		card_2_offer = offers[1]
-	elif offers.size() == 1:
-		card_1_offer = offers[0]
-		card_2_offer = offers[0]
-	else:
-		card_1_offer = {}
-		card_2_offer = {}
+	var offers := RunSkillDatabaseClass.generate_offers(GameManager.run_learned_skills, 3, seed_val)
+	card_1_offer = offers[0] if offers.size() > 0 else {}
+	card_2_offer = offers[1] if offers.size() > 1 else {}
+	card_3_offer = offers[2] if offers.size() > 2 else {}
 	_update_cards_ui()
 
 func _update_cards_ui() -> void:
 	_update_single_card(1, card_1_offer, card_1_panel)
 	_update_single_card(2, card_2_offer, card_2_panel)
+	_update_single_card(3, card_3_offer, card_3_panel)
 
 func _update_single_card(slot_idx: int, offer: Dictionary, panel: PanelContainer) -> void:
 	if offer.is_empty() or not panel:
@@ -138,6 +153,7 @@ func _update_single_card(slot_idx: int, offer: Dictionary, panel: PanelContainer
 		icon_box.add_theme_stylebox_override("panel", ib_style)
 		
 	if lbl_rarity:
+		lbl_rarity.add_theme_font_size_override("font_size", 12)
 		if is_leg:
 			lbl_rarity.text = "⚔ LEGENDARY BLESSING ⚔"
 			lbl_rarity.modulate = Color(1.0, 0.85, 0.25, 1.0)
@@ -149,6 +165,7 @@ func _update_single_card(slot_idx: int, offer: Dictionary, panel: PanelContainer
 			lbl_rarity.modulate = Color(0.35, 0.85, 1.0, 1.0)
 			
 	if lbl_rank:
+		lbl_rank.add_theme_font_size_override("font_size", 11)
 		if offer.get("is_fallback", false):
 			lbl_rank.text = "★ DIVINE BOON ★"
 			lbl_rank.modulate = Color(1.0, 0.9, 0.3)
@@ -162,12 +179,18 @@ func _update_single_card(slot_idx: int, offer: Dictionary, panel: PanelContainer
 			lbl_rank.modulate = Color(1.0, 0.85, 0.35)
 			
 	if lbl_icon:
+		lbl_icon.add_theme_font_size_override("font_size", 36)
 		lbl_icon.text = offer.get("icon_symbol", "🗡")
 	if lbl_title:
+		lbl_title.add_theme_font_size_override("font_size", 16)
+		lbl_title.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		lbl_title.text = offer.get("title", "Blessing")
 	if lbl_arrow:
+		lbl_arrow.add_theme_font_size_override("font_size", 12)
+		lbl_arrow.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		lbl_arrow.text = offer.get("stat_arrow", "ATK PWR ↑↑")
 	if lbl_desc:
+		lbl_desc.add_theme_font_size_override("font_size", 12)
 		lbl_desc.text = offer.get("desc", "")
 
 func _choose_card(slot: int) -> void:
@@ -175,13 +198,14 @@ func _choose_card(slot: int) -> void:
 		return
 	is_choice_locked = true
 	
-	var chosen: Dictionary = card_1_offer if slot == 1 else card_2_offer
+	var chosen: Dictionary = card_1_offer if slot == 1 else (card_2_offer if slot == 2 else card_3_offer)
 	if chosen.is_empty():
 		return
 		
 	# Disable buttons immediately to prevent duplicate application
 	if card_1_btn: card_1_btn.disabled = true
 	if card_2_btn: card_2_btn.disabled = true
+	if card_3_btn: card_3_btn.disabled = true
 	if refresh_btn: refresh_btn.disabled = true
 	
 	# Apply skill or upgrade atomically in GameManager

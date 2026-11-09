@@ -98,6 +98,7 @@ func _connect_signals() -> void:
 	GameManager.run_xp_changed.connect(_on_xp_changed)
 	GameManager.run_level_up.connect(_on_level_up)
 	GameManager.run_skill_applied.connect(_on_skill_applied)
+	GameManager.run_skill_evolved.connect(_on_skill_evolved)
 
 func _update_displays() -> void:
 	if floor_level_label:
@@ -154,6 +155,10 @@ func _on_skill_applied(skill_id: String, new_lvl: int) -> void:
 	var s_name := skill_data.name if skill_data else skill_id.capitalize()
 	show_announcement("✦ Blessing Acquired: %s (Rank %d) ✦" % [s_name, new_lvl], 2.4, Color(0.4, 1.0, 0.6))
 	update_revives_display()
+
+
+func _on_skill_evolved(_evolution_id: String, evolution_name: String) -> void:
+	show_announcement("✦ SKILL EVOLVED: %s ✦" % evolution_name, 3.0, Color(1.0, 0.72, 0.25))
 
 func update_wave_progress(current_w: int, total_w: int, enemies_left: int = -1) -> void:
 	if wave_objective_label:

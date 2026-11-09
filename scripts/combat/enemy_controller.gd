@@ -302,6 +302,10 @@ func _on_death() -> void:
 	if is_dead:
 		return
 	is_dead = true
+	var player_stats: Dictionary = GameManager.get_player_effective_stats()
+	var kill_heal: float = float(player_stats.get("hp_on_kill", 0.0))
+	if kill_heal > 0.0:
+		GameManager.heal_player(kill_heal)
 	GameManager.add_run_shades(shade_reward)
 	if AudioManager:
 		AudioManager.play_sfx("enemy_death")

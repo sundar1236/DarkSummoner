@@ -18,6 +18,7 @@ signal inventory_changed()
 signal run_xp_changed(current_xp: float, max_xp: float)
 signal run_level_up(new_level: int)
 signal run_skill_applied(skill_id: String, new_level: int)
+signal run_skill_evolved(evolution_id: String, evolution_name: String)
 
 # Run State
 var is_in_run: bool = false
@@ -42,7 +43,9 @@ var run_xp: float = 0.0
 var run_xp_to_next: float = 60.0
 var run_player_level: int = 1
 var run_learned_skills: Dictionary = {} # skill_id -> int level (1..3)
-var run_skill_modifiers: Dictionary = {} # Accumulated stat buffs from drafted blessings
+var run_skill_modifiers: Dictionary = {} # Current rank modifiers from drafted blessings
+var run_skill_evolutions: Array[String] = []
+var run_skill_evolution_modifiers: Dictionary = {}
 var run_extra_revives: int = 0
 
 # Inventory
@@ -139,6 +142,8 @@ func start_new_run(char_id: String, start_floor: int = 1) -> void:
 	run_player_level = 1
 	run_learned_skills.clear()
 	run_skill_modifiers.clear()
+	run_skill_evolutions.clear()
+	run_skill_evolution_modifiers.clear()
 	run_extra_revives = 0
 	
 	altar_items.clear()
@@ -176,7 +181,7 @@ func recalculate_stats_and_synergies() -> void:
 	var perm_hp: float = SaveManager.get_permanent_hp_bonus() if SaveManager else 0.0
 	var gear_stats: Dictionary = SaveManager.get_equipped_gear_stats() if SaveManager else {}
 	var item_hp: float = cached_synergies.get("total_hp", 0.0) + gear_stats.get("bonus_hp", 0.0)
-	var skill_hp: float = run_skill_modifiers.get("bonus_hp", 0.0)
+	var skill_hp: float = float(run_skill_modifiers.get("bonus_hp", 0.0)) + float(run_skill_evolution_modifiers.get("bonus_hp", 0.0))
 	
 	player_max_hp = base_hp + perm_hp + item_hp + skill_hp
 	player_hp = clampf(player_hp, 0.0, player_max_hp)
@@ -195,10 +200,10 @@ func get_player_effective_stats() -> Dictionary:
 	var perm_crit: float = SaveManager.get_permanent_crit_bonus() if SaveManager else 0.0
 	
 	var gear_stats: Dictionary = SaveManager.get_equipped_gear_stats() if SaveManager else {}
-	var item_atk: float = cached_synergies.get("total_atk", 0.0) + gear_stats.get("bonus_atk", 0.0) + run_skill_modifiers.get("bonus_atk", 0.0)
-	var item_crit: float = cached_synergies.get("total_crit", 0.0) + gear_stats.get("bonus_crit", 0.0) + run_skill_modifiers.get("bonus_crit", 0.0)
-	var item_speed: float = cached_synergies.get("total_speed", 0.0) + gear_stats.get("bonus_speed", 0.0) + run_skill_modifiers.get("bonus_speed", 0.0)
-	var item_atk_speed: float = cached_synergies.get("total_atk_speed", 0.0) + gear_stats.get("bonus_atk_speed", 0.0) + run_skill_modifiers.get("bonus_atk_speed", 0.0)
+	var item_atk: float = cached_synergies.get("total_atk", 0.0) + gear_stats.get("bonus_atk", 0.0) + float(run_skill_modifiers.get("bonus_atk", 0.0)) + float(run_skill_evolution_modifiers.get("bonus_atk", 0.0))
+	var item_crit: float = cached_synergies.get("total_crit", 0.0) + gear_stats.get("bonus_crit", 0.0) + float(run_skill_modifiers.get("bonus_crit", 0.0)) + float(run_skill_evolution_modifiers.get("bonus_crit", 0.0))
+	var item_speed: float = cached_synergies.get("total_speed", 0.0) + gear_stats.get("bonus_speed", 0.0) + float(run_skill_modifiers.get("bonus_speed", 0.0)) + float(run_skill_evolution_modifiers.get("bonus_speed", 0.0))
+	var item_atk_speed: float = cached_synergies.get("total_atk_speed", 0.0) + gear_stats.get("bonus_atk_speed", 0.0) + float(run_skill_modifiers.get("bonus_atk_speed", 0.0)) + float(run_skill_evolution_modifiers.get("bonus_atk_speed", 0.0))
 	
 	var final_atk: float = (base_atk + item_atk) * perm_atk_mult
 	var final_speed: float = (base_speed + item_speed) * perm_spd_mult
@@ -210,12 +215,15 @@ func get_player_effective_stats() -> Dictionary:
 		"speed": final_speed,
 		"crit_chance": final_crit,
 		"attack_rate": final_atk_rate,
-		"burn_on_hit": run_skill_modifiers.get("burn_on_hit", false),
-		"chain_lightning": run_skill_modifiers.get("chain_lightning", false),
-		"life_steal": run_skill_modifiers.get("life_steal", false),
-		"dodge_cdr": run_skill_modifiers.get("dodge_cdr", 0.0),
-		"extra_projectiles": run_skill_modifiers.get("extra_projectiles", 0),
-		"hp_on_kill": run_skill_modifiers.get("hp_on_kill", 0.0),
+		"burn_on_hit": run_skill_modifiers.get("burn_on_hit", false) or run_skill_evolution_modifiers.get("burn_on_hit", false),
+		"chain_lightning": run_skill_modifiers.get("chain_lightning", false) or run_skill_evolution_modifiers.get("chain_lightning", false),
+		"life_steal": run_skill_modifiers.get("life_steal", false) or run_skill_evolution_modifiers.get("life_steal", false),
+		"dodge_cdr": float(run_skill_modifiers.get("dodge_cdr", 0.0)),
+		"extra_projectiles": int(run_skill_modifiers.get("extra_projectiles", 0)) + int(run_skill_evolution_modifiers.get("extra_projectiles", 0)),
+		"pet": run_skill_modifiers.get("pet", false) or run_skill_evolution_modifiers.get("pet", false),
+		"pet_damage": float(run_skill_modifiers.get("pet_damage", 0.0)) + float(run_skill_evolution_modifiers.get("pet_damage", 0.0)),
+		"hp_on_kill": float(run_skill_modifiers.get("hp_on_kill", 0.0)) + float(run_skill_evolution_modifiers.get("hp_on_kill", 0.0)),
+		"skill_evolutions": run_skill_evolutions.duplicate(),
 		"synergies": cached_synergies
 	}
 
@@ -237,6 +245,10 @@ func add_run_xp(amount: float) -> void:
 	run_xp_changed.emit(run_xp, run_xp_to_next)
 
 func apply_run_skill(skill_id: String) -> bool:
+	if skill_id == "guardian_resolve":
+		heal_player(player_max_hp * 0.5)
+		run_extra_revives += 1
+		return true
 	if skill_id == "valkyrie_boon":
 		# Fallback boon: Full heal + 150 gold
 		heal_player(player_max_hp)
@@ -270,12 +282,57 @@ func apply_run_skill(skill_id: String) -> bool:
 			
 	if mods.has("extra_revive"):
 		run_extra_revives += int(mods["extra_revive"])
-		
+
+	_update_skill_evolutions()
 	recalculate_stats_and_synergies()
 	run_skill_applied.emit(skill_id, new_lvl)
 	if AudioManager:
 		AudioManager.play_sfx("item_place")
 	return true
+
+
+func _update_skill_evolutions() -> void:
+	var recipes: Array[Dictionary] = [
+		{
+			"id": "infernal_blade_storm", "name": "Infernal Blade Storm",
+			"requirements": {"hellfire_infusion": 3, "shadow_flurry": 3},
+			"mods": {"bonus_atk": 25.0, "extra_projectiles": 2, "burn_on_hit": true}
+		},
+		{
+			"id": "storm_wolf", "name": "Storm Wolf",
+			"requirements": {"thunder_tempest": 3, "spectral_prowler": 3},
+			"mods": {"bonus_atk": 18.0, "bonus_crit": 0.08, "chain_lightning": true, "pet": true, "pet_damage": 25.0}
+		},
+		{
+			"id": "soul_devourer", "name": "Soul Devourer",
+			"requirements": {"void_aegis": 3, "blood_harvest": 3},
+			"mods": {"bonus_hp": 60.0, "hp_on_kill": 8.0, "life_steal": true}
+		}
+	]
+
+	for recipe in recipes:
+		var evolution_id: String = recipe["id"]
+		if run_skill_evolutions.has(evolution_id):
+			continue
+		var requirements: Dictionary = recipe["requirements"]
+		var unlocked: bool = true
+		for required_skill in requirements:
+			if int(run_learned_skills.get(required_skill, 0)) < int(requirements[required_skill]):
+				unlocked = false
+				break
+		if not unlocked:
+			continue
+
+		run_skill_evolutions.append(evolution_id)
+		var mods: Dictionary = recipe["mods"]
+		for mod_key in mods:
+			var value = mods[mod_key]
+			if value is bool:
+				run_skill_evolution_modifiers[mod_key] = bool(run_skill_evolution_modifiers.get(mod_key, false)) or value
+			else:
+				run_skill_evolution_modifiers[mod_key] = float(run_skill_evolution_modifiers.get(mod_key, 0.0)) + float(value)
+		run_skill_evolved.emit(evolution_id, str(recipe["name"]))
+
 
 func get_learned_skills_summary() -> Array[Dictionary]:
 	var list: Array[Dictionary] = []

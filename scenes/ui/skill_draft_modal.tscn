@@ -157,7 +157,7 @@ alignment = 1
 theme_override_constants/separation = 16
 
 [node name="SkillCard1" type="PanelContainer" parent="Content/CardsHBox"]
-custom_minimum_size = Vector2(320, 500)
+custom_minimum_size = Vector2(0, 500)
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_card_base")
@@ -223,7 +223,7 @@ layout_mode = 2
 flat = true
 
 [node name="SkillCard2" type="PanelContainer" parent="Content/CardsHBox"]
-custom_minimum_size = Vector2(320, 500)
+custom_minimum_size = Vector2(0, 500)
 layout_mode = 2
 size_flags_horizontal = 3
 theme_override_styles/panel = SubResource("StyleBoxFlat_card_base")
@@ -285,6 +285,72 @@ horizontal_alignment = 1
 autowrap_mode = 2
 
 [node name="CardButton" type="Button" parent="Content/CardsHBox/SkillCard2"]
+layout_mode = 2
+flat = true
+
+[node name="SkillCard3" type="PanelContainer" parent="Content/CardsHBox"]
+custom_minimum_size = Vector2(0, 500)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_card_base")
+
+[node name="VBox" type="VBoxContainer" parent="Content/CardsHBox/SkillCard3"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 12
+
+[node name="RarityHeader" type="Label" parent="Content/CardsHBox/SkillCard3/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.45, 1, 1)
+theme_override_font_sizes/font_size = 18
+text = "✦ RARE BLESSING ✦"
+horizontal_alignment = 1
+
+[node name="RankBadge" type="Label" parent="Content/CardsHBox/SkillCard3/VBox"]
+custom_minimum_size = Vector2(0, 26)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.4, 0.9, 1, 1)
+theme_override_font_sizes/font_size = 15
+text = "✦ NEW SKILL ✦"
+horizontal_alignment = 1
+
+[node name="IconBox" type="PanelContainer" parent="Content/CardsHBox/SkillCard3/VBox"]
+custom_minimum_size = Vector2(96, 96)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_styles/panel = SubResource("StyleBoxFlat_iconbox")
+
+[node name="Icon" type="Label" parent="Content/CardsHBox/SkillCard3/VBox/IconBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 52
+text = "🔥"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Title" type="Label" parent="Content/CardsHBox/SkillCard3/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.92, 0.5, 1)
+theme_override_font_sizes/font_size = 22
+text = "Hellfire Infusion"
+horizontal_alignment = 1
+
+[node name="StatArrow" type="Label" parent="Content/CardsHBox/SkillCard3/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 1, 0.5, 1)
+theme_override_font_sizes/font_size = 16
+text = "BURN DMG ↑↑"
+horizontal_alignment = 1
+
+[node name="Desc" type="Label" parent="Content/CardsHBox/SkillCard3/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_colors/font_color = Color(0.9, 0.95, 1, 1)
+theme_override_font_sizes/font_size = 16
+text = "Attacks ignite enemies, dealing burning damage over time."
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="CardButton" type="Button" parent="Content/CardsHBox/SkillCard3"]
 layout_mode = 2
 flat = true
 

@@ -275,6 +275,13 @@ func _spawn_pets() -> void:
 		pet.setup(p_info.get("id", "wolf"), p_info.get("damage", 12.0), self)
 		offset_x += 100.0
 
+	var skill_stats := GameManager.get_player_effective_stats()
+	if skill_stats.get("pet", false):
+		var skill_pet := PetController.new()
+		pet_container.add_child(skill_pet)
+		skill_pet.target_offset = Vector2(offset_x, -35.0)
+		skill_pet.setup("wolf", 15.0 + float(skill_stats.get("pet_damage", 0.0)), self)
+
 func _on_inventory_changed() -> void:
 	_refresh_stats()
 	_spawn_pets()
@@ -372,6 +379,10 @@ func _find_nearest_enemy() -> Node2D:
 	var min_dist_sq: float = 1600.0 * 1600.0 # Full screen arena targeting
 	for e in enemies:
 		if is_instance_valid(e) and e is Node2D:
+			if "is_dead" in e and e.is_dead:
+				continue
+			if "hp" in e and e.hp <= 0.0:
+				continue
 			if "current_hp" in e and e.current_hp <= 0:
 				continue
 			var d_sq := global_position.distance_squared_to(e.global_position)
@@ -651,7 +662,8 @@ func _handle_cooldowns(delta: float) -> void:
 
 func _handle_autonomous_projectiles(delta: float) -> void:
 	var syn: Dictionary = GameManager.cached_synergies
-	
+	var stats: Dictionary = GameManager.get_player_effective_stats()
+
 	# Auto soul missiles (Soul Urn)
 	if syn.get("has_auto_projectile", false):
 		soul_auto_timer += delta
@@ -662,21 +674,19 @@ func _handle_autonomous_projectiles(delta: float) -> void:
 			proj.global_position = global_position
 			proj.setup(16.0, false, Vector2.RIGHT.rotated(randf() * TAU), 440.0, "soul", true)
 			if AudioManager: AudioManager.play_sfx("proj_launch")
-			
-	# Storm Conduit electric discharge
-	if syn.get("has_storm_conduit", false) or syn.get("has_chain_lightning", false):
+
+	# Storm Conduit, Thunder Tempest, and Storm Wolf automatically strike the nearest living target.
+	if syn.get("has_storm_conduit", false) or syn.get("has_chain_lightning", false) or stats.get("chain_lightning", false):
 		lightning_auto_timer += delta
 		if lightning_auto_timer >= 2.5:
 			lightning_auto_timer = 0.0
-			var enemies := get_tree().get_nodes_in_group("enemies")
-			if not enemies.is_empty():
-				var target: Node2D = enemies.pick_random()
-				if is_instance_valid(target):
-					var dir := (target.global_position - global_position).normalized()
-					var proj := ProjectileController.new()
-					get_parent().add_child(proj)
-					proj.global_position = global_position
-					proj.setup(22.0, true, dir, 750.0, "lightning", true)
+			var target := _find_nearest_enemy()
+			if target:
+				var dir := (target.global_position - global_position).normalized()
+				var proj := ProjectileController.new()
+				get_parent().add_child(proj)
+				proj.global_position = global_position
+				proj.setup(float(stats.get("atk", 20.0)) * 0.8, true, dir, 750.0, "lightning", true)
 
 func take_player_damage(amount: float) -> void:
 	if is_invulnerable or GameManager.player_hp <= 0:

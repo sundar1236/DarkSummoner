@@ -17,6 +17,7 @@ func _ready() -> void:
 	test_combat_wave_progression()
 	test_xp_progression_and_level_up()
 	test_valkyrie_draft_modal_and_offers()
+	test_skill_evolution_combinations()
 	test_skill_stat_application_and_progression()
 	test_learned_skills_drawer()
 	test_combat_feedback_announcements()
@@ -208,7 +209,11 @@ func test_valkyrie_draft_modal_and_offers() -> void:
 	assert_true(get_tree().paused, "SceneTree is paused while draft modal is open")
 	assert_true(not modal.card_1_offer.is_empty(), "Card 1 offer generated")
 	assert_true(not modal.card_2_offer.is_empty(), "Card 2 offer generated")
+	assert_true(not modal.card_3_offer.is_empty(), "Card 3 offer generated")
 	assert_true(modal.card_1_offer["id"] != modal.card_2_offer["id"], "Offers 1 and 2 offer distinct skills")
+	assert_true(modal.card_1_offer["id"] != modal.card_3_offer["id"], "Offers 1 and 3 offer distinct skills")
+	assert_true(modal.card_2_offer["id"] != modal.card_3_offer["id"], "Offers 2 and 3 offer distinct skills")
+	assert_true(modal.card_3_btn != null, "Third skill card has a selectable button")
 	assert_true(modal.card_1_offer.get("is_new", false), "Initial skill is marked as NEW")
 	
 	# Refresh roll test
@@ -232,6 +237,16 @@ func test_valkyrie_draft_modal_and_offers() -> void:
 	assert_true(GameManager.run_learned_skills[chosen_id] == 1, "Skill level initialized at Rank 1")
 	
 	modal.queue_free()
+
+	# Verify the third card can be selected, not just displayed.
+	var third_modal := draft_scene.instantiate() as SkillDraftModal
+	add_child(third_modal)
+	GameManager.run_learned_skills.clear()
+	third_modal.show_draft(1338)
+	var third_choice: String = third_modal.card_3_offer["id"]
+	third_modal._choose_card(3)
+	assert_true(GameManager.run_learned_skills.has(third_choice), "Selecting the third card applies its skill")
+	third_modal.queue_free()
 
 # 5. Test Skill Stat Application & Upgrade Progression
 func test_skill_stat_application_and_progression() -> void:
@@ -273,6 +288,43 @@ func test_skill_stat_application_and_progression() -> void:
 	GameManager.apply_run_skill("void_aegis") # Rank 2
 	GameManager.apply_run_skill("void_aegis") # Rank 3 (Mastery: +1 Revive)
 	assert_true(GameManager.get_available_revives() >= 1, "Void Aegis Mastery granted an extra revive")
+
+
+# 6. Test skill evolution recipes and fallback choices
+func test_skill_evolution_combinations() -> void:
+	print("--- 6. Skill Evolution Combinations ---")
+	var old_learned: Dictionary = GameManager.run_learned_skills.duplicate(true)
+	var old_modifiers: Dictionary = GameManager.run_skill_modifiers.duplicate(true)
+	var old_evolutions: Array[String] = GameManager.run_skill_evolutions.duplicate()
+	var old_evolution_modifiers: Dictionary = GameManager.run_skill_evolution_modifiers.duplicate(true)
+	var old_revives: int = GameManager.run_extra_revives
+
+	GameManager.run_learned_skills = {"hellfire_infusion": 2, "shadow_flurry": 2}
+	GameManager.run_skill_modifiers.clear()
+	GameManager.run_skill_evolutions.clear()
+	GameManager.run_skill_evolution_modifiers.clear()
+	GameManager.apply_run_skill("hellfire_infusion")
+	assert_true(not GameManager.run_skill_evolutions.has("infernal_blade_storm"), "Evolution stays locked until both required skills reach Rank 3")
+	GameManager.apply_run_skill("shadow_flurry")
+	assert_true(GameManager.run_skill_evolutions.has("infernal_blade_storm"), "Rank 3 Hellfire and Shadow Flurry unlock Infernal Blade Storm")
+	var evolved_stats: Dictionary = GameManager.get_player_effective_stats()
+	assert_true(int(evolved_stats.get("extra_projectiles", 0)) >= 6, "Infernal Blade Storm adds extra projectiles")
+	assert_true(evolved_stats.get("burn_on_hit", false), "Infernal Blade Storm enables burn on hit")
+
+	var maxed: Dictionary = {}
+	for skill in RunSkillDatabase.get_all_skills():
+		maxed[skill.id] = skill.max_level
+	var fallback_offers := RunSkillDatabase.generate_offers(maxed, 3, 7)
+	assert_true(fallback_offers.size() == 3, "Fully mastered runs still receive three choices")
+	assert_true(fallback_offers[0].id != fallback_offers[1].id and fallback_offers[1].id != fallback_offers[2].id, "Fallback choices are distinct")
+
+	GameManager.run_learned_skills = old_learned
+	GameManager.run_skill_modifiers = old_modifiers
+	GameManager.run_skill_evolutions = old_evolutions
+	GameManager.run_skill_evolution_modifiers = old_evolution_modifiers
+	GameManager.run_extra_revives = old_revives
+	GameManager.recalculate_stats_and_synergies()
+
 
 # 6. Test Learned Skills Drawer
 func test_learned_skills_drawer() -> void:

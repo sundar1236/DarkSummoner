@@ -253,9 +253,8 @@ static func get_all_skills() -> Array[RunSkillData]:
 		list.append(_skills[k])
 	return list
 
-# Generates 2 valid skill offers respecting max levels, learned progression,
-# and deterministic seed (when testing).
-static func generate_offers(learned_skills: Dictionary, count: int = 2, seed_val: int = -1) -> Array[Dictionary]:
+# Generates up to three distinct skill offers, respecting max levels and deterministic test seeds.
+static func generate_offers(learned_skills: Dictionary, count: int = 3, seed_val: int = -1) -> Array[Dictionary]:
 	init_database()
 	var candidates: Array[RunSkillData] = []
 	
@@ -266,42 +265,13 @@ static func generate_offers(learned_skills: Dictionary, count: int = 2, seed_val
 			candidates.append(skill)
 			
 	if candidates.is_empty():
-		# Fallback boon if player has fully mastered all skills in the run
-		return [
-			{
-				"skill": null,
-				"id": "valkyrie_boon",
-				"name": "Celestial Recovery",
-				"rarity": "legendary",
-				"tier": 3,
-				"icon_symbol": "✨",
-				"is_new": false,
-				"is_fallback": true,
-				"current_level": 3,
-				"target_level": 3,
-				"title": "Celestial Recovery",
-				"desc": "Mastery Achieved! Restores 100% Player HP and grants +150 Run Gold.",
-				"stat_arrow": "FULL RESTORE & +150🪙",
-				"border_color": Color(1.0, 0.85, 0.25, 1.0)
-			},
-			{
-				"skill": null,
-				"id": "abyssal_tithe",
-				"name": "Abyssal Tithe",
-				"rarity": "legendary",
-				"tier": 3,
-				"icon_symbol": "💎",
-				"is_new": false,
-				"is_fallback": true,
-				"current_level": 3,
-				"target_level": 3,
-				"title": "Abyssal Tithe",
-				"desc": "Converts excess divine favor into +25 Permanent Run Shades.",
-				"stat_arrow": "+25 SHADES 🔮",
-				"border_color": Color(0.85, 0.45, 1.0, 1.0)
-			}
-		]
-	
+		var fallback_offers: Array[Dictionary] = []
+		for fallback_id in ["valkyrie_boon", "abyssal_tithe", "guardian_resolve"]:
+			if fallback_offers.size() >= count:
+				break
+			fallback_offers.append(_fallback_offer(fallback_id))
+		return fallback_offers
+
 	# Deterministic or randomized shuffle
 	var pool := candidates.duplicate()
 	if seed_val >= 0:
@@ -348,23 +318,37 @@ static func generate_offers(learned_skills: Dictionary, count: int = 2, seed_val
 			"border_color": skill.get_border_color()
 		})
 		
-	# If only 1 candidate remains, duplicate or add fallback to ensure exactly 2 cards
-	if offers.size() == 1:
-		offers.append({
-			"skill": null,
-			"id": "valkyrie_boon",
-			"name": "Celestial Recovery",
-			"rarity": "legendary",
-			"tier": 3,
-			"icon_symbol": "✨",
-			"is_new": false,
-			"is_fallback": true,
-			"current_level": 1,
-			"target_level": 1,
-			"title": "Celestial Recovery",
-			"desc": "Restores 100% Player HP and grants +100 Run Gold.",
-			"stat_arrow": "HEAL & +100🪙",
-			"border_color": Color(1.0, 0.85, 0.25, 1.0)
-		})
-		
+	# Keep the draft at three distinct choices when fewer than three skills remain.
+	var fallback_ids: Array[String] = ["valkyrie_boon", "abyssal_tithe", "guardian_resolve"]
+	while offers.size() < count:
+		var fallback_id: String = fallback_ids[offers.size() % fallback_ids.size()]
+		offers.append(_fallback_offer(fallback_id))
+
 	return offers
+
+static func _fallback_offer(fallback_id: String) -> Dictionary:
+	match fallback_id:
+		"abyssal_tithe":
+			return {
+				"skill": null, "id": "abyssal_tithe", "name": "Abyssal Tithe",
+				"rarity": "legendary", "tier": 3, "icon_symbol": "💎",
+				"is_new": false, "is_fallback": true, "current_level": 3, "target_level": 3,
+				"title": "Abyssal Tithe", "desc": "Convert divine favor into +25 permanent Shades.",
+				"stat_arrow": "+25 SHADES 🔮", "border_color": Color(0.85, 0.45, 1.0, 1.0)
+			}
+		"guardian_resolve":
+			return {
+				"skill": null, "id": "guardian_resolve", "name": "Guardian's Resolve",
+				"rarity": "epic", "tier": 2, "icon_symbol": "🛡",
+				"is_new": false, "is_fallback": true, "current_level": 3, "target_level": 3,
+				"title": "Guardian's Resolve", "desc": "Restore 50% Max HP and gain one revive.",
+				"stat_arrow": "50% HEAL + 1 REVIVE", "border_color": Color(0.35, 0.85, 1.0, 1.0)
+			}
+		_:
+			return {
+				"skill": null, "id": "valkyrie_boon", "name": "Celestial Recovery",
+				"rarity": "legendary", "tier": 3, "icon_symbol": "✨",
+				"is_new": false, "is_fallback": true, "current_level": 3, "target_level": 3,
+				"title": "Celestial Recovery", "desc": "Restore all HP and gain +150 Run Gold.",
+				"stat_arrow": "FULL RESTORE +150 GOLD", "border_color": Color(1.0, 0.85, 0.25, 1.0)
+			}
