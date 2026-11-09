@@ -26,6 +26,7 @@ signal subtab_changed(tab_name: String)
 @onready var btn_tab_topup: Button = $BottomSubTabs/HBox/Tab5
 
 var remaining_seconds: int = 86400
+var _daily_date_key: String = ""
 var _elapsed: float = 0.0
 var _toast_label: Label = null
 
@@ -35,6 +36,7 @@ func _ready() -> void:
 	if SaveManager:
 		SaveManager.refresh_daily_shop_state()
 		remaining_seconds = SaveManager.get_seconds_until_daily_reset()
+		_daily_date_key = SaveManager.daily_shop_date_key
 		if btn_chapter_pack:
 			btn_chapter_pack.text = "STORE UNAVAILABLE"
 			btn_chapter_pack.disabled = true
@@ -167,21 +169,36 @@ func _refresh_daily_offer_buttons() -> void:
 	]
 	for offer in offers:
 		var offer_button: Button = offer["button"]
+		if not offer_button.has_meta("default_daily_text"):
+			offer_button.set_meta("default_daily_text", offer_button.text)
 		if SaveManager.is_daily_offer_purchased(str(offer["id"])):
 			offer_button.text = "SOLD OUT"
 			offer_button.disabled = true
-	if SaveManager.daily_free_energy_claimed and btn_item5:
-		btn_item5.text = "CLAIMED"
-		btn_item5.disabled = true
+		else:
+			offer_button.text = str(offer_button.get_meta("default_daily_text"))
+			offer_button.disabled = false
+	if btn_item5:
+		if not btn_item5.has_meta("default_daily_text"):
+			btn_item5.set_meta("default_daily_text", btn_item5.text)
+		if SaveManager.daily_free_energy_claimed:
+			btn_item5.text = "CLAIMED"
+			btn_item5.disabled = true
+		else:
+			btn_item5.text = str(btn_item5.get_meta("default_daily_text"))
+			btn_item5.disabled = false
 
 func _process(delta: float) -> void:
 	_elapsed += delta
 	if _elapsed >= 1.0:
 		_elapsed -= 1.0
-		remaining_seconds = SaveManager.get_seconds_until_daily_reset() if SaveManager else maxi(0, remaining_seconds - 1)
-		if remaining_seconds <= 1 and SaveManager:
+		if SaveManager:
 			SaveManager.refresh_daily_shop_state()
-			_refresh_daily_offer_buttons()
+			remaining_seconds = SaveManager.get_seconds_until_daily_reset()
+			if _daily_date_key != SaveManager.daily_shop_date_key:
+				_daily_date_key = SaveManager.daily_shop_date_key
+				_refresh_daily_offer_buttons()
+		else:
+			remaining_seconds = maxi(0, remaining_seconds - 1)
 		_update_timer_text()
 
 func _update_timer_text() -> void:
