@@ -197,6 +197,14 @@ func test_enemy_visual_distinctions_and_telegraphs() -> void:
 	assert_eq(elite.max_hp, 140.0, "Elite brute has high max HP")
 	assert_true(is_instance_valid(elite.elite_aura), "Elite brute has golden aura node")
 	elite.queue_free()
+
+	var charger := EnemyController.new()
+	add_child(charger)
+	charger.setup("charger", 1)
+	assert_eq(charger.max_hp, 70.0, "Charger has its own durable enemy profile")
+	assert_eq(charger.contact_damage, 20.0, "Charger dash has higher contact damage")
+	assert_true(charger.has_method("_telegraph_charger"), "Charger uses a dedicated directional telegraph")
+	charger.queue_free()
 	
 	# Test coin pickup
 	var coin = CoinPickupClass.new()
@@ -238,6 +246,10 @@ func test_boss_controller_telegraphs() -> void:
 	boss.setup(1)
 	assert_true(boss.max_hp >= 380.0, "Boss max HP correctly scaled")
 	assert_true(is_instance_valid(boss.shadow_sprite), "Boss heavy contact shadow initialized")
+	assert_eq(BossController.get_attack_pattern_name(3), "abyssal_cross", "Boss cycles through a fourth cross-lane attack")
+	assert_eq(BossController.get_attack_pattern_name(4), "void_eruption", "Boss attack cycle returns to its first pattern")
+	assert_true(boss._claim_boss_defeat(), "Boss defeat can be claimed once")
+	assert_true(not boss._claim_boss_defeat(), "Duplicate boss defeat is rejected")
 	boss.queue_free()
 
 func test_summoning_circle_hero_presentation() -> void:

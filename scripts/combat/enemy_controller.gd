@@ -4,12 +4,12 @@ extends CharacterBody2D
 const CoinPickupClass = preload("res://scripts/combat/coin_pickup.gd")
 const XpPickupClass = preload("res://scripts/combat/xp_pickup.gd")
 
-# Unified 2.5D enemy controller for regular swarmers, ranged cultists, and elite brutes.
+# Unified 2.5D enemy controller for swarmers, ranged cultists, charging hunters, and elite brutes.
 # Features distinct telegraph indicators, elite visual auras, crisp hit-flashes, and coin drops.
 
 signal enemy_defeated(enemy_node: Node2D)
 
-@export var enemy_type: String = "swarmer" # "swarmer", "cultist", "elite"
+@export var enemy_type: String = "swarmer" # "swarmer", "cultist", "charger", "elite"
 var max_hp: float = 45.0
 var hp: float = 45.0
 var is_dead: bool = false
@@ -18,6 +18,11 @@ var contact_damage: float = 12.0
 var attack_cooldown: float = 1.4
 var attack_timer: float = 0.0
 var is_telegraphing: bool = false
+var is_charging: bool = false
+var charge_direction: Vector2 = Vector2.ZERO
+var charge_timer: float = 0.0
+var charge_speed: float = 430.0
+var charge_hit_player: bool = false
 
 var gold_reward: int = 4
 var shade_reward: int = 1
@@ -99,6 +104,20 @@ func _init_stats(floor_scale: int = 1) -> void:
 			if sprite:
 				sprite.texture = TextureLoader.get_texture("res://assets/sprites/enemies/enemy_cultist.png")
 				sprite.position = Vector2(0, -6)
+		"charger":
+			max_hp = 70.0 * hp_mult
+			move_speed = 105.0
+			contact_damage = 20.0
+			attack_cooldown = 3.2
+			gold_reward = 7
+			shade_reward = 2
+			if shadow_sprite:
+				shadow_sprite.position = Vector2(0, 18)
+				shadow_sprite.scale = Vector2(1.0, 1.0)
+			if sprite:
+				sprite.texture = TextureLoader.get_texture("res://assets/sprites/enemies/enemy_swarmer.png")
+				sprite.modulate = Color(1.0, 0.48, 0.32, 1.0)
+				sprite.scale = Vector2(1.12, 1.12)
 		"elite":
 			max_hp = 140.0 * hp_mult
 			move_speed = 85.0
@@ -157,6 +176,8 @@ func _physics_process(delta: float) -> void:
 			player_ref = p_nodes[0]
 			
 	_handle_burn(delta)
+	if is_dead:
+		return
 	
 	if not is_instance_valid(player_ref):
 		return
@@ -201,6 +222,35 @@ func _physics_process(delta: float) -> void:
 				_telegraph_cultist_attack(dir)
 				attack_timer = 0.0
 				
+		"charger":
+			sprite.rotation = 0.0
+			sprite.position = Vector2(0, -5.0 + abs(sin(anim_time * 9.0)) * 2.0) + lunge_offset
+			if is_charging:
+				velocity = charge_direction * charge_speed
+				move_and_slide()
+				charge_timer -= delta
+				if not charge_hit_player and is_instance_valid(player_ref) and global_position.distance_to(player_ref.global_position) < 48.0:
+					_deal_player_damage(contact_damage)
+					charge_hit_player = true
+					is_charging = false
+					velocity = Vector2.ZERO
+					attack_timer = 0.0
+				elif charge_timer <= 0.0:
+					is_charging = false
+					velocity = Vector2.ZERO
+					attack_timer = 0.0
+			elif not is_telegraphing:
+				if dist > 190.0:
+					velocity = dir * move_speed
+				else:
+					velocity = Vector2.ZERO
+				move_and_slide()
+				if attack_timer >= attack_cooldown:
+					_telegraph_charger(dir)
+					attack_timer = 0.0
+			else:
+				velocity = Vector2.ZERO
+
 		"elite":
 			velocity = dir * move_speed
 			move_and_slide()
@@ -245,6 +295,39 @@ func _telegraph_cultist_attack(dir: Vector2) -> void:
 		if is_instance_valid(self) and hp > 0.0:
 			_fire_cultist_projectile(dir)
 	)
+
+
+func _telegraph_charger(dir: Vector2) -> void:
+	if is_dead or is_telegraphing or is_charging:
+		return
+	is_telegraphing = true
+	velocity = Vector2.ZERO
+	charge_direction = dir.normalized()
+	var warning := Node2D.new()
+	warning.z_index = -1
+	warning.draw.connect(func():
+		warning.draw_line(Vector2.ZERO, charge_direction * 320.0, Color(1.0, 0.28, 0.18, 0.8), 5.0)
+		warning.draw_circle(charge_direction * 320.0, 8.0, Color(1.0, 0.35, 0.2, 0.9))
+	)
+	add_child(warning)
+	if AudioManager:
+		AudioManager.play_sfx("boss_warning")
+	var tween := create_tween()
+	tween.tween_property(sprite, "scale", Vector2(1.32, 0.82), 0.24)
+	tween.tween_property(sprite, "scale", Vector2(1.12, 1.12), 0.2)
+	get_tree().create_timer(0.55).timeout.connect(func():
+		if is_instance_valid(warning):
+			warning.queue_free()
+		if is_dead or not is_inside_tree():
+			return
+		is_telegraphing = false
+		is_charging = true
+		charge_timer = 0.55
+		charge_hit_player = false
+		if AudioManager:
+			AudioManager.play_sfx("proj_launch")
+	)
+
 
 func _fire_cultist_projectile(dir: Vector2) -> void:
 	var proj := ProjectileController.new()
@@ -321,6 +404,7 @@ func _on_death() -> void:
 	# Spawn collectible celestial XP soul crystals
 	var xp_val: float = 25.0
 	if enemy_type == "cultist": xp_val = 35.0
+	elif enemy_type == "charger": xp_val = 50.0
 	elif enemy_type == "elite": xp_val = 75.0
 	var xp_crystal = XpPickupClass.new()
 	get_parent().call_deferred("add_child", xp_crystal)

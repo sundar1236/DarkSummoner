@@ -147,6 +147,7 @@ func test_combat_wave_progression() -> void:
 	assert_true(arena._get_wave_enemy_count(1, 2) > arena._get_wave_enemy_count(1, 1), "Second wave increases enemy count")
 	assert_true(arena._get_wave_enemy_type(0, true) == "elite", "Elite encounters include an elite enemy")
 	assert_true(arena._get_wave_enemy_type(1, false) == "cultist", "Wave composition includes ranged cultists")
+	assert_true(arena._get_wave_enemy_type(4, false) == "charger", "Later wave composition includes charging enemies")
 	arena.free()
 
 # 4. Test In-Run XP Progression & Level-Up
