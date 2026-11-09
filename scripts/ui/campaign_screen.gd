@@ -3,7 +3,7 @@ extends Control
 
 # Campaign World Hub (Screen A - Ref Image 2)
 # Features 2.5D floating diorama island, chapter shield, difficulty selector,
-# interactive event carousel, sidebars, quick-access hunt rewards, and primary Start (x5 Energy) CTA.
+# real daily-task navigation, patrol rewards, and primary Start (x5 Energy) CTA.
 
 signal start_run_requested()
 signal insufficient_energy()
