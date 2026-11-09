@@ -14,6 +14,7 @@ func _ready() -> void:
 	
 	test_single_stick_and_touch_safety()
 	test_projectile_collision_roles_and_homing_filter()
+	test_floor_theme_selection()
 	test_hud_reactivity_and_game_speed()
 	test_combat_wave_progression()
 	test_xp_progression_and_level_up()
@@ -125,7 +126,29 @@ func test_projectile_collision_roles_and_homing_filter() -> void:
 	living_enemy.free()
 	dead_boss.free()
 
-# 3. Test Combat HUD Reactivity & Game Speed
+# 3. Test floor-specific arena palettes.
+func test_floor_theme_selection() -> void:
+	print("--- 3. Floor Theme Selection ---")
+	var background := ArenaBackground.new()
+	background.set_floor_theme(1)
+	var first_theme_name: String = background.floor_theme_name
+	var first_rune_color: Color = background.rune_color
+
+	background.set_floor_theme(2)
+	assert_true(background.floor_theme_name == "Ember Catacombs", "Floor 2 selects the Ember Catacombs theme")
+	assert_true(background.rune_color != first_rune_color, "Floor 2 uses a distinct rune palette")
+
+	background.set_floor_theme(3)
+	assert_true(background.floor_theme_name == "Frostbound Crypt", "Floor 3 selects the Frostbound Crypt theme")
+	background.set_floor_theme(4)
+	assert_true(background.floor_theme_name == "Blighted Sanctum", "Floor 4 selects the Blighted Sanctum theme")
+	background.set_floor_theme(5)
+	assert_true(background.floor_theme_name == "Crimson Throne", "Floor 5 selects the Crimson Throne theme")
+	background.set_floor_theme(6)
+	assert_true(background.floor_theme_name == first_theme_name, "Floor themes cycle predictably after the fifth floor")
+	background.free()
+
+# 4. Test Combat HUD Reactivity & Game Speed
 func test_hud_reactivity_and_game_speed() -> void:
 	print("--- 2. BattleArena HUD Reactivity & Game Speed ---")
 	var arena_scene := load("res://scenes/combat/combat_arena.tscn") as PackedScene
