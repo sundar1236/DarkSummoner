@@ -385,8 +385,8 @@ func advance_to_next_level() -> void:
 	if level_number == 5:
 		current_encounter_type = "boss"
 	elif level_number == 3:
-		# Mid-floor rest camp / shop or elite
-		current_encounter_type = "shop" if randf() < 0.6 else "elite"
+		# Keep the run focused on continuous action combat. The Bazaar is a hub feature.
+		current_encounter_type = "elite"
 	else:
 		current_encounter_type = "combat"
 		
