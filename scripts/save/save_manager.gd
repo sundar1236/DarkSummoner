@@ -117,7 +117,8 @@ var settings_data: Dictionary = {
 	"sfx_vol": 0.8,
 	"ambience_vol": 0.6,
 	"muted": false,
-	"reduced_effects": false
+	"screen_shake": true,
+	"reduced_motion": false
 }
 
 func _ready() -> void:
@@ -941,7 +942,8 @@ func reset_all_data() -> void:
 		"sfx_vol": 0.8,
 		"ambience_vol": 0.6,
 		"muted": false,
-		"reduced_effects": false
+		"screen_shake": true,
+		"reduced_motion": false
 	}
 	_gear_profile_initialized = false
 	_ensure_starter_gear(false)

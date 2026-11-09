@@ -26,5 +26,10 @@ func _process(delta: float) -> void:
 		offset = Vector2.ZERO
 
 func apply_impact(intensity: float = 4.5, duration: float = 0.12) -> void:
+	if SaveManager and (not bool(SaveManager.settings_data.get("screen_shake", true)) or bool(SaveManager.settings_data.get("reduced_motion", false))):
+		shake_intensity = 0.0
+		shake_timer = 0.0
+		offset = Vector2.ZERO
+		return
 	shake_intensity = intensity
 	shake_timer = duration

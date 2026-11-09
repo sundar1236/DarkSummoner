@@ -70,7 +70,11 @@ func _find_nearest_enemy() -> Node2D:
 	return nearest
 
 func _attack_target(target: Node2D) -> void:
+	if not ProjectileController.can_spawn_projectile():
+		return
 	var dir := (target.global_position - global_position).normalized()
+	if not ProjectileController.can_spawn_projectile():
+		return
 	
 	# Spawn pet projectile
 	var proj := ProjectileController.new()

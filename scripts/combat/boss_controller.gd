@@ -247,6 +247,8 @@ func _attack_nova_ring() -> void:
 			return
 		var count: int = 14 if is_enraged else 11
 		for i in range(count):
+			if not ProjectileController.can_spawn_projectile():
+				break
 			var angle := (TAU / float(count)) * float(i)
 			var dir := Vector2.RIGHT.rotated(angle)
 			var proj := ProjectileController.new()
@@ -283,6 +285,8 @@ func _attack_abyssal_cross() -> void:
 			return
 		var damage: float = (20.0 if is_enraged else 16.0) * damage_multiplier
 		for angle in [0.0, PI * 0.5, PI, PI * 1.5]:
+			if not ProjectileController.can_spawn_projectile():
+				break
 			var projectile := ProjectileController.new()
 			get_parent().add_child(projectile)
 			projectile.global_position = global_position

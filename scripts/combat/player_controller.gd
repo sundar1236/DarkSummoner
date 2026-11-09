@@ -461,7 +461,8 @@ func _fire_basic_attack() -> void:
 		
 	# Slash crescent visual swing
 	_spawn_slash_vfx(aim_direction, attack_type, combo_stage)
-	
+	if not ProjectileController.can_spawn_projectile():
+		return
 	var proj := ProjectileController.new()
 	get_parent().add_child(proj)
 	proj.global_position = weapon_socket.global_position
@@ -480,6 +481,8 @@ func _fire_basic_attack() -> void:
 		var sign_mult := 1.0 if i % 2 == 0 else -1.0
 		var spread_angle := (float(i / 2 + 1) * 0.18) * sign_mult
 		var side_dir := aim_direction.rotated(spread_angle)
+		if not ProjectileController.can_spawn_projectile():
+			break
 		var extra_proj := ProjectileController.new()
 		get_parent().add_child(extra_proj)
 		extra_proj.global_position = weapon_socket.global_position
@@ -556,6 +559,8 @@ func trigger_dodge() -> bool:
 	return true
 
 func _spawn_afterimage() -> void:
+	if SaveManager and bool(SaveManager.settings_data.get("reduced_motion", false)):
+		return
 	if not sprite or not sprite.texture:
 		return
 	var afterimage := ShadowAfterimage.new()
@@ -590,6 +595,8 @@ func trigger_active_skill() -> bool:
 			for i in range(count):
 				var angle := (TAU / float(count)) * float(i)
 				var dir := Vector2.RIGHT.rotated(angle)
+				if not ProjectileController.can_spawn_projectile():
+					break
 				var proj := ProjectileController.new()
 				get_parent().add_child(proj)
 				proj.global_position = global_position
@@ -630,6 +637,8 @@ func trigger_active_skill() -> bool:
 			for i in range(6):
 				var angle := randf() * TAU
 				var dir := Vector2.RIGHT.rotated(angle)
+				if not ProjectileController.can_spawn_projectile():
+					break
 				var proj := ProjectileController.new()
 				get_parent().add_child(proj)
 				proj.global_position = global_position
@@ -669,6 +678,8 @@ func _handle_autonomous_projectiles(delta: float) -> void:
 		soul_auto_timer += delta
 		if soul_auto_timer >= 2.0:
 			soul_auto_timer = 0.0
+			if not ProjectileController.can_spawn_projectile():
+				return
 			var proj := ProjectileController.new()
 			get_parent().add_child(proj)
 			proj.global_position = global_position
@@ -683,6 +694,8 @@ func _handle_autonomous_projectiles(delta: float) -> void:
 			var target := _find_nearest_enemy()
 			if target:
 				var dir := (target.global_position - global_position).normalized()
+				if not ProjectileController.can_spawn_projectile():
+					return
 				var proj := ProjectileController.new()
 				get_parent().add_child(proj)
 				proj.global_position = global_position

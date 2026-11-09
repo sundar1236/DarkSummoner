@@ -16,7 +16,8 @@ slider_music = NodePath("VBox/Sliders/MusicRow/MusicSlider")
 slider_sfx = NodePath("VBox/Sliders/SfxRow/SfxSlider")
 slider_ambience = NodePath("VBox/Sliders/AmbienceRow/AmbienceSlider")
 check_mute = NodePath("VBox/CheckMute")
-check_reduced_effects = NodePath("VBox/CheckReducedEffects")
+check_screen_shake = NodePath("VBox/CheckScreenShake")
+check_reduced_motion = NodePath("VBox/CheckReducedMotion")
 btn_resume = NodePath("VBox/Buttons/BtnResume")
 btn_inventory = NodePath("VBox/Buttons/BtnInventory")
 btn_abandon = NodePath("VBox/Buttons/BtnAbandon")
@@ -134,11 +135,17 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 21
 text = "Mute All Audio"
 
-[node name="CheckReducedEffects" type="CheckBox" parent="VBox"]
-custom_minimum_size = Vector2(0, 44)
+[node name="CheckScreenShake" type="CheckBox" parent="VBox"]
+custom_minimum_size = Vector2(0, 42)
 layout_mode = 2
-theme_override_font_sizes/font_size = 19
-text = "Reduce Visual Effects (better performance)"
+theme_override_font_sizes/font_size = 18
+text = "Screen Shake"
+
+[node name="CheckReducedMotion" type="CheckBox" parent="VBox"]
+custom_minimum_size = Vector2(0, 42)
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Reduce Motion Effects"
 
 [node name="Buttons" type="VBoxContainer" parent="VBox"]
 layout_mode = 2

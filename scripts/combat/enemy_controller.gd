@@ -395,6 +395,8 @@ func _telegraph_charger(dir: Vector2) -> void:
 
 
 func _fire_cultist_projectile(dir: Vector2) -> void:
+	if not ProjectileController.can_spawn_projectile():
+		return
 	var proj := ProjectileController.new()
 	get_parent().add_child(proj)
 	proj.global_position = global_position

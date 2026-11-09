@@ -1,6 +1,8 @@
 class_name CombatManager
 extends Node2D
 
+const MAX_ENEMIES_PER_WAVE: int = 16
+
 # Manages arena combat flow, wave progression, enemy spawning,
 # boss encounters, and HUD announcement coordination.
 
@@ -52,6 +54,11 @@ func _start_encounter() -> void:
 	var floor_num := GameManager.floor_number
 	var level_num := GameManager.level_number
 	var enc_type := GameManager.current_encounter_type
+	var arena_background := get_node_or_null("Background") as ArenaBackground
+	if arena_background:
+		var theme_name := arena_background.set_floor_theme(floor_num)
+		if hud_ref:
+			hud_ref.set_floor_theme_name(theme_name)
 	
 	if level_num == 5 or enc_type == "boss":
 		_spawn_boss_encounter(floor_num)
@@ -93,7 +100,7 @@ func _spawn_wave_group(floor_num: int, level_num: int, enc_type: String) -> void
 		enemy.enemy_defeated.connect(_on_enemy_defeated)
 
 func _get_wave_enemy_count(level_num: int, wave_num: int) -> int:
-	return 4 + (level_num * 2) + ((wave_num - 1) * 2)
+	return mini(MAX_ENEMIES_PER_WAVE, 4 + (level_num * 2) + ((wave_num - 1) * 2))
 
 func _get_wave_enemy_type(index: int, is_elite_room: bool) -> String:
 	if is_elite_room and index == 0:

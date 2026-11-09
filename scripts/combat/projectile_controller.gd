@@ -2,6 +2,7 @@ class_name ProjectileController
 extends Area2D
 
 const ImpactSparkVFXClass = preload("res://scripts/combat/impact_spark_vfx.gd")
+const MAX_ACTIVE_PROJECTILES: int = 64
 
 # Unified projectile controller supporting player weapons, homing souls,
 # chain discharges, pet fireballs, and enemy/boss projectiles.
@@ -21,13 +22,20 @@ var has_life_steal: bool = false
 var sprite: Sprite2D
 var timer: float = 0.0
 
+static func can_spawn_projectile() -> bool:
+	var tree := Engine.get_main_loop() as SceneTree
+	return tree == null or tree.get_nodes_in_group("projectiles").size() < MAX_ACTIVE_PROJECTILES
+
 func _ready() -> void:
+	if not can_spawn_projectile():
+		queue_free()
+		return
+	add_to_group("projectiles")
 	if not sprite:
 		sprite = Sprite2D.new()
 		add_child(sprite)
+	_apply_collision_profile()
 	
-	_configure_collision()
-		
 	var shape := CircleShape2D.new()
 	shape.radius = 12.0
 	var col := CollisionShape2D.new()
@@ -37,7 +45,7 @@ func _ready() -> void:
 	body_entered.connect(_on_body_entered)
 	area_entered.connect(_on_area_entered)
 
-func _configure_collision() -> void:
+func _apply_collision_profile() -> void:
 	if is_player_projectile:
 		collision_layer = 4
 		collision_mask = 2 | 16
@@ -51,6 +59,7 @@ func setup(p_damage: float, p_is_crit: bool, p_dir: Vector2, p_speed: float = 55
 	direction = p_dir.normalized()
 	speed = p_speed
 	is_player_projectile = p_is_player
+	_apply_collision_profile()
 	
 	if not sprite:
 		sprite = Sprite2D.new()
@@ -76,7 +85,7 @@ func setup(p_damage: float, p_is_crit: bool, p_dir: Vector2, p_speed: float = 55
 			is_player_projectile = false
 			speed = 320.0
 			
-	_configure_collision()
+	_apply_collision_profile()
 	sprite.texture = TextureLoader.get_texture(tex_path)
 	rotation = direction.angle()
 
@@ -111,14 +120,14 @@ func _find_nearest_enemy() -> Node2D:
 	var enemies := get_tree().get_nodes_in_group("enemies")
 	var nearest: Node2D = null
 	var min_dist: float = 600.0
-	for enemy in enemies:
-		var enemy_node := enemy as Node2D
-		if enemy_node == null or not _is_valid_enemy_target(enemy_node):
-			continue
-		var distance := global_position.distance_to(enemy_node.global_position)
-		if distance < min_dist:
-			min_dist = distance
-			nearest = enemy_node
+	for e in enemies:
+		if is_instance_valid(e) and e is Node2D:
+			if ("is_dead" in e and e.is_dead) or ("hp" in e and e.hp <= 0.0):
+				continue
+			var d := global_position.distance_to(e.global_position)
+			if d < min_dist:
+				min_dist = d
+				nearest = e
 	return nearest
 
 func _on_body_entered(body: Node2D) -> void:
@@ -136,19 +145,19 @@ func _handle_hit(target: Node) -> void:
 			target.take_damage(damage, is_crit)
 			
 			# Spawn impact spark
-			var spark = ImpactSparkVFXClass.new()
-			var p_tint := Color(0.95, 0.75, 1.0)
-			if sprite and sprite.texture:
-				var path := sprite.texture.resource_path
-				if "lightning" in path:
-					p_tint = Color(0.4, 0.9, 1.0)
-				elif "soul" in path:
-					p_tint = Color(0.3, 1.0, 0.65)
-				elif "fireball" in path:
-					p_tint = Color(1.0, 0.6, 0.2)
-			spark.setup(is_crit, global_position, -direction, p_tint)
-			get_parent().add_child(spark)
-			
+			if ImpactSparkVFXClass.can_spawn_spark():
+				var spark = ImpactSparkVFXClass.new()
+				var p_tint := Color(0.95, 0.75, 1.0)
+				if sprite and sprite.texture:
+					var path := sprite.texture.resource_path
+					if "lightning" in path:
+						p_tint = Color(0.4, 0.9, 1.0)
+					elif "soul" in path:
+						p_tint = Color(0.3, 1.0, 0.65)
+					elif "fireball" in path:
+						p_tint = Color(1.0, 0.6, 0.2)
+				spark.setup(is_crit, global_position, -direction, p_tint)
+				get_parent().add_child(spark)
 			if has_burn and target.has_method("apply_burn"):
 				target.apply_burn(6.0, 3)
 			if has_life_steal:
@@ -159,17 +168,19 @@ func _handle_hit(target: Node) -> void:
 				queue_free()
 		elif target is TileMap or target is StaticBody2D:
 			# Hit wall with spark
-			var spark = ImpactSparkVFXClass.new()
-			spark.setup(false, global_position, -direction, Color(0.8, 0.8, 0.8))
-			get_parent().add_child(spark)
+			if ImpactSparkVFXClass.can_spawn_spark():
+				var spark = ImpactSparkVFXClass.new()
+				spark.setup(false, global_position, -direction, Color(0.8, 0.8, 0.8))
+				get_parent().add_child(spark)
 			queue_free()
 	else:
 		# Enemy projectile hits player
 		if target.has_method("take_player_damage"):
 			target.take_player_damage(damage)
-			var spark = ImpactSparkVFXClass.new()
-			spark.setup(false, global_position, -direction, Color(1.0, 0.3, 0.3))
-			get_parent().add_child(spark)
+			if ImpactSparkVFXClass.can_spawn_spark():
+				var spark = ImpactSparkVFXClass.new()
+				spark.setup(false, global_position, -direction, Color(1.0, 0.3, 0.3))
+				get_parent().add_child(spark)
 			queue_free()
 		elif target is TileMap or target is StaticBody2D:
 			queue_free()

@@ -12,7 +12,8 @@ signal abandon_run_requested()
 @export var slider_sfx: HSlider
 @export var slider_ambience: HSlider
 @export var check_mute: CheckBox
-@export var check_reduced_effects: CheckBox
+@export var check_screen_shake: CheckBox
+@export var check_reduced_motion: CheckBox
 
 @export var btn_resume: Button
 @export var btn_inventory: Button
@@ -64,17 +65,16 @@ func _setup_signals() -> void:
 			AudioManager.set_muted(toggled)
 			SaveManager.save_profile()
 		)
-	if check_reduced_effects:
-		check_reduced_effects.toggled.connect(_on_reduced_effects_toggled)
-
-func _on_reduced_effects_toggled(enabled: bool) -> void:
-	if not SaveManager:
-		return
-	SaveManager.settings_data["reduced_effects"] = enable
-	for background in get_tree().get_nodes_in_group("arena_backgrounds"):
-		if background.has_method("set_reduced_effects"):
-			background.set_reduced_effects(enabled)
-	SaveManager.save_profile()
+	if check_screen_shake:
+		check_screen_shake.toggled.connect(func(enabled: bool):
+			SaveManager.settings_data["screen_shake"] = enabled
+			SaveManager.save_profile()
+		)
+	if check_reduced_motion:
+		check_reduced_motion.toggled.connect(func(enabled: bool):
+			SaveManager.settings_data["reduced_motion"] = enabled
+			SaveManager.save_profile()
+		)
 
 func _on_abandon_clicked() -> void:
 	if not is_confirming_abandon:
@@ -100,5 +100,5 @@ func _load_current_values() -> void:
 	if slider_sfx: slider_sfx.value = AudioManager.sfx_vol
 	if slider_ambience: slider_ambience.value = AudioManager.ambience_vol
 	if check_mute: check_mute.button_pressed = AudioManager.is_muted
-	if check_reduced_effects:
-		check_reduced_effects.button_pressed = bool(SaveManager.settings_data.get("reduced_effects", false))
+	if check_screen_shake: check_screen_shake.button_pressed = bool(SaveManager.settings_data.get("screen_shake", true))
+	if check_reduced_motion: check_reduced_motion.button_pressed = bool(SaveManager.settings_data.get("reduced_motion", false))
