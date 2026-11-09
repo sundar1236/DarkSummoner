@@ -640,7 +640,9 @@ func _handle_touch_down(pos: Vector2) -> void:
 
 func _initiate_drag(item: ItemInstance, sock_id: int) -> void:
 	is_dragging = true
-	drag_from_socket = sock_id
+	# Multi-cell items can be touched through any occupied socket. Track the
+	# item's anchor socket so dropping back onto its footprint is a no-op.
+	drag_from_socket = CELL_TO_SOCKET.get(item.grid_pos, sock_id)
 	hover_socket = sock_id
 	drag_origin_cell = item.grid_pos
 	hover_cell = item.grid_pos
@@ -691,7 +693,11 @@ func _try_drop_on_socket(socket_id: int) -> bool:
 
 	var selected := inventory_view.selected_item
 	var target_item := _get_item_in_socket(socket_id)
-	if target_item and target_item != selected and GameManager.can_merge_items(selected, target_item):
+	# A multi-cell item may occupy the socket under the pointer without being
+	# anchored there. Dropping onto any part of itself must not shift its origin.
+	if target_item == selected:
+		return true
+	if target_item and GameManager.can_merge_items(selected, target_item):
 		var merged := GameManager.merge_items(selected, target_item)
 		if not merged:
 			return false

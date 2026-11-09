@@ -279,4 +279,27 @@ func _run_all_tests() -> void:
 	_assert_true(GameManager.altar_items.size() == 1 and GameManager.altar_items[0].data.id == "shadow_blade", "11.2 Drag merge replaces both tier 1 items with the tier 2 result")
 	_assert_true(test_view.selected_item == GameManager.altar_items[0], "11.3 Merged item remains selected in the altar UI")
 	test_view.free()
+
+	# -------------------------------------------------------------
+	# Test 12: Dragging a Multi-Cell Item from a Secondary Footprint Socket
+	# -------------------------------------------------------------
+	GameManager.altar_items.clear()
+	var multi_data := ItemData.new()
+	multi_data.id = "test_multi_cell_blade"
+	multi_data.name = "Test Multi-Cell Blade"
+	multi_data.tags = ["weapon", "shadow"]
+	multi_data.tier = 2
+	multi_data.shape = [Vector2i(0, 0), Vector2i(0, 1)]
+	var multi_item := ItemInstance.new(multi_data, AltarBoard.SOCKET_TO_CELL[0], 0)
+	GameManager.altar_items.append(multi_item)
+	var multi_view := InventoryView.new()
+	multi_view.selected_item = multi_item
+	multi_view.selected_source = "altar"
+	board.inventory_view = multi_view
+	board._initiate_drag(multi_item, 1)
+	_assert_true(board.drag_from_socket == 0, "12.1 Drag origin resolves to the multi-cell item's anchor socket")
+	var same_footprint_drop := board._try_drop_on_socket(1)
+	_assert_true(same_footprint_drop, "12.2 Dropping onto a secondary occupied socket is accepted as a no-op")
+	_assert_true(multi_item.grid_pos == AltarBoard.SOCKET_TO_CELL[0], "12.3 Dropping onto its own footprint does not shift the item anchor")
+	multi_view.free()
 	board.free()
