@@ -301,6 +301,117 @@ func calculate_combat_power() -> int:
 		card_power += int(stars) * 400
 	return base_power + gear_power + star_power + card_power
 
+const WEB_STORAGE_KEY: String = "dark_summoner_save_profile"
+const WEB_RUN_KEY: String = "dark_summoner_run_state"
+
+func _sync_to_web_storage(json_str: String) -> void:
+	if OS.has_feature("web"):
+		if ClassDB.class_exists("JavaScriptBridge"):
+			var js = Engine.get_singleton("JavaScriptBridge")
+			if js:
+				js.eval("try { window.localStorage.setItem('%s', %s); } catch(e) { console.warn(e); }" % [
+					WEB_STORAGE_KEY, JSON.stringify(json_str)
+				])
+
+func _load_from_web_storage() -> String:
+	if OS.has_feature("web"):
+		if ClassDB.class_exists("JavaScriptBridge"):
+			var js = Engine.get_singleton("JavaScriptBridge")
+			if js:
+				var res = js.eval("window.localStorage.getItem('%s') || ''" % WEB_STORAGE_KEY)
+				if res is String and not res.is_empty():
+					return res
+	return ""
+
+func _clear_web_storage() -> void:
+	if OS.has_feature("web"):
+		if ClassDB.class_exists("JavaScriptBridge"):
+			var js = Engine.get_singleton("JavaScriptBridge")
+			if js:
+				js.eval("try { window.localStorage.removeItem('%s'); window.localStorage.removeItem('%s'); } catch(e) {}" % [
+					WEB_STORAGE_KEY, WEB_RUN_KEY
+				])
+
+func reset_all_data() -> void:
+	# Purge all local user files (guaranteeing player progress and combat power reset)
+	if FileAccess.file_exists(SAVE_PATH):
+		DirAccess.remove_absolute(SAVE_PATH)
+	if FileAccess.file_exists(RUN_SAVE_PATH):
+		DirAccess.remove_absolute(RUN_SAVE_PATH)
+
+	_clear_web_storage()
+
+	# Reset in-memory state to clean fresh reinstall defaults
+	shades = 0
+	gems = 150
+	energy = 45
+	max_energy = 50
+	profile_gold = 5000
+	player_name = "Hunter Raven"
+	player_level = 5
+	active_character_id = "shadow_hunter"
+	difficulty = "normal"
+	patrol_last_claim = 0
+	chapter_stars = { 1: 3, 2: 1, 3: 0 }
+	daily_free_energy_claimed = false
+	chapter_pack_purchased = false
+	highest_floor_unlocked = 1
+	unlocked_characters = ["shadow_hunter"]
+	character_levels = {
+		"shadow_hunter": 1,
+		"storm_reaper": 1,
+		"soul_binder": 1,
+		"frost_valkyrie": 1
+	}
+	character_shards = {
+		"shadow_hunter": 45,
+		"storm_reaper": 20,
+		"soul_binder": 12,
+		"frost_valkyrie": 0
+	}
+	character_stars = {
+		"shadow_hunter": 2,
+		"storm_reaper": 3,
+		"soul_binder": 2,
+		"frost_valkyrie": 1
+	}
+	equipment_levels = {
+		"weapon": 60,
+		"amulet": 55,
+		"ring": 58,
+		"helmet": 60,
+		"armor": 60,
+		"boots": 55
+	}
+	talent_cards = {
+		"glory": 5,
+		"tactics": 4,
+		"swift_wind": 3,
+		"super_crit": 4,
+		"iron_will": 3,
+		"vampiric": 3,
+		"storm_call": 0,
+		"flame_burst": 0
+	}
+	permanent_upgrades = {
+		"max_hp": 0,
+		"atk": 0,
+		"speed": 0,
+		"crit": 0,
+		"altar_expand": 0,
+		"start_gold": 0,
+		"potion_potency": 0
+	}
+	settings_data = {
+		"master_vol": 0.8,
+		"music_vol": 0.7,
+		"sfx_vol": 0.8,
+		"ambience_vol": 0.6,
+		"muted": false
+	}
+	profile_changed.emit()
+	profile_loaded.emit()
+
 func save_profile() -> void:
 	# Capture settings
 	if AudioManager:
@@ -333,7 +444,8 @@ func save_profile() -> void:
 		"equipment_levels": equipment_levels,
 		"talent_cards": talent_cards,
 		"permanent_upgrades": permanent_upgrades,
-		"settings": settings_data
+		"settings": settings_data,
+		"combat_power": calculate_combat_power()
 	}
 
 	var json_str := JSON.stringify(data, "\t")
@@ -342,16 +454,23 @@ func save_profile() -> void:
 		file.store_string(json_str)
 		file.close()
 
+	# Synchronize state directly to browser/app localStorage if running in web environment
+	_sync_to_web_storage(json_str)
+
 func load_profile() -> void:
-	if not FileAccess.file_exists(SAVE_PATH):
+	var content: String = ""
+	if FileAccess.file_exists(SAVE_PATH):
+		var file := FileAccess.open(SAVE_PATH, FileAccess.READ)
+		if file:
+			content = file.get_as_text()
+			file.close()
+
+	# If running on web and local user file was missing or empty, attempt loading from browser localStorage
+	if content.is_empty():
+		content = _load_from_web_storage()
+
+	if content.is_empty():
 		return
-	
-	var file := FileAccess.open(SAVE_PATH, FileAccess.READ)
-	if not file:
-		return
-	
-	var content := file.get_as_text()
-	file.close()
 	
 	var parsed: Variant = JSON.parse_string(content)
 	if not (parsed is Dictionary):
