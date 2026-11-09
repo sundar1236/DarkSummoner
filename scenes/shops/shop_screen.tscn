@@ -139,7 +139,7 @@ layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 18
 theme_override_styles/normal = SubResource("StyleBoxFlat_valuebadge")
-text = "DEMO OFFER"
+text = "STORE OFFLINE"
 horizontal_alignment = 1
 vertical_alignment = 1
 
