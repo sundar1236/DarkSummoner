@@ -228,6 +228,16 @@ func test_hero_loadout_subtabs_and_progression() -> void:
 	assert_test(GameManager.current_character != null and GameManager.current_character.id == "storm_reaper", "GameManager switches to storm_reaper")
 	assert_test(SaveManager.active_character_id == "storm_reaper", "SaveManager saves active_character_id")
 	
+	# Blacksmith exposes all six persistent gear slots.
+	var smith_scene := load("res://scenes/ui/blacksmith_modal.tscn") as PackedScene
+	var smith := smith_scene.instantiate() as BlacksmithModal
+	add_child(smith)
+	await get_tree().process_frame
+	assert_test(smith.btn_upgrade_weapon != null and smith.btn_upgrade_armor != null and smith.btn_upgrade_ring != null, "Blacksmith retains weapon, armor, and ring upgrade controls")
+	assert_test(smith.btn_upgrade_helmet != null and smith.btn_upgrade_boots != null and smith.btn_upgrade_amulet != null, "Blacksmith exposes helmet, boots, and amulet upgrades")
+	smith.queue_free()
+	await get_tree().process_frame
+
 	# Equipment upgrade
 	var pre_weapon := SaveManager.get_equipped_gear("weapon")
 	var pre_weap_lvl: int = pre_weapon.upgrade_level if pre_weapon else -1
@@ -249,6 +259,13 @@ func test_shop_screen_atomic_purchases() -> void:
 	add_child(shop)
 	await get_tree().process_frame
 	
+	# Premium gems are independent from permanent Shades.
+	var before_shades: int = SaveManager.shades
+	SaveManager.gems = 100
+	assert_test(SaveManager.spend_gems(25), "Premium gem spend succeeds when the gem balance is sufficient")
+	assert_test(SaveManager.gems == 75 and SaveManager.shades == before_shades, "Spending gems never deducts Shades")
+	SaveManager.add_gems(10)
+	assert_test(SaveManager.gems == 85 and SaveManager.shades == before_shades, "Adding gems never grants Shades")
 	SaveManager.chapter_pack_purchased = false
 	SaveManager.gems = 100
 	SaveManager.energy = 20
