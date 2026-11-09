@@ -568,9 +568,6 @@ func _calculate_gear_stat_power(stats: Dictionary) -> int:
 func calculate_combat_power() -> int:
 	return int(get_combat_power_breakdown().get("total", 0))
 
-func calculate_combat_power() -> int:
-	return int(get_combat_power_breakdown().get("total", 0))
-
 const WEB_STORAGE_KEY: String = "dark_summoner_save_profile"
 const WEB_RUN_KEY: String = "dark_summoner_run_state"
 
