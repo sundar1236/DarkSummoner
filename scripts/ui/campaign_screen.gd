@@ -214,7 +214,7 @@ func _on_hunt_pressed() -> void:
 		show_toast("Patrol rewards ready in %02d:%02d" % [hours, minutes])
 		return
 	if AudioManager: AudioManager.play_sfx("shop_buy")
-	show_toast("🏆 Patrol Rewards Claimed! +%d Gold · +%d XP" % [int(claimed.get("gold", 0)), int(claimed.get("xp", 0))])
+	show_toast("🏆 Patrol Rewards Claimed! +%d Gold" % int(claimed.get("gold", 0)))
 	hunt_clicked.emit()
 
 func _process(delta: float) -> void:
