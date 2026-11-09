@@ -15,7 +15,7 @@ The player controls a lone hunter ascending a perilous dark-fantasy tower. In th
 2. **Build the Run Loadout**: Arrange run-specific runes, monster cores, and relics in the Summoning Circle to activate adjacency and tag synergies.
 3. **Enter Combat**: Use the single movement joystick. While stationary, the hunter automatically targets and attacks the nearest enemy; moving suppresses basic attacks. Dodge, activate character skills, and use healing potions when needed.
 4. **Clear Enemy Waves**: Regular encounters contain two progressively harder waves. Elite encounters include an elite enemy; floor bosses use their own multi-phase fight.
-5. **Choose Blessings**: Collect XP, select from three run-skill offers on level-up, and upgrade skills through duplicate picks.
+5. **Choose Blessings**: Collect XP and choose from three skill offers on level-up. Duplicate picks upgrade skills; mastering paired skills can unlock powerful evolutions.
 6. **Claim Rewards**: Earn run Gold, permanent Shades, and item choices before preparing for the next encounter.
 7. **Ascend Floors**: Each floor has five levels; Level 5 is the floor boss (Lord Malakar).
 8. **Boss Victory & Defeat Rules**:
@@ -178,17 +178,18 @@ To install on a connected Android phone via ADB:
 
 ---
 
-## 6. Inventory & Synergies
+## 6. Persistent Equipment, Summoning Circle & Synergies
 
-- **Altar Grid (Active)**: Initial 4×4 size. Items contribute all base stats, passives, and adjacency bonuses. Locked during combat.
-- **Reserve Backpack (Stored)**: Holds up to 10 inactive items. Items in backpack provide zero stats or synergies.
-- **90° Rotation**: Multi-cell items can be rotated in 90-degree increments with bounds and overlap validation.
-- **Item Merging**: Combining two matching items of the same tier (e.g. 2× Shadow Daggers) reforges them into the next tier (Shadow Blade, Abyssal Scythe).
+- **Hunter Equipment (Persistent)**: Six saved character slots — weapon, helmet, armor, boots, amulet, and ring. Gear stats and set bonuses carry between runs.
+- **Summoning Circle (In-Run)**: Runes, monster cores, and relics are arranged during preparation for the current run. Persistent character gear does not occupy these run-only slots.
+- **Reserve Backpack**: Stores inactive run items; stored items do not contribute stats or synergies.
+- **Item Rotation & Merging**: Multi-cell run items support validated 90° rotation and same-item tier merging.
 - **Adjacency Examples**:
-  - `Fire Rune` adjacent to `Wolf Core` → **Hellhound Evolution** (transforms wolf into fiery hellhound with explosive fireballs).
-  - `Fire Rune` adjacent to `Weapon` → **Flame Blade** (+12 burn damage).
-  - `Blood Chalice` adjacent to `Armor` → **Vampiric Aegis** (+35 HP and healing on kill).
-- **Tag Set Bonuses**: 2+ Shadow items (+15% Crit), 2+ Runes (+20% ATK), 2+ Lightning items (Storm Conduit electric aura), 2+ Cores (Beast Master pet attack speed).
+  - `Fire Rune` adjacent to `Wolf Core` → **Hellhound Evolution** (fiery companion with explosive fireballs).
+  - `Fire Rune` adjacent to a compatible weapon → **Flame Blade** (burn damage).
+  - `Blood Chalice` adjacent to armor → **Vampiric Aegis** (bonus HP and healing on kill).
+- **Tag Set Bonuses**: Matching Shadow, Rune, Lightning, and Core tags grant their corresponding combat bonuses.
+- **Skill Evolutions**: Max-rank skill pairs can unlock **Infernal Blade Storm**, **Storm Wolf**, or **Soul Devourer** during a run.
 
 ---
 
