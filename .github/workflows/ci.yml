@@ -17,19 +17,28 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Scan project, generate global class cache, and import assets
-        run: godot --headless --editor --path . --import --quit
+        shell: bash
+        run: |
+          set -euo pipefail
+          log_file="$(mktemp)"
+          trap 'rm -f "$log_file"' EXIT
+          godot --headless --editor --path . --import --quit 2>&1 | tee "$log_file"
+          if grep -E "SCRIPT ERROR:|Failed to load script|Parse Error:|Compile Error:" "$log_file"; then
+            echo "Godot project import reported script errors."
+            exit 1
+          fi
 
       - name: Run Core Gameplay Test Suite (116 tests)
-        run: godot -v --headless --path . "res://tests/test_runner.tscn"
+        run: bash tools/ci/run_godot_test.sh "res://tests/test_runner.tscn" "ALL ACCEPTANCE TESTS PASSED SUCCESSFULLY!"
 
       - name: Run Summoning Circle Altar Test Suite (34 tests)
-        run: godot -v --headless --path . "res://tests/test_summoning_circle.tscn"
+        run: bash tools/ci/run_godot_test.sh "res://tests/test_summoning_circle.tscn" "SUCCESS: All Summoning Circle Altar assertions passed!"
 
       - name: Run Phase 3 Character Animation & Combat Tests (58 tests)
-        run: godot -v --headless --path . "res://tests/test_character_animation_and_combat.tscn"
+        run: bash tools/ci/run_godot_test.sh "res://tests/test_character_animation_and_combat.tscn" "Phase 3 Test Results:"
 
       - name: Run Phase 4 Navigation & UI Tests
-        run: godot -v --headless --path . "res://tests/test_phase4_navigation_and_ui.tscn"
+        run: bash tools/ci/run_godot_test.sh "res://tests/test_phase4_navigation_and_ui.tscn" "PHASE 4 TEST RESULTS:"
 
       - name: Run Phase 5 Combat, HUD & Skills Tests
-        run: godot -v --headless --path . "res://tests/test_phase5_combat_and_skills.tscn"
+        run: bash tools/ci/run_godot_test.sh "res://tests/test_phase5_combat_and_skills.tscn" "PHASE 5 TEST RESULTS:"

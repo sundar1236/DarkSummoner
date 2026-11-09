@@ -379,7 +379,7 @@ func _format_gear_set_bonus(bonus: Dictionary) -> String:
 	var names := {"bonus_atk": "ATK", "bonus_hp": "HP", "bonus_crit": "CRIT", "bonus_speed": "MOVE SPD", "bonus_atk_speed": "ATK SPD"}
 	for stat_name in bonus:
 		var value := float(bonus[stat_name])
-		var percent := stat_name in ["bonus_crit", "bonus_atk_speed"]
+		var percent: bool = stat_name in ["bonus_crit", "bonus_atk_speed"]
 		var display_value := value * 100.0 if percent else value
 		labels.append("%s +%s%s" % [names.get(stat_name, stat_name), _format_gear_stat(display_value), "%" if percent else ""])
 	return ", ".join(labels)
