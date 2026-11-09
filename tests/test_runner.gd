@@ -12,6 +12,7 @@ func _ready() -> void:
 	
 	test_independent_movement_and_aim()
 	test_persistent_equipment_slots()
+	test_blacksmith_gear_purchases()
 	test_boss_gear_rewards_are_persistent()
 	test_run_altar_excludes_persistent_gear()
 	test_inventory_footprint_and_rotation()
@@ -133,6 +134,34 @@ func test_persistent_equipment_slots() -> void:
 	SaveManager.equipped_gear = original_equipped
 	SaveManager.profile_gold = original_gold
 	SaveManager.save_profile()
+
+
+func test_blacksmith_gear_purchases() -> void:
+	print("--- Test: Blacksmith Persistent Gear Purchases ---")
+	var original_inventory: Array[Dictionary] = SaveManager.gear_inventory.duplicate(true)
+	var original_equipped: Dictionary = SaveManager.equipped_gear.duplicate(true)
+	var original_gold := SaveManager.profile_gold
+	var target := ItemDatabase.get_item("void_pendant")
+	assert_true(target != null and target.equipment_slot == "amulet", "Forge catalogue item is valid persistent gear")
+	if not target:
+		return
+
+	SaveManager.profile_gold = target.price + 10
+	assert_true(SaveManager.buy_gear_item(target.id), "Player can buy unowned gear with sufficient profile gold")
+	assert_true(SaveManager.has_gear_item(target.id), "Purchased gear is added to persistent inventory")
+	assert_true(SaveManager.profile_gold == 10, "Purchase deducts the exact profile gold price")
+	assert_true(not SaveManager.buy_gear_item(target.id), "Already-owned gear cannot be purchased twice")
+
+	SaveManager.profile_gold = 0
+	assert_true(not SaveManager.buy_gear_item("soul_band"), "Purchase is rejected when profile gold is insufficient")
+	assert_true(not SaveManager.has_gear_item("soul_band"), "Failed purchase does not add gear")
+
+	SaveManager.gear_inventory = original_inventory
+	SaveManager.equipped_gear = original_equipped
+	SaveManager.profile_gold = original_gold
+	SaveManager.save_profile()
+	SaveManager.gold_changed.emit(SaveManager.profile_gold)
+	SaveManager.profile_changed.emit()
 
 
 func test_boss_gear_rewards_are_persistent() -> void:
