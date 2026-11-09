@@ -14,6 +14,7 @@ func _init() -> void:
 	print("==================================================\n")
 	
 	test_independent_movement_and_aim()
+	test_persistent_equipment_slots()
 	test_inventory_footprint_and_rotation()
 	test_inventory_bounds_and_overlap_validation()
 	test_synergies_and_backpack_isolation()
@@ -63,6 +64,30 @@ func test_independent_movement_and_aim() -> void:
 
 	player.queue_free()
 	move_joy.queue_free()
+
+
+func test_persistent_equipment_slots() -> void:
+	print("--- Test: Persistent Six-Slot Equipment ---")
+	var original_inventory := SaveManager.gear_inventory.duplicate(true)
+	var original_equipped := SaveManager.equipped_gear.duplicate(true)
+	var helm := ItemInstance.new(ItemDatabase.get_item("void_helm"))
+	var wrong_slot_item := ItemInstance.new(ItemDatabase.get_item("fire_rune"))
+
+	assert_true(SaveManager.add_gear_item(helm), "Valid equipment item is added to profile inventory")
+	assert_true(not SaveManager.add_gear_item(helm), "Duplicate equipment UID is rejected")
+	assert_true(not SaveManager.add_gear_item(wrong_slot_item), "Runes cannot be added to equipment inventory")
+	assert_true(SaveManager.equip_gear_item(helm.uid), "Helmet can be equipped into its matching slot")
+	assert_true(SaveManager.get_equipped_gear("helmet") != null, "Equipped helmet can be retrieved by slot")
+	assert_true(not SaveManager.equip_gear_item(wrong_slot_item.uid), "Non-equipment item cannot be equipped")
+
+	var stats := SaveManager.get_equipped_gear_stats()
+	assert_true(stats.get("bonus_hp", 0.0) >= 18.0, "Equipped gear contributes its passive stats")
+	assert_true(SaveManager.unequip_gear_slot("helmet"), "Equipment slot can be unequipped")
+	assert_true(SaveManager.get_equipped_gear("helmet") == null, "Unequipped slot is empty")
+
+	SaveManager.gear_inventory = original_inventory
+	SaveManager.equipped_gear = original_equipped
+	SaveManager.save_profile()
 
 # 2. Test Multi-Cell Footprint and 90-Degree Rotation
 func test_inventory_footprint_and_rotation() -> void:
