@@ -258,6 +258,7 @@ func test_combat_wave_progression() -> void:
 	assert_true(arena.enemies_remaining == arena._get_wave_enemy_count(GameManager.level_number, 2), "Second wave spawns its own enemy group")
 	assert_true(arena.enemies_remaining > 0, "Encounter remains active between waves")
 	assert_true(arena._get_wave_enemy_count(1, 2) > arena._get_wave_enemy_count(1, 1), "Second wave increases enemy count")
+	arena.current_wave = 1
 	assert_true(arena._get_wave_enemy_type(0, true) == "mini_boss", "Elite encounters begin with an Abyssal Champion mini-boss")
 	arena.current_wave = 2
 	assert_true(arena._get_wave_enemy_type(0, true) == "elite", "Second elite wave includes a regular elite brute")
