@@ -106,6 +106,13 @@ func _run_all_tests() -> void:
 	var compat_unlocked: bool = board.is_item_compatible(dagger_inst, 0)
 	_assert_true(compat_unlocked, "3.4 Dagger is compatible with unlocked Socket 0")
 
+	var blood_relic_data := ItemData.new()
+	blood_relic_data.id = "test_blood_relic"
+	blood_relic_data.tags = ["relic", "blood"]
+	var blood_relic := ItemInstance.new(blood_relic_data, Vector2i.ZERO, 0)
+	_assert_true(not board.is_item_compatible(blood_relic, 0), "3.5 Blood relic is rejected by a socket that does not support its tags")
+	_assert_true(not board.is_item_compatible(blood_relic, 12), "3.6 Blood relic is rejected by the Prime Apex Core when no supported tag matches")
+
 	# -------------------------------------------------------------
 	# Test 4: Equipping Item from Backpack to Empty Socket
 	# -------------------------------------------------------------
