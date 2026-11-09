@@ -11,6 +11,7 @@ func _ready() -> void:
 	print("==================================================\n")
 	
 	test_independent_movement_and_aim()
+	test_persistent_equipment_slots()
 	test_inventory_footprint_and_rotation()
 	test_inventory_bounds_and_overlap_validation()
 	test_synergies_and_backpack_isolation()
@@ -87,6 +88,41 @@ func test_independent_movement_and_aim() -> void:
 	dummy_enemy.queue_free()
 	player.queue_free()
 	move_joy.queue_free()
+
+
+# Persistent profile gear is independent from run altar items.
+func test_persistent_equipment_slots() -> void:
+	print("--- Test: Persistent Six-Slot Hunter Equipment ---")
+	var original_inventory: Array[Dictionary] = SaveManager.gear_inventory.duplicate(true)
+	var original_equipped: Dictionary = SaveManager.equipped_gear.duplicate(true)
+
+	assert_true(SaveManager.EQUIPMENT_SLOTS.size() == 6, "Six equipment slots are registered")
+	for slot_name in SaveManager.EQUIPMENT_SLOTS:
+		assert_true(SaveManager.get_equipped_gear(slot_name) != null, "%s has starter equipment" % slot_name.capitalize())
+
+	var helm := ItemInstance.new(ItemDatabase.get_item("void_helm"))
+	var rune := ItemInstance.new(ItemDatabase.get_item("fire_rune"))
+	assert_true(SaveManager.add_gear_item(helm), "Valid gear item is added to profile inventory")
+	assert_true(not SaveManager.add_gear_item(helm), "Duplicate gear UID is rejected")
+	assert_true(not SaveManager.add_gear_item(rune), "Runes cannot enter the equipment inventory")
+	assert_true(SaveManager.equip_gear_item(helm.uid), "Gear item equips into its declared slot")
+	var equipped_helm := SaveManager.get_equipped_gear("helmet")
+	assert_true(equipped_helm != null and equipped_helm.uid == helm.uid, "Helmet slot returns the equipped item")
+	assert_true(not SaveManager.equip_gear_item(rune.uid), "Runes cannot be equipped as gear")
+
+	var gear_stats: Dictionary = SaveManager.get_equipped_gear_stats()
+	assert_true(gear_stats.get("bonus_hp", 0.0) >= 18.0, "Equipped gear contributes passive HP")
+	SaveManager.save_profile()
+	SaveManager.load_profile()
+	var restored_helm := SaveManager.get_equipped_gear("helmet")
+	assert_true(restored_helm != null and restored_helm.uid == helm.uid, "Equipped item UID persists across profile reload")
+
+	assert_true(SaveManager.unequip_gear_slot("helmet"), "Equipped gear can be unequipped")
+	assert_true(SaveManager.get_equipped_gear("helmet") == null, "Unequipped slot is empty")
+
+	SaveManager.gear_inventory = original_inventory
+	SaveManager.equipped_gear = original_equipped
+	SaveManager.save_profile()
 
 # 2. Test Multi-Cell Footprint and 90-Degree Rotation
 func test_inventory_footprint_and_rotation() -> void:
