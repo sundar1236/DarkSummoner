@@ -238,6 +238,16 @@ func test_valkyrie_draft_modal_and_offers() -> void:
 	
 	modal.queue_free()
 
+	# Verify the third card can be selected, not just displayed.
+	var third_modal := draft_scene.instantiate() as SkillDraftModal
+	add_child(third_modal)
+	GameManager.run_learned_skills.clear()
+	third_modal.show_draft(1338)
+	var third_choice: String = third_modal.card_3_offer["id"]
+	third_modal._choose_card(3)
+	assert_true(GameManager.run_learned_skills.has(third_choice), "Selecting the third card applies its skill")
+	third_modal.queue_free()
+
 # 5. Test Skill Stat Application & Upgrade Progression
 func test_skill_stat_application_and_progression() -> void:
 	print("--- 5. Skill Stat Application & Progression ---")
