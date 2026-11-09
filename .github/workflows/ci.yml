@@ -29,16 +29,21 @@ jobs:
           fi
 
       - name: Run Core Gameplay Test Suite (116 tests)
-        run: bash tools/ci/run_godot_test.sh "res://tests/test_runner.tscn" "ALL ACCEPTANCE TESTS PASSED SUCCESSFULLY!"
+        run: >-
+          bash tools/ci/run_godot_test.sh "res://tests/test_runner.tscn" "ALL ACCEPTANCE TESTS PASSED SUCCESSFULLY!"
 
       - name: Run Summoning Circle Altar Test Suite (34 tests)
-        run: bash tools/ci/run_godot_test.sh "res://tests/test_summoning_circle.tscn" "SUCCESS: All Summoning Circle Altar assertions passed!"
+        run: >-
+          bash tools/ci/run_godot_test.sh "res://tests/test_summoning_circle.tscn" "SUCCESS: All Summoning Circle Altar assertions passed!"
 
       - name: Run Phase 3 Character Animation & Combat Tests (58 tests)
-        run: bash tools/ci/run_godot_test.sh "res://tests/test_character_animation_and_combat.tscn" "Phase 3 Test Results:"
+        run: >-
+          bash tools/ci/run_godot_test.sh "res://tests/test_character_animation_and_combat.tscn" "Phase 3 Test Results:"
 
       - name: Run Phase 4 Navigation & UI Tests
-        run: bash tools/ci/run_godot_test.sh "res://tests/test_phase4_navigation_and_ui.tscn" "PHASE 4 TEST RESULTS:"
+        run: >-
+          bash tools/ci/run_godot_test.sh "res://tests/test_phase4_navigation_and_ui.tscn" "PHASE 4 TEST RESULTS:"
 
       - name: Run Phase 5 Combat, HUD & Skills Tests
-        run: bash tools/ci/run_godot_test.sh "res://tests/test_phase5_combat_and_skills.tscn" "PHASE 5 TEST RESULTS:"
+        run: >-
+          bash tools/ci/run_godot_test.sh "res://tests/test_phase5_combat_and_skills.tscn" "PHASE 5 TEST RESULTS:"
