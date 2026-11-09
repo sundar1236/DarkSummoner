@@ -309,18 +309,29 @@ func _setup_info_modal() -> void:
 	add_child(_info_modal)
 
 func _toggle_combat_power_modal() -> void:
-	if not _info_modal: return
+	if not _info_modal:
+		return
 	if _info_modal.visible:
 		_info_modal.visible = false
 		return
 
 	var power: int = SaveManager.calculate_combat_power() if SaveManager else 24800
-	var desc_lbl = _info_modal.find_child("StatDescLabel", true, false) as Label
+	var gear_stats: Dictionary = SaveManager.get_equipped_gear_stats() if SaveManager else {}
+	var equipped_count := 0
+	if SaveManager:
+		for slot_name in SaveManager.EQUIPMENT_SLOTS:
+			if SaveManager.get_equipped_gear(slot_name):
+				equipped_count += 1
+	var desc_lbl := _info_modal.find_child("StatDescLabel", true, false) as Label
 	if desc_lbl:
-		desc_lbl.text = "✦ Total Combat Power: %s\n✦ Effective ATK: %s\n✦ Effective HP: %s\n✦ Gear Slots: 6/6 S-Tier\n✦ Resonance: Adjacency bonuses apply on Altar Grid." % [
-			_format_num(power), _format_num(base_display_atk), _format_num(base_display_hp)
+		desc_lbl.text = "✦ Total Combat Power: %s\n✦ Gear ATK: +%d\n✦ Gear HP: +%d\n✦ Equipment Slots: %d/6\n✦ Rune resonance is calculated separately during runs." % [
+			_format_num(power),
+			int(gear_stats.get("bonus_atk", 0.0)),
+			int(gear_stats.get("bonus_hp", 0.0)),
+			equipped_count
 		]
-	if AudioManager: AudioManager.play_sfx("ui_click")
+	if AudioManager:
+		AudioManager.play_sfx("ui_click")
 	_info_modal.visible = true
 
 func show_toast(text: String) -> void:
@@ -422,8 +433,6 @@ func _update_character_ui() -> void:
 			if skill_lbl_2: skill_lbl_2.text = "✦ Lv.2 Tempest Strike [Unlocked]\nEvery 4th hit calls down a thunderbolt."
 			if skill_lbl_3: skill_lbl_3.text = "✦ Lv.3 Static Overload [Unlocked]\nShocked enemies explode on defeat."
 			if skill_lbl_4: skill_lbl_4.text = "✧ Lv.4 Eye of the Maelstrom [Locked - 5★]\nStorm aura zaps surrounding foes."
-			if stat_atk_label: stat_atk_label.text = "⚔ ATK: 5,140"
-			if stat_hp_label: stat_hp_label.text = "❤ HP: 16,800"
 		"soul_binder":
 			if char_name_badge: char_name_badge.text = "Soul Binder"
 			if star_rating_row: star_rating_row.text = "★ ★ ☆ ☆ ☆ ☆"
@@ -434,8 +443,6 @@ func _update_character_ui() -> void:
 			if skill_lbl_2: skill_lbl_2.text = "✦ Lv.2 Spectral Harvest [Unlocked]\nDefeated enemies spawn orbiting wisps."
 			if skill_lbl_3: skill_lbl_3.text = "✧ Lv.3 Void Absorption [Locked - 3★]\nAbsorb enemy projectiles into healing."
 			if skill_lbl_4: skill_lbl_4.text = "✧ Lv.4 Soul Rebirth [Locked - 5★]\nFatal damage triggers 3s invulnerability."
-			if stat_atk_label: stat_atk_label.text = "⚔ ATK: 4,680"
-			if stat_hp_label: stat_hp_label.text = "❤ HP: 21,400"
 		_:
 			if char_name_badge: char_name_badge.text = "Shadow Hunter"
 			if star_rating_row:
@@ -450,8 +457,17 @@ func _update_character_ui() -> void:
 			if skill_lbl_2: skill_lbl_2.text = "✦ Lv.2 Abyssal Surge [Unlocked]\nConsecutive hits gain +5% ATK SPD (up to 25%)."
 			if skill_lbl_3: skill_lbl_3.text = "✧ Lv.3 Soul Harvester [Locked - 3★]" if hunter_stars < 3 else "✦ Lv.3 Soul Harvester [Unlocked]\nDefeating an elite restores 10% max HP."
 			if skill_lbl_4: skill_lbl_4.text = "✧ Lv.4 Void Singularity [Locked - 5★]\nCrits unleash shockwave dealing 180% damage."
-			if stat_atk_label: stat_atk_label.text = "⚔ ATK: %s" % _format_num(base_display_atk)
-			if stat_hp_label: stat_hp_label.text = "❤ HP: %s" % _format_num(base_display_hp)
+
+	_refresh_gear_stat_labels()
+
+func _refresh_gear_stat_labels() -> void:
+	if not SaveManager:
+		return
+	var gear_stats: Dictionary = SaveManager.get_equipped_gear_stats()
+	if stat_atk_label:
+		stat_atk_label.text = "⚔ Gear ATK: +%d" % int(gear_stats.get("bonus_atk", 0.0))
+	if stat_hp_label:
+		stat_hp_label.text = "❤ Gear HP: +%d" % int(gear_stats.get("bonus_hp", 0.0))
 
 func _setup_gear_slots_wiring() -> void:
 	var slots := {
