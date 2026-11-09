@@ -29,7 +29,7 @@ btn_recycle = NodePath("MainLayout/DetailsPanel/VBoxAll/Actions/BtnRecycle")
 toast_panel = NodePath("ToastPanel")
 toast_label = NodePath("ToastPanel/ToastLabel")
 synergy_list_container = NodePath("MainLayout/Scroll/Content/SynergyList")
-btn_close = NodePath("MainLayout/Header/BtnClose")
+btn_close = NodePath("MainLayout/Footer/BtnClose")
 lbl_grid_size = NodePath("MainLayout/Header/LblGridSize")
 lbl_backpack_cap = NodePath("MainLayout/Scroll/Content/BackpackHeader/LblBackpackCap")
 
@@ -84,13 +84,6 @@ theme_override_colors/font_color = Color(0.75, 0.7, 0.85, 1)
 theme_override_font_sizes/font_size = 16
 text = "Altar Grid: 4x4"
 horizontal_alignment = 1
-
-[node name="BtnClose" type="Button" parent="MainLayout/Header"]
-custom_minimum_size = Vector2(96, 48)
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.9, 0.4, 1)
-theme_override_font_sizes/font_size = 18
-text = "DONE"
 
 [node name="AltarContainer" type="CenterContainer" parent="MainLayout"]
 custom_minimum_size = Vector2(0, 390)
@@ -231,6 +224,20 @@ text = "✦ ACTIVE ALTAR SYNERGIES"
 [node name="SynergyList" type="VBoxContainer" parent="MainLayout/Scroll/Content"]
 layout_mode = 2
 theme_override_constants/separation = 6
+
+[node name="Footer" type="HBoxContainer" parent="MainLayout"]
+layout_mode = 2
+
+[node name="FooterSpacer" type="Control" parent="MainLayout/Footer"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="BtnClose" type="Button" parent="MainLayout/Footer"]
+custom_minimum_size = Vector2(156, 54)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.9, 0.4, 1)
+theme_override_font_sizes/font_size = 18
+text = "DONE"
 
 [node name="ToastPanel" type="PanelContainer" parent="."]
 visible = false
