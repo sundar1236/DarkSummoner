@@ -556,6 +556,8 @@ func trigger_dodge() -> bool:
 	return true
 
 func _spawn_afterimage() -> void:
+	if SaveManager and bool(SaveManager.settings_data.get("reduced_motion", false)):
+		return
 	if not sprite or not sprite.texture:
 		return
 	var afterimage := ShadowAfterimage.new()
