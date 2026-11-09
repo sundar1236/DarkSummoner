@@ -170,7 +170,8 @@ func recalculate_stats_and_synergies() -> void:
 	# Calculate total player max HP
 	var base_hp: float = current_character.base_hp if current_character else 100.0
 	var perm_hp: float = SaveManager.get_permanent_hp_bonus() if SaveManager else 0.0
-	var item_hp: float = cached_synergies.get("total_hp", 0.0)
+	var gear_stats: Dictionary = SaveManager.get_equipped_gear_stats() if SaveManager else {}
+	var item_hp: float = cached_synergies.get("total_hp", 0.0) + gear_stats.get("bonus_hp", 0.0)
 	var skill_hp: float = run_skill_modifiers.get("bonus_hp", 0.0)
 	
 	player_max_hp = base_hp + perm_hp + item_hp + skill_hp
@@ -189,10 +190,11 @@ func get_player_effective_stats() -> Dictionary:
 	var perm_spd_mult: float = SaveManager.get_permanent_speed_multiplier() if SaveManager else 1.0
 	var perm_crit: float = SaveManager.get_permanent_crit_bonus() if SaveManager else 0.0
 	
-	var item_atk: float = cached_synergies.get("total_atk", 0.0) + run_skill_modifiers.get("bonus_atk", 0.0)
-	var item_crit: float = cached_synergies.get("total_crit", 0.0) + run_skill_modifiers.get("bonus_crit", 0.0)
-	var item_speed: float = cached_synergies.get("total_speed", 0.0) + run_skill_modifiers.get("bonus_speed", 0.0)
-	var item_atk_speed: float = cached_synergies.get("total_atk_speed", 0.0) + run_skill_modifiers.get("bonus_atk_speed", 0.0)
+	var gear_stats: Dictionary = SaveManager.get_equipped_gear_stats() if SaveManager else {}
+	var item_atk: float = cached_synergies.get("total_atk", 0.0) + gear_stats.get("bonus_atk", 0.0) + run_skill_modifiers.get("bonus_atk", 0.0)
+	var item_crit: float = cached_synergies.get("total_crit", 0.0) + gear_stats.get("bonus_crit", 0.0) + run_skill_modifiers.get("bonus_crit", 0.0)
+	var item_speed: float = cached_synergies.get("total_speed", 0.0) + gear_stats.get("bonus_speed", 0.0) + run_skill_modifiers.get("bonus_speed", 0.0)
+	var item_atk_speed: float = cached_synergies.get("total_atk_speed", 0.0) + gear_stats.get("bonus_atk_speed", 0.0) + run_skill_modifiers.get("bonus_atk_speed", 0.0)
 	
 	var final_atk: float = (base_atk + item_atk) * perm_atk_mult
 	var final_speed: float = (base_speed + item_speed) * perm_spd_mult
