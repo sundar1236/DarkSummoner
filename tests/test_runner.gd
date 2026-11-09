@@ -13,6 +13,7 @@ func _ready() -> void:
 	test_independent_movement_and_aim()
 	test_persistent_equipment_slots()
 	test_gear_item_details_and_comparison()
+	test_gear_inventory_sorting()
 	test_blacksmith_gear_purchases()
 	test_boss_gear_rewards_are_persistent()
 	test_run_altar_excludes_persistent_gear()
@@ -173,6 +174,38 @@ func test_gear_item_details_and_comparison() -> void:
 	SaveManager.equipped_gear = original_equipped
 	SaveManager.profile_gold = original_gold
 	SaveManager.save_profile()
+	loadout.queue_free()
+
+
+func test_gear_inventory_sorting() -> void:
+	print("--- Test: Functional Gear Inventory Sorting ---")
+	var scene := load("res://scenes/characters/hero_loadout_screen.tscn") as PackedScene
+	assert_true(scene != null, "Hero loadout scene loads for sorting validation")
+	if not scene:
+		return
+
+	var loadout := scene.instantiate() as HeroLoadoutScreen
+	add_child(loadout)
+	var helmet := ItemInstance.new(ItemDatabase.get_item("void_helm"))
+	var boots := ItemInstance.new(ItemDatabase.get_item("ranger_boots"))
+	var ring := ItemInstance.new(ItemDatabase.get_item("wraith_ring"))
+	helmet.upgrade_level = 1
+	boots.upgrade_level = 5
+	ring.upgrade_level = 3
+	var gear_items: Array[ItemInstance] = [ring, boots, helmet]
+
+	var by_upgrade := loadout._get_sorted_gear_items(gear_items, 1)
+	assert_true(by_upgrade[0].uid == boots.uid, "Upgrade sort places the highest upgrade level first")
+	assert_true(by_upgrade[1].uid == ring.uid, "Upgrade sort orders remaining items by upgrade level")
+
+	var by_quality := loadout._get_sorted_gear_items(gear_items, 0)
+	assert_true(by_quality[0].data.tier >= by_quality[1].data.tier, "Quality sort orders higher tiers first")
+	assert_true(by_quality[1].data.tier >= by_quality[2].data.tier, "Quality sort keeps tier order descending")
+
+	var by_slot := loadout._get_sorted_gear_items(gear_items, 2)
+	assert_true(by_slot[0].data.equipment_slot == "helmet", "Slot sort follows the fixed equipment slot order")
+	assert_true(by_slot[1].data.equipment_slot == "boots", "Boots follow helmet in slot sort")
+	assert_true(by_slot[2].data.equipment_slot == "ring", "Ring follows boots in slot sort")
 	loadout.queue_free()
 
 

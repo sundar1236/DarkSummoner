@@ -111,12 +111,14 @@ func _ready() -> void:
 	# Sort Buttons on Gear and Runes subtabs
 	var btn_gear_sort := $ContentContainer/ViewGear/MiddleBar.get_node_or_null("SortBtn") as Button
 	if btn_gear_sort:
+		var sort_names := ["▼ By Quality", "▼ By Upgrade", "▼ By Slot"]
+		btn_gear_sort.text = sort_names[gear_sort_index]
 		btn_gear_sort.pressed.connect(func():
-			gear_sort_index = (gear_sort_index + 1) % 3
-			var sort_names := ["▼ By Quality", "▼ By Level", "▼ By Slot"]
+			gear_sort_index = (gear_sort_index + 1) % sort_names.size()
 			btn_gear_sort.text = sort_names[gear_sort_index]
 			if AudioManager: AudioManager.play_sfx("ui_click")
-			show_toast("Sorted Gear: %s" % sort_names[gear_sort_index])
+			_refresh_gear_inventory_grid()
+			show_toast("Gear sorted: %s" % sort_names[gear_sort_index])
 		)
 
 	var btn_rune_sort := $ContentContainer/ViewRunes/MiddleBar.get_node_or_null("SortBtn") as Button
@@ -205,7 +207,7 @@ func _refresh_gear_inventory_grid() -> void:
 		"weapon": "🗡", "amulet": "📿", "ring": "💍",
 		"helmet": "👑", "armor": "🥋", "boots": "👢"
 	}
-	var items: Array[ItemInstance] = SaveManager.get_gear_items()
+	var items: Array[ItemInstance] = _get_sorted_gear_items(SaveManager.get_gear_items(), gear_sort_index)
 	for item in items:
 		if not item or not item.data:
 			continue
@@ -227,6 +229,48 @@ func _refresh_gear_inventory_grid() -> void:
 			_show_gear_details(item_uid)
 		)
 		gear_grid.add_child(button)
+
+
+func _get_sorted_gear_items(items: Array[ItemInstance], sort_index: int) -> Array[ItemInstance]:
+	var sorted_items: Array[ItemInstance] = []
+	for item in items:
+		if item and item.data:
+			sorted_items.append(item)
+
+	var rarity_order := {
+		"common": 0,
+		"uncommon": 1,
+		"rare": 2,
+		"epic": 3,
+		"legendary": 4,
+		"mythic": 5
+	}
+	var slot_order: Array[String] = SaveManager.EQUIPMENT_SLOTS if SaveManager else [
+		"weapon", "helmet", "armor", "boots", "amulet", "ring"
+	]
+	sorted_items.sort_custom(func(a: ItemInstance, b: ItemInstance) -> bool:
+		match sort_index:
+			1:
+				if a.upgrade_level != b.upgrade_level:
+					return a.upgrade_level > b.upgrade_level
+				if a.data.tier != b.data.tier:
+					return a.data.tier > b.data.tier
+			2:
+				var a_slot := slot_order.find(a.data.equipment_slot)
+				var b_slot := slot_order.find(b.data.equipment_slot)
+				if a_slot != b_slot:
+					return a_slot < b_slot
+				return a.data.name.nocasecmp_to(b.data.name) < 0
+			_:
+				if a.data.tier != b.data.tier:
+					return a.data.tier > b.data.tier
+				var a_rarity: int = rarity_order.get(a.rarity.to_lower(), 0)
+				var b_rarity: int = rarity_order.get(b.rarity.to_lower(), 0)
+				if a_rarity != b_rarity:
+					return a_rarity > b_rarity
+		return a.data.name.nocasecmp_to(b.data.name) < 0
+	)
+	return sorted_items
 
 func _setup_gear_detail_modal() -> void:
 	_gear_detail_modal = PanelContainer.new()
