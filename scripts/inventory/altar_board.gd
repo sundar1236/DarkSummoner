@@ -246,8 +246,9 @@ func is_item_compatible(item: ItemInstance, socket_id: int) -> bool:
 	for t in item.data.tags:
 		if supported.has(t):
 			return true
-	if supported.has(item.data.item_type) or supported.has("rune") or supported.has("weapon"):
-		return true
+	# Socket compatibility must come from the item's actual tags. Checking whether
+	# the socket supports a generic tag such as "rune" or "weapon" would make every
+	# item compatible with that socket, even when the item has no matching tag.
 	return false
 
 func _draw() -> void:
