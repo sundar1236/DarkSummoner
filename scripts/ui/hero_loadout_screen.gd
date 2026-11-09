@@ -370,8 +370,6 @@ func _on_star_up_hunter() -> void:
 	if SaveManager:
 		if SaveManager.star_up_character("shadow_hunter"):
 			hunter_stars = SaveManager.character_stars.get("shadow_hunter", hunter_stars + 1)
-			base_display_atk += 280
-			base_display_hp += 950
 			_update_character_ui()
 			show_toast("★ Shadow Hunter Star Up (%d★)! +280 ATK, +950 HP" % hunter_stars)
 			star_up_requested.emit("shadow_hunter")
@@ -389,8 +387,6 @@ func _on_star_up_hunter() -> void:
 	else:
 		if hunter_stars < 6:
 			hunter_stars += 1
-			base_display_atk += 280
-			base_display_hp += 950
 			if AudioManager: AudioManager.play_sfx("upgrade")
 			_update_character_ui()
 			show_toast("★ Shadow Hunter Star Up (%d★)!" % hunter_stars)
