@@ -126,7 +126,7 @@ func start_new_run(char_id: String, start_floor: int = 1) -> void:
 	current_encounter_type = "combat"
 	
 	# Update grid dimensions based on permanent upgrade
-	var dims := SaveManager.get_altar_grid_dimensions()
+	var dims: Vector2i = SaveManager.get_altar_grid_dimensions()
 	grid_manager = GridManager.new(dims.x, dims.y)
 	
 	run_gold = 30 + SaveManager.get_permanent_starting_gold()
