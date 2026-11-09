@@ -83,6 +83,12 @@ func _run_all_tests() -> void:
 	_assert_true(AltarBoard.SOCKET_TO_CELL[8] == Vector2i(1, 1), "2.2 Left spirit vessel maps to virtual cell (1, 1)")
 	_assert_true(AltarBoard.SOCKET_TO_CELL[9] == Vector2i(2, 1), "2.3 Right spirit vessel maps to virtual cell (2, 1)")
 	_assert_true(AltarBoard.SOCKET_TO_CELL[12] == Vector2i(1, 2), "2.4 Prime apex core maps to virtual cell (1, 2)")
+	_assert_true(AltarBoard.CELL_TO_SOCKET.size() == 13, "2.5 Only the 13 canonical socket cells are mapped")
+	_assert_true(board._get_socket_for_cell(Vector2i(1, 0)) == -1, "2.6 Unassigned in-bounds cell (1, 0) has no socket mapping")
+	_assert_true(board._get_socket_for_cell(Vector2i(2, 0)) == -1, "2.7 Unassigned in-bounds cell (2, 0) has no socket mapping")
+	_assert_true(board._get_socket_for_cell(Vector2i(2, 2)) == -1, "2.8 Unassigned in-bounds cell (2, 2) has no socket mapping")
+	_assert_true(board._get_socket_for_cell(Vector2i(0, 4)) == -1, "2.9 Out-of-bounds cell (0, 4) has no socket mapping")
+	_assert_true(board._get_socket_for_cell(Vector2i(4, 0)) == -1, "2.10 Out-of-bounds cell (4, 0) has no socket mapping")
 
 	# -------------------------------------------------------------
 	# Test 3: Locked Sockets Validation (Padlock on 10 & 11)
