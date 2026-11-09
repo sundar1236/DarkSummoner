@@ -15,7 +15,6 @@ signal pause_requested()
 const SafeAreaHelper = preload("res://scripts/ui/safe_area_helper.gd")
 
 @export var move_joystick: VirtualJoystick
-@export var aim_joystick: VirtualJoystick = null
 @export var skill_draft_modal: SkillDraftModal = null
 @export var feedback_banner: PanelContainer = null
 @export var feedback_label: Label = null
@@ -75,8 +74,6 @@ func setup(player: PlayerController) -> void:
 	player_ref = player
 	if is_instance_valid(player_ref):
 		player_ref.move_joystick = move_joystick
-		if aim_joystick:
-			player_ref.aim_joystick = aim_joystick
 		player_ref.dodge_cooldown_updated.connect(_on_dodge_cooldown)
 		player_ref.skill_cooldown_updated.connect(_on_skill_cooldown)
 

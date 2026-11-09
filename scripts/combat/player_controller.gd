@@ -14,7 +14,6 @@ signal skill_cooldown_updated(current: float, max_val: float)
 signal dodge_cooldown_updated(current: float, max_val: float)
 
 @export var move_joystick: VirtualJoystick
-@export var aim_joystick: VirtualJoystick = null
 
 var base_speed: float = 240.0
 var current_speed: float = 240.0
@@ -328,13 +327,8 @@ func _handle_aim_and_attack(delta: float) -> void:
 		
 	var is_moving: bool = move_vec.length_squared() > 0.04 or velocity.length_squared() > 100.0
 	
-	# 1. Dedicated aim joystick override (if explicitly provided in test / custom mode)
-	if aim_joystick and aim_joystick.is_pressed and (aim_joystick.output_vector.length_squared() > 0.01 or aim_joystick.is_aim_and_attack):
-		if aim_joystick.output_vector.length_squared() > 0.01:
-			aim_direction = aim_joystick.output_vector.normalized()
-		is_attacking = true
-	# 2. Responsive Single Directional Movement Pad (Archero Stutter-Step Tactical Combat)
-	elif is_moving:
+	# Single-stick Archero controls: move while moving, auto-aim and attack when stationary.
+	if is_moving:
 		# Moving suppresses attack; hunter aims toward movement vector for intuitive tactical positioning
 		if move_vec.length_squared() > 0.01:
 			aim_direction = move_vec.normalized()

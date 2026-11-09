@@ -178,6 +178,7 @@ func test_tower_progression_level_5_boss_guarantee() -> void:
 	assert_true(GameManager.level_number == 2 and GameManager.current_encounter_type != "boss", "Level 2 is non-boss encounter")
 	
 	GameManager.advance_to_next_level() # to Level 3
+	assert_true(GameManager.level_number == 3 and GameManager.current_encounter_type == "elite", "Level 3 stays an elite combat encounter; the shop is not opened during a run")
 	GameManager.advance_to_next_level() # to Level 4
 	assert_true(GameManager.level_number == 4, "Progresses cleanly through Level 4")
 	
