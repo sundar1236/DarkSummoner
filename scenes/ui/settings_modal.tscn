@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://scripts/ui/settings_modal.gd" id="1_set"]
 
-[node name="SettingsModal" type="Control" node_paths=PackedStringArray("slider_master", "slider_music", "slider_sfx", "slider_ambience", "check_mute", "check_reduced_effects", "btn_resume", "btn_inventory", "btn_abandon")]
+[node name="SettingsModal" type="Control" node_paths=PackedStringArray("slider_master", "slider_music", "slider_sfx", "slider_ambience", "check_mute", "check_screen_shake", "check_reduced_motion", "btn_resume", "btn_inventory", "btn_abandon")]
 process_mode = 3
 layout_mode = 3
 anchors_preset = 15
