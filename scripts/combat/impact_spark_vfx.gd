@@ -2,6 +2,17 @@ class_name ImpactSparkVFX
 extends Node2D
 
 # Crisp impact spark effect triggered upon weapon hits and critical strikes.
+const MAX_ACTIVE_SPARKS: int = 48
+
+static func can_spawn_spark() -> bool:
+	var tree := Engine.get_main_loop() as SceneTree
+	return tree == null or tree.get_nodes_in_group("impact_sparks").size() < MAX_ACTIVE_SPARKS
+
+func _ready() -> void:
+	if get_tree().get_nodes_in_group("impact_sparks").size() >= MAX_ACTIVE_SPARKS:
+		queue_free()
+		return
+	add_to_group("impact_sparks")
 
 var sprite: Sprite2D
 
