@@ -528,7 +528,7 @@ func _toggle_combat_power_modal() -> void:
 				equipped_count += 1
 	var desc_lbl := _info_modal.find_child("StatDescLabel", true, false) as Label
 	if desc_lbl:
-		desc_lbl.text = "TOTAL COMBAT POWER  %s\\n\\nPOWER SOURCES\\nHunter level       %s\\nEquipment (legacy)  %s\\nEquipped gear       %s\\nCharacter stars     %s\\nTalent cards        %s\\n\\nEQUIPPED GEAR BONUSES\\nATK  +%s     HP  +%s\\nCRIT  +%.1f%%     MOVE SPD  +%s\\nATK SPD  +%.1f%%\\n\\nEquipment slots: %d/6\\nRune resonance is calculated separately during runs." % [
+		desc_lbl.text = "TOTAL COMBAT POWER  %s\n\nPOWER SOURCES\nHunter level       %s\nEquipment (legacy)  %s\nEquipped gear       %s\nCharacter stars     %s\nTalent cards        %s\n\nEQUIPPED GEAR BONUSES\nATK  +%s     HP  +%s\nCRIT  +%.1f%%     MOVE SPD  +%s\nATK SPD  +%.1f%%\n\nEquipment slots: %d/6\nRune resonance is calculated separately during runs." % [
 			_format_num(int(breakdown.get("total", 0))),
 			_format_num(int(breakdown.get("base", 0))),
 			_format_num(int(breakdown.get("legacy_gear", 0))),
