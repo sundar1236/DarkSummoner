@@ -81,6 +81,7 @@ func _refresh_tabs() -> void:
 	if not tabs_container:
 		return
 	for child in tabs_container.get_children():
+		tabs_container.remove_child(child)
 		child.queue_free()
 
 	for ch in CharacterDatabase.get_all_characters():
