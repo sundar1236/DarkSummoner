@@ -767,8 +767,7 @@ func get_patrol_reward_status() -> Dictionary:
 	return {
 		"ready": patrol_last_claim <= 0 or remaining == 0,
 		"seconds_remaining": remaining,
-		"gold": 1200 + (player_level * 150),
-		"xp": 400 + (player_level * 50)
+		"gold": 1200 + (player_level * 150)
 	}
 
 func claim_patrol_rewards() -> Dictionary:
@@ -776,11 +775,10 @@ func claim_patrol_rewards() -> Dictionary:
 	if not bool(status.get("ready", false)):
 		return {"ready": false, "seconds_remaining": int(status.get("seconds_remaining", 0))}
 	var base_gold: int = int(status.get("gold", 0))
-	var base_xp: int = int(status.get("xp", 0))
 	add_gold(base_gold)
 	patrol_last_claim = int(Time.get_unix_time_from_system())
 	save_profile()
-	return {"ready": true, "gold": base_gold, "xp": base_xp}
+	return {"ready": true, "gold": base_gold}
 
 func get_combat_power_breakdown() -> Dictionary:
 	var base_power := 2500 * player_level
