@@ -430,7 +430,22 @@ func test_altar_weapon_and_item_moving() -> void:
 	assert_true(blade.grid_pos == old_pos, "Position preserved on move cancel")
 	assert_true(blade.rotation_step == 1, "Rotation restored on move cancel")
 	inv_view.queue_free()
-	
+
+	# 6b. Auto-entering move mode after an invalid rotation must preserve the
+	# pre-rotation orientation so Cancel Move can restore it.
+	var edge_blade := ItemInstance.new(ItemDatabase.get_item("shadow_blade"), Vector2i(3, 0), 0)
+	GameManager.altar_items.append(edge_blade)
+	var edge_inv := inv_scene.instantiate() as InventoryView
+	add_child(edge_inv)
+	edge_inv._select_item(edge_blade, "altar")
+	edge_inv._on_rotate_pressed()
+	assert_true(edge_inv.is_move_mode, "Invalid in-place rotation enters move mode")
+	assert_true(edge_inv.move_orig_rot == 0 and edge_blade.rotation_step == 1, "Move preview rotates while original orientation is retained for rollback")
+	edge_inv.cancel_move_mode()
+	assert_true(edge_blade.rotation_step == 0, "Cancel Move restores orientation after auto-entered rotation mode")
+	assert_true(edge_blade.grid_pos == Vector2i(3, 0), "Cancel Move preserves edge item position")
+	edge_inv.queue_free()
+
 	# 7. Move an item participating in adjacency synergy
 	GameManager.altar_items.clear()
 	var wolf := ItemInstance.new(ItemDatabase.get_item("wolf_core"), Vector2i(0, 0), 0)

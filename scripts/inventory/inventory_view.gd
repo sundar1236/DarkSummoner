@@ -281,23 +281,28 @@ func _update_details_panel() -> void:
 func _on_rotate_pressed() -> void:
 	if not selected_item:
 		return
-		
+
+	var previous_rotation := selected_item.rotation_step
 	selected_item.rotate_clockwise()
 	if AudioManager:
 		AudioManager.play_sfx("item_rotate")
-		
+
 	if is_move_mode:
-		# In move mode: rotation affects live destination preview
+		# In move mode: rotation affects the live destination preview.
 		if altar_board:
 			altar_board.queue_redraw()
 	elif selected_source == "altar":
-		# Not in move mode: if fits at current pos, commit; if not, enter move mode with rotated shape!
+		# Keep the original orientation as the cancel snapshot when the rotated
+		# footprint cannot remain in its current position.
 		if GameManager.grid_manager.can_place_item_ignoring(selected_item, selected_item.grid_pos, GameManager.altar_items, selected_item):
 			GameManager.recalculate_stats_and_synergies()
 		else:
-			# Auto-enter move mode so player can place the rotated item in any valid spot
+			selected_item.rotation_step = previous_rotation
 			start_move_mode()
-	
+			selected_item.rotate_clockwise()
+			if altar_board:
+				altar_board.queue_redraw()
+
 	refresh_inventory_ui()
 
 func _on_move_pressed() -> void:
