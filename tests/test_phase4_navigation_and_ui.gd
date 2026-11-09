@@ -206,10 +206,18 @@ func test_campaign_screen_features() -> void:
 	camp._on_start_pressed()
 	assert_test(camp_res.start and SaveManager.energy == 5, "Start allowed when Energy >= 5, deducting exactly 5 Energy")
 	
-	# Patrol Hunt Claim
-	var pre_gold := SaveManager.profile_gold
+	# Patrol rewards can be claimed once per eight-hour cycle.
+	var old_patrol_claim: int = SaveManager.patrol_last_claim
+	var old_profile_gold: int = SaveManager.profile_gold
+	SaveManager.patrol_last_claim = 0
 	camp._on_hunt_pressed()
-	assert_test(SaveManager.profile_gold >= pre_gold, "Patrol Hunt claim adds gold to persistent profile")
+	var claimed_profile_gold: int = SaveManager.profile_gold
+	assert_test(claimed_profile_gold > old_profile_gold, "Ready Patrol Rewards add Gold to the persistent profile")
+	camp._on_hunt_pressed()
+	assert_test(SaveManager.profile_gold == claimed_profile_gold, "Patrol Rewards cannot be claimed repeatedly during cooldown")
+	assert_test(int(SaveManager.get_patrol_reward_status().get("seconds_remaining", 0)) > 0, "Patrol claim starts the eight-hour cooldown")
+	SaveManager.patrol_last_claim = old_patrol_claim
+	SaveManager.profile_gold = old_profile_gold
 	
 	camp.queue_free()
 	await get_tree().process_frame
