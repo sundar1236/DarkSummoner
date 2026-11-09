@@ -606,6 +606,7 @@ func test_initial_three_character_draft() -> void:
 	var original_unlocked: Array[String] = SaveManager.unlocked_characters.duplicate()
 	var original_active_id: String = SaveManager.active_character_id
 	var original_selection_complete: bool = SaveManager.has_completed_initial_character_selection
+	SaveManager.has_completed_initial_character_selection = false
 	var original_current_character: CharacterData = GameManager.current_character
 	var scene := load("res://scenes/characters/character_select_view.tscn") as PackedScene
 	assert_true(scene != null, "First-run character selection scene loads")
