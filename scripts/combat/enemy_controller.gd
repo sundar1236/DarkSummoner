@@ -385,6 +385,9 @@ func _on_death() -> void:
 	if is_dead:
 		return
 	is_dead = true
+	if SaveManager:
+		SaveManager.record_daily_mission_progress("enemy_slayer", 1)
+		SaveManager.record_achievement_progress("abyssal_slayer", 1)
 	var player_stats: Dictionary = GameManager.get_player_effective_stats()
 	var kill_heal: float = float(player_stats.get("hp_on_kill", 0.0))
 	if kill_heal > 0.0:
