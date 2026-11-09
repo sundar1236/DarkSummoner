@@ -35,6 +35,11 @@ var _toast_label: Label = null
 func _ready() -> void:
 	_setup_buttons()
 	_setup_toast_label()
+	visibility_changed.connect(func():
+		if is_visible_in_tree():
+			_refresh_daily_missions()
+			_refresh_achievements()
+	)
 	if SaveManager:
 		SaveManager.daily_missions_changed.connect(_refresh_daily_missions)
 		SaveManager.achievements_changed.connect(_refresh_achievements)
@@ -195,12 +200,12 @@ func _refresh_daily_offer_buttons() -> void:
 
 
 func _refresh_daily_missions() -> void:
-	if not SaveManager or not daily_mission_list:
+	if not is_visible_in_tree() or not SaveManager or not daily_mission_list:
 		return
 	_populate_progress_rows(daily_mission_list, SaveManager.get_daily_missions(), false)
 
 func _refresh_achievements() -> void:
-	if not SaveManager or not achievements_list:
+	if not is_visible_in_tree() or not SaveManager or not achievements_list:
 		return
 	_populate_progress_rows(achievements_list, SaveManager.get_achievements(), true)
 
