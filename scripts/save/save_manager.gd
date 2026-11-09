@@ -21,6 +21,7 @@ var profile_gold: int = 5000
 var player_name: String = "Hunter Raven"
 var player_level: int = 5
 var active_character_id: String = "shadow_hunter"
+var has_completed_initial_character_selection: bool = false
 var difficulty: String = "normal" # "normal", "hard", "torment"
 var patrol_last_claim: int = 0
 var chapter_stars: Dictionary = { 1: 3, 2: 1, 3: 0 }
@@ -148,6 +149,19 @@ func spend_shades(amount: int) -> bool:
 
 func is_character_unlocked(char_id: String) -> bool:
 	return unlocked_characters.has(char_id)
+
+func complete_initial_character_selection(char_id: String) -> bool:
+	if has_completed_initial_character_selection:
+		return false
+	if not ["shadow_hunter", "storm_reaper", "soul_binder"].has(char_id):
+		return false
+	if not unlocked_characters.has(char_id):
+		unlocked_characters.append(char_id)
+	active_character_id = char_id
+	has_completed_initial_character_selection = true
+	save_profile()
+	profile_changed.emit()
+	return true
 
 func unlock_character(char_id: String, shade_cost: int = 0) -> bool:
 	if is_character_unlocked(char_id):
@@ -617,6 +631,7 @@ func reset_all_data() -> void:
 	player_name = "Hunter Raven"
 	player_level = 5
 	active_character_id = "shadow_hunter"
+	has_completed_initial_character_selection = false
 	difficulty = "normal"
 	patrol_last_claim = 0
 	chapter_stars = { 1: 3, 2: 1, 3: 0 }
@@ -703,6 +718,7 @@ func save_profile() -> void:
 		"player_name": player_name,
 		"player_level": player_level,
 		"active_character_id": active_character_id,
+		"has_completed_initial_character_selection": has_completed_initial_character_selection,
 		"difficulty": difficulty,
 		"patrol_last_claim": patrol_last_claim,
 		"chapter_stars": chapter_stars,
@@ -761,6 +777,7 @@ func load_profile() -> void:
 	player_name = dict.get("player_name", "Hunter Raven")
 	player_level = dict.get("player_level", 5)
 	active_character_id = dict.get("active_character_id", "shadow_hunter")
+	has_completed_initial_character_selection = bool(dict.get("has_completed_initial_character_selection", false))
 	difficulty = dict.get("difficulty", "normal")
 	patrol_last_claim = dict.get("patrol_last_claim", 0)
 	daily_free_energy_claimed = dict.get("daily_free_energy_claimed", false)

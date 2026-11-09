@@ -33,6 +33,7 @@ func _ready() -> void:
 	test_characters_data_and_abilities()
 	test_audio_buses_and_volumes()
 	test_character_selection_and_unlock_flow()
+	test_initial_three_character_draft()
 	test_opening_navigation_flow()
 	test_story_intro_and_illustrated_assets()
 	test_altar_weapon_and_item_moving()
@@ -598,6 +599,48 @@ func test_character_selection_and_unlock_flow() -> void:
 		assert_true(csv.lbl_unlock_requirement.text.contains("80 SHADES"), "Shows 80 Shades unlock requirement")
 		
 	csv.queue_free()
+
+# 14b. Test First-Run Three-Champion Selection
+func test_initial_three_character_draft() -> void:
+	print("--- Test 14b: First-Run Three-Champion Selection ---")
+	var original_unlocked: Array[String] = SaveManager.unlocked_characters.duplicate()
+	var original_active_id: String = SaveManager.active_character_id
+	var original_selection_complete: bool = SaveManager.has_completed_initial_character_selection
+	SaveManager.has_completed_initial_character_selection = false
+	var original_current_character: CharacterData = GameManager.current_character
+	var scene := load("res://scenes/characters/character_select_view.tscn") as PackedScene
+	assert_true(scene != null, "First-run character selection scene loads")
+	if not scene:
+		return
+	assert_true(ResourceLoader.exists("res://assets/art/ui_reference/card_full_shadow_hunter.png"), "Shadow Hunter full character artwork is available")
+	assert_true(ResourceLoader.exists("res://assets/art/ui_reference/card_full_storm_reaper.png"), "Storm Reaper full character artwork is available")
+	assert_true(ResourceLoader.exists("res://assets/art/ui_reference/card_full_soul_binder.png"), "Soul Binder full character artwork is available")
+	var picker := scene.instantiate() as CharacterSelectView
+	add_child(picker)
+	var controller := MainController.new()
+	controller.character_select_view = picker
+	controller._show_after_story()
+	picker.start_run_requested.connect(controller._on_character_selection_confirmed)
+	assert_true(picker.visible and picker.is_initial_selection, "First launch opens the character draft after the story")
+	assert_true(not picker.btn_back.visible, "Initial character choice cannot be skipped")
+	assert_true(picker.tabs_container.get_child_count() == 3, "All three illustrated champions are displayed together")
+	assert_true(not picker.btn_action.disabled, "Any of the three champions can be chosen on first launch")
+	picker._select_character("soul_binder")
+	var chosen_signal := {"character_id": ""}
+	picker.start_run_requested.connect(func(char_id: String): chosen_signal.character_id = char_id)
+	picker._on_action_pressed()
+	assert_true(SaveManager.has_completed_initial_character_selection, "Initial champion choice is persisted")
+	assert_true(SaveManager.active_character_id == "soul_binder", "Chosen champion becomes the active character")
+	assert_true(SaveManager.is_character_unlocked("soul_binder"), "Chosen champion is permanently unlocked")
+	assert_true(chosen_signal.character_id == "soul_binder", "Selection confirmation emits the chosen character ID")
+	assert_true(not picker.visible, "Confirming the first champion continues into the hub")
+	SaveManager.unlocked_characters = original_unlocked
+	SaveManager.active_character_id = original_active_id
+	SaveManager.has_completed_initial_character_selection = original_selection_complete
+	GameManager.current_character = original_current_character
+	SaveManager.save_profile()
+	controller.free()
+	picker.queue_free()
 
 # 15. Test Opening Experience & Main Menu Navigation
 func test_opening_navigation_flow() -> void:
