@@ -12,6 +12,7 @@ signal enemy_defeated(enemy_node: Node2D)
 @export var enemy_type: String = "swarmer" # "swarmer", "cultist", "elite"
 var max_hp: float = 45.0
 var hp: float = 45.0
+var is_dead: bool = false
 var move_speed: float = 140.0
 var contact_damage: float = 12.0
 var attack_cooldown: float = 1.4
@@ -271,6 +272,8 @@ func _handle_burn(delta: float) -> void:
 		take_damage(5.0, false)
 
 func take_damage(amount: float, is_crit: bool) -> void:
+	if is_dead or amount <= 0.0:
+		return
 	hp = maxf(0.0, hp - amount)
 	if health_bar:
 		health_bar.value = hp
@@ -296,6 +299,9 @@ func take_damage(amount: float, is_crit: bool) -> void:
 		_on_death()
 
 func _on_death() -> void:
+	if is_dead:
+		return
+	is_dead = true
 	GameManager.add_run_shades(shade_reward)
 	if AudioManager:
 		AudioManager.play_sfx("enemy_death")
