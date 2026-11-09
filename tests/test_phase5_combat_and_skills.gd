@@ -187,6 +187,11 @@ func test_difficulty_scaling_and_mini_boss() -> void:
 	var difficulty_data: Dictionary = SaveManager.get_difficulty_multipliers()
 	assert_true(difficulty_data.get("boss_hp", 1.0) == 2.0, "Torment mode also scales boss health")
 	assert_true(difficulty_data.get("boss_damage", 1.0) == 1.5, "Torment mode also scales boss damage")
+	var scaled_boss := BossController.new()
+	scaled_boss.setup(1)
+	assert_true(is_equal_approx(scaled_boss.max_hp, 760.0), "Torment mode doubles floor boss health")
+	assert_true(is_equal_approx(scaled_boss.damage_multiplier, 1.5), "Torment mode scales floor boss attack damage")
+	scaled_boss.free()
 
 	SaveManager.difficulty = original_difficulty
 	normal_enemy.free()
