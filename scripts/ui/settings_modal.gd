@@ -70,7 +70,7 @@ func _setup_signals() -> void:
 func _on_reduced_effects_toggled(enabled: bool) -> void:
 	if not SaveManager:
 		return
-	SaveManager.settings_data["reduced_effects"] = enabled
+	SaveManager.settings_data["reduced_effects"] = enable
 	for background in get_tree().get_nodes_in_group("arena_backgrounds"):
 		if background.has_method("set_reduced_effects"):
 			background.set_reduced_effects(enabled)
