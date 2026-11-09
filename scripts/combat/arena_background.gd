@@ -5,6 +5,7 @@ extends Node2D
 # glowing summoning circle runes, corner braziers, and dynamic torchlight flicker.
 
 var flicker_timer: float = 0.0
+var reduced_effects: bool = false
 var floor_theme_name: String = "Abyssal Ruins"
 var floor_background_color: Color = Color(0.05, 0.03, 0.07, 1.0)
 var tile_base_color: Color = Color(0.09, 0.06, 0.13, 0.95)
@@ -62,6 +63,17 @@ func set_floor_theme(floor_num: int) -> void:
 			rune_color = Color(1.0, 0.3, 0.38, 0.9)
 			brazier_glow_color = Color(1.0, 0.12, 0.2, 0.2)
 			brazier_flame_color = Color(1.0, 0.42, 0.25, 0.95)
+	queue_redraw()
+
+func _ready() -> void:
+	add_to_group("arena_backgrounds")
+	set_reduced_effects(bool(SaveManager.settings_data.get("reduced_effects", false)))
+
+func set_reduced_effects(enabled: bool) -> void:
+	reduced_effects = enabled
+	set_process(not enabled)
+	if enabled:
+		flicker_timer = 0.0
 	queue_redraw()
 
 func _shade_color(base: Color, amount: float) -> Color:

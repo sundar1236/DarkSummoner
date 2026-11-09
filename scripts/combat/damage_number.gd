@@ -29,13 +29,16 @@ func setup(amount: float, is_crit: bool, start_pos: Vector2) -> void:
 	label.size = Vector2(80, 30)
 	add_child(label)
 	
+	var reduced_effects := bool(SaveManager.settings_data.get("reduced_effects", false)) if SaveManager else false
+	var fade_duration := 0.32 if reduced_effects else 0.55
 	var tween := create_tween().set_parallel(true)
-	# Float upward
-	var target_y := global_position.y - (55.0 if is_crit else 40.0)
-	tween.tween_property(self, "global_position:y", target_y, 0.55).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-	# Scale punch
-	if is_crit:
-		tween.tween_property(self, "scale", Vector2(1.0, 1.0), 0.55).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	# Float upward with less motion on low-effects mode.
+	var travel_distance := 22.0 if reduced_effects else (55.0 if is_crit else 40.0)
+	var target_y := global_position.y - travel_distance
+	tween.tween_property(self, "global_position:y", target_y, fade_duration).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	# Keep critical-hit scale animation disabled on low-effects mode.
+	if is_crit and not reduced_effects:
+		tween.tween_property(self, "scale", Vector2(1.0, 1.0), fade_duration).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 	# Fade out
-	tween.tween_property(self, "modulate:a", 0.0, 0.55).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	tween.tween_property(self, "modulate:a", 0.0, fade_duration).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
 	tween.chain().tween_callback(queue_free)
