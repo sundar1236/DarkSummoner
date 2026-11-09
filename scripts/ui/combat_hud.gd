@@ -22,6 +22,7 @@ const SafeAreaHelper = preload("res://scripts/ui/safe_area_helper.gd")
 @export var player_hp_bar: ProgressBar
 @export var player_hp_label: Label
 @export var floor_level_label: Label
+@export var floor_theme_label: Label
 @export var gold_label: Label
 @export var shades_label: Label
 
@@ -113,6 +114,12 @@ func _update_displays() -> void:
 	_on_hp_changed(GameManager.player_hp, GameManager.player_max_hp)
 	_on_xp_changed(GameManager.run_xp, GameManager.run_xp_to_next)
 	update_revives_display()
+
+
+func set_floor_theme_name(theme_name: String) -> void:
+	if floor_theme_label:
+		floor_theme_label.text = theme_name.to_upper()
+
 
 func _on_speed_toggle() -> void:
 	current_speed_scale = 2.0 if current_speed_scale == 1.0 else 1.0
