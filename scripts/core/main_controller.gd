@@ -23,12 +23,15 @@ var is_inventory_from_pause: bool = false
 
 func _ready() -> void:
 	_connect_subsystems()
-	if main_shell:
-		_show_screen("shell")
-	elif intro_screen:
+	if SaveManager and not SaveManager.active_character_id.is_empty():
+		GameManager.current_character = CharacterDatabase.get_character(SaveManager.active_character_id)
+	if intro_screen:
 		_show_screen("intro")
+	elif story_intro:
+		_show_screen("story_intro")
+		story_intro.start_story()
 	else:
-		_show_screen("menu")
+		_show_after_story()
 
 func _connect_subsystems() -> void:
 	# 1. Intro Screen Signal -> transitions to Story Prologue
@@ -38,17 +41,12 @@ func _connect_subsystems() -> void:
 				_show_screen("story_intro")
 				story_intro.start_story()
 			else:
-				_show_screen("menu")
+				_show_after_story()
 		)
 
-	# 1b. Story Intro Signal -> transitions to Main Menu or Main Shell
+	# 1b. Story Intro Signal -> first-time character draft, then the hub.
 	if story_intro:
-		story_intro.story_completed.connect(func():
-			if main_shell:
-				_show_screen("shell")
-			else:
-				_show_screen("menu")
-		)
+		story_intro.story_completed.connect(_show_after_story)
 
 	# 1c. Main Shell Signals (Chrome Hub)
 	if main_shell:
@@ -84,8 +82,8 @@ func _connect_subsystems() -> void:
 
 	# 3. Character Select Signals
 	if character_select_view:
-		character_select_view.start_run_requested.connect(_on_start_run_requested)
-		character_select_view.back_requested.connect(func(): _show_screen("menu"))
+		character_select_view.start_run_requested.connect(_on_character_selection_confirmed)
+		character_select_view.back_requested.connect(func(): _show_screen("shell" if main_shell else "menu"))
 
 	# 4. Progression View Signals (Sanctuary)
 	if progression_view:
@@ -143,6 +141,21 @@ func _connect_subsystems() -> void:
 			_clear_arena()
 			_show_screen("shell" if main_shell else "menu")
 		)
+
+func _show_after_story() -> void:
+	if SaveManager and not SaveManager.has_completed_initial_character_selection and character_select_view:
+		character_select_view.set_initial_selection_mode(true)
+		_show_screen("character_select")
+	else:
+		_show_screen("shell" if main_shell else "menu")
+
+func _on_character_selection_confirmed(char_id: String) -> void:
+	if character_select_view and character_select_view.is_initial_selection:
+		GameManager.current_character = CharacterDatabase.get_character(char_id)
+		character_select_view.set_initial_selection_mode(false)
+		_show_screen("shell" if main_shell else "menu")
+		return
+	_on_start_run_requested(char_id)
 
 func _show_screen(screen_name: String) -> void:
 	if intro_screen: intro_screen.visible = (screen_name == "intro")
