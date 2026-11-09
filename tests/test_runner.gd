@@ -619,7 +619,8 @@ func test_initial_three_character_draft() -> void:
 	add_child(picker)
 	var controller := MainController.new()
 	controller.character_select_view = picker
-	add_child(controller)
+	controller._show_after_story()
+	picker.start_run_requested.connect(controller._on_character_selection_confirmed)
 	assert_true(picker.visible and picker.is_initial_selection, "First launch opens the character draft after the story")
 	assert_true(not picker.btn_back.visible, "Initial character choice cannot be skipped")
 	assert_true(picker.tabs_container.get_child_count() == 3, "All three illustrated champions are displayed together")
@@ -638,7 +639,7 @@ func test_initial_three_character_draft() -> void:
 	SaveManager.has_completed_initial_character_selection = original_selection_complete
 	GameManager.current_character = original_current_character
 	SaveManager.save_profile()
-	controller.queue_free()
+	controller.free()
 	picker.queue_free()
 
 # 15. Test Opening Experience & Main Menu Navigation
