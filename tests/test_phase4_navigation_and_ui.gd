@@ -258,6 +258,8 @@ func test_shop_screen_atomic_purchases() -> void:
 	var shop := scene.instantiate() as ShopScreen
 	add_child(shop)
 	await get_tree().process_frame
+	assert_test(shop.daily_mission_list.get_child_count() == 3, "Daily Hunts panel displays three missions")
+	assert_test(shop.achievements_list.get_child_count() == 3, "Hunter Achievements panel displays three milestones")
 
 	# Real-money offers must not mint resources without a billing provider.
 	SaveManager.chapter_pack_purchased = false
@@ -304,6 +306,44 @@ func test_shop_screen_atomic_purchases() -> void:
 	shop._buy_daily_item(elixir_btn, "healing_elixir", 45, false, "Elixirs acquired")
 	assert_test(SaveManager.get_shop_item_quantity("healing_elixir") == 2, "Healing Elixir offer stores two bonus potions")
 	assert_test(SaveManager.consume_shop_item("healing_elixir", 2) == 2 and SaveManager.get_shop_item_quantity("healing_elixir") == 0, "Run startup can consume the purchased potion charges")
+
+	# Daily missions and lifetime achievements have independent, claim-once rewards.
+	SaveManager.daily_mission_progress.clear()
+	SaveManager.daily_mission_claimed.clear()
+	SaveManager.record_daily_mission_progress("enemy_slayer", 20)
+	var slayer_mission: Dictionary = {}
+	for mission in SaveManager.get_daily_missions():
+		if str(mission.get("id", "")) == "enemy_slayer":
+			slayer_mission = mission
+	assert_test(bool(slayer_mission.get("completed", false)), "Defeating 20 enemies completes the daily slayer mission")
+	var mission_gold_before: int = SaveManager.profile_gold
+	var mission_shades_before: int = SaveManager.shades
+	assert_test(SaveManager.claim_daily_mission_reward("enemy_slayer"), "Completed daily mission reward can be claimed")
+	assert_test(SaveManager.profile_gold == mission_gold_before + 250 and SaveManager.shades == mission_shades_before + 5, "Daily mission grants its displayed Gold and Shades")
+	assert_test(not SaveManager.claim_daily_mission_reward("enemy_slayer"), "Daily mission reward cannot be claimed twice")
+
+	SaveManager.achievement_progress["abyssal_slayer"] = 99
+	SaveManager.record_achievement_progress("abyssal_slayer", 1)
+	var slayer_achievement: Dictionary = {}
+	for achievement in SaveManager.get_achievements():
+		if str(achievement.get("id", "")) == "abyssal_slayer":
+			slayer_achievement = achievement
+	assert_test(bool(slayer_achievement.get("completed", false)), "Lifetime slayer achievement completes at 100 kills")
+	var achievement_gold_before: int = SaveManager.profile_gold
+	var achievement_shades_before: int = SaveManager.shades
+	assert_test(SaveManager.claim_achievement_reward("abyssal_slayer"), "Completed lifetime achievement reward can be claimed")
+	assert_test(SaveManager.profile_gold == achievement_gold_before + 500 and SaveManager.shades == achievement_shades_before + 10, "Achievement grants its Gold and Shades rewards")
+	assert_test(not SaveManager.claim_achievement_reward("abyssal_slayer"), "Lifetime achievement reward cannot be claimed twice")
+	SaveManager.save_profile()
+	SaveManager.load_profile()
+	assert_test(bool(SaveManager.daily_mission_claimed.get("enemy_slayer", false)) and bool(SaveManager.achievement_claimed.get("abyssal_slayer", false)), "Daily and lifetime reward claims persist after profile reload")
+
+	# Daily mission progress resets with the local shop date; lifetime achievements remain.
+	SaveManager.daily_shop_date_key = "2000-01-01"
+	SaveManager.daily_mission_progress["enemy_slayer"] = 12
+	SaveManager.refresh_daily_shop_state()
+	assert_test(SaveManager.daily_mission_progress.is_empty(), "Daily mission progress resets at the next local day")
+	assert_test(int(SaveManager.achievement_progress.get("abyssal_slayer", 0)) == 100, "Lifetime achievement progress survives daily reset")
 
 	# Free energy is limited by the local calendar date and has a real reset countdown.
 	SaveManager.daily_free_energy_claim_date = ""

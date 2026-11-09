@@ -17,6 +17,8 @@ signal subtab_changed(tab_name: String)
 @onready var btn_item4: Button = $ScrollContainer/VBox/DailyShopSection/Grid3x2/Item4/VBox/Btn
 @onready var btn_item5: Button = $ScrollContainer/VBox/DailyShopSection/Grid3x2/Item5/VBox/Btn
 @onready var btn_item6: Button = $ScrollContainer/VBox/DailyShopSection/Grid3x2/Item6/VBox/Btn
+@onready var daily_mission_list: VBoxContainer = $ScrollContainer/VBox/DailyMissionsCard/Content/MissionList
+@onready var achievements_list: VBoxContainer = $ScrollContainer/VBox/AchievementsCard/Content/AchievementsList
 
 # Bottom Subtabs
 @onready var btn_tab_daily: Button = $BottomSubTabs/HBox/Tab1
@@ -33,7 +35,14 @@ var _toast_label: Label = null
 func _ready() -> void:
 	_setup_buttons()
 	_setup_toast_label()
+	visibility_changed.connect(func():
+		if is_visible_in_tree():
+			_refresh_daily_missions()
+			_refresh_achievements()
+	)
 	if SaveManager:
+		SaveManager.daily_missions_changed.connect(_refresh_daily_missions)
+		SaveManager.achievements_changed.connect(_refresh_achievements)
 		SaveManager.refresh_daily_shop_state()
 		remaining_seconds = SaveManager.get_seconds_until_daily_reset()
 		_daily_date_key = SaveManager.daily_shop_date_key
@@ -41,6 +50,8 @@ func _ready() -> void:
 			btn_chapter_pack.text = "STORE UNAVAILABLE"
 			btn_chapter_pack.disabled = true
 		_refresh_daily_offer_buttons()
+		_refresh_daily_missions()
+		_refresh_achievements()
 	_update_timer_text()
 
 func _setup_toast_label() -> void:
@@ -187,6 +198,83 @@ func _refresh_daily_offer_buttons() -> void:
 			btn_item5.text = str(btn_item5.get_meta("default_daily_text"))
 			btn_item5.disabled = false
 
+
+func _refresh_daily_missions() -> void:
+	if not is_visible_in_tree() or not SaveManager or not daily_mission_list:
+		return
+	_populate_progress_rows(daily_mission_list, SaveManager.get_daily_missions(), false)
+
+func _refresh_achievements() -> void:
+	if not is_visible_in_tree() or not SaveManager or not achievements_list:
+		return
+	_populate_progress_rows(achievements_list, SaveManager.get_achievements(), true)
+
+func _populate_progress_rows(container: VBoxContainer, entries: Array[Dictionary], is_achievement: bool) -> void:
+	for child in container.get_children():
+		container.remove_child(child)
+		child.queue_free()
+
+	for entry in entries:
+		var row := HBoxContainer.new()
+		row.custom_minimum_size = Vector2(0, 64)
+		row.add_theme_constant_override("separation", 10)
+		var details := VBoxContainer.new()
+		details.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		details.add_theme_constant_override("separation", 2)
+
+		var title_label := Label.new()
+		title_label.text = str(entry.get("title", "Hunter Feat"))
+		title_label.add_theme_font_size_override("font_size", 15)
+		title_label.add_theme_color_override("font_color", Color(0.94, 0.92, 0.84, 1.0))
+		details.add_child(title_label)
+
+		var progress_bar := ProgressBar.new()
+		progress_bar.custom_minimum_size = Vector2(0, 10)
+		progress_bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		progress_bar.show_percentage = false
+		progress_bar.max_value = maxi(1, int(entry.get("target", 1)))
+		progress_bar.value = int(entry.get("progress", 0))
+		details.add_child(progress_bar)
+
+		var reward_label := Label.new()
+		reward_label.text = "%d/%d   ·   +%d Gold   ·   +%d Shades" % [
+			int(entry.get("progress", 0)),
+			int(entry.get("target", 1)),
+			int(entry.get("reward_gold", 0)),
+			int(entry.get("reward_shades", 0))
+		]
+		reward_label.add_theme_font_size_override("font_size", 11)
+		reward_label.add_theme_color_override("font_color", Color(0.68, 0.74, 0.84, 1.0))
+		details.add_child(reward_label)
+		row.add_child(details)
+
+		var claim_button := Button.new()
+		claim_button.custom_minimum_size = Vector2(104, 42)
+		claim_button.add_theme_font_size_override("font_size", 13)
+		if bool(entry.get("claimed", false)):
+			claim_button.text = "CLAIMED"
+			claim_button.disabled = true
+		elif bool(entry.get("completed", false)):
+			claim_button.text = "CLAIM"
+			claim_button.disabled = false
+		else:
+			claim_button.text = "IN PROGRESS"
+			claim_button.disabled = true
+		var entry_id: String = str(entry.get("id", ""))
+		claim_button.pressed.connect(_on_progress_reward_claimed.bind(entry_id, is_achievement))
+		row.add_child(claim_button)
+		container.add_child(row)
+
+func _on_progress_reward_claimed(entry_id: String, is_achievement: bool) -> void:
+	if not SaveManager:
+		return
+	if is_achievement:
+		SaveManager.claim_achievement_reward(entry_id)
+	else:
+		SaveManager.claim_daily_mission_reward(entry_id)
+	_refresh_daily_missions()
+	_refresh_achievements()
+
 func _process(delta: float) -> void:
 	_elapsed += delta
 	if _elapsed >= 1.0:
@@ -197,6 +285,7 @@ func _process(delta: float) -> void:
 			if _daily_date_key != SaveManager.daily_shop_date_key:
 				_daily_date_key = SaveManager.daily_shop_date_key
 				_refresh_daily_offer_buttons()
+				_refresh_daily_missions()
 		else:
 			remaining_seconds = maxi(0, remaining_seconds - 1)
 		_update_timer_text()

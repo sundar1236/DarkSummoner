@@ -445,7 +445,10 @@ func complete_current_level() -> void:
 		return # Prevent duplicate claim!
 	has_claimed_level_reward = true
 	is_combat_active = false
-	
+	if SaveManager:
+		SaveManager.record_daily_mission_progress("encounter_clearer", 1)
+		SaveManager.record_achievement_progress("tower_climber", 1)
+
 	if level_number == 5:
 		# Floor Boss Defeated!
 		if AudioManager:
