@@ -678,14 +678,7 @@ func _handle_touch_up(pos: Vector2) -> void:
 	is_dragging = false
 
 	if inventory_view and inventory_view.selected_item and release_socket != -1:
-		var sel := inventory_view.selected_item
-		var target_cell: Vector2i = SOCKET_TO_CELL.get(release_socket, Vector2i(-999, -999))
-		if release_socket != drag_from_socket and is_item_compatible(sel, release_socket):
-			if GameManager.can_move_item_to(sel, target_cell):
-				inventory_view.commit_move(target_cell)
-			else:
-				if AudioManager: AudioManager.play_sfx("ui_error")
-		elif release_socket != drag_from_socket:
+		if not _try_drop_on_socket(release_socket):
 			if AudioManager: AudioManager.play_sfx("ui_error")
 
 	# Releasing outside a socket cancels the relocation without changing the item.
@@ -693,6 +686,32 @@ func _handle_touch_up(pos: Vector2) -> void:
 	drag_from_socket = -1
 	hover_cell = Vector2i(-999, -999)
 	queue_redraw()
+
+func _try_drop_on_socket(socket_id: int) -> bool:
+	if not inventory_view or not inventory_view.selected_item:
+		return false
+	if socket_id < 0 or socket_id >= SOCKET_DEFS.size():
+		return false
+	if socket_id == drag_from_socket:
+		return true
+
+	var selected := inventory_view.selected_item
+	var target_item := _get_item_in_socket(socket_id)
+	if target_item and target_item != selected and GameManager.can_merge_items(selected, target_item):
+		var merged := GameManager.merge_items(selected, target_item)
+		if not merged:
+			return false
+		inventory_view.is_move_mode = false
+		inventory_view._select_item(merged, "altar")
+		inventory_view.refresh_inventory_ui()
+		return true
+
+	if not is_item_compatible(selected, socket_id):
+		return false
+	var target_cell: Vector2i = SOCKET_TO_CELL[socket_id]
+	if not GameManager.can_move_item_to(selected, target_cell):
+		return false
+	return inventory_view.commit_move(target_cell)
 
 func _find_best_placement_for_cell(item: ItemInstance, clicked_cell: Vector2i) -> Vector2i:
 	for offset in item.get_rotated_shape():
