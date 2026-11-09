@@ -166,9 +166,10 @@ func _handle_hit(target: Node) -> void:
 		# Enemy projectile hits player
 		if target.has_method("take_player_damage"):
 			target.take_player_damage(damage)
-			var spark = ImpactSparkVFXClass.new()
-			spark.setup(false, global_position, -direction, Color(1.0, 0.3, 0.3))
-			get_parent().add_child(spark)
+			if ImpactSparkVFXClass.can_spawn_spark():
+				var spark = ImpactSparkVFXClass.new()
+				spark.setup(false, global_position, -direction, Color(1.0, 0.3, 0.3))
+				get_parent().add_child(spark)
 			queue_free()
 		elif target is TileMap or target is StaticBody2D:
 			queue_free()
