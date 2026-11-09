@@ -53,6 +53,7 @@ func _ready() -> void:
 			tab_buttons[idx].pressed.connect(func(): select_tab(idx))
 	if SaveManager:
 		SaveManager.profile_changed.connect(refresh_badges)
+		SaveManager.daily_missions_changed.connect(refresh_badges)
 		SaveManager.energy_changed.connect(func(_c, _m): refresh_badges())
 	refresh_badges()
 	_update_tab_visuals()
@@ -70,8 +71,13 @@ func refresh_badges() -> void:
 	if not SaveManager: return
 	SaveManager.refresh_daily_shop_state()
 	if badge_shop:
-		# Free daily energy available
-		badge_shop.visible = not SaveManager.daily_free_energy_claimed
+		var claimable_mission := false
+		for mission in SaveManager.get_daily_missions():
+			if bool(mission.get("completed", false)) and not bool(mission.get("claimed", false)):
+				claimable_mission = true
+				break
+		var free_energy_available := not SaveManager.daily_free_energy_claimed
+		badge_shop.visible = free_energy_available or claimable_mission
 	if badge_gear:
 		# Character can be starred up
 		var shards: int = SaveManager.character_shards.get("shadow_hunter", 0)
