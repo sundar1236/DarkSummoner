@@ -95,6 +95,7 @@ func test_persistent_equipment_slots() -> void:
 	print("--- Test: Persistent Six-Slot Hunter Equipment ---")
 	var original_inventory: Array[Dictionary] = SaveManager.gear_inventory.duplicate(true)
 	var original_equipped: Dictionary = SaveManager.equipped_gear.duplicate(true)
+	var original_gold: int = SaveManager.profile_gold
 
 	assert_true(SaveManager.EQUIPMENT_SLOTS.size() == 6, "Six equipment slots are registered")
 	for slot_name in SaveManager.EQUIPMENT_SLOTS:
@@ -112,6 +113,10 @@ func test_persistent_equipment_slots() -> void:
 
 	var gear_stats: Dictionary = SaveManager.get_equipped_gear_stats()
 	assert_true(gear_stats.get("bonus_hp", 0.0) >= 18.0, "Equipped gear contributes passive HP")
+	var old_upgrade_level: int = restored_helm.upgrade_level
+	assert_true(SaveManager.upgrade_equipped_gear("helmet"), "Blacksmith upgrades the equipped item")
+	var upgraded_helm := SaveManager.get_equipped_gear("helmet")
+	assert_true(upgraded_helm != null and upgraded_helm.upgrade_level == old_upgrade_level + 1, "Gear upgrade level is stored on the item instance")
 	SaveManager.save_profile()
 	SaveManager.load_profile()
 	var restored_helm := SaveManager.get_equipped_gear("helmet")
@@ -122,6 +127,7 @@ func test_persistent_equipment_slots() -> void:
 
 	SaveManager.gear_inventory = original_inventory
 	SaveManager.equipped_gear = original_equipped
+	SaveManager.profile_gold = original_gold
 	SaveManager.save_profile()
 
 # 2. Test Multi-Cell Footprint and 90-Degree Rotation
