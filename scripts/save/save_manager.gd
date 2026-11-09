@@ -279,7 +279,7 @@ func star_up_character(char_id: String) -> bool:
 const EQUIPMENT_SLOTS: Array[String] = ["weapon", "helmet", "armor", "boots", "amulet", "ring"]
 
 
-func _ensure_starter_gear() -> void:
+func _ensure_starter_gear(persist: bool = true) -> void:
 	if _gear_profile_initialized:
 		return
 	var starter_items := {
@@ -299,7 +299,8 @@ func _ensure_starter_gear() -> void:
 		gear_inventory.append(item.to_dict())
 		equipped_gear[slot] = item.uid
 	_gear_profile_initialized = true
-	save_profile()
+	if persist:
+		save_profile()
 	profile_changed.emit()
 
 func get_gear_items() -> Array[ItemInstance]:
@@ -518,7 +519,7 @@ func reset_all_data() -> void:
 		"muted": false
 	}
 	_gear_profile_initialized = false
-	_ensure_starter_gear()
+	_ensure_starter_gear(false)
 	profile_changed.emit()
 	profile_loaded.emit()
 
