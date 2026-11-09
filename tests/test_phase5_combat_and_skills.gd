@@ -1,7 +1,7 @@
 extends Node
 
 # Automated Regression & Feature Test Suite for Phase 5:
-# BattleArena HUD, Mobile Dual-Stick Controls, In-Run XP, Valkyrie Skill Draft Modal,
+# BattleArena HUD, Single-Stick Controls, In-Run XP, Valkyrie Skill Draft Modal,
 # Skill Progression & Stat Application, Feedback, and Combat Lifecycle.
 
 var tests_passed: int = 0
@@ -12,7 +12,7 @@ func _ready() -> void:
 	print("  RUNNING PHASE 5 COMBAT, HUD & SKILLS TEST SUITE")
 	print("==================================================\n")
 	
-	test_dual_stick_and_touch_safety()
+	test_single_stick_and_touch_safety()
 	test_hud_reactivity_and_game_speed()
 	test_xp_progression_and_level_up()
 	test_valkyrie_draft_modal_and_offers()
@@ -41,61 +41,49 @@ func assert_true(condition: bool, message: String) -> void:
 		print("  [FAIL] " + message)
 
 # 1. Test Dual-Stick Independent Controls & Input Safety
-func test_dual_stick_and_touch_safety() -> void:
-	print("--- 1. Dual-Stick Independent Controls & Input Safety ---")
+func test_single_stick_and_touch_safety() -> void:
+	print("--- 1. Single-Stick Archero Controls & Input Safety ---")
 	var player := PlayerController.new()
 	var move_joy := VirtualJoystick.new()
-	var aim_joy := VirtualJoystick.new()
-	aim_joy.is_aim_and_attack = true
-	
+
 	add_child(player)
 	add_child(move_joy)
-	add_child(aim_joy)
-	
 	player.move_joystick = move_joy
-	player.aim_joystick = aim_joy
-	
-	# Simulate moving left (-1, 0) and aiming right (+1, 0)
+
+	# Moving left moves the hunter and suppresses the basic attack.
 	move_joy.touch_index = 0
 	move_joy.is_pressed = true
 	move_joy.output_vector = Vector2(-1.0, 0.0)
-	
-	aim_joy.touch_index = 1
-	aim_joy.is_pressed = true
-	aim_joy.output_vector = Vector2(1.0, 0.0)
-	
 	player._physics_process(0.016)
-	
-	assert_true(player.velocity.x < 0.0, "Player moves left with left joystick")
-	assert_true(player.aim_direction.x > 0.0, "Player independently aims right with right joystick")
-	assert_true(player.is_attacking, "Holding right aim-stick maintains continuous attack")
-	
-	# Multitouch index isolation: Releasing left stick does not disrupt right aim stick
+
+	assert_true(player.velocity.x < 0.0, "Single joystick moves the player left")
+	assert_true(player.aim_direction.x < 0.0, "While moving, the hunter faces the movement direction")
+	assert_true(not player.is_attacking, "Movement suppresses basic attacks")
+
+	# Releasing the only stick allows stationary auto-targeting.
 	move_joy._reset_joystick()
 	player.velocity = Vector2.ZERO
+	var enemy := Node2D.new()
+	enemy.add_to_group("enemies")
+	enemy.global_position = Vector2(120.0, 0.0)
+	add_child(enemy)
 	player._physics_process(0.016)
-	
-	assert_true(not move_joy.is_pressed, "Left stick released cleanly")
-	assert_true(aim_joy.is_pressed, "Right stick remains active with separate touch index")
-	assert_true(player.is_attacking, "Attacking continues while right stick is held")
-	
-	# Releasing right stick stops attacking
-	aim_joy._reset_joystick()
-	player._physics_process(0.016)
-	assert_true(not player.is_attacking, "Releasing right stick stops attacking")
-	
-	# Unhandled input cancellation: Touch outside release cancels stick
-	aim_joy.touch_index = 2
-	aim_joy.is_pressed = true
+
+	assert_true(player.is_attacking, "Hunter automatically attacks a nearby enemy while stationary")
+	assert_true(player.aim_direction.x > 0.0, "Hunter automatically aims toward the nearest enemy")
+
+	# An unhandled touch release must not leave the movement joystick stuck.
+	move_joy.touch_index = 2
+	move_joy.is_pressed = true
 	var release_ev := InputEventScreenTouch.new()
 	release_ev.index = 2
 	release_ev.pressed = false
-	aim_joy._unhandled_input(release_ev)
-	assert_true(not aim_joy.is_pressed and aim_joy.touch_index == -1, "Unhandled touch release cancels stuck stick")
-	
+	move_joy._unhandled_input(release_ev)
+	assert_true(not move_joy.is_pressed and move_joy.touch_index == -1, "Touch release cancels a stuck movement joystick")
+
 	player.queue_free()
 	move_joy.queue_free()
-	aim_joy.queue_free()
+	enemy.queue_free()
 
 # 2. Test Combat HUD Reactivity & Game Speed
 func test_hud_reactivity_and_game_speed() -> void:
