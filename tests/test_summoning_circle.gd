@@ -253,4 +253,24 @@ func _run_all_tests() -> void:
 	var restored_wolf := restored_items.filter(func(it): return it.data and it.data.id == "wolf_core")
 	_assert_true(not restored_wolf.is_empty() and restored_wolf[0].grid_pos == AltarBoard.SOCKET_TO_CELL[8], "10.3 Restored Wolf Core retains exact Socket 8 grid position (1, 1)")
 	
+	# -------------------------------------------------------------
+	# Test 11: Drag-and-Drop Merge on an Occupied Socket
+	# -------------------------------------------------------------
+	GameManager.altar_items.clear()
+	GameManager.backpack_items.clear()
+	var merge_data := ItemDatabase.get_item("shadow_dagger")
+	var drag_item := ItemInstance.new(merge_data, AltarBoard.SOCKET_TO_CELL[0], 0)
+	var target_item := ItemInstance.new(merge_data, AltarBoard.SOCKET_TO_CELL[4], 0)
+	GameManager.altar_items.append(drag_item)
+	GameManager.altar_items.append(target_item)
+	var test_view := InventoryView.new()
+	test_view.selected_item = drag_item
+	test_view.selected_source = "altar"
+	board.inventory_view = test_view
+	board.drag_from_socket = 0
+	var drag_merge_ok := board._try_drop_on_socket(4)
+	_assert_true(drag_merge_ok, "11.1 Dragging a mergeable item onto its matching socket succeeds")
+	_assert_true(GameManager.altar_items.size() == 1 and GameManager.altar_items[0].data.id == "shadow_blade", "11.2 Drag merge replaces both tier 1 items with the tier 2 result")
+	_assert_true(test_view.selected_item == GameManager.altar_items[0], "11.3 Merged item remains selected in the altar UI")
+	test_view.free()
 	board.free()
