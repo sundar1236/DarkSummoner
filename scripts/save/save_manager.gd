@@ -26,6 +26,10 @@ var difficulty: String = "normal" # "normal", "hard", "torment"
 var patrol_last_claim: int = 0
 var chapter_stars: Dictionary = { 1: 3, 2: 1, 3: 0 }
 var daily_free_energy_claimed: bool = false
+var daily_free_energy_claim_date: String = ""
+var daily_shop_date_key: String = ""
+var daily_shop_purchased_items: Dictionary = {}
+var shop_item_inventory: Dictionary = {}
 var chapter_pack_purchased: bool = false
 
 var highest_floor_unlocked: int = 1
@@ -100,6 +104,7 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	load_profile()
 	_ensure_starter_gear()
+	refresh_daily_shop_state()
 
 func get_upgrade_cost(stat_name: String) -> int:
 	var current_level: int = permanent_upgrades.get(stat_name, 0)
@@ -258,6 +263,93 @@ func add_gems(amount: int) -> void:
 	gems += amount
 	save_profile()
 	gems_changed.emit(gems)
+
+
+func _get_local_date_key() -> String:
+	var now: Dictionary = Time.get_datetime_dict_from_system()
+	return "%04d-%02d-%02d" % [int(now.get("year", 2000)), int(now.get("month", 1)), int(now.get("day", 1))]
+
+func refresh_daily_shop_state() -> void:
+	var today := _get_local_date_key()
+	var changed := false
+	if daily_free_energy_claimed and daily_free_energy_claim_date.is_empty():
+		# Migrate old saves without a claim date without granting a second same-day claim.
+		daily_free_energy_claim_date = today
+		changed = true
+	if daily_shop_date_key != today:
+		daily_shop_date_key = today
+		daily_shop_purchased_items.clear()
+		changed = true
+	var claimed_today := daily_free_energy_claim_date == today
+	if daily_free_energy_claimed != claimed_today:
+		daily_free_energy_claimed = claimed_today
+		changed = true
+	if changed:
+		save_profile()
+		profile_changed.emit()
+
+func get_seconds_until_daily_reset() -> int:
+	var now: Dictionary = Time.get_datetime_dict_from_system()
+	var seconds_today := int(now.get("hour", 0)) * 3600 + int(now.get("minute", 0)) * 60 + int(now.get("second", 0))
+	return maxi(1, 86400 - seconds_today)
+
+func is_daily_offer_purchased(item_id: String) -> bool:
+	refresh_daily_shop_state()
+	return bool(daily_shop_purchased_items.get(item_id, false))
+
+func mark_daily_offer_purchased(item_id: String) -> bool:
+	if item_id.is_empty() or is_daily_offer_purchased(item_id):
+		return false
+	daily_shop_purchased_items[item_id] = true
+	save_profile()
+	profile_changed.emit()
+	return true
+
+func claim_daily_free_energy(amount: int = 20) -> bool:
+	refresh_daily_shop_state()
+	if daily_free_energy_claimed or amount <= 0:
+		return false
+	add_energy(amount)
+	daily_free_energy_claimed = true
+	daily_free_energy_claim_date = _get_local_date_key()
+	save_profile()
+	profile_changed.emit()
+	return true
+
+func add_shop_item(item_id: String, amount: int = 1) -> bool:
+	if item_id.is_empty() or amount <= 0:
+		return false
+	shop_item_inventory[item_id] = int(shop_item_inventory.get(item_id, 0)) + amount
+	save_profile()
+	profile_changed.emit()
+	return true
+
+func get_shop_item_quantity(item_id: String) -> int:
+	return maxi(0, int(shop_item_inventory.get(item_id, 0)))
+
+func consume_shop_item(item_id: String, amount: int = 1) -> int:
+	if item_id.is_empty() or amount <= 0:
+		return 0
+	var available := get_shop_item_quantity(item_id)
+	var consumed := mini(available, amount)
+	if consumed <= 0:
+		return 0
+	var remaining := available - consumed
+	if remaining == 0:
+		shop_item_inventory.erase(item_id)
+	else:
+		shop_item_inventory[item_id] = remaining
+	save_profile()
+	profile_changed.emit()
+	return consumed
+
+func add_character_shards(char_id: String, amount: int) -> bool:
+	if not character_shards.has(char_id) or amount <= 0:
+		return false
+	character_shards[char_id] = int(character_shards.get(char_id, 0)) + amount
+	save_profile()
+	profile_changed.emit()
+	return true
 
 func set_difficulty(diff: String) -> void:
 	difficulty = diff
@@ -632,6 +724,10 @@ func reset_all_data() -> void:
 	patrol_last_claim = 0
 	chapter_stars = { 1: 3, 2: 1, 3: 0 }
 	daily_free_energy_claimed = false
+	daily_free_energy_claim_date = ""
+	daily_shop_date_key = ""
+	daily_shop_purchased_items.clear()
+	shop_item_inventory.clear()
 	chapter_pack_purchased = false
 	highest_floor_unlocked = 1
 	unlocked_characters = ["shadow_hunter"]
@@ -719,6 +815,10 @@ func save_profile() -> void:
 		"patrol_last_claim": patrol_last_claim,
 		"chapter_stars": chapter_stars,
 		"daily_free_energy_claimed": daily_free_energy_claimed,
+		"daily_free_energy_claim_date": daily_free_energy_claim_date,
+		"daily_shop_date_key": daily_shop_date_key,
+		"daily_shop_purchased_items": daily_shop_purchased_items,
+		"shop_item_inventory": shop_item_inventory,
 		"chapter_pack_purchased": chapter_pack_purchased,
 		"highest_floor_unlocked": highest_floor_unlocked,
 		"unlocked_characters": unlocked_characters,
@@ -776,8 +876,14 @@ func load_profile() -> void:
 	has_completed_initial_character_selection = bool(dict.get("has_completed_initial_character_selection", false))
 	difficulty = dict.get("difficulty", "normal")
 	patrol_last_claim = dict.get("patrol_last_claim", 0)
-	daily_free_energy_claimed = dict.get("daily_free_energy_claimed", false)
-	chapter_pack_purchased = dict.get("chapter_pack_purchased", false)
+	daily_free_energy_claimed = bool(dict.get("daily_free_energy_claimed", false))
+	daily_free_energy_claim_date = str(dict.get("daily_free_energy_claim_date", ""))
+	daily_shop_date_key = str(dict.get("daily_shop_date_key", ""))
+	var saved_daily_purchases: Variant = dict.get("daily_shop_purchased_items", {})
+	daily_shop_purchased_items = saved_daily_purchases.duplicate(true) if saved_daily_purchases is Dictionary else {}
+	var saved_shop_inventory: Variant = dict.get("shop_item_inventory", {})
+	shop_item_inventory = saved_shop_inventory.duplicate(true) if saved_shop_inventory is Dictionary else {}
+	chapter_pack_purchased = bool(dict.get("chapter_pack_purchased", false))
 	highest_floor_unlocked = dict.get("highest_floor_unlocked", 1)
 	
 	var ch_stars: Variant = dict.get("chapter_stars", {})

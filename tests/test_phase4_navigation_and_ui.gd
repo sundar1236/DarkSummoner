@@ -255,52 +255,67 @@ func test_hero_loadout_subtabs_and_progression() -> void:
 func test_shop_screen_atomic_purchases() -> void:
 	print("--- 6. ShopScreen Atomic Purchases ---")
 	var scene := load("res://scenes/shops/shop_screen.tscn") as PackedScene
-	var shop = scene.instantiate()
+	var shop := scene.instantiate() as ShopScreen
 	add_child(shop)
 	await get_tree().process_frame
-	
-	# Premium gems are independent from permanent Shades.
-	var before_shades: int = SaveManager.shades
-	SaveManager.gems = 100
-	assert_test(SaveManager.spend_gems(25), "Premium gem spend succeeds when the gem balance is sufficient")
-	assert_test(SaveManager.gems == 75 and SaveManager.shades == before_shades, "Spending gems never deducts Shades")
-	SaveManager.add_gems(10)
-	assert_test(SaveManager.gems == 85 and SaveManager.shades == before_shades, "Adding gems never grants Shades")
+
+	# Real-money offers must not mint resources without a billing provider.
 	SaveManager.chapter_pack_purchased = false
 	SaveManager.gems = 100
 	SaveManager.energy = 20
 	SaveManager.profile_gold = 500
-	
-	# Buy Chapter Pack
 	shop._on_buy_chapter_pack()
-	assert_test(SaveManager.chapter_pack_purchased, "Chapter Pack marked as purchased in SaveManager")
-	assert_test(SaveManager.gems == 600, "Chapter Pack granted +500 Gems (100 -> 600)")
-	assert_test(SaveManager.energy == 70, "Chapter Pack granted +50 Energy (20 -> 70)")
-	assert_test(SaveManager.profile_gold == 2000, "Chapter Pack granted +1500 Gold (500 -> 2000)")
-	assert_test(shop.btn_chapter_pack.disabled, "Chapter Pack button disabled after purchase")
-	
-	# Attempt double purchase
-	var pre_g := SaveManager.gems
-	shop._on_buy_chapter_pack()
-	assert_test(SaveManager.gems == pre_g, "Second Chapter Pack purchase blocked atomically")
-	
-	# Buy Daily Item with Gold
+	assert_test(shop.btn_chapter_pack.disabled, "Chapter Pack is disabled without platform billing")
+	assert_test(SaveManager.gems == 100 and SaveManager.energy == 20 and SaveManager.profile_gold == 500, "Unavailable paid offer grants no resources")
+
+	# Buy a run item: currency is deducted and the actual item is stored for the next run.
+	SaveManager.refresh_daily_shop_state()
+	SaveManager.daily_shop_purchased_items.erase("fire_rune")
+	SaveManager.shop_item_inventory.erase("fire_rune")
 	SaveManager.profile_gold = 100
-	var dummy_btn := Button.new()
-	shop.add_child(dummy_btn)
-	shop._buy_daily_item(dummy_btn, "fire_rune", 80, false, "Purchased!")
-	assert_test(SaveManager.profile_gold == 20, "Daily item purchase deducted 80 gold (100 -> 20)")
-	assert_test(dummy_btn.disabled and dummy_btn.text == "SOLD OUT", "Button marked SOLD OUT and disabled")
-	
-	# Free Daily Energy Claim
+	var rune_btn := Button.new()
+	shop.add_child(rune_btn)
+	shop._buy_daily_item(rune_btn, "fire_rune", 80, false, "Fire Rune Acquired!")
+	assert_test(SaveManager.profile_gold == 20, "Daily Fire Rune purchase deducts the correct gold")
+	assert_test(SaveManager.get_shop_item_quantity("fire_rune") == 1, "Purchased Fire Rune is delivered to persistent run-item stash")
+	assert_test(rune_btn.disabled and rune_btn.text == "SOLD OUT", "Purchased daily offer is marked sold out")
+	SaveManager.save_profile()
+	SaveManager.load_profile()
+	assert_test(SaveManager.get_shop_item_quantity("fire_rune") == 1 and SaveManager.is_daily_offer_purchased("fire_rune"), "Purchased stock and daily limit persist after profile reload")
+	shop._buy_daily_item(rune_btn, "fire_rune", 80, false, "Fire Rune Acquired!")
+	assert_test(SaveManager.profile_gold == 20 and SaveManager.get_shop_item_quantity("fire_rune") == 1, "Daily offer cannot be purchased twice")
+
+	# Premium shard offer grants the stated character shards, not an unrelated currency.
+	SaveManager.daily_shop_purchased_items.erase("storm_shard")
+	SaveManager.gems = 100
+	var old_storm_shards: int = SaveManager.character_shards.get("storm_reaper", 0)
+	var shard_btn := Button.new()
+	shop.add_child(shard_btn)
+	shop._buy_daily_item(shard_btn, "storm_shard", 50, true, "Storm shards acquired")
+	assert_test(SaveManager.gems == 50, "Storm Shard offer deducts its gem price")
+	assert_test(SaveManager.character_shards["storm_reaper"] == old_storm_shards + 5, "Storm Shard offer delivers five Storm Reaper shards")
+
+	# Healing elixirs are carried into the next run as potion charges.
+	SaveManager.daily_shop_purchased_items.erase("healing_elixir")
+	SaveManager.shop_item_inventory.erase("healing_elixir")
+	SaveManager.profile_gold = 100
+	var elixir_btn := Button.new()
+	shop.add_child(elixir_btn)
+	shop._buy_daily_item(elixir_btn, "healing_elixir", 45, false, "Elixirs acquired")
+	assert_test(SaveManager.get_shop_item_quantity("healing_elixir") == 2, "Healing Elixir offer stores two bonus potions")
+	assert_test(SaveManager.consume_shop_item("healing_elixir", 2) == 2 and SaveManager.get_shop_item_quantity("healing_elixir") == 0, "Run startup can consume the purchased potion charges")
+
+	# Free energy is limited by the local calendar date and has a real reset countdown.
+	SaveManager.daily_free_energy_claim_date = ""
 	SaveManager.daily_free_energy_claimed = false
+	SaveManager.refresh_daily_shop_state()
 	SaveManager.energy = 10
-	var free_btn := Button.new()
-	shop.add_child(free_btn)
-	shop._claim_free_energy(free_btn)
-	assert_test(SaveManager.energy == 30, "Free Energy Claim granted +20 Energy (10 -> 30)")
-	assert_test(SaveManager.daily_free_energy_claimed, "daily_free_energy_claimed set to true")
-	
+	assert_test(SaveManager.claim_daily_free_energy(20), "Daily free energy can be claimed once")
+	assert_test(SaveManager.energy == 30 and SaveManager.daily_free_energy_claimed, "Daily claim grants +20 energy and persists claim state")
+	assert_test(not SaveManager.claim_daily_free_energy(20), "Second free-energy claim on the same date is rejected")
+	assert_test(SaveManager.get_seconds_until_daily_reset() > 0 and SaveManager.get_seconds_until_daily_reset() <= 86400, "Daily shop countdown is based on local midnight")
+
+	assert_test(shop.btn_tab_chest.disabled and shop.btn_tab_wish.disabled and shop.btn_tab_limited.disabled and shop.btn_tab_topup.disabled, "Unimplemented store tabs are disabled rather than showing fake navigation")
 	shop.queue_free()
 	await get_tree().process_frame
 

@@ -134,7 +134,7 @@ func start_new_run(char_id: String, start_floor: int = 1) -> void:
 	
 	run_gold = 30 + SaveManager.get_permanent_starting_gold()
 	run_shades = 0
-	potions = 3
+	potions = mini(MAX_POTIONS, 3 + SaveManager.consume_shop_item("healing_elixir", 2))
 	
 	# Reset in-run XP & skills
 	run_xp = 0.0
@@ -167,6 +167,31 @@ func start_new_run(char_id: String, start_floor: int = 1) -> void:
 			else:
 				backpack_items.append(inst)
 				
+	# Deliver purchased run items from the persistent shop stash into this run.
+	for shop_item_id in ["fire_rune", "wolf_core"]:
+		var owned_count: int = SaveManager.get_shop_item_quantity(shop_item_id)
+		var shop_item_data := ItemDatabase.get_item(shop_item_id)
+		if not shop_item_data:
+			continue
+		for item_index in range(owned_count):
+			var shop_item := ItemInstance.new(shop_item_data, Vector2i.ZERO, 0)
+			var placed := false
+			for y in range(dims.y):
+				for x in range(dims.x):
+					var candidate_pos := Vector2i(x, y)
+					if grid_manager.can_place_item(shop_item, candidate_pos, altar_items):
+						shop_item.grid_pos = candidate_pos
+						altar_items.append(shop_item)
+						placed = true
+						break
+				if placed:
+					break
+			if not placed and backpack_items.size() < BACKPACK_CAPACITY:
+				backpack_items.append(shop_item)
+				placed = true
+			if placed:
+				SaveManager.consume_shop_item(shop_item_id, 1)
+
 	recalculate_stats_and_synergies()
 	player_hp = player_max_hp
 	
