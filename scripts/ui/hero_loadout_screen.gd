@@ -80,28 +80,20 @@ func _ready() -> void:
 			blacksmith_requested.emit()
 		)
 		
+	# Keep unfinished cosmetic/workshop actions out of the live navigation until they have real gameplay effects.
 	var btn_workshop := $ContentContainer/ViewRunes/MiddleBar/WorkshopBtn as Button
 	if btn_workshop:
-		btn_workshop.pressed.connect(func():
-			if AudioManager: AudioManager.play_sfx("ui_click")
-			show_toast("✨ Rune Workshop: Arcane Transmutation ready!")
-			rune_workshop_requested.emit()
-		)
+		btn_workshop.visible = false
+	var btn_rune_sort := $ContentContainer/ViewRunes/MiddleBar.get_node_or_null("SortBtn") as Button
+	if btn_rune_sort:
+		btn_rune_sort.visible = false
 
-	# Outfit & Sacred Hall buttons on Character screen
 	var btn_outfit := $ContentContainer/ViewCharacters/TopHalf/PedestalContainer.get_node_or_null("OutfitBtn") as Button
 	if btn_outfit:
-		btn_outfit.pressed.connect(func():
-			if AudioManager: AudioManager.play_sfx("ui_click")
-			show_toast("👑 Attire: Legendary Abyssal Garb Active (+5% ATK)")
-		)
-
+		btn_outfit.visible = false
 	var btn_sacred := $ContentContainer/ViewCharacters/TopHalf/PedestalContainer.get_node_or_null("SacredHallBtn") as Button
 	if btn_sacred:
-		btn_sacred.pressed.connect(func():
-			if AudioManager: AudioManager.play_sfx("ui_click")
-			show_toast("🏛 Hall of Champions: Rank %s Hunter Recorded" % [SaveManager.player_level if SaveManager else 5])
-		)
+		btn_sacred.visible = false
 
 	# Stat Pill Info Button
 	var btn_info := $ContentContainer/ViewGear/TopHalf/StatPill/HBox.get_node_or_null("InfoBtn") as Button
@@ -121,15 +113,6 @@ func _ready() -> void:
 			show_toast("Gear sorted: %s" % sort_names[gear_sort_index])
 		)
 
-	var btn_rune_sort := $ContentContainer/ViewRunes/MiddleBar.get_node_or_null("SortBtn") as Button
-	if btn_rune_sort:
-		btn_rune_sort.pressed.connect(func():
-			runes_sort_index = (runes_sort_index + 1) % 3
-			var sort_names := ["▼ By Tier", "▼ By Synergy", "▼ By Element"]
-			btn_rune_sort.text = sort_names[runes_sort_index]
-			if AudioManager: AudioManager.play_sfx("ui_click")
-			show_toast("Sorted Runes: %s" % sort_names[runes_sort_index])
-		)
 		
 	_setup_character_roster_wiring()
 	_setup_gear_slots_wiring()
@@ -144,24 +127,11 @@ func _ready() -> void:
 	_switch_subtab(active_subtab)
 
 func _setup_runes_dock_wiring() -> void:
-	var rune_grid := $ContentContainer/ViewRunes/BottomInventory/Grid as Control
-	if not rune_grid: return
-	var runes_info := [
-		{"name": "Fire Rune", "icon": "🔥", "tier": 1},
-		{"name": "Wolf Core", "icon": "🐺", "tier": 1},
-		{"name": "Storm Shard", "icon": "⚡", "tier": 2},
-		{"name": "Frost Rune", "icon": "❄", "tier": 1},
-		{"name": "Void Crystal", "icon": "🔮", "tier": 2}
-	]
-	for i in range(mini(rune_grid.get_child_count(), runes_info.size())):
-		var r_slot := rune_grid.get_child(i) as Control
-		var info: Dictionary = runes_info[i]
-		if r_slot:
-			r_slot.gui_input.connect(func(ev: InputEvent):
-				if ev is InputEventMouseButton and ev.pressed:
-					if AudioManager: AudioManager.play_sfx("item_place")
-					show_toast("✨ %s (T%d) ready for ritual placement!" % [info.name, info.tier])
-			)
+	# The displayed rune tiles were static placeholders, not owned inventory.
+	# Hide them until the profile-backed ritual collection is implemented.
+	var rune_inventory := $ContentContainer/ViewRunes/BottomInventory as Control
+	if rune_inventory:
+		rune_inventory.visible = false
 
 func refresh_loadout() -> void:
 	if not SaveManager:
