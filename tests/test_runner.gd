@@ -12,6 +12,7 @@ func _ready() -> void:
 	
 	test_independent_movement_and_aim()
 	test_persistent_equipment_slots()
+	test_run_altar_excludes_persistent_gear()
 	test_inventory_footprint_and_rotation()
 	test_inventory_bounds_and_overlap_validation()
 	test_synergies_and_backpack_isolation()
@@ -131,6 +132,17 @@ func test_persistent_equipment_slots() -> void:
 	SaveManager.equipped_gear = original_equipped
 	SaveManager.profile_gold = original_gold
 	SaveManager.save_profile()
+
+
+func test_run_altar_excludes_persistent_gear() -> void:
+	print("--- Test: Run Summoning Circle Contains Only Run Items ---")
+	for char_id in ["shadow_hunter", "storm_reaper", "soul_binder"]:
+		GameManager.start_new_run(char_id, 1)
+		var found_run_item := false
+		for item in GameManager.altar_items:
+			assert_true(item.data != null and item.data.equipment_slot.is_empty(), "%s altar excludes persistent gear" % char_id)
+			found_run_item = true
+		assert_true(found_run_item, "%s keeps its rune, core, or relic starter item" % char_id)
 
 # 2. Test Multi-Cell Footprint and 90-Degree Rotation
 func test_inventory_footprint_and_rotation() -> void:
