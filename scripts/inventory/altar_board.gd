@@ -151,12 +151,6 @@ const CELL_TO_SOCKET: Dictionary = {
 	Vector2i(1, 3): 10,
 	Vector2i(2, 3): 11,
 	Vector2i(1, 2): 12,
-	# Fallback mappings for any non-standard cell
-	Vector2i(1, 0): 0,
-	Vector2i(2, 0): 4,
-	Vector2i(2, 2): 12,
-	Vector2i(0, 4): 3,
-	Vector2i(4, 0): 4
 }
 
 # Drag & Relocation State
