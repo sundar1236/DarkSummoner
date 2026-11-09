@@ -487,6 +487,44 @@ theme_override_font_sizes/font_size = 18
 theme_override_styles/normal = SubResource("StyleBoxFlat_buybtn")
 text = "🪙 45 Gold"
 
+[node name="DailyMissionsCard" type="PanelContainer" parent="ScrollContainer/VBox"]
+custom_minimum_size = Vector2(0, 260)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_dailycard")
+
+[node name="Content" type="VBoxContainer" parent="ScrollContainer/VBox/DailyMissionsCard"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Header" type="Label" parent="ScrollContainer/VBox/DailyMissionsCard/Content"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.88, 0.35, 1)
+theme_override_font_sizes/font_size = 23
+text = "📜 Daily Hunts"
+
+[node name="MissionList" type="VBoxContainer" parent="ScrollContainer/VBox/DailyMissionsCard/Content"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="AchievementsCard" type="PanelContainer" parent="ScrollContainer/VBox"]
+custom_minimum_size = Vector2(0, 260)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_dailycard")
+
+[node name="Content" type="VBoxContainer" parent="ScrollContainer/VBox/AchievementsCard"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Header" type="Label" parent="ScrollContainer/VBox/AchievementsCard/Content"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.65, 0.82, 1.0, 1)
+theme_override_font_sizes/font_size = 23
+text = "🏆 Hunter Achievements"
+
+[node name="AchievementsList" type="VBoxContainer" parent="ScrollContainer/VBox/AchievementsCard/Content"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
 [node name="BottomSubTabs" type="Panel" parent="."]
 custom_minimum_size = Vector2(0, 56)
 layout_mode = 1
