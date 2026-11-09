@@ -129,6 +129,13 @@ func test_main_shell_orchestration() -> void:
 	assert_test(shell.screen_campaign != null and shell.screen_campaign.visible, "MainShell defaults to Campaign screen visible")
 	assert_test(shell.screen_shop != null and not shell.screen_shop.visible, "Shop screen hidden by default")
 	assert_test(shell.screen_loadout != null and not shell.screen_loadout.visible, "Loadout screen hidden by default")
+
+	# Daily tasks shortcut opens the real mission panel in the Shop screen.
+	shell.screen_campaign.btn_tasks.pressed.emit()
+	await get_tree().process_frame
+	await get_tree().process_frame
+	assert_test(shell.current_tab == 0 and shell.screen_shop.visible, "Campaign daily-tasks shortcut opens the Shop screen")
+	assert_test((shell.screen_shop.get_node("ScrollContainer") as ScrollContainer).scroll_vertical > 0, "Daily-tasks shortcut scrolls to the mission panel")
 	
 	# Switch to tab 1 (HeroLoadout)
 	shell.nav_dock.select_tab(1)
@@ -167,11 +174,18 @@ func test_campaign_screen_features() -> void:
 	add_child(camp)
 	await get_tree().process_frame
 	
-	# Event Carousel
-	assert_test(camp.events_data.size() == 3, "Campaign has 3 carousel events")
-	var initial_title: String = camp.events_data[camp.current_event_idx].title
-	camp._cycle_event()
-	assert_test(camp.events_data[camp.current_event_idx].title != initial_title, "Carousel cycles to next event on interaction")
+	# Campaign hub shows only real, implemented actions.
+	assert_test(camp.banner_title.text == "Tower Expedition", "Campaign banner describes the actual tower progression")
+	assert_test(not camp.banner_btn.visible, "Non-functional live-event carousel is not clickable")
+	assert_test(not (camp.get_node("LeftSidebar") as Control).visible, "Unimplemented VIP, gift, and ranking shortcuts are hidden")
+	assert_test(not camp.btn_friends.visible, "Unimplemented social shortcut is hidden")
+	assert_test(not (camp.get_node("BottomControls/QuickAccessRow/ChestBtn") as Button).visible, "Repeatable placeholder chest reward is hidden")
+	assert_test(not (camp.get_node("BottomControls/QuickAccessRow/GuildBtn") as Button).visible, "Unimplemented guild shortcut is hidden")
+	assert_test(not (camp.get_node("BottomControls/ChatTicker") as Control).visible, "Fake online-player ticker is hidden")
+	var tasks_requested := [false]
+	camp.daily_tasks_requested.connect(func(): tasks_requested[0] = true)
+	camp.btn_tasks.pressed.emit()
+	assert_test(tasks_requested[0], "Daily tasks shortcut emits the real navigation signal")
 	
 	# Difficulty Selector
 	camp._select_difficulty("torment")
@@ -192,10 +206,19 @@ func test_campaign_screen_features() -> void:
 	camp._on_start_pressed()
 	assert_test(camp_res.start and SaveManager.energy == 5, "Start allowed when Energy >= 5, deducting exactly 5 Energy")
 	
-	# Patrol Hunt Claim
-	var pre_gold := SaveManager.profile_gold
+	# Patrol rewards can be claimed once per eight-hour cycle.
+	var old_patrol_claim: int = SaveManager.patrol_last_claim
+	var old_profile_gold: int = SaveManager.profile_gold
+	SaveManager.patrol_last_claim = 0
 	camp._on_hunt_pressed()
-	assert_test(SaveManager.profile_gold >= pre_gold, "Patrol Hunt claim adds gold to persistent profile")
+	var claimed_profile_gold: int = SaveManager.profile_gold
+	assert_test(claimed_profile_gold > old_profile_gold, "Ready Patrol Rewards add Gold to the persistent profile")
+	camp._on_hunt_pressed()
+	assert_test(SaveManager.profile_gold == claimed_profile_gold, "Patrol Rewards cannot be claimed repeatedly during cooldown")
+	assert_test(int(SaveManager.get_patrol_reward_status().get("seconds_remaining", 0)) > 0, "Patrol claim starts the eight-hour cooldown")
+	SaveManager.patrol_last_claim = old_patrol_claim
+	SaveManager.profile_gold = old_profile_gold
+	SaveManager.save_profile()
 	
 	camp.queue_free()
 	await get_tree().process_frame
