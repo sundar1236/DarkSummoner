@@ -31,7 +31,7 @@ corner_radius_top_right = 12
 corner_radius_bottom_right = 12
 corner_radius_bottom_left = 12
 
-[node name="BlacksmithModal" type="Control" node_paths=PackedStringArray("btn_upgrade_weapon", "btn_upgrade_armor", "btn_upgrade_ring", "btn_close", "lbl_gold_balance")]
+[node name="BlacksmithModal" type="Control" node_paths=PackedStringArray("btn_upgrade_weapon", "btn_upgrade_armor", "btn_upgrade_ring", "btn_close", "lbl_gold_balance", "shop_items_container")]
 visible = false
 layout_mode = 3
 anchors_preset = 15
@@ -45,6 +45,7 @@ btn_upgrade_armor = NodePath("CenterContainer/Card/VBox/BtnArmor")
 btn_upgrade_ring = NodePath("CenterContainer/Card/VBox/BtnRing")
 btn_close = NodePath("CenterContainer/Card/VBox/BtnClose")
 lbl_gold_balance = NodePath("CenterContainer/Card/VBox/GoldBalance")
+shop_items_container = NodePath("CenterContainer/Card/VBox/ShopScroll/ShopItems")
 
 [node name="Backdrop" type="Panel" parent="."]
 layout_mode = 1
@@ -64,7 +65,7 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="Card" type="PanelContainer" parent="CenterContainer"]
-custom_minimum_size = Vector2(500, 500)
+custom_minimum_size = Vector2(560, 760)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_card")
 
@@ -116,6 +117,24 @@ theme_override_colors/font_color = Color(1, 0.92, 0.5, 1)
 theme_override_font_sizes/font_size = 20
 theme_override_styles/normal = SubResource("StyleBoxFlat_btn")
 text = "Infuse Ring (Lv.58 -> 59) [🪙 200]"
+
+[node name="ShopHeading" type="Label" parent="CenterContainer/Card/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.88, 0.35, 1)
+theme_override_font_sizes/font_size = 20
+text = "AVAILABLE EQUIPMENT"
+horizontal_alignment = 1
+
+[node name="ShopScroll" type="ScrollContainer" parent="CenterContainer/Card/VBox"]
+custom_minimum_size = Vector2(440, 190)
+layout_mode = 2
+size_flags_horizontal = 4
+horizontal_scroll_mode = 0
+
+[node name="ShopItems" type="VBoxContainer" parent="CenterContainer/Card/VBox/ShopScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
 
 [node name="BtnClose" type="Button" parent="CenterContainer/Card/VBox"]
 custom_minimum_size = Vector2(240, 52)
