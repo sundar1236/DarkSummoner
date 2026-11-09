@@ -301,5 +301,9 @@ func _run_all_tests() -> void:
 	var same_footprint_drop := board._try_drop_on_socket(1)
 	_assert_true(same_footprint_drop, "12.2 Dropping onto a secondary occupied socket is accepted as a no-op")
 	_assert_true(multi_item.grid_pos == AltarBoard.SOCKET_TO_CELL[0], "12.3 Dropping onto its own footprint does not shift the item anchor")
+	multi_view.is_move_mode = true
+	board._handle_touch_down(board.get_socket_pos(1))
+	_assert_true(multi_view.is_move_mode, "12.4 Tapping a secondary occupied socket keeps move mode active")
+	_assert_true(multi_item.grid_pos == AltarBoard.SOCKET_TO_CELL[0], "12.5 Tap-to-move on its own footprint does not shift the item anchor")
 	multi_view.free()
 	board.free()

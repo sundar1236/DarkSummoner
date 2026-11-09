@@ -584,6 +584,10 @@ func _handle_touch_down(pos: Vector2) -> void:
 	# Case 1: In active Move Mode
 	if inventory_view and inventory_view.is_move_mode and inventory_view.selected_item:
 		var sel := inventory_view.selected_item
+		# The grid validator ignores the moving item itself, so tapping a
+		# secondary socket in its own footprint must be handled before validation.
+		if clicked_item == sel:
+			return
 		if is_item_compatible(sel, s_id) and GameManager.can_move_item_to(sel, target_cell):
 			inventory_view.commit_move(target_cell)
 			return
