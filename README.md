@@ -16,8 +16,9 @@ The player controls a lone hunter ascending a perilous dark-fantasy tower. In th
 3. **Enter Combat**: Use the single movement joystick. While stationary, the hunter automatically targets and attacks the nearest enemy; moving suppresses basic attacks. Dodge, activate character skills, and use healing potions when needed.
 4. **Clear Enemy Waves**: Regular encounters contain two progressively harder waves. Elite encounters include an elite enemy; floor bosses use their own multi-phase fight.
 5. **Choose Blessings**: Collect XP and choose from three skill offers on level-up. Duplicate picks upgrade skills; mastering paired skills can unlock powerful evolutions.
-6. **Claim Rewards**: Earn run Gold, permanent Shades, and item choices before preparing for the next encounter.
-7. **Ascend Floors**: Each floor has five levels; Level 5 is the floor boss (Lord Malakar).
+6. **Daily Shop**: Claim energy once per local day and buy run supplies, Storm Reaper shards, or profile Gold. Purchased run supplies are delivered to the next run; unimplemented store tabs and real-money billing remain disabled.
+7. **Claim Rewards**: Earn run Gold, permanent Shades, and item choices before preparing for the next encounter.
+8. **Ascend Floors**: Each floor has five levels; Level 5 is the floor boss (Lord Malakar).
 8. **Boss Victory & Defeat Rules**:
    - Defeating the boss unlocks the next floor at Level 1.
    - Defeat on the boss resets the player to **Level 1 of the same floor** (never sent back to Floor 1).
