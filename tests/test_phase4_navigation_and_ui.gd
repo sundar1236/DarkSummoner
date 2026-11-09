@@ -279,6 +279,9 @@ func test_shop_screen_atomic_purchases() -> void:
 	assert_test(SaveManager.profile_gold == 20, "Daily Fire Rune purchase deducts the correct gold")
 	assert_test(SaveManager.get_shop_item_quantity("fire_rune") == 1, "Purchased Fire Rune is delivered to persistent run-item stash")
 	assert_test(rune_btn.disabled and rune_btn.text == "SOLD OUT", "Purchased daily offer is marked sold out")
+	SaveManager.save_profile()
+	SaveManager.load_profile()
+	assert_test(SaveManager.get_shop_item_quantity("fire_rune") == 1 and SaveManager.is_daily_offer_purchased("fire_rune"), "Purchased stock and daily limit persist after profile reload")
 	shop._buy_daily_item(rune_btn, "fire_rune", 80, false, "Fire Rune Acquired!")
 	assert_test(SaveManager.profile_gold == 20 and SaveManager.get_shop_item_quantity("fire_rune") == 1, "Daily offer cannot be purchased twice")
 
