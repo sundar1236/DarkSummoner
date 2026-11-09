@@ -15,6 +15,7 @@ func _ready() -> void:
 	test_gear_item_details_and_comparison()
 	test_gear_inventory_sorting()
 	test_combat_power_breakdown()
+	test_gear_set_bonuses()
 	test_blacksmith_gear_purchases()
 	test_boss_gear_rewards_are_persistent()
 	test_run_altar_excludes_persistent_gear()
@@ -246,6 +247,60 @@ func test_combat_power_breakdown() -> void:
 	SaveManager.talent_cards = original_cards
 	SaveManager.gear_inventory = original_inventory
 	SaveManager.equipped_gear = original_equipped
+	SaveManager.save_profile()
+
+
+func test_gear_set_bonuses() -> void:
+	print("--- Test: Persistent Gear Set Bonuses ---")
+	var original_inventory: Array[Dictionary] = SaveManager.gear_inventory.duplicate(true)
+	var original_equipped: Dictionary = SaveManager.equipped_gear.duplicate(true)
+	var original_level: int = SaveManager.player_level
+	var original_equipment_levels: Dictionary = SaveManager.equipment_levels.duplicate(true)
+	var original_stars: Dictionary = SaveManager.character_stars.duplicate(true)
+	var original_cards: Dictionary = SaveManager.talent_cards.duplicate(true)
+	SaveManager.gear_inventory.clear()
+	SaveManager.equipped_gear = {"weapon": "", "helmet": "", "armor": "", "boots": "", "amulet": "", "ring": ""}
+	var dagger := ItemInstance.new(ItemDatabase.get_item("shadow_dagger"))
+	var helm := ItemInstance.new(ItemDatabase.get_item("void_helm"))
+	var shield := ItemInstance.new(ItemDatabase.get_item("void_shield"))
+	var pendant := ItemInstance.new(ItemDatabase.get_item("void_pendant"))
+	for gear in [dagger, helm, shield, pendant]:
+		assert_true(SaveManager.add_gear_item(gear), "%s is added for set test" % gear.data.name)
+	assert_true(SaveManager.equip_gear_item(dagger.uid), "Abyssal weapon equips")
+	assert_true(SaveManager.equip_gear_item(helm.uid), "Abyssal helmet equips")
+	var abyssal: Dictionary = {}
+	for entry in SaveManager.get_active_gear_sets():
+		if entry.id == "abyssal_regalia":
+			abyssal = entry
+	assert_true(int(abyssal.get("count", 0)) == 2, "Two matching Abyssal pieces are counted")
+	assert_true(int(abyssal.get("active_threshold", 0)) == 2, "Two-piece Abyssal threshold activates")
+	var two_piece: Dictionary = SaveManager.get_gear_set_bonus_stats()
+	assert_true(is_equal_approx(float(two_piece.bonus_atk), 8.0), "Two-piece set grants attack bonus")
+	assert_true(is_equal_approx(float(two_piece.bonus_crit), 0.03), "Two-piece set grants critical bonus")
+	assert_true(SaveManager.equip_gear_item(shield.uid), "Abyssal armor equips")
+	assert_true(SaveManager.equip_gear_item(pendant.uid), "Abyssal amulet equips")
+	for entry in SaveManager.get_active_gear_sets():
+		if entry.id == "abyssal_regalia":
+			abyssal = entry
+	assert_true(int(abyssal.get("active_threshold", 0)) == 4, "Four-piece threshold activates")
+	var four_piece: Dictionary = SaveManager.get_gear_set_bonus_stats()
+	assert_true(is_equal_approx(float(four_piece.bonus_hp), 40.0), "Four-piece set grants HP bonus")
+	assert_true(is_equal_approx(float(four_piece.bonus_crit), 0.08), "Four-piece threshold replaces two-piece bonus")
+	var breakdown: Dictionary = SaveManager.get_combat_power_breakdown()
+	assert_true(int(breakdown.get("set_bonus", 0)) > 0, "Set bonuses contribute to combat power")
+	assert_true(int(breakdown.total) == SaveManager.calculate_combat_power(), "Set bonus total matches combat power API")
+	assert_true(SaveManager.unequip_gear_slot("amulet"), "A set piece can be unequipped")
+	for entry in SaveManager.get_active_gear_sets():
+		if entry.id == "abyssal_regalia":
+			abyssal = entry
+	assert_true(int(abyssal.get("active_threshold", 0)) == 2, "Unequipping drops to two-piece threshold")
+	assert_true(is_equal_approx(float(SaveManager.get_gear_set_bonus_stats().bonus_crit), 0.03), "Two-piece bonus returns after unequip")
+	SaveManager.gear_inventory = original_inventory
+	SaveManager.equipped_gear = original_equipped
+	SaveManager.player_level = original_level
+	SaveManager.equipment_levels = original_equipment_levels
+	SaveManager.character_stars = original_stars
+	SaveManager.talent_cards = original_cards
 	SaveManager.save_profile()
 
 
