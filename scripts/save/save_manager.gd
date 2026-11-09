@@ -319,6 +319,14 @@ func get_gear_item(uid: String) -> ItemInstance:
 			return ItemInstance.from_dict(item_dict)
 	return null
 
+func has_gear_item(item_id: String) -> bool:
+	if item_id.is_empty():
+		return false
+	for item_dict in gear_inventory:
+		if str(item_dict.get("item_id", "")) == item_id:
+			return true
+	return false
+
 func get_equipped_gear(slot_name: String) -> ItemInstance:
 	if not equipped_gear.has(slot_name):
 		return null
