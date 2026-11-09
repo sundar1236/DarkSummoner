@@ -55,6 +55,14 @@ var gear_sort_index: int = 0
 var runes_sort_index: int = 0
 var _toast_label: Label = null
 var _info_modal: PanelContainer = null
+var _gear_detail_modal: PanelContainer = null
+var _gear_detail_title: Label = null
+var _gear_detail_summary: Label = null
+var _gear_detail_stats: Label = null
+var _gear_detail_comparison: Label = null
+var _gear_detail_equip_button: Button = null
+var _gear_detail_unequip_button: Button = null
+var _selected_gear_uid: String = ""
 
 func _ready() -> void:
 	if btn_sub_characters:
@@ -126,6 +134,7 @@ func _ready() -> void:
 	_setup_runes_dock_wiring()
 	_setup_toast_label()
 	_setup_info_modal()
+	_setup_gear_detail_modal()
 	
 	if SaveManager and not SaveManager.active_character_id.is_empty():
 		current_char_id = SaveManager.active_character_id
@@ -212,19 +221,175 @@ func _refresh_gear_inventory_grid() -> void:
 		]
 		button.add_theme_font_size_override("font_size", 13)
 		var item_uid := item.uid
+		if item.uid == _selected_gear_uid:
+			button.text += "\nSelected"
 		button.pressed.connect(func():
-			_equip_gear_item(item_uid)
+			_show_gear_details(item_uid)
 		)
 		gear_grid.add_child(button)
 
-func _equip_gear_item(uid: String) -> void:
-	if SaveManager and SaveManager.equip_gear_item(uid):
-		if AudioManager:
-			AudioManager.play_sfx("item_place")
+func _setup_gear_detail_modal() -> void:
+	_gear_detail_modal = PanelContainer.new()
+	_gear_detail_modal.name = "GearDetailModal"
+	_gear_detail_modal.anchor_left = 0.5
+	_gear_detail_modal.anchor_top = 0.5
+	_gear_detail_modal.anchor_right = 0.5
+	_gear_detail_modal.anchor_bottom = 0.5
+	_gear_detail_modal.offset_left = -250.0
+	_gear_detail_modal.offset_top = -230.0
+	_gear_detail_modal.offset_right = 250.0
+	_gear_detail_modal.offset_bottom = 230.0
+	_gear_detail_modal.custom_minimum_size = Vector2(500, 460)
+	_gear_detail_modal.z_index = 70
+
+	var panel_style := StyleBoxFlat.new()
+	panel_style.bg_color = Color(0.045, 0.055, 0.09, 0.98)
+	panel_style.border_color = Color(0.86, 0.69, 0.28, 1.0)
+	panel_style.set_border_width_all(2)
+	panel_style.set_corner_radius_all(14)
+	_gear_detail_modal.add_theme_stylebox_override("panel", panel_style)
+
+	var content := VBoxContainer.new()
+	content.add_theme_constant_override("separation", 12)
+	_gear_detail_modal.add_child(content)
+
+	_gear_detail_title = Label.new()
+	_gear_detail_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_gear_detail_title.add_theme_font_size_override("font_size", 22)
+	_gear_detail_title.add_theme_color_override("font_color", Color(1.0, 0.86, 0.38, 1.0))
+	content.add_child(_gear_detail_title)
+
+	_gear_detail_summary = Label.new()
+	_gear_detail_summary.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_gear_detail_summary.add_theme_font_size_override("font_size", 15)
+	content.add_child(_gear_detail_summary)
+
+	_gear_detail_stats = Label.new()
+	_gear_detail_stats.add_theme_font_size_override("font_size", 16)
+	_gear_detail_stats.add_theme_color_override("font_color", Color(0.82, 0.9, 1.0, 1.0))
+	content.add_child(_gear_detail_stats)
+
+	_gear_detail_comparison = Label.new()
+	_gear_detail_comparison.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_gear_detail_comparison.add_theme_font_size_override("font_size", 14)
+	_gear_detail_comparison.add_theme_color_override("font_color", Color(0.78, 0.86, 0.78, 1.0))
+	content.add_child(_gear_detail_comparison)
+
+	var actions := HBoxContainer.new()
+	actions.alignment = BoxContainer.ALIGNMENT_CENTER
+	actions.add_theme_constant_override("separation", 10)
+	content.add_child(actions)
+
+	_gear_detail_equip_button = Button.new()
+	_gear_detail_equip_button.text = "EQUIP"
+	_gear_detail_equip_button.custom_minimum_size = Vector2(130, 46)
+	_gear_detail_equip_button.pressed.connect(_on_gear_detail_equip_pressed)
+	actions.add_child(_gear_detail_equip_button)
+
+	_gear_detail_unequip_button = Button.new()
+	_gear_detail_unequip_button.text = "UNEQUIP"
+	_gear_detail_unequip_button.custom_minimum_size = Vector2(130, 46)
+	_gear_detail_unequip_button.pressed.connect(_on_gear_detail_unequip_pressed)
+	actions.add_child(_gear_detail_unequip_button)
+
+	var close_button := Button.new()
+	close_button.text = "CLOSE"
+	close_button.custom_minimum_size = Vector2(100, 46)
+	close_button.pressed.connect(func(): _gear_detail_modal.visible = false)
+	actions.add_child(close_button)
+
+	_gear_detail_modal.visible = false
+	add_child(_gear_detail_modal)
+
+func _show_gear_details(uid: String) -> bool:
+	if not SaveManager or not _gear_detail_modal:
+		return false
+	var item: ItemInstance = SaveManager.get_gear_item(uid)
+	if not item or not item.data:
+		return false
+
+	_selected_gear_uid = uid
+	var slot_name := item.data.equipment_slot
+	var equipped: ItemInstance = SaveManager.get_equipped_gear(slot_name)
+	var is_equipped := equipped != null and equipped.uid == item.uid
+	_gear_detail_title.text = item.data.name
+	_gear_detail_summary.text = "%s  •  %s  •  Tier %d  •  Upgrade +%d\n%s" % [
+		slot_name.capitalize(), item.rarity.capitalize(), item.data.tier, item.upgrade_level, item.data.description
+	]
+	var stats := _get_gear_item_stats(item)
+	_gear_detail_stats.text = "ATK  +%s     HP  +%s\nCRIT  +%.1f%%     MOVE SPD  +%s\nATK SPD  +%.1f%%" % [
+		_format_gear_stat(stats["bonus_atk"]),
+		_format_gear_stat(stats["bonus_hp"]),
+		stats["bonus_crit"] * 100.0,
+		_format_gear_stat(stats["bonus_speed"]),
+		stats["bonus_atk_speed"] * 100.0
+	]
+	_gear_detail_comparison.text = _build_gear_comparison_text(item, equipped)
+	_gear_detail_equip_button.text = "EQUIPPED" if is_equipped else "EQUIP"
+	_gear_detail_equip_button.disabled = is_equipped
+	_gear_detail_unequip_button.visible = is_equipped
+	_gear_detail_modal.visible = true
+	_refresh_gear_inventory_grid()
+	return true
+
+func _get_gear_item_stats(item: ItemInstance) -> Dictionary:
+	if not item or not item.data:
+		return {}
+	var level := maxi(0, item.upgrade_level)
+	return {
+		"bonus_atk": item.data.bonus_atk + level,
+		"bonus_hp": item.data.bonus_hp + (level * 5.0),
+		"bonus_crit": item.data.bonus_crit + (level * 0.001),
+		"bonus_speed": item.data.bonus_speed + level,
+		"bonus_atk_speed": item.data.bonus_atk_speed + (level * 0.005)
+	}
+
+func _build_gear_comparison_text(item: ItemInstance, equipped: ItemInstance) -> String:
+	if not equipped or not equipped.data:
+		return "Comparison: This slot is empty. Equipping this item will add its full bonuses."
+	if equipped.uid == item.uid:
+		return "Currently equipped in this slot."
+	var candidate_stats := _get_gear_item_stats(item)
+	var current_stats := _get_gear_item_stats(equipped)
+	return "Compared with %s:\nATK %s  •  HP %s\nCRIT %s  •  MOVE SPD %s  •  ATK SPD %s" % [
+		equipped.data.name,
+		_format_gear_delta(candidate_stats["bonus_atk"] - current_stats["bonus_atk"], false),
+		_format_gear_delta(candidate_stats["bonus_hp"] - current_stats["bonus_hp"], false),
+		_format_gear_delta(candidate_stats["bonus_crit"] - current_stats["bonus_crit"], true),
+		_format_gear_delta(candidate_stats["bonus_speed"] - current_stats["bonus_speed"], false),
+		_format_gear_delta(candidate_stats["bonus_atk_speed"] - current_stats["bonus_atk_speed"], true)
+	]
+
+func _format_gear_stat(value: float) -> String:
+	return "%d" % roundi(value) if is_equal_approx(value, roundf(value)) else "%.2f" % value
+
+func _format_gear_delta(value: float, as_percent: bool) -> String:
+	var display_value := value * 100.0 if as_percent else value
+	var sign := "+" if display_value >= 0.0 else ""
+	return "%s%.1f%s" % [sign, display_value, "%" if as_percent else ""]
+
+func _on_gear_detail_equip_pressed() -> void:
+	if not SaveManager or _selected_gear_uid.is_empty():
+		return
+	var uid := _selected_gear_uid
+	if SaveManager.equip_gear_item(uid):
+		if AudioManager: AudioManager.play_sfx("item_place")
 		refresh_loadout()
+		_show_gear_details(uid)
 		show_toast("Equipment updated")
 	else:
 		show_toast("This item cannot be equipped")
+
+func _on_gear_detail_unequip_pressed() -> void:
+	if not SaveManager or _selected_gear_uid.is_empty():
+		return
+	var item: ItemInstance = SaveManager.get_gear_item(_selected_gear_uid)
+	if item and SaveManager.unequip_gear_slot(item.data.equipment_slot):
+		if AudioManager: AudioManager.play_sfx("item_place")
+		refresh_loadout()
+		_show_gear_details(item.uid)
+		show_toast("Equipment removed")
+
 
 func _setup_toast_label() -> void:
 	_toast_label = Label.new()
@@ -479,11 +644,9 @@ func _setup_gear_slots_wiring() -> void:
 func _on_gear_slot_pressed(slot_name: String) -> void:
 	if not SaveManager:
 		return
-	if SaveManager.unequip_gear_slot(slot_name):
-		if AudioManager:
-			AudioManager.play_sfx("item_place")
-		refresh_loadout()
-		show_toast("Unequipped %s" % slot_name.capitalize())
+	var item: ItemInstance = SaveManager.get_equipped_gear(slot_name)
+	if item:
+		_show_gear_details(item.uid)
 	else:
 		show_toast("No %s equipped" % slot_name.capitalize())
 

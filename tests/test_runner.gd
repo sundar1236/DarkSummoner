@@ -12,6 +12,7 @@ func _ready() -> void:
 	
 	test_independent_movement_and_aim()
 	test_persistent_equipment_slots()
+	test_gear_item_details_and_comparison()
 	test_blacksmith_gear_purchases()
 	test_boss_gear_rewards_are_persistent()
 	test_run_altar_excludes_persistent_gear()
@@ -134,6 +135,45 @@ func test_persistent_equipment_slots() -> void:
 	SaveManager.equipped_gear = original_equipped
 	SaveManager.profile_gold = original_gold
 	SaveManager.save_profile()
+
+
+func test_gear_item_details_and_comparison() -> void:
+	print("--- Test: Gear Item Details, Comparison, Equip and Unequip ---")
+	var original_inventory: Array[Dictionary] = SaveManager.gear_inventory.duplicate(true)
+	var original_equipped: Dictionary = SaveManager.equipped_gear.duplicate(true)
+	var original_gold: int = SaveManager.profile_gold
+	var scene := load("res://scenes/characters/hero_loadout_screen.tscn") as PackedScene
+	assert_true(scene != null, "Hero loadout scene loads for gear detail validation")
+	if not scene:
+		return
+
+	var loadout := scene.instantiate() as HeroLoadoutScreen
+	add_child(loadout)
+	var base_helm := ItemInstance.new(ItemDatabase.get_item("void_helm"))
+	var upgrade_helm := ItemInstance.new(ItemDatabase.get_item("storm_circlet"))
+	assert_true(SaveManager.add_gear_item(base_helm), "Base helmet is added to gear inventory")
+	assert_true(SaveManager.add_gear_item(upgrade_helm), "Comparison helmet is added to gear inventory")
+	assert_true(SaveManager.equip_gear_item(base_helm.uid), "Base helmet equips for comparison")
+	assert_true(loadout._show_gear_details(upgrade_helm.uid), "Selecting an inventory item opens its detail panel")
+	assert_true(loadout._gear_detail_modal.visible, "Gear detail panel becomes visible")
+	assert_true(loadout._gear_detail_title.text == "Storm Circlet", "Detail panel displays the selected item name")
+	assert_true(loadout._gear_detail_comparison.text.contains("Compared with Void Helm"), "Comparison identifies the currently equipped helmet")
+	assert_true(loadout._gear_detail_comparison.text.contains("+12.0"), "Comparison shows the candidate's HP advantage")
+	assert_true(loadout._gear_detail_comparison.text.contains("+3.0%"), "Comparison shows the candidate's critical chance advantage")
+	assert_true(loadout._gear_detail_equip_button.text == "EQUIP", "Unequipped item exposes the Equip action")
+
+	loadout._on_gear_detail_equip_pressed()
+	var equipped_after_swap := SaveManager.get_equipped_gear("helmet")
+	assert_true(equipped_after_swap != null and equipped_after_swap.uid == upgrade_helm.uid, "Equip action replaces the current item in its slot")
+	assert_true(loadout._gear_detail_unequip_button.visible, "Equipped item exposes the Unequip action")
+	loadout._on_gear_detail_unequip_pressed()
+	assert_true(SaveManager.get_equipped_gear("helmet") == null, "Unequip action clears the selected item's slot")
+
+	SaveManager.gear_inventory = original_inventory
+	SaveManager.equipped_gear = original_equipped
+	SaveManager.profile_gold = original_gold
+	SaveManager.save_profile()
+	loadout.queue_free()
 
 
 func test_blacksmith_gear_purchases() -> void:
