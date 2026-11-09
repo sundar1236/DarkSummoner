@@ -51,8 +51,6 @@ signal rune_workshop_requested()
 
 var current_char_id: String = "shadow_hunter"
 var hunter_stars: int = 2
-var base_display_atk: int = 4280
-var base_display_hp: int = 18920
 var gear_sort_index: int = 0
 var runes_sort_index: int = 0
 var _toast_label: Label = null
@@ -155,33 +153,78 @@ func _setup_runes_dock_wiring() -> void:
 			)
 
 func refresh_loadout() -> void:
-	if not SaveManager: return
-	var eq: Dictionary = SaveManager.equipment_levels
-	var slots := [
-		$ContentContainer/ViewGear/TopHalf/LeftSlots/SlotWeapon,
-		$ContentContainer/ViewGear/TopHalf/LeftSlots/SlotAmulet,
-		$ContentContainer/ViewGear/TopHalf/LeftSlots/SlotRing,
-		$ContentContainer/ViewGear/TopHalf/RightSlots/SlotHelmet,
-		$ContentContainer/ViewGear/TopHalf/RightSlots/SlotArmor,
-		$ContentContainer/ViewGear/TopHalf/RightSlots/SlotBoots
-	]
-	var keys := ["weapon", "amulet", "ring", "helmet", "armor", "boots"]
-	var total_lvl := 0
-	for i in range(slots.size()):
-		var slot: Control = slots[i]
-		var k: String = keys[i]
-		var lvl: int = eq.get(k, 60)
-		total_lvl += lvl
-		if slot:
-			var lvl_lbl := slot.get_node_or_null("VBox/Level") as Label
-			if lvl_lbl:
-				lvl_lbl.text = "Lv.%d S" % lvl
+	if not SaveManager:
+		return
+
+	var slots := {
+		"weapon": $ContentContainer/ViewGear/TopHalf/LeftSlots/SlotWeapon,
+		"amulet": $ContentContainer/ViewGear/TopHalf/LeftSlots/SlotAmulet,
+		"ring": $ContentContainer/ViewGear/TopHalf/LeftSlots/SlotRing,
+		"helmet": $ContentContainer/ViewGear/TopHalf/RightSlots/SlotHelmet,
+		"armor": $ContentContainer/ViewGear/TopHalf/RightSlots/SlotArmor,
+		"boots": $ContentContainer/ViewGear/TopHalf/RightSlots/SlotBoots
+	}
+	var slot_icons := {
+		"weapon": "🗡", "amulet": "📿", "ring": "💍",
+		"helmet": "👑", "armor": "🥋", "boots": "👢"
+	}
+	for slot_name in slots:
+		var slot: Control = slots[slot_name]
+		var item: ItemInstance = SaveManager.get_equipped_gear(slot_name)
+		var icon_lbl := slot.get_node_or_null("VBox/Icon") as Label
+		var level_lbl := slot.get_node_or_null("VBox/Level") as Label
+		if icon_lbl:
+			icon_lbl.text = slot_icons[slot_name] if not item else slot_icons[slot_name]
+		if level_lbl:
+			if item and item.data:
+				level_lbl.text = "%s\n+%d" % [item.data.name, item.upgrade_level]
+			else:
+				level_lbl.text = "Empty"
 				
-	base_display_atk = 3200 + total_lvl * 8
-	base_display_hp = 14000 + total_lvl * 25
-	if stat_atk_label: stat_atk_label.text = "⚔ ATK: %s" % _format_num(base_display_atk)
-	if stat_hp_label: stat_hp_label.text = "❤ HP: %s" % _format_num(base_display_hp)
 	_update_character_ui()
+	_refresh_gear_inventory_grid()
+
+func _refresh_gear_inventory_grid() -> void:
+	var gear_grid := $ContentContainer/ViewGear/BottomInventory/Grid as GridContainer
+	if not gear_grid or not SaveManager:
+		return
+	for child in gear_grid.get_children():
+		gear_grid.remove_child(child)
+		child.queue_free()
+
+	var slot_icons := {
+		"weapon": "🗡", "amulet": "📿", "ring": "💍",
+		"helmet": "👑", "armor": "🥋", "boots": "👢"
+	}
+	var items: Array[ItemInstance] = SaveManager.get_gear_items()
+	for item in items:
+		if not item or not item.data:
+			continue
+		var slot_name := item.data.equipment_slot
+		var button := Button.new()
+		button.custom_minimum_size = Vector2(104, 96)
+		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		var equipped := str(SaveManager.equipped_gear.get(slot_name, "")) == item.uid
+		button.text = "%s\n%s\n%s" % [
+			slot_icons.get(slot_name, "◆"),
+			item.data.name,
+			"Equipped" if equipped else item.rarity.capitalize()
+		]
+		button.add_theme_font_size_override("font_size", 13)
+		var item_uid := item.uid
+		button.pressed.connect(func():
+			_equip_gear_item(item_uid)
+		)
+		gear_grid.add_child(button)
+
+func _equip_gear_item(uid: String) -> void:
+	if SaveManager and SaveManager.equip_gear_item(uid):
+		if AudioManager:
+			AudioManager.play_sfx("item_place")
+		refresh_loadout()
+		show_toast("Equipment updated")
+	else:
+		show_toast("This item cannot be equipped")
 
 func _setup_toast_label() -> void:
 	_toast_label = Label.new()
@@ -261,18 +304,29 @@ func _setup_info_modal() -> void:
 	add_child(_info_modal)
 
 func _toggle_combat_power_modal() -> void:
-	if not _info_modal: return
+	if not _info_modal:
+		return
 	if _info_modal.visible:
 		_info_modal.visible = false
 		return
 
 	var power: int = SaveManager.calculate_combat_power() if SaveManager else 24800
-	var desc_lbl = _info_modal.find_child("StatDescLabel", true, false) as Label
+	var gear_stats: Dictionary = SaveManager.get_equipped_gear_stats() if SaveManager else {}
+	var equipped_count := 0
+	if SaveManager:
+		for slot_name in SaveManager.EQUIPMENT_SLOTS:
+			if SaveManager.get_equipped_gear(slot_name):
+				equipped_count += 1
+	var desc_lbl := _info_modal.find_child("StatDescLabel", true, false) as Label
 	if desc_lbl:
-		desc_lbl.text = "✦ Total Combat Power: %s\n✦ Effective ATK: %s\n✦ Effective HP: %s\n✦ Gear Slots: 6/6 S-Tier\n✦ Resonance: Adjacency bonuses apply on Altar Grid." % [
-			_format_num(power), _format_num(base_display_atk), _format_num(base_display_hp)
+		desc_lbl.text = "✦ Total Combat Power: %s\n✦ Gear ATK: +%d\n✦ Gear HP: +%d\n✦ Equipment Slots: %d/6\n✦ Rune resonance is calculated separately during runs." % [
+			_format_num(power),
+			int(gear_stats.get("bonus_atk", 0.0)),
+			int(gear_stats.get("bonus_hp", 0.0)),
+			equipped_count
 		]
-	if AudioManager: AudioManager.play_sfx("ui_click")
+	if AudioManager:
+		AudioManager.play_sfx("ui_click")
 	_info_modal.visible = true
 
 func show_toast(text: String) -> void:
@@ -316,8 +370,6 @@ func _on_star_up_hunter() -> void:
 	if SaveManager:
 		if SaveManager.star_up_character("shadow_hunter"):
 			hunter_stars = SaveManager.character_stars.get("shadow_hunter", hunter_stars + 1)
-			base_display_atk += 280
-			base_display_hp += 950
 			_update_character_ui()
 			show_toast("★ Shadow Hunter Star Up (%d★)! +280 ATK, +950 HP" % hunter_stars)
 			star_up_requested.emit("shadow_hunter")
@@ -335,8 +387,6 @@ func _on_star_up_hunter() -> void:
 	else:
 		if hunter_stars < 6:
 			hunter_stars += 1
-			base_display_atk += 280
-			base_display_hp += 950
 			if AudioManager: AudioManager.play_sfx("upgrade")
 			_update_character_ui()
 			show_toast("★ Shadow Hunter Star Up (%d★)!" % hunter_stars)
@@ -374,8 +424,6 @@ func _update_character_ui() -> void:
 			if skill_lbl_2: skill_lbl_2.text = "✦ Lv.2 Tempest Strike [Unlocked]\nEvery 4th hit calls down a thunderbolt."
 			if skill_lbl_3: skill_lbl_3.text = "✦ Lv.3 Static Overload [Unlocked]\nShocked enemies explode on defeat."
 			if skill_lbl_4: skill_lbl_4.text = "✧ Lv.4 Eye of the Maelstrom [Locked - 5★]\nStorm aura zaps surrounding foes."
-			if stat_atk_label: stat_atk_label.text = "⚔ ATK: 5,140"
-			if stat_hp_label: stat_hp_label.text = "❤ HP: 16,800"
 		"soul_binder":
 			if char_name_badge: char_name_badge.text = "Soul Binder"
 			if star_rating_row: star_rating_row.text = "★ ★ ☆ ☆ ☆ ☆"
@@ -386,8 +434,6 @@ func _update_character_ui() -> void:
 			if skill_lbl_2: skill_lbl_2.text = "✦ Lv.2 Spectral Harvest [Unlocked]\nDefeated enemies spawn orbiting wisps."
 			if skill_lbl_3: skill_lbl_3.text = "✧ Lv.3 Void Absorption [Locked - 3★]\nAbsorb enemy projectiles into healing."
 			if skill_lbl_4: skill_lbl_4.text = "✧ Lv.4 Soul Rebirth [Locked - 5★]\nFatal damage triggers 3s invulnerability."
-			if stat_atk_label: stat_atk_label.text = "⚔ ATK: 4,680"
-			if stat_hp_label: stat_hp_label.text = "❤ HP: 21,400"
 		_:
 			if char_name_badge: char_name_badge.text = "Shadow Hunter"
 			if star_rating_row:
@@ -402,50 +448,45 @@ func _update_character_ui() -> void:
 			if skill_lbl_2: skill_lbl_2.text = "✦ Lv.2 Abyssal Surge [Unlocked]\nConsecutive hits gain +5% ATK SPD (up to 25%)."
 			if skill_lbl_3: skill_lbl_3.text = "✧ Lv.3 Soul Harvester [Locked - 3★]" if hunter_stars < 3 else "✦ Lv.3 Soul Harvester [Unlocked]\nDefeating an elite restores 10% max HP."
 			if skill_lbl_4: skill_lbl_4.text = "✧ Lv.4 Void Singularity [Locked - 5★]\nCrits unleash shockwave dealing 180% damage."
-			if stat_atk_label: stat_atk_label.text = "⚔ ATK: %s" % _format_num(base_display_atk)
-			if stat_hp_label: stat_hp_label.text = "❤ HP: %s" % _format_num(base_display_hp)
+
+	_refresh_gear_stat_labels()
+
+func _refresh_gear_stat_labels() -> void:
+	if not SaveManager:
+		return
+	var gear_stats: Dictionary = SaveManager.get_equipped_gear_stats()
+	if stat_atk_label:
+		stat_atk_label.text = "⚔ Gear ATK: +%d" % int(gear_stats.get("bonus_atk", 0.0))
+	if stat_hp_label:
+		stat_hp_label.text = "❤ Gear HP: +%d" % int(gear_stats.get("bonus_hp", 0.0))
 
 func _setup_gear_slots_wiring() -> void:
-	var slots := [
-		$ContentContainer/ViewGear/TopHalf/LeftSlots/SlotWeapon,
-		$ContentContainer/ViewGear/TopHalf/LeftSlots/SlotAmulet,
-		$ContentContainer/ViewGear/TopHalf/LeftSlots/SlotRing,
-		$ContentContainer/ViewGear/TopHalf/RightSlots/SlotHelmet,
-		$ContentContainer/ViewGear/TopHalf/RightSlots/SlotArmor,
-		$ContentContainer/ViewGear/TopHalf/RightSlots/SlotBoots
-	]
-	var names := ["Weapon", "Amulet", "Ring", "Helmet", "Armor", "Boots"]
-	for i in range(slots.size()):
-		var slot: Control = slots[i]
-		var s_name: String = names[i]
-		if slot:
-			slot.gui_input.connect(func(ev: InputEvent):
-				if ev is InputEventMouseButton and ev.pressed:
-					_upgrade_gear_slot(slot, s_name)
-			)
+	var slots := {
+		"weapon": $ContentContainer/ViewGear/TopHalf/LeftSlots/SlotWeapon,
+		"amulet": $ContentContainer/ViewGear/TopHalf/LeftSlots/SlotAmulet,
+		"ring": $ContentContainer/ViewGear/TopHalf/LeftSlots/SlotRing,
+		"helmet": $ContentContainer/ViewGear/TopHalf/RightSlots/SlotHelmet,
+		"armor": $ContentContainer/ViewGear/TopHalf/RightSlots/SlotArmor,
+		"boots": $ContentContainer/ViewGear/TopHalf/RightSlots/SlotBoots
+	}
+	for slot_name in slots:
+		var slot: Control = slots[slot_name]
+		slot.gui_input.connect(func(ev: InputEvent):
+			if ev is InputEventMouseButton and ev.pressed and ev.button_index == MOUSE_BUTTON_LEFT:
+				_on_gear_slot_pressed(slot_name)
+		)
 
-func _upgrade_gear_slot(slot: Control, slot_name: String) -> void:
-	var k := slot_name.to_lower()
-	if SaveManager:
-		if SaveManager.upgrade_equipment_slot(k):
-			var new_lvl: int = SaveManager.equipment_levels.get(k, 60)
-			refresh_loadout()
-			show_toast("✦ %s Upgraded to Lv.%d! (+45 ATK, +120 HP)" % [slot_name, new_lvl])
-		else:
-			var cur_l: int = SaveManager.equipment_levels.get(k, 60)
-			var cost: int = cur_l * 50
-			if AudioManager: AudioManager.play_sfx("ui_error")
-			show_toast("Need 🪙 %d Gold to upgrade %s!" % [cost, slot_name])
+func _on_gear_slot_pressed(slot_name: String) -> void:
+	if not SaveManager:
+		return
+	if SaveManager.unequip_gear_slot(slot_name):
+		if AudioManager:
+			AudioManager.play_sfx("item_place")
+		refresh_loadout()
+		show_toast("Unequipped %s" % slot_name.capitalize())
 	else:
-		var lvl_lbl := slot.get_node_or_null("VBox/Level") as Label
-		if lvl_lbl:
-			base_display_atk += 45
-			base_display_hp += 120
-			if AudioManager: AudioManager.play_sfx("upgrade")
-			lvl_lbl.text = "Lv.61 S"
-			if stat_atk_label: stat_atk_label.text = "⚔ ATK: %s" % _format_num(base_display_atk)
-			if stat_hp_label: stat_hp_label.text = "❤ HP: %s" % _format_num(base_display_hp)
-			show_toast("✦ %s Upgraded to Lv.61!" % slot_name)
+		show_toast("No %s equipped" % slot_name.capitalize())
+
 
 func _format_num(val: int) -> String:
 	var thousands := val / 1000

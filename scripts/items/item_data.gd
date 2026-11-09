@@ -8,6 +8,7 @@ extends Resource
 @export_multiline var description: String = ""
 @export var tier: int = 1
 @export var tags: Array[String] = []
+@export var equipment_slot: String = ""
 
 # Footprint cells relative to top-left (0,0). E.g.:
 # 1x1: [Vector2i(0,0)]

@@ -35,27 +35,40 @@ func open_modal() -> void:
 	if AudioManager: AudioManager.play_sfx("ui_click")
 
 func refresh_modal() -> void:
-	if not SaveManager: return
+	if not SaveManager:
+		return
 	if lbl_gold_balance:
 		lbl_gold_balance.text = "Available Gold: 🪙 %s" % _format_num(SaveManager.profile_gold)
-	if btn_upgrade_weapon:
-		var lvl: int = SaveManager.equipment_levels.get("weapon", 60)
-		btn_upgrade_weapon.text = "Forge Weapon (Lv.%d -> %d) [🪙 300]" % [lvl, lvl + 1]
-	if btn_upgrade_armor:
-		var lvl: int = SaveManager.equipment_levels.get("armor", 60)
-		btn_upgrade_armor.text = "Reinforce Armor (Lv.%d -> %d) [🪙 250]" % [lvl, lvl + 1]
-	if btn_upgrade_ring:
-		var lvl: int = SaveManager.equipment_levels.get("ring", 58)
-		btn_upgrade_ring.text = "Infuse Ring (Lv.%d -> %d) [🪙 200]" % [lvl, lvl + 1]
+	_refresh_upgrade_button(btn_upgrade_weapon, "weapon", "Forge Weapon")
+	_refresh_upgrade_button(btn_upgrade_armor, "armor", "Reinforce Armor")
+	_refresh_upgrade_button(btn_upgrade_ring, "ring", "Infuse Ring")
+
+func _refresh_upgrade_button(button: Button, slot_name: String, action_name: String) -> void:
+	if not button or not SaveManager:
+		return
+	var item: ItemInstance = SaveManager.get_equipped_gear(slot_name)
+	if not item or not item.data:
+		button.text = "No %s equipped" % slot_name
+		button.disabled = true
+		return
+	var cost: int = SaveManager.get_gear_upgrade_cost(slot_name)
+	button.text = "%s: %s Lv.%d → %d [🪙 %d]" % [
+		action_name, item.data.name, item.upgrade_level, item.upgrade_level + 1, cost
+	]
+	button.disabled = SaveManager.profile_gold < cost
 
 func _upgrade_slot(slot: String) -> void:
-	if not SaveManager: return
-	if SaveManager.upgrade_equipment_slot(slot):
-		var n_lvl: int = SaveManager.equipment_levels.get(slot, 1)
+	if not SaveManager:
+		return
+	if SaveManager.upgrade_equipped_gear(slot):
+		var item: ItemInstance = SaveManager.get_equipped_gear(slot)
 		refresh_modal()
-		gear_upgraded.emit(slot, n_lvl)
+		if item:
+			gear_upgraded.emit(slot, item.upgrade_level)
 	else:
-		if AudioManager: AudioManager.play_sfx("ui_error")
+		if AudioManager:
+			AudioManager.play_sfx("ui_error")
+
 
 func _format_num(val: int) -> String:
 	var thousands := val / 1000

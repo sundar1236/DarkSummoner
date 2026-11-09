@@ -50,6 +50,12 @@ var character_stars: Dictionary = {
 	"frost_valkyrie": 1
 }
 
+var gear_inventory: Array[Dictionary] = []
+var equipped_gear: Dictionary = {
+	"weapon": "", "helmet": "", "armor": "", "boots": "", "amulet": "", "ring": ""
+}
+var _gear_profile_initialized: bool = false
+
 var equipment_levels: Dictionary = {
 	"weapon": 60,
 	"amulet": 55,
@@ -92,6 +98,7 @@ var settings_data: Dictionary = {
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	load_profile()
+	_ensure_starter_gear()
 
 func get_upgrade_cost(stat_name: String) -> int:
 	var current_level: int = permanent_upgrades.get(stat_name, 0)
@@ -269,6 +276,134 @@ func star_up_character(char_id: String) -> bool:
 		return true
 	return false
 
+const EQUIPMENT_SLOTS: Array[String] = ["weapon", "helmet", "armor", "boots", "amulet", "ring"]
+
+
+func _ensure_starter_gear(persist: bool = true) -> void:
+	if _gear_profile_initialized:
+		return
+	var starter_items := {
+		"weapon": "shadow_dagger",
+		"helmet": "void_helm",
+		"armor": "iron_shield",
+		"boots": "ranger_boots",
+		"amulet": "ember_amulet",
+		"ring": "wraith_ring"
+	}
+	gear_inventory.clear()
+	for slot in starter_items:
+		var data := ItemDatabase.get_item(starter_items[slot])
+		if not data:
+			continue
+		var item := ItemInstance.new(data)
+		gear_inventory.append(item.to_dict())
+		equipped_gear[slot] = item.uid
+	_gear_profile_initialized = true
+	if persist:
+		save_profile()
+	profile_changed.emit()
+
+func get_gear_items() -> Array[ItemInstance]:
+	var result: Array[ItemInstance] = []
+	for item_dict in gear_inventory:
+		var item := ItemInstance.from_dict(item_dict)
+		if item:
+			result.append(item)
+	return result
+
+func get_gear_item(uid: String) -> ItemInstance:
+	if uid.is_empty():
+		return null
+	for item_dict in gear_inventory:
+		if str(item_dict.get("uid", "")) == uid:
+			return ItemInstance.from_dict(item_dict)
+	return null
+
+func get_equipped_gear(slot_name: String) -> ItemInstance:
+	if not equipped_gear.has(slot_name):
+		return null
+	return get_gear_item(str(equipped_gear.get(slot_name, "")))
+
+func add_gear_item(item: ItemInstance) -> bool:
+	if not item or not item.data or not EQUIPMENT_SLOTS.has(item.data.equipment_slot):
+		return false
+	for item_dict in gear_inventory:
+		if str(item_dict.get("uid", "")) == item.uid:
+			return false
+	gear_inventory.append(item.to_dict())
+	_gear_profile_initialized = true
+	save_profile()
+	profile_changed.emit()
+	return true
+
+func equip_gear_item(uid: String) -> bool:
+	var item := get_gear_item(uid)
+	if not item or not item.data or not EQUIPMENT_SLOTS.has(item.data.equipment_slot):
+		return false
+	equipped_gear[item.data.equipment_slot] = item.uid
+	save_profile()
+	profile_changed.emit()
+	return true
+
+func unequip_gear_slot(slot_name: String) -> bool:
+	if not EQUIPMENT_SLOTS.has(slot_name):
+		return false
+	if str(equipped_gear.get(slot_name, "")).is_empty():
+		return false
+	equipped_gear[slot_name] = ""
+	save_profile()
+	profile_changed.emit()
+	return true
+
+func get_equipped_gear_stats() -> Dictionary:
+	var totals := {
+		"bonus_atk": 0.0,
+		"bonus_hp": 0.0,
+		"bonus_crit": 0.0,
+		"bonus_speed": 0.0,
+		"bonus_atk_speed": 0.0
+	}
+	for slot_name in EQUIPMENT_SLOTS:
+		var item := get_equipped_gear(slot_name)
+		if not item or not item.data:
+			continue
+		var level: int = maxi(0, item.upgrade_level)
+		totals["bonus_atk"] += item.data.bonus_atk + level
+		totals["bonus_hp"] += item.data.bonus_hp + (level * 5.0)
+		totals["bonus_crit"] += item.data.bonus_crit + (level * 0.001)
+		totals["bonus_speed"] += item.data.bonus_speed + level
+		totals["bonus_atk_speed"] += item.data.bonus_atk_speed + (level * 0.005)
+	return totals
+
+
+func get_gear_upgrade_cost(slot_name: String) -> int:
+	var item := get_equipped_gear(slot_name)
+	if not item or not item.data:
+		return 0
+	return (item.upgrade_level + 1) * 50 * item.data.tier
+
+func upgrade_equipped_gear(slot_name: String) -> bool:
+	if not EQUIPMENT_SLOTS.has(slot_name):
+		return false
+	var item := get_equipped_gear(slot_name)
+	if not item or not item.data:
+		return false
+	var cost := get_gear_upgrade_cost(slot_name)
+	if profile_gold < cost:
+		return false
+	profile_gold -= cost
+	item.upgrade_level += 1
+	for index in range(gear_inventory.size()):
+		if str(gear_inventory[index].get("uid", "")) == item.uid:
+			gear_inventory[index] = item.to_dict()
+			break
+	save_profile()
+	gold_changed.emit(profile_gold)
+	profile_changed.emit()
+	if AudioManager:
+		AudioManager.play_sfx("upgrade")
+	return true
+
 func upgrade_equipment_slot(slot_name: String) -> bool:
 	var cur_lvl: int = equipment_levels.get(slot_name, 1)
 	var cost: int = cur_lvl * 50
@@ -293,13 +428,21 @@ func calculate_combat_power() -> int:
 	var gear_power := 0
 	for lvl in equipment_levels.values():
 		gear_power += int(lvl) * 45
+	var equipped_stats: Dictionary = get_equipped_gear_stats()
+	var equipped_power := int(
+		equipped_stats.get("bonus_atk", 0.0) * 20.0
+		+ equipped_stats.get("bonus_hp", 0.0) * 2.0
+		+ equipped_stats.get("bonus_crit", 0.0) * 500.0
+		+ equipped_stats.get("bonus_speed", 0.0) * 2.0
+		+ equipped_stats.get("bonus_atk_speed", 0.0) * 300.0
+	)
 	var star_power := 0
 	for stars in character_stars.values():
 		star_power += int(stars) * 650
 	var card_power := 0
 	for stars in talent_cards.values():
 		card_power += int(stars) * 400
-	return base_power + gear_power + star_power + card_power
+	return base_power + gear_power + equipped_power + star_power + card_power
 
 const WEB_STORAGE_KEY: String = "dark_summoner_save_profile"
 const WEB_RUN_KEY: String = "dark_summoner_run_state"
@@ -375,6 +518,9 @@ func reset_all_data() -> void:
 		"soul_binder": 2,
 		"frost_valkyrie": 1
 	}
+	gear_inventory.clear()
+	equipped_gear = {"weapon": "", "helmet": "", "armor": "", "boots": "", "amulet": "", "ring": ""}
+	_gear_profile_initialized = false
 	equipment_levels = {
 		"weapon": 60,
 		"amulet": 55,
@@ -409,6 +555,8 @@ func reset_all_data() -> void:
 		"ambience_vol": 0.6,
 		"muted": false
 	}
+	_gear_profile_initialized = false
+	_ensure_starter_gear(false)
 	profile_changed.emit()
 	profile_loaded.emit()
 
@@ -442,12 +590,15 @@ func save_profile() -> void:
 		"character_shards": character_shards,
 		"character_stars": character_stars,
 		"equipment_levels": equipment_levels,
+		"gear_inventory": gear_inventory,
+		"equipped_gear": equipped_gear,
 		"talent_cards": talent_cards,
 		"permanent_upgrades": permanent_upgrades,
 		"settings": settings_data,
 		"combat_power": calculate_combat_power()
 	}
 
+	_gear_profile_initialized = true
 	var json_str := JSON.stringify(data, "\t")
 	var file := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
 	if file:
@@ -507,6 +658,17 @@ func load_profile() -> void:
 		for k in c_stars.keys():
 			character_stars[str(k)] = c_stars[k]
 			
+	var saved_gear: Variant = dict.get("gear_inventory", null)
+	if saved_gear is Array:
+		gear_inventory.clear()
+		for entry in saved_gear:
+			if entry is Dictionary and ItemDatabase.get_item(str(entry.get("item_id", ""))):
+				gear_inventory.append(entry.duplicate(true))
+		_gear_profile_initialized = true
+	var saved_equipped: Variant = dict.get("equipped_gear", {})
+	if saved_equipped is Dictionary:
+		for slot_name in EQUIPMENT_SLOTS:
+			equipped_gear[slot_name] = str(saved_equipped.get(slot_name, ""))
 	var eq_lvls: Variant = dict.get("equipment_levels", {})
 	if eq_lvls is Dictionary:
 		for k in eq_lvls.keys():
