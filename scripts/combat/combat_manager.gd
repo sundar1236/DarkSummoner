@@ -97,7 +97,7 @@ func _get_wave_enemy_count(level_num: int, wave_num: int) -> int:
 
 func _get_wave_enemy_type(index: int, is_elite_room: bool) -> String:
 	if is_elite_room and index == 0:
-		return "elite"
+		return "mini_boss" if current_wave == 1 else "elite"
 	if index % 5 == 4:
 		return "charger"
 	if index % 2 == 1:

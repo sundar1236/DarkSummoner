@@ -78,7 +78,10 @@ func setup(p_type: String, p_floor: int) -> void:
 	_init_stats(p_floor)
 
 func _init_stats(floor_scale: int = 1) -> void:
-	var hp_mult := 1.0 + (float(floor_scale - 1) * 0.35)
+	var difficulty_mods: Dictionary = SaveManager.get_difficulty_multipliers() if SaveManager else {}
+	var hp_mult := (1.0 + (float(floor_scale - 1) * 0.35)) * float(difficulty_mods.get("enemy_hp", 1.0))
+	var damage_mult: float = float(difficulty_mods.get("enemy_damage", 1.0))
+	var reward_mult: float = float(difficulty_mods.get("rewards", 1.0))
 	match enemy_type:
 		"swarmer":
 			max_hp = 35.0 * hp_mult
@@ -134,7 +137,28 @@ func _init_stats(floor_scale: int = 1) -> void:
 				health_bar.size = Vector2(56, 7)
 				health_bar.position = Vector2(-28, -42)
 			_setup_elite_aura()
+		"mini_boss":
+			max_hp = 300.0 * hp_mult
+			move_speed = 72.0
+			contact_damage = 26.0
+			attack_cooldown = 4.0
+			gold_reward = 30
+			shade_reward = 6
+			if shadow_sprite:
+				shadow_sprite.position = Vector2(0, 32)
+				shadow_sprite.scale = Vector2(1.8, 1.8)
+			if sprite:
+				sprite.texture = TextureLoader.get_texture("res://assets/sprites/enemies/enemy_elite.png")
+				sprite.position = Vector2(0, -14)
+				sprite.scale = Vector2(1.55, 1.55)
+				sprite.modulate = Color(0.9, 0.42, 0.38, 1.0)
+			if health_bar:
+				health_bar.size = Vector2(76, 9)
+				health_bar.position = Vector2(-38, -54)
+			_setup_elite_aura()
 			
+	contact_damage *= damage_mult
+	gold_reward = maxi(1, roundi(float(gold_reward) * reward_mult))
 	hp = max_hp
 	if health_bar:
 		health_bar.max_value = max_hp
@@ -147,21 +171,22 @@ func _setup_elite_aura() -> void:
 	elite_aura.z_index = -1
 	elite_aura.draw.connect(func():
 		# Glowing golden-red menacing ring beneath elite brute
-		var r: float = 32.0 + sin(anim_time * 5.0) * 2.0
-		elite_aura.draw_arc(Vector2(0, 20), r, 0.0, TAU, 32, Color(1.0, 0.75, 0.2, 0.65), 3.0)
-		elite_aura.draw_circle(Vector2(0, 20), r * 0.95, Color(1.0, 0.3, 0.1, 0.12))
+		var r: float = (48.0 if enemy_type == "mini_boss" else 32.0) + sin(anim_time * 5.0) * 2.0
+		var ring_center := Vector2(0, 26) if enemy_type == "mini_boss" else Vector2(0, 20)
+		elite_aura.draw_arc(ring_center, r, 0.0, TAU, 32, Color(1.0, 0.75, 0.2, 0.65), 3.0)
+		elite_aura.draw_circle(ring_center, r * 0.95, Color(1.0, 0.3, 0.1, 0.12))
 	)
 	add_child(elite_aura)
 	
 	# Crown badge over elite health bar
 	var crown := Label.new()
-	crown.text = "👑 ELITE"
+	crown.text = "☠ ABYSSAL CHAMPION" if enemy_type == "mini_boss" else "👑 ELITE"
 	crown.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	crown.add_theme_font_size_override("font_size", 10)
 	crown.add_theme_color_override("font_color", Color(1.0, 0.85, 0.25, 1.0))
 	crown.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 1.0))
-	crown.size = Vector2(60, 14)
-	crown.position = Vector2(-30, -58)
+	crown.size = Vector2(110, 16) if enemy_type == "mini_boss" else Vector2(60, 14)
+	crown.position = Vector2(-55, -72) if enemy_type == "mini_boss" else Vector2(-30, -58)
 	crown.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(crown)
 
@@ -262,9 +287,49 @@ func _physics_process(delta: float) -> void:
 				_lunge_attack(dir)
 				_deal_player_damage(contact_damage)
 				attack_timer = 0.0
+		"mini_boss":
+			sprite.rotation = sin(anim_time * 5.0) * 0.045
+			sprite.position = Vector2(0, -14.0 + abs(sin(anim_time * 4.0)) * 2.5) + lunge_offset
+			if not is_telegraphing:
+				velocity = dir * move_speed if dist > 145.0 else Vector2.ZERO
+				move_and_slide()
+				if attack_timer >= attack_cooldown:
+					attack_timer = 0.0
+					_telegraph_mini_boss_slam()
+			else:
+				velocity = Vector2.ZERO
 
 	# Smoothly decay lunge offset
 	lunge_offset = lunge_offset.move_toward(Vector2.ZERO, 60.0 * delta)
+
+func _telegraph_mini_boss_slam() -> void:
+	if is_dead or is_telegraphing or not is_instance_valid(player_ref):
+		return
+	is_telegraphing = true
+	velocity = Vector2.ZERO
+	var target_position := player_ref.global_position
+	var danger_radius := 112.0
+	var warning := Node2D.new()
+	warning.global_position = target_position
+	warning.z_index = -1
+	warning.draw.connect(func():
+		warning.draw_circle(Vector2.ZERO, danger_radius, Color(0.9, 0.08, 0.12, 0.18))
+		warning.draw_arc(Vector2.ZERO, danger_radius, 0.0, TAU, 40, Color(1.0, 0.22, 0.2, 0.9), 4.0)
+	)
+	get_parent().add_child(warning)
+	if AudioManager:
+		AudioManager.play_sfx("boss_warning")
+	var tween := create_tween()
+	tween.tween_property(sprite, "scale", Vector2(1.8, 1.25), 0.28)
+	tween.tween_property(sprite, "scale", Vector2(1.55, 1.55), 0.24)
+	get_tree().create_timer(0.85).timeout.connect(func():
+		if is_instance_valid(warning):
+			warning.queue_free()
+		if is_instance_valid(self) and is_inside_tree():
+			if not is_dead and is_instance_valid(player_ref) and target_position.distance_to(player_ref.global_position) <= danger_radius:
+				_deal_player_damage(contact_damage * 1.35)
+			is_telegraphing = false
+	)
 
 func _lunge_attack(dir: Vector2) -> void:
 	lunge_offset = dir * 14.0

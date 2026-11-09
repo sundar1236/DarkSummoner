@@ -21,6 +21,7 @@ var sprite: Sprite2D
 
 var is_enraged: bool = false
 var is_performing_attack: bool = false
+var damage_multiplier: float = 1.0
 var attack_cooldown: float = 2.8
 var attack_timer: float = 0.0
 var attack_index: int = 0
@@ -36,7 +37,9 @@ func _ready() -> void:
 
 func setup(p_floor: int) -> void:
 	var scale_mult := 1.0 + float(p_floor - 1) * 0.5
-	max_hp = 380.0 * scale_mult
+	var difficulty_mods: Dictionary = SaveManager.get_difficulty_multipliers() if SaveManager else {}
+	max_hp = 380.0 * scale_mult * float(difficulty_mods.get("boss_hp", 1.0))
+	damage_multiplier = float(difficulty_mods.get("boss_damage", 1.0))
 	hp = max_hp
 	boss_hp_changed.emit(hp, max_hp)
 	if AudioManager:
@@ -176,7 +179,7 @@ func _attack_void_eruption() -> void:
 			if is_instance_valid(player_ref):
 				var dist := warn_node.global_position.distance_to(player_ref.global_position)
 				if dist <= 80.0 and player_ref.has_method("take_player_damage"):
-					player_ref.take_player_damage(30.0)
+					player_ref.take_player_damage(30.0 * damage_multiplier)
 			warn_node.queue_free()
 		is_performing_attack = false
 	)
@@ -220,7 +223,7 @@ func _attack_abyssal_charge() -> void:
 			move_and_slide()
 			# Check contact with player
 			if is_instance_valid(player_ref) and global_position.distance_to(player_ref.global_position) < 58.0:
-				player_ref.take_player_damage(26.0)
+				player_ref.take_player_damage(26.0 * damage_multiplier)
 				break
 			await get_tree().physics_frame
 			timer += get_physics_process_delta_time()
@@ -249,7 +252,7 @@ func _attack_nova_ring() -> void:
 			var proj := ProjectileController.new()
 			get_parent().add_child(proj)
 			proj.global_position = global_position
-			proj.setup(14.0, false, dir, 320.0, "enemy", false)
+			proj.setup(14.0 * damage_multiplier, false, dir, 320.0, "enemy", false)
 		if AudioManager:
 			AudioManager.play_sfx("proj_launch")
 		is_performing_attack = false
@@ -278,7 +281,7 @@ func _attack_abyssal_cross() -> void:
 		if is_dead or not is_inside_tree():
 			is_performing_attack = false
 			return
-		var damage: float = 20.0 if is_enraged else 16.0
+		var damage: float = (20.0 if is_enraged else 16.0) * damage_multiplier
 		for angle in [0.0, PI * 0.5, PI, PI * 1.5]:
 			var projectile := ProjectileController.new()
 			get_parent().add_child(projectile)

@@ -15,6 +15,7 @@ func _ready() -> void:
 	test_single_stick_and_touch_safety()
 	test_projectile_collision_roles_and_homing_filter()
 	test_floor_theme_selection()
+	test_difficulty_scaling_and_mini_boss()
 	test_hud_reactivity_and_game_speed()
 	test_combat_wave_progression()
 	test_xp_progression_and_level_up()
@@ -148,7 +149,58 @@ func test_floor_theme_selection() -> void:
 	assert_true(background.floor_theme_name == first_theme_name, "Floor themes cycle predictably after the fifth floor")
 	background.free()
 
-# 4. Test Combat HUD Reactivity & Game Speed
+# 4. Test difficulty scaling and the elite-room mini-boss.
+func test_difficulty_scaling_and_mini_boss() -> void:
+	print("--- 4. Difficulty Scaling & Mini-Boss Encounter ---")
+	var original_difficulty: String = SaveManager.difficulty
+	SaveManager.difficulty = "normal"
+	var normal_enemy := EnemyController.new()
+	normal_enemy.setup("swarmer", 1)
+	var normal_hp: float = normal_enemy.max_hp
+	var normal_damage: float = normal_enemy.contact_damage
+	var normal_gold: int = normal_enemy.gold_reward
+
+	SaveManager.difficulty = "hard"
+	var hard_enemy := EnemyController.new()
+	hard_enemy.setup("swarmer", 1)
+	assert_true(is_equal_approx(hard_enemy.max_hp, normal_hp * 1.5), "Hard mode increases enemy HP by 1.5x")
+	assert_true(is_equal_approx(hard_enemy.contact_damage, normal_damage * 1.25), "Hard mode increases enemy damage by 1.25x")
+	assert_true(hard_enemy.gold_reward > normal_gold, "Hard mode increases enemy gold rewards")
+
+	SaveManager.difficulty = "torment"
+	var torment_enemy := EnemyController.new()
+	torment_enemy.setup("swarmer", 1)
+	assert_true(is_equal_approx(torment_enemy.max_hp, normal_hp * 2.0), "Torment mode increases enemy HP by 2x")
+	assert_true(is_equal_approx(torment_enemy.contact_damage, normal_damage * 1.5), "Torment mode increases enemy damage by 1.5x")
+
+	var champion := EnemyController.new()
+	champion.setup("mini_boss", 1)
+	assert_true(champion.max_hp > torment_enemy.max_hp, "Abyssal Champion has mini-boss health")
+	assert_true(champion.shade_reward >= 6, "Mini-boss awards additional Shades")
+
+	var arena := CombatManager.new()
+	arena.current_wave = 1
+	assert_true(arena._get_wave_enemy_type(0, true) == "mini_boss", "First elite wave spawns the mini-boss")
+	arena.current_wave = 2
+	assert_true(arena._get_wave_enemy_type(0, true) == "elite", "Second elite wave returns to the elite brute")
+
+	var difficulty_data: Dictionary = SaveManager.get_difficulty_multipliers()
+	assert_true(difficulty_data.get("boss_hp", 1.0) == 2.0, "Torment mode also scales boss health")
+	assert_true(difficulty_data.get("boss_damage", 1.0) == 1.5, "Torment mode also scales boss damage")
+	var scaled_boss := BossController.new()
+	scaled_boss.setup(1)
+	assert_true(is_equal_approx(scaled_boss.max_hp, 760.0), "Torment mode doubles floor boss health")
+	assert_true(is_equal_approx(scaled_boss.damage_multiplier, 1.5), "Torment mode scales floor boss attack damage")
+	scaled_boss.free()
+
+	SaveManager.difficulty = original_difficulty
+	normal_enemy.free()
+	hard_enemy.free()
+	torment_enemy.free()
+	champion.free()
+	arena.free()
+
+# 5. Test Combat HUD Reactivity & Game Speed
 func test_hud_reactivity_and_game_speed() -> void:
 	print("--- 2. BattleArena HUD Reactivity & Game Speed ---")
 	var arena_scene := load("res://scenes/combat/combat_arena.tscn") as PackedScene
@@ -206,7 +258,11 @@ func test_combat_wave_progression() -> void:
 	assert_true(arena.enemies_remaining == arena._get_wave_enemy_count(GameManager.level_number, 2), "Second wave spawns its own enemy group")
 	assert_true(arena.enemies_remaining > 0, "Encounter remains active between waves")
 	assert_true(arena._get_wave_enemy_count(1, 2) > arena._get_wave_enemy_count(1, 1), "Second wave increases enemy count")
-	assert_true(arena._get_wave_enemy_type(0, true) == "elite", "Elite encounters include an elite enemy")
+	arena.current_wave = 1
+	assert_true(arena._get_wave_enemy_type(0, true) == "mini_boss", "Elite encounters begin with an Abyssal Champion mini-boss")
+	arena.current_wave = 2
+	assert_true(arena._get_wave_enemy_type(0, true) == "elite", "Second elite wave includes a regular elite brute")
+	arena.current_wave = 1
 	assert_true(arena._get_wave_enemy_type(1, false) == "cultist", "Wave composition includes ranged cultists")
 	assert_true(arena._get_wave_enemy_type(4, false) == "charger", "Later wave composition includes charging enemies")
 	arena.free()

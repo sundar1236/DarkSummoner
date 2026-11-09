@@ -478,7 +478,18 @@ func claim_achievement_reward(achievement_id: String) -> bool:
 		AudioManager.play_sfx("upgrade")
 	return true
 
+func get_difficulty_multipliers() -> Dictionary:
+	match difficulty:
+		"hard":
+			return {"enemy_hp": 1.5, "enemy_damage": 1.25, "boss_hp": 1.5, "boss_damage": 1.25, "rewards": 1.25}
+		"torment":
+			return {"enemy_hp": 2.0, "enemy_damage": 1.5, "boss_hp": 2.0, "boss_damage": 1.5, "rewards": 1.5}
+		_:
+			return {"enemy_hp": 1.0, "enemy_damage": 1.0, "boss_hp": 1.0, "boss_damage": 1.0, "rewards": 1.0}
+
 func set_difficulty(diff: String) -> void:
+	if not ["normal", "hard", "torment"].has(diff):
+		return
 	difficulty = diff
 	save_profile()
 	profile_changed.emit()
