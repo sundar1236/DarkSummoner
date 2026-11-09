@@ -156,6 +156,7 @@ func test_floor_enemy_composition() -> void:
 	var original_floor: int = GameManager.floor_number
 	var arena := CombatManager.new()
 	arena.current_wave = 1
+	assert_true(arena._get_wave_enemy_count(4, 2) <= 14, "Regular combat waves stay within the 14-enemy mobile budget")
 
 	GameManager.floor_number = 1
 	assert_true(arena._get_wave_enemy_type(0, false) == "swarmer", "Abyssal Ruins begins with swarmers")
