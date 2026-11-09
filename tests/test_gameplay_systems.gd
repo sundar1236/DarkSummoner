@@ -45,38 +45,24 @@ func assert_true(condition: bool, message: String) -> void:
 		tests_failed += 1
 		print("  [FAIL] " + message)
 
-# 1. Test Independent Movement and Aiming
+# 1. Test Single-Stick Movement and Auto-Attack
 func test_independent_movement_and_aim() -> void:
-	print("--- Test 1: Independent Dual-Stick Movement & Aiming ---")
+	print("--- Test 1: Single-Stick Movement & Auto-Attack Behaviour ---")
 	var player := PlayerController.new()
 	var move_joy := VirtualJoystick.new()
-	var aim_joy := VirtualJoystick.new()
-	
 	player.move_joystick = move_joy
-	player.aim_joystick = aim_joy
-	
-	# Simulate moving left (-1, 0)
+
+	# Moving with the single joystick moves the hunter and suppresses attacks.
 	move_joy.is_pressed = true
 	move_joy.output_vector = Vector2(-1.0, 0.0)
-	
-	# Simulate aiming right (+1, 0)
-	aim_joy.is_pressed = true
-	aim_joy.output_vector = Vector2(1.0, 0.0)
-	
 	player._physics_process(0.016)
-	
-	assert_true(player.velocity.x < 0.0, "Player moves left while joystick points left")
-	assert_true(player.aim_direction.x > 0.0, "Player aims right independently while moving left")
-	assert_true(player.is_attacking, "Holding aim-attack stick enables continuous attacks")
-	
-	# Releasing aim stick stops attack
-	aim_joy._reset_joystick()
-	player._physics_process(0.016)
-	assert_true(not player.is_attacking, "Releasing aim-attack stick stops basic attacks")
-	
+
+	assert_true(player.velocity.x < 0.0, "Player moves left with the single joystick")
+	assert_true(player.aim_direction.x < 0.0, "Player faces the movement direction while moving")
+	assert_true(not player.is_attacking, "Basic attacks are suppressed while moving")
+
 	player.queue_free()
 	move_joy.queue_free()
-	aim_joy.queue_free()
 
 # 2. Test Multi-Cell Footprint and 90-Degree Rotation
 func test_inventory_footprint_and_rotation() -> void:
