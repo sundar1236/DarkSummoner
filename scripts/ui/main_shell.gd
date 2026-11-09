@@ -53,9 +53,12 @@ func _ready() -> void:
 		screen_campaign.camp_clicked.connect(func():
 			if nav_dock: nav_dock.select_tab(1)
 		)
-		screen_campaign.rumble_clicked.connect(func():
-			start_run_requested.emit()
-		)
+		if screen_campaign.has_signal("daily_tasks_requested"):
+			screen_campaign.daily_tasks_requested.connect(func():
+				if nav_dock: nav_dock.select_tab(0)
+				if screen_shop and screen_shop.has_method("focus_daily_missions"):
+					screen_shop.call_deferred("focus_daily_missions")
+			)
 		if screen_campaign.has_signal("insufficient_energy"):
 			screen_campaign.insufficient_energy.connect(open_energy_modal)
 	if screen_loadout:
