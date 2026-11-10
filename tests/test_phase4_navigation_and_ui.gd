@@ -105,10 +105,12 @@ func test_bottom_nav_dock_tabs_and_badges() -> void:
 	assert_test(dock.tab_labels[2].get_theme_font_size("font_size") == 17, "Inactive tab label size is 17px")
 	
 	# Badge tests
+	SaveManager.daily_free_energy_claim_date = ""
 	SaveManager.daily_free_energy_claimed = false
 	dock.refresh_badges()
 	assert_test(dock.badge_shop.visible, "Shop badge visible when free energy is unclaimed")
 	
+	SaveManager.daily_free_energy_claim_date = SaveManager._get_local_date_key()
 	SaveManager.daily_free_energy_claimed = true
 	dock.refresh_badges()
 	assert_test(not dock.badge_shop.visible, "Shop badge hidden when free energy is claimed")
@@ -345,6 +347,7 @@ func test_shop_screen_atomic_purchases() -> void:
 	assert_test(SaveManager.profile_gold == mission_gold_before + 250 and SaveManager.shades == mission_shades_before + 5, "Daily mission grants its displayed Gold and Shades")
 	assert_test(not SaveManager.claim_daily_mission_reward("enemy_slayer"), "Daily mission reward cannot be claimed twice")
 
+	SaveManager.achievement_claimed.erase("abyssal_slayer")
 	SaveManager.achievement_progress["abyssal_slayer"] = 99
 	SaveManager.record_achievement_progress("abyssal_slayer", 1)
 	var slayer_achievement: Dictionary = {}
