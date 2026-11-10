@@ -110,15 +110,29 @@ func _state_clip_name() -> String:
 		AnimState.VICTORY: return "victory"
 	return "idle"
 
+func _resolve_authored_clip_name(clip_key: String) -> String:
+	if not is_instance_valid(authored_animation_player):
+		return ""
+	var base_name := str(authored_animation_names.get(clip_key, clip_key))
+	var directional_name := "%s_%s" % [base_name, animation_direction]
+	if authored_animation_player.has_animation(directional_name):
+		return directional_name
+	return base_name if authored_animation_player.has_animation(base_name) else ""
+
+func get_authored_clip_duration(clip_key: String) -> float:
+	var animation_name := _resolve_authored_clip_name(clip_key)
+	if animation_name.is_empty():
+		return 0.0
+	var animation := authored_animation_player.get_animation(animation_name)
+	return animation.length if animation else 0.0
+
 func _play_authored_clip(clip_key: String, force_restart: bool = false) -> bool:
 	if not is_instance_valid(authored_animation_player):
 		_set_authored_visual_active(false)
 		return false
 
-	var base_name := str(authored_animation_names.get(clip_key, clip_key))
-	var directional_name := "%s_%s" % [base_name, animation_direction]
-	var animation_name := directional_name if authored_animation_player.has_animation(directional_name) else base_name
-	if not authored_animation_player.has_animation(animation_name):
+	var animation_name := _resolve_authored_clip_name(clip_key)
+	if animation_name.is_empty():
 		_set_authored_visual_active(false)
 		return false
 	if force_restart or authored_animation_player.current_animation != animation_name:
@@ -295,7 +309,6 @@ func trigger_attack(aim_dir: Vector2, _attack_type: String = "slash") -> int:
 	_transition_to(AnimState.ATTACK)
 	is_locked = true
 	attack_duration = 0.20
-	attack_anim_timer = attack_duration
 	combo_reset_timer = COMBO_WINDOW
 	
 	var executed_stage: int = combo_stage
@@ -346,16 +359,22 @@ func trigger_attack(aim_dir: Vector2, _attack_type: String = "slash") -> int:
 				tw.parallel().tween_property(weapon_sprite, "scale", Vector2(0.22, 0.22), 0.14)
 			combo_stage = 0 # Cycle back
 			
-	_play_authored_clip("attack_%d" % (executed_stage + 1), true)
+	var attack_clip_key := "attack_%d" % (executed_stage + 1)
+	_play_authored_clip(attack_clip_key, true)
+	attack_duration = maxf(0.20, get_authored_clip_duration(attack_clip_key))
+	attack_anim_timer = attack_duration
 	return executed_stage
 
 func trigger_skill() -> void:
 	_transition_to(AnimState.SKILL)
 	_play_authored_clip("skill", true)
 	is_locked = true
+	var skill_duration := maxf(0.45, get_authored_clip_duration("skill"))
 	var tw := create_tween()
 	tw.tween_property(self, "procedural_scale", Vector2(1.25, 1.25), 0.2).set_trans(Tween.TRANS_BACK)
 	tw.tween_property(self, "procedural_scale", Vector2.ONE, 0.25)
+	if skill_duration > 0.45:
+		tw.tween_interval(skill_duration - 0.45)
 	tw.tween_callback(func():
 		is_locked = false
 		_transition_to(AnimState.IDLE)
@@ -367,7 +386,7 @@ func trigger_hurt(hit_direction: Vector2 = Vector2.ZERO) -> void:
 		animation_direction = _get_direction_suffix(-hit_direction)
 	_transition_to(AnimState.HURT)
 	is_locked = true
-	hurt_timer = 0.16
+	hurt_timer = maxf(0.16, get_authored_clip_duration("hurt"))
 	
 	# Recoil flinch backwards
 	procedural_offset = -hit_direction * 10.0
@@ -389,9 +408,12 @@ func trigger_dodge(dash_dir: Vector2) -> void:
 	
 	var visual_target := _get_active_visual_target()
 	if visual_target:
+		var dodge_duration := maxf(0.22, get_authored_clip_duration("dodge"))
 		var tw := visual_target.create_tween()
 		visual_target.modulate.a = 0.4
 		tw.tween_property(visual_target, "modulate:a", 1.0, 0.22)
+		if dodge_duration > 0.22:
+			tw.tween_interval(dodge_duration - 0.22)
 		tw.tween_callback(func():
 			is_locked = false
 			_transition_to(AnimState.IDLE)
