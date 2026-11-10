@@ -91,6 +91,13 @@ func _set_authored_visual_active(active: bool) -> void:
 	if is_instance_valid(sprite):
 		sprite.visible = not active
 
+func _get_active_visual_target() -> CanvasItem:
+	if authored_animation_active and is_instance_valid(authored_rig_root):
+		return authored_rig_root
+	if is_instance_valid(sprite):
+		return sprite
+	return null
+
 func _state_clip_name() -> String:
 	match current_state:
 		AnimState.IDLE: return "idle"
@@ -365,10 +372,11 @@ func trigger_hurt(hit_direction: Vector2 = Vector2.ZERO) -> void:
 	procedural_offset = -hit_direction * 10.0
 	procedural_scale = Vector2(1.15, 0.85)
 	
-	if sprite:
-		var tw := sprite.create_tween()
-		sprite.modulate = Color(2.0, 0.3, 0.3, 1.0)
-		tw.tween_property(sprite, "modulate", Color(1.0, 1.0, 1.0, 1.0), 0.16)
+	var visual_target := _get_active_visual_target()
+	if visual_target:
+		var tw := visual_target.create_tween()
+		visual_target.modulate = Color(2.0, 0.3, 0.3, 1.0)
+		tw.tween_property(visual_target, "modulate", Color(1.0, 1.0, 1.0, 1.0), 0.16)
 
 func trigger_dodge(dash_dir: Vector2) -> void:
 	# Dodge cleanly cancels any attack lock immediately
@@ -378,10 +386,11 @@ func trigger_dodge(dash_dir: Vector2) -> void:
 	procedural_offset = dash_dir * 8.0
 	procedural_scale = Vector2(1.3, 0.75)
 	
-	if sprite:
-		var tw := sprite.create_tween()
-		sprite.modulate.a = 0.4
-		tw.tween_property(sprite, "modulate:a", 1.0, 0.22)
+	var visual_target := _get_active_visual_target()
+	if visual_target:
+		var tw := visual_target.create_tween()
+		visual_target.modulate.a = 0.4
+		tw.tween_property(visual_target, "modulate:a", 1.0, 0.22)
 		tw.tween_callback(func():
 			is_locked = false
 			_transition_to(AnimState.IDLE)
@@ -390,9 +399,10 @@ func trigger_dodge(dash_dir: Vector2) -> void:
 func trigger_defeat() -> void:
 	_transition_to(AnimState.DEFEAT)
 	is_locked = true
-	if sprite:
-		var tw := sprite.create_tween()
-		tw.tween_property(sprite, "modulate", Color(0.4, 0.4, 0.5, 0.0), 0.8)
+	var visual_target := _get_active_visual_target()
+	if visual_target:
+		var tw := visual_target.create_tween()
+		tw.tween_property(visual_target, "modulate", Color(0.4, 0.4, 0.5, 0.0), 0.8)
 
 func trigger_victory() -> void:
 	_transition_to(AnimState.VICTORY)
