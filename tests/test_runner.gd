@@ -40,6 +40,7 @@ func _ready() -> void:
 	test_valkyrie_blessing_pick_and_refresh()
 	test_summoning_circle_redesign()
 	test_authored_character_animation_fallbacks()
+	test_selected_character_visual_scene_mapping()
 	
 	print("\n==================================================")
 	print("  TEST RESULTS: %d PASSED, %d FAILED" % [tests_passed, tests_failed])
@@ -897,3 +898,12 @@ func test_authored_character_animation_fallbacks() -> void:
 	controller.queue_free()
 	legacy_sprite.queue_free()
 	rig_root.queue_free()
+
+# 21. Test generated visual scene mapping for each playable hero.
+func test_selected_character_visual_scene_mapping() -> void:
+	print("--- Test 21: Selected Character Visual Scene Mapping ---")
+	assert_true(PlayerController.AUTHORED_CHARACTER_SCENES.size() == 3, "All three playable characters have authored scene slots")
+	assert_true(PlayerController.AUTHORED_CHARACTER_SCENES.get("shadow_hunter") == "res://scenes/characters/shadow_hunter_visual.tscn", "Shadow Hunter maps to its generated visual scene")
+	assert_true(PlayerController.AUTHORED_CHARACTER_SCENES.get("storm_reaper") == "res://scenes/characters/storm_reaper_visual.tscn", "Storm Reaper maps to its generated visual scene")
+	assert_true(PlayerController.AUTHORED_CHARACTER_SCENES.get("soul_binder") == "res://scenes/characters/soul_binder_visual.tscn", "Soul Binder maps to its generated visual scene")
+	assert_true(PlayerController.AUTHORED_CHARACTER_SCENES.get("unknown_character", "").is_empty(), "Unknown characters do not resolve to an arbitrary rig")
