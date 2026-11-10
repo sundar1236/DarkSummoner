@@ -227,19 +227,36 @@ func get_authored_socket(socket_name: String) -> Node2D:
 # package has been built. Gameplay remains on the existing sprite otherwise.
 func _install_selected_character_visual() -> void:
 	if not GameManager.current_character:
+		_clear_selected_character_visual()
 		return
 	var character_id := str(GameManager.current_character.id)
 	if character_id == authored_visual_character_id:
 		return
 	var scene_path := str(AUTHORED_CHARACTER_SCENES.get(character_id, ""))
 	if scene_path.is_empty() or not ResourceLoader.exists(scene_path):
+		_clear_selected_character_visual()
 		return
 	var rig_scene := load(scene_path) as PackedScene
 	if rig_scene == null:
 		push_warning("Authored visual scene could not be loaded for %s: %s" % [character_id, scene_path])
+		_clear_selected_character_visual()
 		return
 	if install_authored_visual(rig_scene):
 		authored_visual_character_id = character_id
+	else:
+		_clear_selected_character_visual()
+
+# Never leave the previous character's authored rig visible when the selected
+# character has no generated scene or its scene fails validation.
+func _clear_selected_character_visual() -> void:
+	if is_instance_valid(authored_rig_root):
+		authored_rig_root.free()
+		authored_rig_root = null
+	if is_instance_valid(anim_ctrl):
+		anim_ctrl.clear_authored_animation()
+	authored_visual_character_id = ""
+	if is_instance_valid(sprite):
+		sprite.visible = true
 
 func _setup_character_ambience() -> void:
 	var char_id := "shadow_hunter"
