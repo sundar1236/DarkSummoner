@@ -101,5 +101,15 @@ func play(clip_name: String, force_restart: bool = false) -> void:
 	if force_restart or animated_sprite.animation != clip_name:
 		animated_sprite.play(clip_name)
 
+func has_animation(clip_name: String) -> bool:
+	return is_ready_for_animation() and animated_sprite.sprite_frames.has_animation(clip_name)
+
+func is_one_shot_playing(clip_name: String) -> bool:
+	if not has_animation(clip_name):
+		return false
+	if animated_sprite.animation != clip_name or not animated_sprite.is_playing():
+		return false
+	return not animated_sprite.sprite_frames.get_animation_loop(clip_name)
+
 func is_ready_for_animation() -> bool:
 	return is_instance_valid(animated_sprite) and animated_sprite.sprite_frames != null
