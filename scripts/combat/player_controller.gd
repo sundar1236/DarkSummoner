@@ -424,6 +424,9 @@ func _handle_aim_and_attack(delta: float) -> void:
 	aim_indicator.queue_redraw()
 	weapon_socket.position = aim_direction * 20.0
 	weapon_socket.rotation = aim_direction.angle()
+	var authored_weapon_socket := get_authored_socket("WeaponSocket")
+	if authored_weapon_socket:
+		authored_weapon_socket.global_rotation = aim_direction.angle()
 	
 	# Attack continuous firing while stationary and targeting an enemy
 	# Shadow Hunter consecutive hits slightly accelerate firing speed
@@ -524,13 +527,14 @@ func _fire_basic_attack() -> void:
 			if combo_streak >= 4:
 				_spawn_afterimage()
 		
-	# Slash crescent visual swing
-	_spawn_slash_vfx(aim_direction, attack_type, combo_stage)
+	# Slash crescent visual swing and projectile muzzle share the active rig socket.
+	var attack_origin := _get_weapon_spawn_position()
+	_spawn_slash_vfx(aim_direction, attack_type, combo_stage, attack_origin)
 	if not ProjectileController.can_spawn_projectile():
 		return
 	var proj := ProjectileController.new()
 	get_parent().add_child(proj)
-	proj.global_position = weapon_socket.global_position
+	proj.global_position = attack_origin
 	
 	var p_speed := 720.0 if attack_type == "lightning" else 600.0
 	proj.setup(final_dmg, is_crit, aim_direction, p_speed, attack_type, true)
@@ -550,7 +554,7 @@ func _fire_basic_attack() -> void:
 			break
 		var extra_proj := ProjectileController.new()
 		get_parent().add_child(extra_proj)
-		extra_proj.global_position = weapon_socket.global_position
+		extra_proj.global_position = attack_origin
 		extra_proj.setup(final_dmg * 0.75, is_crit, side_dir, p_speed, attack_type, true)
 		if proj.has_burn: extra_proj.has_burn = true
 		if proj.has_life_steal: extra_proj.has_life_steal = true
@@ -558,10 +562,22 @@ func _fire_basic_attack() -> void:
 	if AudioManager:
 		AudioManager.play_sfx(sfx_name, 0.06)
 
-func _spawn_slash_vfx(dir: Vector2, atk_type: String, stage_idx: int = 0) -> void:
+func _get_weapon_spawn_position() -> Vector2:
+	var authored_socket := get_authored_socket("WeaponSocket")
+	if authored_socket:
+		return authored_socket.global_position
+	return weapon_socket.global_position if is_instance_valid(weapon_socket) else global_position
+
+func _spawn_slash_vfx(
+	dir: Vector2,
+	atk_type: String,
+	stage_idx: int = 0,
+	spawn_origin: Vector2 = Vector2.ZERO
+) -> void:
 	var slash := Sprite2D.new()
 	slash.texture = TextureLoader.get_texture("res://assets/sprites/projectiles/proj_slash.png")
-	slash.global_position = weapon_socket.global_position + dir * 10.0
+	var origin := spawn_origin if spawn_origin != Vector2.ZERO else _get_weapon_spawn_position()
+	slash.global_position = origin + dir * 10.0
 	slash.rotation = dir.angle()
 	
 	# Combo stage visual variance
