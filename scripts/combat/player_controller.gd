@@ -141,6 +141,39 @@ func _setup_visuals() -> void:
 	authored_animation_player.name = "AuthoredAnimationPlayer"
 	authored_rig_root.add_child(authored_animation_player)
 	anim_ctrl.bind_authored_animation_player(authored_animation_player, {}, authored_rig_root)
+
+# Installs a production character visual scene without replacing the gameplay body.
+# The supplied scene must have an AnimationPlayer somewhere beneath its Node2D root.
+func install_authored_visual(rig_scene: PackedScene, clip_names: Dictionary = {}) -> bool:
+	if rig_scene == null or not is_instance_valid(visual_root) or not is_instance_valid(anim_ctrl):
+		return false
+
+	var rig_instance := rig_scene.instantiate()
+	if not rig_instance is Node2D:
+		rig_instance.queue_free()
+		push_warning("Authored character visual scene root must inherit Node2D.")
+		return false
+
+	var rig_root := rig_instance as Node2D
+	var animation_player := rig_root.find_child("AnimationPlayer", true, false) as AnimationPlayer
+	if animation_player == null:
+		rig_root.free()
+		push_warning("Authored character visual scene requires an AnimationPlayer child.")
+		return false
+
+	if is_instance_valid(authored_rig_root):
+		authored_rig_root.queue_free()
+		authored_rig_root = null
+
+	rig_root.name = "AuthoredRigRoot"
+	rig_root.visible = false
+	visual_root.add_child(rig_root)
+	authored_rig_root = rig_root
+	# Animation tracks resolve from the rig root regardless of where the player
+	# sits inside the scene hierarchy.
+	animation_player.root_node = animation_player.get_path_to(rig_root)
+	anim_ctrl.bind_authored_animation_player(animation_player, clip_names, rig_root)
+	return true
 	
 	# 7. Aim reticle indicator line
 	aim_indicator = Node2D.new()
