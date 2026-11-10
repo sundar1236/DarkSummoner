@@ -51,12 +51,19 @@ static func _validate_manifest(manifest_path: String) -> Array[String]:
 	if int(data.get("schema_version", 0)) != 1:
 		errors.append("schema_version must be 1.")
 
+	var canvas: Variant = data.get("canvas", null)
+	if not canvas is Dictionary:
+		errors.append("canvas must be an object.")
+	elif int(canvas.get("width", 0)) != EXPECTED_SIZE.x or int(canvas.get("height", 0)) != EXPECTED_SIZE.y:
+		errors.append("canvas width and height must be 720 and 1280.")
+
 	var floors: Variant = data.get("floors", null)
 	if not floors is Array or floors.is_empty():
 		errors.append("floors must be a non-empty array.")
 		return errors
 
 	var floor_ids: Dictionary = {}
+	var floor_numbers: Dictionary = {}
 	for floor_index in range(floors.size()):
 		var floor_data: Variant = floors[floor_index]
 		if not floor_data is Dictionary:
@@ -70,6 +77,18 @@ static func _validate_manifest(manifest_path: String) -> Array[String]:
 			errors.append("Duplicate floor id: %s" % floor_id)
 		else:
 			floor_ids[floor_id] = true
+
+		var floor_name := str(floor_data.get("name", "")).strip_edges()
+		if floor_name.is_empty():
+			errors.append("Floor '%s' has no display name." % floor_id)
+
+		var floor_number := int(floor_data.get("floor_number", 0))
+		if floor_number < 1 or floor_number > 5:
+			errors.append("Floor '%s' floor_number must be between 1 and 5." % floor_id)
+		elif floor_numbers.has(floor_number):
+			errors.append("Duplicate floor_number: %d." % floor_number)
+		else:
+			floor_numbers[floor_number] = true
 
 		var layers: Variant = floor_data.get("layers", null)
 		if not layers is Array:
@@ -115,5 +134,9 @@ static func _validate_manifest(manifest_path: String) -> Array[String]:
 		for required_role in REQUIRED_ROLES:
 			if not roles.has(required_role):
 				errors.append("Floor '%s' is missing required '%s' layer." % [floor_id, required_role])
+
+	for expected_floor in range(1, 6):
+		if not floor_numbers.has(expected_floor):
+			errors.append("Manifest is missing floor_number %d." % expected_floor)
 
 	return errors
