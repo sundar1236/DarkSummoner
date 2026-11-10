@@ -57,8 +57,8 @@ const PARENT_BONE := {
 }
 
 const LAYER_ORDER: Array[String] = [
-	"back_cape", "rear_leg_upper", "rear_leg_lower", "rear_boot",
-	"front_leg_upper", "front_leg_lower", "front_boot", "pelvis_torso",
+	"pelvis_torso", "back_cape", "rear_leg_upper", "rear_leg_lower", "rear_boot",
+	"front_leg_upper", "front_leg_lower", "front_boot",
 	"rear_arm_upper", "rear_arm_lower", "rear_hand",
 	"front_arm_upper", "front_arm_lower", "front_hand",
 	"head_face", "hood_back", "hair_back", "hood_front", "hair_front",
@@ -197,7 +197,7 @@ func _add_animations(player: AnimationPlayer) -> void:
 	var library := AnimationLibrary.new()
 	library.add_animation("idle", _make_animation(1.2, true, {
 		"Skeleton2D/Root/Body": [[0.0, 0.0], [0.6, 0.015], [1.2, 0.0]],
-		"Skeleton2D/Body/Head": [[0.0, 0.0], [0.6, -0.025], [1.2, 0.0]],
+		"Skeleton2D/Root/Body/Head": [[0.0, 0.0], [0.6, -0.025], [1.2, 0.0]],
 		"Skeleton2D/Root/BackCape": [[0.0, 0.0], [0.6, 0.025], [1.2, 0.0]]
 	}))
 	library.add_animation("run", _make_animation(0.48, true, {
