@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "canvas": {
+    "width": 720,
+    "height": 1280,
+    "orientation": "portrait"
+  },
+  "description": "Layered 2.5D arena environment source contract. Replace all example paths with approved original transparent PNG artwork.",
+  "floors": [
+    {
+      "id": "abyssal_ruins",
+      "name": "Abyssal Ruins",
+      "floor_number": 1,
+      "layers": [
+        {"role": "background", "source": "res://assets/art/environments/floors/abyssal_ruins/background.png"},
+        {"role": "floor", "source": "res://assets/art/environments/floors/abyssal_ruins/floor.png"},
+        {"role": "props", "source": "res://assets/art/environments/floors/abyssal_ruins/props.png"},
+        {"role": "foreground", "source": "res://assets/art/environments/floors/abyssal_ruins/foreground.png"}
+      ]
+    },
+    {
+      "id": "ember_catacombs",
+      "name": "Ember Catacombs",
+      "floor_number": 2,
+      "layers": [
+        {"role": "background", "source": "res://assets/art/environments/floors/ember_catacombs/background.png"},
+        {"role": "floor", "source": "res://assets/art/environments/floors/ember_catacombs/floor.png"},
+        {"role": "props", "source": "res://assets/art/environments/floors/ember_catacombs/props.png"},
+        {"role": "foreground", "source": "res://assets/art/environments/floors/ember_catacombs/foreground.png"}
+      ]
+    },
+    {
+      "id": "frostbound_crypt",
+      "name": "Frostbound Crypt",
+      "floor_number": 3,
+      "layers": [
+        {"role": "background", "source": "res://assets/art/environments/floors/frostbound_crypt/background.png"},
+        {"role": "floor", "source": "res://assets/art/environments/floors/frostbound_crypt/floor.png"},
+        {"role": "props", "source": "res://assets/art/environments/floors/frostbound_crypt/props.png"},
+        {"role": "foreground", "source": "res://assets/art/environments/floors/frostbound_crypt/foreground.png"}
+      ]
+    },
+    {
+      "id": "blighted_sanctum",
+      "name": "Blighted Sanctum",
+      "floor_number": 4,
+      "layers": [
+        {"role": "background", "source": "res://assets/art/environments/floors/blighted_sanctum/background.png"},
+        {"role": "floor", "source": "res://assets/art/environments/floors/blighted_sanctum/floor.png"},
+        {"role": "props", "source": "res://assets/art/environments/floors/blighted_sanctum/props.png"},
+        {"role": "foreground", "source": "res://assets/art/environments/floors/blighted_sanctum/foreground.png"}
+      ]
+    },
+    {
+      "id": "crimson_throne",
+      "name": "Crimson Throne",
+      "floor_number": 5,
+      "layers": [
+        {"role": "background", "source": "res://assets/art/environments/floors/crimson_throne/background.png"},
+        {"role": "floor", "source": "res://assets/art/environments/floors/crimson_throne/floor.png"},
+        {"role": "props", "source": "res://assets/art/environments/floors/crimson_throne/props.png"},
+        {"role": "foreground", "source": "res://assets/art/environments/floors/crimson_throne/foreground.png"}
+      ]
+    }
+  ]
+}
