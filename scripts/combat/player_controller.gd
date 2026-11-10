@@ -2,6 +2,7 @@ class_name PlayerController
 extends CharacterBody2D
 
 const CharacterAnimationControllerClass = preload("res://scripts/combat/character_animation_controller.gd")
+const CharacterVisualContractClass = preload("res://scripts/combat/character_visual_contract.gd")
 const OverheadHealthBarClass = preload("res://scripts/combat/overhead_health_bar.gd")
 
 # Lone Hunter player controller for Abyssal Altar.
@@ -185,9 +186,11 @@ func install_authored_visual(rig_scene: PackedScene, clip_names: Dictionary = {}
 
 	var rig_root := rig_instance as Node2D
 	var animation_player := rig_root.find_child("AnimationPlayer", true, false) as AnimationPlayer
-	if animation_player == null:
+	var contract_issues: Array[String] = CharacterVisualContractClass.validate(rig_root, animation_player, clip_names)
+	if not contract_issues.is_empty():
 		rig_root.free()
-		push_warning("Authored character visual scene requires an AnimationPlayer child.")
+		for issue in contract_issues:
+			push_warning("Authored character visual rejected: %s" % issue)
 		return false
 
 	if is_instance_valid(authored_rig_root):
@@ -203,7 +206,14 @@ func install_authored_visual(rig_scene: PackedScene, clip_names: Dictionary = {}
 	animation_player.root_node = animation_player.get_path_to(rig_root)
 	anim_ctrl.bind_authored_animation_player(animation_player, clip_names, rig_root)
 	return true
-	
+
+# Resolve a named attachment point from the active authored rig.
+# Returns null while the legacy sprite fallback is active or when the socket is absent.
+func get_authored_socket(socket_name: String) -> Node2D:
+	if not is_instance_valid(authored_rig_root) or not anim_ctrl or not anim_ctrl.authored_animation_active:
+		return null
+	return CharacterVisualContractClass.find_socket(authored_rig_root, socket_name)
+
 
 func _setup_character_ambience() -> void:
 	var char_id := "shadow_hunter"
