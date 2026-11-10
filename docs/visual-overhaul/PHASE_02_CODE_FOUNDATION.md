@@ -14,6 +14,7 @@ The first safe code-foundation change is committed. Production character artwork
 - Directional locomotion clips now reselect when the player changes facing direction. One-shot actions capture their facing at trigger time so an attack does not switch direction halfway through its swing.
 - Added a dedicated `AuthoredRigRoot` with its `AnimationPlayer` as a child. This gives future Skeleton2D/Bone2D or layered sprite scenes a clean animation root.
 - The authored rig stays hidden until a valid clip is found; the legacy Sprite2D stays visible as fallback. When a valid authored clip is available, the legacy sprite is hidden to avoid drawing two characters over each other.
+- Hurt flash, dodge fade, and defeat fade now target whichever visual representation is active, rather than accidentally modifying only the hidden fallback sprite.
 - Kept the existing procedural animation as fallback. No replacement art or fake skeletal rig was introduced.
 
 ## Why this change
@@ -23,7 +24,7 @@ The CharacterBody2D remains the authoritative gameplay and physics object. The v
 ## Validation
 
 - Source-level changes committed to `visual-overhaul/phase-02-code-foundation`.
-- Direction changes, one-shot facing capture, authored rig visibility, and legacy sprite fallback were reviewed in source. Godot editor/headless tests have not been run in this environment.
+- Direction changes, one-shot facing capture, authored rig visibility, legacy sprite fallback, and hit/dodge/defeat feedback routing were reviewed in source. Godot editor/headless tests have not been run in this environment.
 - The project should be opened in Godot 4.3 and checked for scene startup, player movement, collision, weapon/projectile origin, animation state changes, dodge, and character switching before merging.
 - Existing procedural animation remains enabled until production animation assets are integrated.
 
