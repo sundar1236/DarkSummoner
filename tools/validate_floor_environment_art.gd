@@ -28,11 +28,7 @@ static func _validate_manifest(manifest_path: String) -> Array[String]:
 	var errors: Array[String] = []
 	if not FileAccess.file_exists(manifest_path):
 		errors.append("Manifest not found: %s" % manifest_path)
-		for expected_floor in range(1, 6):
-		if not floor_numbers.has(expected_floor):
-			errors.append("Manifest is missing floor_number %d." % expected_floor)
-
-	return errors
+		return errors
 
 	var file := FileAccess.open(manifest_path, FileAccess.READ)
 	if file == null:
@@ -138,5 +134,9 @@ static func _validate_manifest(manifest_path: String) -> Array[String]:
 		for required_role in REQUIRED_ROLES:
 			if not roles.has(required_role):
 				errors.append("Floor '%s' is missing required '%s' layer." % [floor_id, required_role])
+
+	for expected_floor in range(1, 6):
+		if not floor_numbers.has(expected_floor):
+			errors.append("Manifest is missing floor_number %d." % expected_floor)
 
 	return errors
