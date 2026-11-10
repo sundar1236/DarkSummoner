@@ -32,6 +32,7 @@ var weapon_sprite: Sprite2D
 # it owns the character rig; the existing procedural sprite animation remains fallback.
 var authored_animation_player: AnimationPlayer
 var authored_animation_active: bool = false
+var animation_direction: String = "s"
 var authored_animation_names: Dictionary = {
 	"idle": "idle",
 	"run": "run",
@@ -96,7 +97,10 @@ func _play_authored_clip(clip_key: String) -> bool:
 	if not is_instance_valid(authored_animation_player):
 		authored_animation_active = false
 		return false
-	var animation_name := str(authored_animation_names.get(clip_key, clip_key))
+
+	var base_name := str(authored_animation_names.get(clip_key, clip_key))
+	var directional_name := "%s_%s" % [base_name, animation_direction]
+	var animation_name := directional_name if authored_animation_player.has_animation(directional_name) else base_name
 	if not authored_animation_player.has_animation(animation_name):
 		authored_animation_active = false
 		return false
@@ -104,6 +108,22 @@ func _play_authored_clip(clip_key: String) -> bool:
 		authored_animation_player.play(animation_name)
 	authored_animation_active = true
 	return true
+
+func _get_direction_suffix(direction: Vector2) -> String:
+	if direction.length_squared() < 0.01:
+		return animation_direction
+	var angle := direction.angle()
+	var octant := int(round(angle / (PI / 4.0)))
+	match posmod(octant, 8):
+		0: return "e"
+		1: return "se"
+		2: return "s"
+		3: return "sw"
+		4: return "w"
+		5: return "nw"
+		6: return "n"
+		7: return "ne"
+	return "s"
 
 func update(delta: float, velocity: Vector2, aim_dir: Vector2, move_speed: float) -> void:
 	anim_time += delta
@@ -128,6 +148,10 @@ func update(delta: float, velocity: Vector2, aim_dir: Vector2, move_speed: float
 			is_locked = false
 			attack_completed.emit()
 			_transition_to(AnimState.IDLE)
+
+	# Track an eight-way facing direction for authored directional clips.
+	var direction_source := velocity if velocity.length_squared() > 100.0 else aim_dir
+	animation_direction = _get_direction_suffix(direction_source)
 
 	# Facing logic
 	if sprite and current_state != AnimState.DEFEAT:
