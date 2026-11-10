@@ -81,6 +81,17 @@ func _setup_visuals() -> void:
 	health_bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(health_bar)
 
+func _resolve_authored_actor_id() -> String:
+	match enemy_type:
+		"swarmer", "cultist", "charger":
+			return enemy_type
+		"elite":
+			return "elite_brute"
+		"mini_boss":
+			return "abyssal_champion"
+		_:
+			return enemy_type
+
 func _setup_authored_animation() -> void:
 	var manifest_path := "res://assets/art/enemies/source/manifest.json"
 	if not FileAccess.file_exists(manifest_path) or not is_instance_valid(visual_root):
@@ -88,7 +99,8 @@ func _setup_authored_animation() -> void:
 	authored_animator = EnemyBossSpriteAnimation.new()
 	authored_animator.name = "AuthoredSpriteAnimation"
 	visual_root.add_child(authored_animator)
-	authored_animation_active = authored_animator.setup_from_manifest(manifest_path, enemy_type)
+	var authored_actor_id := _resolve_authored_actor_id()
+	authored_animation_active = authored_animator.setup_from_manifest(manifest_path, authored_actor_id, "enemy")
 	if authored_animation_active:
 		sprite.visible = false
 		_play_authored_animation("idle")
