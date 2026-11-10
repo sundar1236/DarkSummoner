@@ -7,7 +7,7 @@ extends Control
 # Tab 1: HeroLoadoutScreen (Screen B: Characters | Gear | Runes)
 # Tab 2: CampaignScreen (Screen A: Floating Diorama World Hub) [Default]
 # Tab 3: CollectibleScreen (Screen C: Talent Cards & Artifacts)
-# Tab 4: Sanctuary / Events (ProgressionView)
+# Tab 4: Events hub (dedicated event cards)
 
 signal start_run_requested()
 signal screen_selected(tab_index: int)
@@ -20,7 +20,7 @@ signal screen_selected(tab_index: int)
 @onready var screen_loadout = $ScreensContainer/HeroLoadoutScreen
 @onready var screen_campaign = $ScreensContainer/CampaignScreen
 @onready var screen_collectible = $ScreensContainer/CollectibleScreen
-@onready var screen_sanctuary = $ScreensContainer.get_node_or_null("SanctuaryView")
+@onready var screen_sanctuary = $ScreensContainer.get_node_or_null("EventsScreen")
 
 @onready var modal_energy: Control = get_node_or_null("EnergyReplenishModal")
 @onready var modal_profile: Control = get_node_or_null("PlayerProfileModal")
@@ -90,8 +90,16 @@ func _ready() -> void:
 					screen_loadout.refresh_loadout()
 			)
 	if screen_sanctuary:
-		var back_btn = screen_sanctuary.get_node_or_null("VBox/Header/BtnBack") as Control
-		if back_btn: back_btn.visible = false
+		if screen_sanctuary.has_signal("campaign_requested"):
+			screen_sanctuary.campaign_requested.connect(func():
+				if nav_dock: nav_dock.select_tab(2)
+			)
+		if screen_sanctuary.has_signal("missions_requested"):
+			screen_sanctuary.missions_requested.connect(func():
+				if nav_dock: nav_dock.select_tab(0)
+				if screen_shop and screen_shop.has_method("focus_daily_missions"):
+					screen_shop.call_deferred("focus_daily_missions")
+			)
 	_switch_to_tab(current_tab)
 
 func open_energy_modal() -> void:
