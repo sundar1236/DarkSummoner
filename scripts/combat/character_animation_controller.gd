@@ -31,6 +31,7 @@ var weapon_sprite: Sprite2D
 # Optional authored animation driver. When a matching AnimationPlayer clip exists,
 # it owns the character rig; the existing procedural sprite animation remains fallback.
 var authored_animation_player: AnimationPlayer
+var authored_rig_root: Node2D
 var authored_animation_active: bool = false
 var animation_direction: String = "s"
 var authored_animation_names: Dictionary = {
@@ -74,12 +75,21 @@ func setup(p_sprite: Sprite2D, p_socket: Marker2D = null, p_weapon_sprite: Sprit
 
 # Bind an AnimationPlayer owned by the character visual rig. Clip names can be
 # overridden per character; missing clips safely fall back to the legacy controller.
-func bind_authored_animation_player(player: AnimationPlayer, clip_names: Dictionary = {}) -> void:
+func bind_authored_animation_player(player: AnimationPlayer, clip_names: Dictionary = {}, rig_root: Node2D = null) -> void:
 	authored_animation_player = player
+	authored_rig_root = rig_root
 	for key in clip_names:
 		authored_animation_names[key] = str(clip_names[key])
 	authored_animation_active = false
+	_set_authored_visual_active(false)
 	_play_authored_clip(_state_clip_name())
+
+func _set_authored_visual_active(active: bool) -> void:
+	authored_animation_active = active
+	if is_instance_valid(authored_rig_root):
+		authored_rig_root.visible = active
+	if is_instance_valid(sprite):
+		sprite.visible = not active
 
 func _state_clip_name() -> String:
 	match current_state:
@@ -95,18 +105,18 @@ func _state_clip_name() -> String:
 
 func _play_authored_clip(clip_key: String) -> bool:
 	if not is_instance_valid(authored_animation_player):
-		authored_animation_active = false
+		_set_authored_visual_active(false)
 		return false
 
 	var base_name := str(authored_animation_names.get(clip_key, clip_key))
 	var directional_name := "%s_%s" % [base_name, animation_direction]
 	var animation_name := directional_name if authored_animation_player.has_animation(directional_name) else base_name
 	if not authored_animation_player.has_animation(animation_name):
-		authored_animation_active = false
+		_set_authored_visual_active(false)
 		return false
 	if authored_animation_player.current_animation != animation_name:
 		authored_animation_player.play(animation_name)
-	authored_animation_active = true
+	_set_authored_visual_active(true)
 	return true
 
 func _get_direction_suffix(direction: Vector2) -> String:
@@ -150,8 +160,14 @@ func update(delta: float, velocity: Vector2, aim_dir: Vector2, move_speed: float
 			_transition_to(AnimState.IDLE)
 
 	# Track an eight-way facing direction for authored directional clips.
-	var direction_source := velocity if velocity.length_squared() > 100.0 else aim_dir
-	animation_direction = _get_direction_suffix(direction_source)
+	# Directional locomotion clips can change while moving. One-shot actions keep
+	# the direction captured when their trigger was called, preventing mid-swing flips.
+	if current_state == AnimState.IDLE or current_state == AnimState.RUN:
+		var direction_source := velocity if velocity.length_squared() > 100.0 else aim_dir
+		var next_direction := _get_direction_suffix(direction_source)
+		if next_direction != animation_direction:
+			animation_direction = next_direction
+			_play_authored_clip(_state_clip_name())
 
 	# Facing logic
 	if sprite and current_state != AnimState.DEFEAT:
@@ -266,6 +282,8 @@ func play_run() -> void:
 	_transition_to(AnimState.RUN)
 
 func trigger_attack(aim_dir: Vector2, _attack_type: String = "slash") -> int:
+	# Capture the attack facing before selecting its directional authored clip.
+	animation_direction = _get_direction_suffix(aim_dir)
 	# Immediately interrupt previous attack or idle/run
 	_transition_to(AnimState.ATTACK)
 	is_locked = true
@@ -337,6 +355,8 @@ func trigger_skill() -> void:
 
 func trigger_hurt(hit_direction: Vector2 = Vector2.ZERO) -> void:
 	# Hurt has high interrupt priority over attack!
+	if hit_direction.length_squared() > 0.01:
+		animation_direction = _get_direction_suffix(-hit_direction)
 	_transition_to(AnimState.HURT)
 	is_locked = true
 	hurt_timer = 0.16
@@ -352,6 +372,7 @@ func trigger_hurt(hit_direction: Vector2 = Vector2.ZERO) -> void:
 
 func trigger_dodge(dash_dir: Vector2) -> void:
 	# Dodge cleanly cancels any attack lock immediately
+	animation_direction = _get_direction_suffix(dash_dir)
 	_transition_to(AnimState.DODGE)
 	is_locked = true
 	procedural_offset = dash_dir * 8.0
