@@ -110,14 +110,37 @@ func _state_clip_name() -> String:
 		AnimState.VICTORY: return "victory"
 	return "idle"
 
-func _resolve_authored_clip_name(clip_key: String) -> String:
-	if not is_instance_valid(authored_animation_player):
+# Optional actions can be absent from an early art package. Resolve them to a
+# safe core pose/clip instead of hiding the authored rig and flashing the old sprite.
+const AUTHORED_CLIP_FALLBACKS: Dictionary = {
+	"attack_2": "attack_1",
+	"attack_3": "attack_1",
+	"skill": "idle",
+	"hurt": "idle",
+	"dodge": "run",
+	"defeat": "idle",
+	"victory": "idle"
+}
+
+func _find_authored_clip(base_name: String) -> String:
+	if not is_instance_valid(authored_animation_player) or base_name.is_empty():
 		return ""
-	var base_name := str(authored_animation_names.get(clip_key, clip_key))
 	var directional_name := "%s_%s" % [base_name, animation_direction]
 	if authored_animation_player.has_animation(directional_name):
 		return directional_name
 	return base_name if authored_animation_player.has_animation(base_name) else ""
+
+func _resolve_authored_clip_name(clip_key: String) -> String:
+	if not is_instance_valid(authored_animation_player):
+		return ""
+	var base_name := str(authored_animation_names.get(clip_key, clip_key))
+	var resolved_name := _find_authored_clip(base_name)
+	if not resolved_name.is_empty():
+		return resolved_name
+
+	var fallback_key := str(AUTHORED_CLIP_FALLBACKS.get(clip_key, "idle"))
+	var fallback_name := str(authored_animation_names.get(fallback_key, fallback_key))
+	return _find_authored_clip(fallback_name)
 
 func get_authored_clip_duration(clip_key: String) -> float:
 	var animation_name := _resolve_authored_clip_name(clip_key)
