@@ -20,6 +20,8 @@ var player_ref: Node2D
 var shadow_sprite: Sprite2D
 var sprite: Sprite2D
 var visual_root: Node2D
+var authored_animator: EnemyBossSpriteAnimation
+var authored_animation_active: bool = false
 
 var is_enraged: bool = false
 var is_performing_attack: bool = false
@@ -36,6 +38,7 @@ func _ready() -> void:
 	collision_mask = 1 | 4 | 16
 	
 	_setup_visuals()
+	_setup_authored_animation()
 
 func setup(p_floor: int) -> void:
 	var scale_mult := 1.0 + float(p_floor - 1) * 0.5
@@ -74,6 +77,25 @@ func _setup_visuals() -> void:
 	col.shape = shape
 	add_child(col)
 
+func _setup_authored_animation() -> void:
+	var manifest_path := "res://assets/art/enemies/source/manifest.json"
+	if not FileAccess.file_exists(manifest_path) or not is_instance_valid(visual_root):
+		return
+	authored_animator = EnemyBossSpriteAnimation.new()
+	authored_animator.name = "AuthoredSpriteAnimation"
+	visual_root.add_child(authored_animator)
+	authored_animation_active = authored_animator.setup_from_manifest(manifest_path, "lord_malakar")
+	if authored_animation_active:
+		sprite.visible = false
+		_play_authored_animation("idle")
+	else:
+		authored_animator.queue_free()
+		authored_animator = null
+
+func _play_authored_animation(clip_name: String, force_restart: bool = false) -> void:
+	if authored_animation_active and is_instance_valid(authored_animator):
+		authored_animator.play(clip_name, force_restart)
+
 func _physics_process(delta: float) -> void:
 	if is_dead:
 		return
@@ -90,6 +112,8 @@ func _physics_process(delta: float) -> void:
 	if not is_enraged and (hp / max_hp) <= 0.5:
 		_enter_enraged_phase()
 		
+	# The authored idle/move clip is presentation-only; movement logic remains unchanged.
+	_play_authored_animation("move" if velocity.length_squared() > 1.0 else "idle")
 	# Floating bobbing animation
 	var float_y := sin(anim_time * 2.5) * 6.0
 	sprite.position = Vector2(0, -10.0 + float_y)
@@ -210,6 +234,7 @@ func _attack_abyssal_charge() -> void:
 	add_child(line_node)
 	
 	# 0.8s charging windup pulse; physics and collision remain on the boss body.
+	_play_authored_animation("attack", true)
 	CombatSpriteFeedback.play_telegraph(visual_root, charge_dir, 0.8, Vector2(1.18, 0.88))
 	
 	get_tree().create_timer(0.8).timeout.connect(func():
@@ -315,6 +340,7 @@ func take_damage(amount: float, is_crit: bool) -> void:
 	var recoil_direction := Vector2.UP
 	if is_instance_valid(player_ref):
 		recoil_direction = global_position - player_ref.global_position
+	_play_authored_animation("hurt", true)
 	CombatSpriteFeedback.play_hit(visual_root, recoil_direction, 1.15)
 	
 	if is_crit:
@@ -362,6 +388,7 @@ func _on_boss_death() -> void:
 	GameManager.complete_current_level()
 	
 	# Dramatic boss dissolve is visual-only; rewards and level completion already fired above.
+	_play_authored_animation("death", true)
 	var death_tween := CombatSpriteFeedback.play_death(
 		visual_root,
 		0.7,

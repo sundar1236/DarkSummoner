@@ -32,6 +32,8 @@ var player_ref: Node2D
 var shadow_sprite: Sprite2D
 var sprite: Sprite2D
 var visual_root: Node2D
+var authored_animator: EnemyBossSpriteAnimation
+var authored_animation_active: bool = false
 var health_bar: ProgressBar
 var elite_aura: Node2D
 var burn_stacks: int = 0
@@ -78,9 +80,29 @@ func _setup_visuals() -> void:
 	health_bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(health_bar)
 
+func _setup_authored_animation() -> void:
+	var manifest_path := "res://assets/art/enemies/source/manifest.json"
+	if not FileAccess.file_exists(manifest_path) or not is_instance_valid(visual_root):
+		return
+	authored_animator = EnemyBossSpriteAnimation.new()
+	authored_animator.name = "AuthoredSpriteAnimation"
+	visual_root.add_child(authored_animator)
+	authored_animation_active = authored_animator.setup_from_manifest(manifest_path, enemy_type)
+	if authored_animation_active:
+		sprite.visible = false
+		_play_authored_animation("idle")
+	else:
+		authored_animator.queue_free()
+		authored_animator = null
+
+func _play_authored_animation(clip_name: String, force_restart: bool = false) -> void:
+	if authored_animation_active and is_instance_valid(authored_animator):
+		authored_animator.play(clip_name, force_restart)
+
 func setup(p_type: String, p_floor: int) -> void:
 	enemy_type = p_type
 	_init_stats(p_floor)
+	_setup_authored_animation()
 
 func _init_stats(floor_scale: int = 1) -> void:
 	var difficulty_mods: Dictionary = SaveManager.get_difficulty_multipliers() if SaveManager else {}
@@ -220,6 +242,8 @@ func _physics_process(delta: float) -> void:
 	
 	attack_timer += delta
 	
+	# Keep authored clip state synchronized without changing enemy movement or timing.
+	_play_authored_animation("move" if velocity.length_squared() > 1.0 else "idle")
 	# Horizontal Directional Facing
 	if abs(dir.x) > 0.05 and not is_telegraphing:
 		sprite.flip_h = (dir.x < 0.0)
@@ -327,6 +351,7 @@ func _telegraph_mini_boss_slam() -> void:
 	get_parent().add_child(warning)
 	if AudioManager:
 		AudioManager.play_sfx("boss_warning")
+	_play_authored_animation("attack", true)
 	CombatSpriteFeedback.play_telegraph(visual_root, Vector2.UP, 0.52, Vector2(1.16, 0.84))
 	get_tree().create_timer(0.85).timeout.connect(func():
 		if is_instance_valid(warning):
@@ -355,6 +380,7 @@ func _telegraph_cultist_attack(dir: Vector2) -> void:
 	add_child(telegraph)
 	
 	# Casting windup animation pulse
+	_play_authored_animation("attack", true)
 	CombatSpriteFeedback.play_telegraph(visual_root, dir, 0.34, Vector2(1.12, 0.92))
 	
 	get_tree().create_timer(0.34).timeout.connect(func():
@@ -381,6 +407,7 @@ func _telegraph_charger(dir: Vector2) -> void:
 	add_child(warning)
 	if AudioManager:
 		AudioManager.play_sfx("boss_warning")
+	_play_authored_animation("attack", true)
 	CombatSpriteFeedback.play_telegraph(visual_root, charge_direction, 0.44, Vector2(1.18, 0.82))
 	get_tree().create_timer(0.55).timeout.connect(func():
 		if is_instance_valid(warning):
@@ -439,6 +466,7 @@ func take_damage(amount: float, is_crit: bool) -> void:
 	var recoil_direction := Vector2.UP
 	if is_instance_valid(player_ref):
 		recoil_direction = global_position - player_ref.global_position
+	_play_authored_animation("hurt", true)
 	CombatSpriteFeedback.play_hit(visual_root, recoil_direction, 1.0)
 	
 	if is_crit:
@@ -482,6 +510,7 @@ func _on_death() -> void:
 	xp_crystal.setup(xp_val, global_position)
 	
 	# Death dissolve animates only the visual wrapper; collision and rewards stay unchanged.
+	_play_authored_animation("death", true)
 	var death_tween := CombatSpriteFeedback.play_death(visual_root, 0.2)
 	if death_tween:
 		death_tween.finished.connect(queue_free)
