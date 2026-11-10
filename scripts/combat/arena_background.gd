@@ -108,13 +108,19 @@ func _install_authored_floor_art(floor_num: int) -> bool:
 		push_warning("Floor art manifest is invalid; using procedural arena.")
 		return false
 
+	if int(parser.data.get("schema_version", 0)) != 1:
+		push_warning("Floor art manifest schema is unsupported; using procedural arena.")
+		return false
+
 	var floors: Variant = parser.data.get("floors", null)
 	if not floors is Array:
 		return false
 
+	# Five authored themes repeat as the tower continues beyond floor five.
+	var theme_floor_number := posmod(maxi(floor_num, 1) - 1, 5) + 1
 	var selected_floor: Dictionary = {}
 	for entry in floors:
-		if entry is Dictionary and int(entry.get("floor_number", -1)) == floor_num:
+		if entry is Dictionary and int(entry.get("floor_number", -1)) == theme_floor_number:
 			selected_floor = entry
 			break
 	if selected_floor.is_empty():
@@ -134,13 +140,13 @@ func _install_authored_floor_art(floor_num: int) -> bool:
 			return false
 		var texture := load(source) as Texture2D
 		if texture == null or texture.get_width() != 720 or texture.get_height() != 1280:
-			push_warning("Floor %d art layer '%s' is missing or not 720x1280; using procedural arena." % [floor_num, role])
+			push_warning("Floor theme %d art layer '%s' is missing or not 720x1280; using procedural arena." % [theme_floor_number, role])
 			return false
 		textures[role] = texture
 
 	for role in FLOOR_ART_ROLES:
 		if not textures.has(role):
-			push_warning("Floor %d art is missing '%s'; using procedural arena." % [floor_num, role])
+			push_warning("Floor theme %d art is missing '%s'; using procedural arena." % [theme_floor_number, role])
 			return false
 
 	var art_root := Node2D.new()
