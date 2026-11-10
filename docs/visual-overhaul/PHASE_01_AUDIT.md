@@ -58,6 +58,38 @@ Do not replace or rewrite:
 
 Animation must remain presentation-only. Damage, cooldowns, targeting, collision and progression remain owned by gameplay systems.
 
+## Asset inventory audit — completed from repository metadata and generators
+
+The recursive repository tree and the character-art generation script were inspected after the initial source audit.
+
+### Player character assets
+
+- `assets/sprites/characters/player_base.png`, `player_shadow_hunter.png` and `player_storm_reaper.png` currently resolve to the **same Git blob SHA** (`786193b3937d42909ddee531afe35693982eea6a`). They are not three distinct in-game character images at this revision.
+- `player_soul_binder.png` is a separate image.
+- `tools/generate_phase3_art.gd` describes the player sprites as 128 x 128 images drawn procedurally with Image drawing primitives. The Shadow Hunter, Storm Reaper and Soul Binder are currently authored as single flattened images, not separated body/limb/weapon layers.
+- No player sprite-sheet frame layout or layered character source was found in the audited asset paths.
+- The separate character portraits under `assets/art/characters/` and full-card art under `assets/art/ui_reference/` are presentation assets. The character-select scene loads full-card textures and a portrait texture; these do not provide animation-ready body parts.
+
+### Environment, enemy and effects assets
+
+- The arena background source is a single PNG at `assets/art/backgrounds/tower_altar_bg.png` (approximately 2.08 MB in repository size). Its runtime presentation is controlled by `scripts/combat/arena_background.gd`; the current arena scene has a separate Background Node2D behind the player.
+- Enemy and boss sprite paths are individual PNG textures, not a demonstrated frame-based animation set.
+- Existing VFX include small standalone PNGs for ground shadow, impact, dash trail and summoning circle. These are useful ingredients but do not by themselves create layered animated combat feedback.
+- The repository also contains a substantial UI reference-art set. Keep those UI assets separate from the combat-character rigging work.
+
+### Critical art blocker
+
+The current in-game Shadow Hunter and Storm Reaper texture paths point to byte-identical artwork. Until distinct character art is supplied/generated and split into animation-ready parts or sprite sheets, a real three-character rig pipeline cannot be completed honestly. Rigging the current flattened PNG as if it contained separate limbs would create a fake cutout effect and would not reach the requested Archero-like quality.
+
+### Asset production decision
+
+For the first production character, Shadow Hunter:
+1. Create a new high-resolution, transparent, top-down/three-quarter chibi character master with clear front/back separation and a consistent ground-contact point.
+2. Deliver either (a) clean, non-overlapping layered PNG parts with pivots and overlap allowances for a Godot Skeleton2D cutout rig, or (b) a consistent sprite sheet with named animation rows/columns and frame metadata. Do not mix the two pipelines.
+3. Keep weapons as separate attachable layers so the attack pose and weapon trail can animate independently.
+4. Produce the required idle, 8-direction locomotion, attack anticipation/active/recovery, dodge, hurt, death, victory and skill clips.
+5. Validate readability at the actual combat render size before building the same pipeline for the other two heroes.
+
 ## Main visual gaps
 
 1. Player artwork is presented through one Sprite2D texture per hero; a true rig/animation asset pipeline is not evidenced by the inspected controller.
@@ -119,11 +151,13 @@ This source audit did not run Godot. Before merging implementation changes:
 
 ## Phase 01 status
 
-- Source architecture review: completed for the files listed above.
+- Source architecture review: completed.
+- Character, enemy, boss, UI and environment asset inventory: completed from the repository tree and source generators.
+- Character asset identity check: completed; Shadow Hunter and Storm Reaper currently point to the same PNG blob.
 - Existing gameplay preservation map: documented.
 - Animation gap identified: confirmed.
-- Actual texture-by-texture art audit: pending.
+- Pixel-level visual inspection in Godot: pending.
 - Godot runtime/headless validation: pending.
-- New animation system implementation: intentionally deferred until actual art assets are inspected.
+- New animation system implementation: intentionally deferred until animation-ready character artwork exists.
 
-This branch contains the audit only. No existing gameplay code or assets have been modified.
+Phase 01 is now complete as an audit and implementation specification. This branch still contains documentation-only changes; no existing gameplay code or assets have been modified. The next phase is Phase 02, which must create and validate the actual Shadow Hunter production art before a rig is authored.
