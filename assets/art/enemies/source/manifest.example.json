@@ -1,0 +1,452 @@
+{
+  "schema_version": 1,
+  "description": "Example contract for animation-ready enemy and boss sprite sheets. Replace source paths with approved original artwork before validation.",
+  "actors": [
+    {
+      "id": "swarmer",
+      "role": "enemy",
+      "source": "res://assets/art/enemies/source/swarmer/spritesheet.png",
+      "frame_size": [
+        128,
+        128
+      ],
+      "columns": 6,
+      "rows": 5,
+      "clips": [
+        {
+          "name": "idle",
+          "frames": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "fps": 6,
+          "loop": true
+        },
+        {
+          "name": "move",
+          "frames": [
+            6,
+            7,
+            8,
+            9,
+            10,
+            11
+          ],
+          "fps": 10,
+          "loop": true
+        },
+        {
+          "name": "attack",
+          "frames": [
+            12,
+            13,
+            14,
+            15
+          ],
+          "fps": 12,
+          "loop": false
+        },
+        {
+          "name": "hurt",
+          "frames": [
+            18,
+            19
+          ],
+          "fps": 12,
+          "loop": false
+        },
+        {
+          "name": "defeat",
+          "frames": [
+            24,
+            25,
+            26,
+            27
+          ],
+          "fps": 8,
+          "loop": false
+        }
+      ]
+    },
+    {
+      "id": "cultist",
+      "role": "enemy",
+      "source": "res://assets/art/enemies/source/cultist/spritesheet.png",
+      "frame_size": [
+        128,
+        128
+      ],
+      "columns": 6,
+      "rows": 5,
+      "clips": [
+        {
+          "name": "idle",
+          "frames": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "fps": 5,
+          "loop": true
+        },
+        {
+          "name": "move",
+          "frames": [
+            6,
+            7,
+            8,
+            9,
+            10,
+            11
+          ],
+          "fps": 8,
+          "loop": true
+        },
+        {
+          "name": "attack",
+          "frames": [
+            12,
+            13,
+            14,
+            15,
+            16
+          ],
+          "fps": 10,
+          "loop": false
+        },
+        {
+          "name": "hurt",
+          "frames": [
+            18,
+            19
+          ],
+          "fps": 12,
+          "loop": false
+        },
+        {
+          "name": "defeat",
+          "frames": [
+            24,
+            25,
+            26,
+            27
+          ],
+          "fps": 8,
+          "loop": false
+        }
+      ]
+    },
+    {
+      "id": "charger",
+      "role": "enemy",
+      "source": "res://assets/art/enemies/source/charger/spritesheet.png",
+      "frame_size": [
+        160,
+        160
+      ],
+      "columns": 6,
+      "rows": 5,
+      "clips": [
+        {
+          "name": "idle",
+          "frames": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "fps": 5,
+          "loop": true
+        },
+        {
+          "name": "move",
+          "frames": [
+            6,
+            7,
+            8,
+            9,
+            10,
+            11
+          ],
+          "fps": 10,
+          "loop": true
+        },
+        {
+          "name": "attack",
+          "frames": [
+            12,
+            13,
+            14,
+            15,
+            16,
+            17
+          ],
+          "fps": 12,
+          "loop": false
+        },
+        {
+          "name": "hurt",
+          "frames": [
+            18,
+            19
+          ],
+          "fps": 12,
+          "loop": false
+        },
+        {
+          "name": "defeat",
+          "frames": [
+            24,
+            25,
+            26,
+            27
+          ],
+          "fps": 8,
+          "loop": false
+        }
+      ]
+    },
+    {
+      "id": "elite_brute",
+      "role": "enemy",
+      "source": "res://assets/art/enemies/source/elite_brute/spritesheet.png",
+      "frame_size": [
+        192,
+        192
+      ],
+      "columns": 6,
+      "rows": 5,
+      "clips": [
+        {
+          "name": "idle",
+          "frames": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "fps": 5,
+          "loop": true
+        },
+        {
+          "name": "move",
+          "frames": [
+            6,
+            7,
+            8,
+            9,
+            10,
+            11
+          ],
+          "fps": 7,
+          "loop": true
+        },
+        {
+          "name": "attack",
+          "frames": [
+            12,
+            13,
+            14,
+            15,
+            16,
+            17
+          ],
+          "fps": 9,
+          "loop": false
+        },
+        {
+          "name": "hurt",
+          "frames": [
+            18,
+            19
+          ],
+          "fps": 10,
+          "loop": false
+        },
+        {
+          "name": "defeat",
+          "frames": [
+            24,
+            25,
+            26,
+            27
+          ],
+          "fps": 7,
+          "loop": false
+        }
+      ]
+    },
+    {
+      "id": "abyssal_champion",
+      "role": "enemy",
+      "source": "res://assets/art/enemies/source/abyssal_champion/spritesheet.png",
+      "frame_size": [
+        224,
+        224
+      ],
+      "columns": 6,
+      "rows": 5,
+      "clips": [
+        {
+          "name": "idle",
+          "frames": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "fps": 5,
+          "loop": true
+        },
+        {
+          "name": "move",
+          "frames": [
+            6,
+            7,
+            8,
+            9,
+            10,
+            11
+          ],
+          "fps": 7,
+          "loop": true
+        },
+        {
+          "name": "attack",
+          "frames": [
+            12,
+            13,
+            14,
+            15,
+            16,
+            17
+          ],
+          "fps": 8,
+          "loop": false
+        },
+        {
+          "name": "hurt",
+          "frames": [
+            18,
+            19
+          ],
+          "fps": 10,
+          "loop": false
+        },
+        {
+          "name": "defeat",
+          "frames": [
+            24,
+            25,
+            26,
+            27
+          ],
+          "fps": 7,
+          "loop": false
+        }
+      ]
+    },
+    {
+      "id": "lord_malakar",
+      "role": "boss",
+      "source": "res://assets/art/bosses/source/lord_malakar/spritesheet.png",
+      "frame_size": [
+        256,
+        256
+      ],
+      "columns": 8,
+      "rows": 6,
+      "clips": [
+        {
+          "name": "idle",
+          "frames": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "fps": 6,
+          "loop": true
+        },
+        {
+          "name": "move",
+          "frames": [
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15
+          ],
+          "fps": 8,
+          "loop": true
+        },
+        {
+          "name": "attack",
+          "frames": [
+            16,
+            17,
+            18,
+            19,
+            20,
+            21
+          ],
+          "fps": 10,
+          "loop": false
+        },
+        {
+          "name": "hurt",
+          "frames": [
+            24,
+            25,
+            26
+          ],
+          "fps": 10,
+          "loop": false
+        },
+        {
+          "name": "defeat",
+          "frames": [
+            32,
+            33,
+            34,
+            35,
+            36,
+            37
+          ],
+          "fps": 8,
+          "loop": false
+        },
+        {
+          "name": "telegraph",
+          "frames": [
+            40,
+            41,
+            42,
+            43
+          ],
+          "fps": 6,
+          "loop": false
+        },
+        {
+          "name": "enrage",
+          "frames": [
+            44,
+            45,
+            46,
+            47
+          ],
+          "fps": 8,
+          "loop": false
+        }
+      ]
+    }
+  ]
+}
