@@ -382,6 +382,7 @@ func _telegraph_mini_boss_slam() -> void:
 	)
 
 func _lunge_attack(dir: Vector2) -> void:
+	_play_authored_animation("attack", true)
 	lunge_offset = dir * 14.0
 
 func _telegraph_cultist_attack(dir: Vector2) -> void:
