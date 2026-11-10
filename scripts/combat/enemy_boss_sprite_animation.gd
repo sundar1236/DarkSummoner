@@ -16,12 +16,12 @@ func _ready() -> void:
 	if not sprite_frames_path.is_empty():
 		_load_from_manifest(sprite_frames_path)
 
-func setup_from_manifest(p_manifest_path: String, p_actor_id: String) -> bool:
+func setup_from_manifest(p_manifest_path: String, p_actor_id: String, expected_role: String = "") -> bool:
 	manifest_path = p_manifest_path
 	actor_id = p_actor_id
-	return _load_from_manifest(manifest_path)
+	return _load_from_manifest(manifest_path, expected_role)
 
-func _load_from_manifest(path: String) -> bool:
+func _load_from_manifest(path: String, expected_role: String = "") -> bool:
 	if not FileAccess.file_exists(path):
 		return false
 	var file := FileAccess.open(path, FileAccess.READ)
@@ -38,6 +38,10 @@ func _load_from_manifest(path: String) -> bool:
 		return false
 	for actor in actors:
 		if actor is Dictionary and str(actor.get("id", "")) == actor_id:
+			var actual_role := str(actor.get("role", "")).strip_edges()
+			if not expected_role.is_empty() and actual_role != expected_role:
+				push_warning("Actor '%s' has role '%s'; expected '%s'. Keeping legacy visual fallback." % [actor_id, actual_role, expected_role])
+				return false
 			return _build_animation(actor)
 	return false
 
