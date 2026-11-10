@@ -11,8 +11,10 @@ The first safe code-foundation change is committed. Production character artwork
 - Kept the CollisionShape2D, movement, targeting, attack logic, health bar, combo label, pet container, and gameplay state on the existing player root.
 - Added an AnimationPlayer adapter to CharacterAnimationController. It checks for authored clips and falls back to the existing procedural animation when a clip is absent.
 - Added optional eight-direction clip resolution. The adapter checks names such as `run_n`, `run_ne`, `run_e` ... `run_nw`, then falls back to the base clip such as `run`.
-- Attached an empty AuthoredAnimationPlayer beneath CharacterVisualRoot so future rig animations can be added without changing gameplay state ownership.
-- Kept the existing Sprite2D and procedural animation as the active fallback. No replacement art or fake skeletal rig was introduced.
+- Directional locomotion clips now reselect when the player changes facing direction. One-shot actions capture their facing at trigger time so an attack does not switch direction halfway through its swing.
+- Added a dedicated `AuthoredRigRoot` with its `AnimationPlayer` as a child. This gives future Skeleton2D/Bone2D or layered sprite scenes a clean animation root.
+- The authored rig stays hidden until a valid clip is found; the legacy Sprite2D stays visible as fallback. When a valid authored clip is available, the legacy sprite is hidden to avoid drawing two characters over each other.
+- Kept the existing procedural animation as fallback. No replacement art or fake skeletal rig was introduced.
 
 ## Why this change
 
@@ -20,8 +22,8 @@ The CharacterBody2D remains the authoritative gameplay and physics object. The v
 
 ## Validation
 
-- Source-level change committed to `visual-overhaul/phase-02-code-foundation`.
-- Godot editor/headless tests have not been run in this environment.
+- Source-level changes committed to `visual-overhaul/phase-02-code-foundation`.
+- Direction changes, one-shot facing capture, authored rig visibility, and legacy sprite fallback were reviewed in source. Godot editor/headless tests have not been run in this environment.
 - The project should be opened in Godot 4.3 and checked for scene startup, player movement, collision, weapon/projectile origin, animation state changes, dodge, and character switching before merging.
 - Existing procedural animation remains enabled until production animation assets are integrated.
 
