@@ -22,6 +22,7 @@ var sprite: Sprite2D
 var visual_root: Node2D
 var authored_animator: EnemyBossSpriteAnimation
 var authored_animation_active: bool = false
+var authored_locked_clip: String = ""
 
 var is_enraged: bool = false
 var is_performing_attack: bool = false
@@ -93,8 +94,26 @@ func _setup_authored_animation() -> void:
 		authored_animator = null
 
 func _play_authored_animation(clip_name: String, force_restart: bool = false) -> void:
-	if authored_animation_active and is_instance_valid(authored_animator):
-		authored_animator.play(clip_name, force_restart)
+	if not authored_animation_active or not is_instance_valid(authored_animator):
+		return
+	var resolved_clip := clip_name
+	if clip_name == "death" and not authored_animator.has_animation(resolved_clip):
+		resolved_clip = "defeat"
+	if not authored_animator.has_animation(resolved_clip):
+		return
+	authored_animator.play(resolved_clip, force_restart)
+	if not authored_animator.animated_sprite.sprite_frames.get_animation_loop(resolved_clip):
+		authored_locked_clip = resolved_clip
+
+func _update_authored_locomotion() -> void:
+	if not authored_animation_active or not is_instance_valid(authored_animator):
+		return
+	if not authored_locked_clip.is_empty():
+		if authored_animator.is_one_shot_playing(authored_locked_clip):
+			return
+		authored_locked_clip = ""
+	var locomotion_clip := "move" if velocity.length_squared() > 1.0 else "idle"
+	authored_animator.play(locomotion_clip)
 
 func _physics_process(delta: float) -> void:
 	if is_dead:
@@ -113,7 +132,7 @@ func _physics_process(delta: float) -> void:
 		_enter_enraged_phase()
 		
 	# The authored idle/move clip is presentation-only; movement logic remains unchanged.
-	_play_authored_animation("move" if velocity.length_squared() > 1.0 else "idle")
+	_update_authored_locomotion()
 	# Floating bobbing animation
 	var float_y := sin(anim_time * 2.5) * 6.0
 	sprite.position = Vector2(0, -10.0 + float_y)
