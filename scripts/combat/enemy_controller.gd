@@ -49,7 +49,6 @@ func _ready() -> void:
 	
 	_setup_visuals()
 	_init_stats()
-	_setup_authored_animation()
 
 func _setup_visuals() -> void:
 	# 1. Ground contact shadow
@@ -103,6 +102,7 @@ func _play_authored_animation(clip_name: String, force_restart: bool = false) ->
 func setup(p_type: String, p_floor: int) -> void:
 	enemy_type = p_type
 	_init_stats(p_floor)
+	_setup_authored_animation()
 
 func _init_stats(floor_scale: int = 1) -> void:
 	var difficulty_mods: Dictionary = SaveManager.get_difficulty_multipliers() if SaveManager else {}
