@@ -179,7 +179,7 @@ func install_authored_visual(rig_scene: PackedScene, clip_names: Dictionary = {}
 
 	var rig_instance := rig_scene.instantiate()
 	if not rig_instance is Node2D:
-		rig_instance.queue_free()
+		rig_instance.free()
 		push_warning("Authored character visual scene root must inherit Node2D.")
 		return false
 
@@ -191,7 +191,7 @@ func install_authored_visual(rig_scene: PackedScene, clip_names: Dictionary = {}
 		return false
 
 	if is_instance_valid(authored_rig_root):
-		authored_rig_root.queue_free()
+		authored_rig_root.free()
 		authored_rig_root = null
 
 	rig_root.name = "AuthoredRigRoot"
