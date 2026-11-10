@@ -90,6 +90,9 @@ func set_floor_theme(floor_num: int) -> String:
 	return floor_theme_name
 
 func _install_authored_floor_art(floor_num: int) -> bool:
+	var old_art := get_node_or_null("AuthoredFloorArt")
+	if old_art != null:
+		old_art.queue_free()
 	if not FileAccess.file_exists(FLOOR_ART_MANIFEST):
 		return false
 
@@ -139,10 +142,6 @@ func _install_authored_floor_art(floor_num: int) -> bool:
 		if not textures.has(role):
 			push_warning("Floor %d art is missing '%s'; using procedural arena." % [floor_num, role])
 			return false
-
-	var old_art := get_node_or_null("AuthoredFloorArt")
-	if old_art != null:
-		old_art.queue_free()
 
 	var art_root := Node2D.new()
 	art_root.name = "AuthoredFloorArt"
