@@ -44,7 +44,7 @@ func _initialize() -> void:
 		push_error(issue)
 	quit(1)
 
-func _validate_manifest(manifest_path: String) -> Array[String]:
+static func _validate_manifest(manifest_path: String) -> Array[String]:
 	var errors: Array[String] = []
 	if not FileAccess.file_exists(manifest_path):
 		errors.append("Manifest not found: %s" % manifest_path)
