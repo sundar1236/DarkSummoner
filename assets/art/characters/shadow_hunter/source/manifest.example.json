@@ -1,0 +1,182 @@
+{
+  "schema_version": 1,
+  "character_id": "shadow_hunter",
+  "canvas_size": [
+    1024,
+    1024
+  ],
+  "ground_anchor": [
+    512,
+    900
+  ],
+  "layers": [
+    {
+      "name": "back_cape",
+      "file": "res://assets/art/characters/shadow_hunter/source/back_cape.png",
+      "pivot": [
+        512,
+        440
+      ]
+    },
+    {
+      "name": "rear_leg_upper",
+      "file": "res://assets/art/characters/shadow_hunter/source/rear_leg_upper.png",
+      "pivot": [
+        480,
+        650
+      ]
+    },
+    {
+      "name": "rear_leg_lower",
+      "file": "res://assets/art/characters/shadow_hunter/source/rear_leg_lower.png",
+      "pivot": [
+        480,
+        770
+      ]
+    },
+    {
+      "name": "rear_boot",
+      "file": "res://assets/art/characters/shadow_hunter/source/rear_boot.png",
+      "pivot": [
+        480,
+        870
+      ]
+    },
+    {
+      "name": "front_leg_upper",
+      "file": "res://assets/art/characters/shadow_hunter/source/front_leg_upper.png",
+      "pivot": [
+        550,
+        650
+      ]
+    },
+    {
+      "name": "front_leg_lower",
+      "file": "res://assets/art/characters/shadow_hunter/source/front_leg_lower.png",
+      "pivot": [
+        550,
+        770
+      ]
+    },
+    {
+      "name": "front_boot",
+      "file": "res://assets/art/characters/shadow_hunter/source/front_boot.png",
+      "pivot": [
+        550,
+        870
+      ]
+    },
+    {
+      "name": "pelvis_torso",
+      "file": "res://assets/art/characters/shadow_hunter/source/pelvis_torso.png",
+      "pivot": [
+        512,
+        560
+      ]
+    },
+    {
+      "name": "rear_arm_upper",
+      "file": "res://assets/art/characters/shadow_hunter/source/rear_arm_upper.png",
+      "pivot": [
+        440,
+        500
+      ]
+    },
+    {
+      "name": "rear_arm_lower",
+      "file": "res://assets/art/characters/shadow_hunter/source/rear_arm_lower.png",
+      "pivot": [
+        410,
+        600
+      ]
+    },
+    {
+      "name": "rear_hand",
+      "file": "res://assets/art/characters/shadow_hunter/source/rear_hand.png",
+      "pivot": [
+        390,
+        680
+      ]
+    },
+    {
+      "name": "front_arm_upper",
+      "file": "res://assets/art/characters/shadow_hunter/source/front_arm_upper.png",
+      "pivot": [
+        585,
+        500
+      ]
+    },
+    {
+      "name": "front_arm_lower",
+      "file": "res://assets/art/characters/shadow_hunter/source/front_arm_lower.png",
+      "pivot": [
+        620,
+        600
+      ]
+    },
+    {
+      "name": "front_hand",
+      "file": "res://assets/art/characters/shadow_hunter/source/front_hand.png",
+      "pivot": [
+        650,
+        680
+      ]
+    },
+    {
+      "name": "head_face",
+      "file": "res://assets/art/characters/shadow_hunter/source/head_face.png",
+      "pivot": [
+        512,
+        300
+      ]
+    },
+    {
+      "name": "hood_back",
+      "file": "res://assets/art/characters/shadow_hunter/source/hood_back.png",
+      "pivot": [
+        512,
+        280
+      ]
+    },
+    {
+      "name": "hood_front",
+      "file": "res://assets/art/characters/shadow_hunter/source/hood_front.png",
+      "pivot": [
+        512,
+        280
+      ]
+    },
+    {
+      "name": "hair_back",
+      "file": "res://assets/art/characters/shadow_hunter/source/hair_back.png",
+      "pivot": [
+        512,
+        310
+      ]
+    },
+    {
+      "name": "hair_front",
+      "file": "res://assets/art/characters/shadow_hunter/source/hair_front.png",
+      "pivot": [
+        512,
+        310
+      ]
+    },
+    {
+      "name": "left_dagger",
+      "file": "res://assets/art/characters/shadow_hunter/source/left_dagger.png",
+      "pivot": [
+        390,
+        680
+      ]
+    },
+    {
+      "name": "right_dagger",
+      "file": "res://assets/art/characters/shadow_hunter/source/right_dagger.png",
+      "pivot": [
+        650,
+        680
+      ]
+    }
+  ]
+}
