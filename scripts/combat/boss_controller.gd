@@ -3,6 +3,7 @@ extends CharacterBody2D
 
 const CoinPickupClass = preload("res://scripts/combat/coin_pickup.gd")
 const XpPickupClass = preload("res://scripts/combat/xp_pickup.gd")
+const CombatSpriteFeedback = preload("res://scripts/combat/combat_sprite_feedback.gd")
 
 # Floor Boss controller: "Lord Malakar, the Abyssal Dread".
 # Features multi-phase combat and readable animated warning telegraph danger zones.
@@ -18,6 +19,7 @@ var move_speed: float = 90.0
 var player_ref: Node2D
 var shadow_sprite: Sprite2D
 var sprite: Sprite2D
+var visual_root: Node2D
 
 var is_enraged: bool = false
 var is_performing_attack: bool = false
@@ -56,11 +58,14 @@ func _setup_visuals() -> void:
 	shadow_sprite.z_index = -1
 	add_child(shadow_sprite)
 	
-	# 2. Main Boss Sprite
+	# 2. Main Boss Sprite on a presentation-only wrapper.
+	visual_root = Node2D.new()
+	visual_root.name = "VisualRoot"
+	add_child(visual_root)
 	sprite = Sprite2D.new()
 	sprite.texture = TextureLoader.get_texture("res://assets/sprites/bosses/boss_abyssal_dread.png")
 	sprite.position = Vector2(0, -10)
-	add_child(sprite)
+	visual_root.add_child(sprite)
 	
 	# 3. Collision shape
 	var col := CollisionShape2D.new()
@@ -204,10 +209,8 @@ func _attack_abyssal_charge() -> void:
 	)
 	add_child(line_node)
 	
-	# 0.8s charging windup pulse
-	var tween := create_tween()
-	tween.tween_property(sprite, "scale", Vector2(1.25, 1.25), 0.4).set_trans(Tween.TRANS_BACK)
-	tween.tween_property(sprite, "scale", Vector2(1.0, 1.0), 0.4)
+	# 0.8s charging windup pulse; physics and collision remain on the boss body.
+	CombatSpriteFeedback.play_telegraph(visual_root, charge_dir, 0.8, Vector2(1.18, 0.88))
 	
 	get_tree().create_timer(0.8).timeout.connect(func():
 		if is_instance_valid(line_node):
@@ -274,9 +277,7 @@ func _attack_abyssal_cross() -> void:
 		cross_telegraph.draw_circle(Vector2.ZERO, 34.0, Color(1.0, 0.12, 0.24, 0.18))
 	)
 	get_parent().add_child(cross_telegraph)
-	var pulse := create_tween()
-	pulse.tween_property(sprite, "scale", Vector2(1.18, 1.18), 0.24)
-	pulse.tween_property(sprite, "scale", Vector2.ONE, 0.24)
+	CombatSpriteFeedback.play_telegraph(visual_root, Vector2.UP, 0.48, Vector2(1.12, 0.9))
 	get_tree().create_timer(0.65).timeout.connect(func():
 		if is_instance_valid(cross_telegraph):
 			cross_telegraph.queue_free()
@@ -311,12 +312,10 @@ func take_damage(amount: float, is_crit: bool) -> void:
 	get_parent().add_child(dmg_num)
 	dmg_num.setup(amount, is_crit, global_position + Vector2(0, -20))
 	
-	var tween := create_tween()
-	sprite.modulate = Color(2.2, 2.2, 2.2, 1.0)
-	sprite.scale = Vector2(1.12, 0.9)
-	var rest_col := Color(1.5, 0.35, 0.35, 1.0) if is_enraged else Color(1.0, 1.0, 1.0, 1.0)
-	tween.tween_property(sprite, "scale", Vector2(1.0, 1.0), 0.12).set_trans(Tween.TRANS_QUAD)
-	tween.parallel().tween_property(sprite, "modulate", rest_col, 0.12)
+	var recoil_direction := Vector2.UP
+	if is_instance_valid(player_ref):
+		recoil_direction = global_position - player_ref.global_position
+	CombatSpriteFeedback.play_hit(visual_root, recoil_direction, 1.15)
 	
 	if is_crit:
 		if AudioManager: AudioManager.play_sfx("crit_hit")
@@ -362,9 +361,12 @@ func _on_boss_death() -> void:
 	boss_defeated.emit()
 	GameManager.complete_current_level()
 	
-	# Death dissolve sequence
-	var tween := create_tween()
-	tween.tween_property(sprite, "scale", Vector2(1.3, 1.3), 0.2)
-	tween.tween_property(sprite, "scale", Vector2(0.1, 0.1), 0.5).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
-	tween.parallel().tween_property(sprite, "modulate:a", 0.0, 0.5)
-	tween.tween_callback(queue_free)
+	# Dramatic boss dissolve is visual-only; rewards and level completion already fired above.
+	var death_tween := CombatSpriteFeedback.play_death(
+		visual_root,
+		0.7,
+		Vector2(1.3, 1.3),
+		Vector2(0.1, 0.1)
+	)
+	if death_tween:
+		death_tween.finished.connect(queue_free)

@@ -3,6 +3,7 @@ extends CharacterBody2D
 
 const CoinPickupClass = preload("res://scripts/combat/coin_pickup.gd")
 const XpPickupClass = preload("res://scripts/combat/xp_pickup.gd")
+const CombatSpriteFeedback = preload("res://scripts/combat/combat_sprite_feedback.gd")
 
 # Unified 2.5D enemy controller for swarmers, ranged cultists, charging hunters, and elite brutes.
 # Features distinct telegraph indicators, elite visual auras, crisp hit-flashes, and coin drops.
@@ -30,6 +31,7 @@ var shade_reward: int = 1
 var player_ref: Node2D
 var shadow_sprite: Sprite2D
 var sprite: Sprite2D
+var visual_root: Node2D
 var health_bar: ProgressBar
 var elite_aura: Node2D
 var burn_stacks: int = 0
@@ -54,9 +56,12 @@ func _setup_visuals() -> void:
 	shadow_sprite.z_index = -1
 	add_child(shadow_sprite)
 	
-	# 2. Main Enemy Sprite
+	# 2. Main Enemy Sprite on a presentation-only wrapper.
+	visual_root = Node2D.new()
+	visual_root.name = "VisualRoot"
+	add_child(visual_root)
 	sprite = Sprite2D.new()
-	add_child(sprite)
+	visual_root.add_child(sprite)
 	
 	# 3. Collision shape
 	var col := CollisionShape2D.new()
@@ -322,9 +327,7 @@ func _telegraph_mini_boss_slam() -> void:
 	get_parent().add_child(warning)
 	if AudioManager:
 		AudioManager.play_sfx("boss_warning")
-	var tween := create_tween()
-	tween.tween_property(sprite, "scale", Vector2(1.8, 1.25), 0.28)
-	tween.tween_property(sprite, "scale", Vector2(1.55, 1.55), 0.24)
+	CombatSpriteFeedback.play_telegraph(visual_root, Vector2.UP, 0.52, Vector2(1.16, 0.84))
 	get_tree().create_timer(0.85).timeout.connect(func():
 		if is_instance_valid(warning):
 			warning.queue_free()
@@ -352,9 +355,7 @@ func _telegraph_cultist_attack(dir: Vector2) -> void:
 	add_child(telegraph)
 	
 	# Casting windup animation pulse
-	var tween := create_tween()
-	tween.tween_property(sprite, "scale", Vector2(1.25, 1.25), 0.18)
-	tween.tween_property(sprite, "scale", Vector2(1.0, 1.0), 0.16)
+	CombatSpriteFeedback.play_telegraph(visual_root, dir, 0.34, Vector2(1.12, 0.92))
 	
 	get_tree().create_timer(0.34).timeout.connect(func():
 		if is_instance_valid(telegraph):
@@ -380,9 +381,7 @@ func _telegraph_charger(dir: Vector2) -> void:
 	add_child(warning)
 	if AudioManager:
 		AudioManager.play_sfx("boss_warning")
-	var tween := create_tween()
-	tween.tween_property(sprite, "scale", Vector2(1.32, 0.82), 0.24)
-	tween.tween_property(sprite, "scale", Vector2(1.12, 1.12), 0.2)
+	CombatSpriteFeedback.play_telegraph(visual_root, charge_direction, 0.44, Vector2(1.18, 0.82))
 	get_tree().create_timer(0.55).timeout.connect(func():
 		if is_instance_valid(warning):
 			warning.queue_free()
@@ -436,12 +435,11 @@ func take_damage(amount: float, is_crit: bool) -> void:
 	get_parent().add_child(dmg_num)
 	dmg_num.setup(amount, is_crit, global_position)
 	
-	# High-readability white hit flash & micro squash flinch
-	var tween := create_tween()
-	sprite.modulate = Color(2.5, 2.5, 2.5, 1.0)
-	sprite.scale = Vector2(1.18, 0.88)
-	tween.tween_property(sprite, "scale", Vector2(1.0, 1.0), 0.12).set_trans(Tween.TRANS_QUAD)
-	tween.parallel().tween_property(sprite, "modulate", Color(1.0, 1.0, 1.0, 1.0), 0.10)
+	# High-readability flash and recoil are isolated from the physics body.
+	var recoil_direction := Vector2.UP
+	if is_instance_valid(player_ref):
+		recoil_direction = global_position - player_ref.global_position
+	CombatSpriteFeedback.play_hit(visual_root, recoil_direction, 1.0)
 	
 	if is_crit:
 		if AudioManager: AudioManager.play_sfx("crit_hit")
@@ -483,8 +481,7 @@ func _on_death() -> void:
 	get_parent().call_deferred("add_child", xp_crystal)
 	xp_crystal.setup(xp_val, global_position)
 	
-	# Death dissolve tween
-	var tween := create_tween()
-	tween.tween_property(sprite, "scale", Vector2(0.1, 0.1), 0.2).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
-	tween.parallel().tween_property(sprite, "modulate:a", 0.0, 0.2)
-	tween.tween_callback(queue_free)
+	# Death dissolve animates only the visual wrapper; collision and rewards stay unchanged.
+	var death_tween := CombatSpriteFeedback.play_death(visual_root, 0.2)
+	if death_tween:
+		death_tween.finished.connect(queue_free)
