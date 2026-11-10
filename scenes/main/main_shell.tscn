@@ -7,7 +7,7 @@
 [ext_resource type="PackedScene" uid="uid://c6heroloadoutscreen01" path="res://scenes/characters/hero_loadout_screen.tscn" id="5_hlo"]
 [ext_resource type="PackedScene" uid="uid://c6campaignscreen01" path="res://scenes/campaign/campaign_screen.tscn" id="6_cmp"]
 [ext_resource type="PackedScene" uid="uid://c6collectiblescreen01" path="res://scenes/collectibles/collectible_screen.tscn" id="7_col"]
-[ext_resource type="PackedScene" uid="uid://c6progressionview01" path="res://scenes/characters/progression_view.tscn" id="8_prg"]
+[ext_resource type="PackedScene" path="res://scenes/events/events_screen.tscn" id="8_evt"]
 [ext_resource type="PackedScene" uid="uid://c6energyreplenish01" path="res://scenes/ui/energy_replenish_modal.tscn" id="9_enr"]
 [ext_resource type="PackedScene" uid="uid://c6playerprofilemodal01" path="res://scenes/ui/player_profile_modal.tscn" id="10_prf"]
 [ext_resource type="PackedScene" uid="uid://c6blacksmithmodal01" path="res://scenes/ui/blacksmith_modal.tscn" id="11_bsm"]
@@ -54,11 +54,9 @@ layout_mode = 1
 visible = false
 layout_mode = 1
 
-[node name="SanctuaryView" parent="ScreensContainer" instance=ExtResource("8_prg")]
+[node name="EventsScreen" parent="ScreensContainer" instance=ExtResource("8_evt")]
 visible = false
 layout_mode = 1
-offset_top = 88.0
-offset_bottom = -96.0
 
 [node name="TopResourceBar" parent="." instance=ExtResource("2_top")]
 layout_mode = 1

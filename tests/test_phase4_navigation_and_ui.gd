@@ -131,6 +131,13 @@ func test_main_shell_orchestration() -> void:
 	assert_test(shell.screen_campaign != null and shell.screen_campaign.visible, "MainShell defaults to Campaign screen visible")
 	assert_test(shell.screen_shop != null and not shell.screen_shop.visible, "Shop screen hidden by default")
 	assert_test(shell.screen_loadout != null and not shell.screen_loadout.visible, "Loadout screen hidden by default")
+	assert_test(shell.screen_sanctuary != null and not shell.screen_sanctuary.visible, "Events screen exists and is hidden on Campaign")
+	shell.nav_dock.select_tab(4)
+	await get_tree().process_frame
+	assert_test(shell.screen_sanctuary.visible, "Events tab opens dedicated Events page")
+	assert_test(shell.screen_sanctuary.get_node("Content/EventsTitle").text == "ABYSSAL EVENTS", "Events page no longer displays champion selection")
+	shell.nav_dock.select_tab(2)
+	await get_tree().process_frame
 
 	# Daily tasks shortcut opens the real mission panel in the Shop screen.
 	shell.screen_campaign.btn_tasks.pressed.emit()

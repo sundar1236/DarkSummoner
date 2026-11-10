@@ -28,6 +28,25 @@ var sprite: Sprite2D
 var weapon_socket: Marker2D
 var weapon_sprite: Sprite2D
 
+# Optional authored animation driver. When a matching AnimationPlayer clip exists,
+# it owns the character rig; the existing procedural sprite animation remains fallback.
+var authored_animation_player: AnimationPlayer
+var authored_rig_root: Node2D
+var authored_animation_active: bool = false
+var animation_direction: String = "s"
+var authored_animation_names: Dictionary = {
+	"idle": "idle",
+	"run": "run",
+	"attack_1": "attack_1",
+	"attack_2": "attack_2",
+	"attack_3": "attack_3",
+	"skill": "skill",
+	"hurt": "hurt",
+	"dodge": "dodge",
+	"defeat": "defeat",
+	"victory": "victory"
+}
+
 # Combo Tracking
 var combo_stage: int = 0 # 0, 1, 2
 var combo_reset_timer: float = 0.0
@@ -54,6 +73,112 @@ func setup(p_sprite: Sprite2D, p_socket: Marker2D = null, p_weapon_sprite: Sprit
 		base_sprite_pos = sprite.position
 		base_sprite_scale = sprite.scale
 
+# Bind an AnimationPlayer owned by the character visual rig. Clip names can be
+# overridden per character; missing clips safely fall back to the legacy controller.
+func bind_authored_animation_player(player: AnimationPlayer, clip_names: Dictionary = {}, rig_root: Node2D = null) -> void:
+	authored_animation_player = player
+	authored_rig_root = rig_root
+	for key in clip_names:
+		authored_animation_names[key] = str(clip_names[key])
+	authored_animation_active = false
+	_set_authored_visual_active(false)
+	_play_authored_clip(_state_clip_name())
+
+func _set_authored_visual_active(active: bool) -> void:
+	authored_animation_active = active
+	if is_instance_valid(authored_rig_root):
+		authored_rig_root.visible = active
+	if is_instance_valid(sprite):
+		sprite.visible = not active
+
+func _get_active_visual_target() -> CanvasItem:
+	if authored_animation_active and is_instance_valid(authored_rig_root):
+		return authored_rig_root
+	if is_instance_valid(sprite):
+		return sprite
+	return null
+
+func _state_clip_name() -> String:
+	match current_state:
+		AnimState.IDLE: return "idle"
+		AnimState.RUN: return "run"
+		AnimState.ATTACK: return "attack_1"
+		AnimState.SKILL: return "skill"
+		AnimState.HURT: return "hurt"
+		AnimState.DODGE: return "dodge"
+		AnimState.DEFEAT: return "defeat"
+		AnimState.VICTORY: return "victory"
+	return "idle"
+
+# Optional actions can be absent from an early art package. Resolve them to a
+# safe core pose/clip instead of hiding the authored rig and flashing the old sprite.
+const AUTHORED_CLIP_FALLBACKS: Dictionary = {
+	"attack_2": "attack_1",
+	"attack_3": "attack_1",
+	"skill": "idle",
+	"hurt": "idle",
+	"dodge": "run",
+	"defeat": "idle",
+	"victory": "idle"
+}
+
+func _find_authored_clip(base_name: String) -> String:
+	if not is_instance_valid(authored_animation_player) or base_name.is_empty():
+		return ""
+	var directional_name := "%s_%s" % [base_name, animation_direction]
+	if authored_animation_player.has_animation(directional_name):
+		return directional_name
+	return base_name if authored_animation_player.has_animation(base_name) else ""
+
+func _resolve_authored_clip_name(clip_key: String) -> String:
+	if not is_instance_valid(authored_animation_player):
+		return ""
+	var base_name := str(authored_animation_names.get(clip_key, clip_key))
+	var resolved_name := _find_authored_clip(base_name)
+	if not resolved_name.is_empty():
+		return resolved_name
+
+	var fallback_key := str(AUTHORED_CLIP_FALLBACKS.get(clip_key, "idle"))
+	var fallback_name := str(authored_animation_names.get(fallback_key, fallback_key))
+	return _find_authored_clip(fallback_name)
+
+func get_authored_clip_duration(clip_key: String) -> float:
+	var animation_name := _resolve_authored_clip_name(clip_key)
+	if animation_name.is_empty():
+		return 0.0
+	var animation := authored_animation_player.get_animation(animation_name)
+	return animation.length if animation else 0.0
+
+func _play_authored_clip(clip_key: String, force_restart: bool = false) -> bool:
+	if not is_instance_valid(authored_animation_player):
+		_set_authored_visual_active(false)
+		return false
+
+	var animation_name := _resolve_authored_clip_name(clip_key)
+	if animation_name.is_empty():
+		_set_authored_visual_active(false)
+		return false
+	if force_restart or authored_animation_player.current_animation != animation_name:
+		authored_animation_player.play(animation_name)
+	_set_authored_visual_active(true)
+	return true
+
+func _get_direction_suffix(direction: Vector2) -> String:
+	if direction.length_squared() < 0.01:
+		return animation_direction
+	var angle := direction.angle()
+	var octant := int(round(angle / (PI / 4.0)))
+	match posmod(octant, 8):
+		0: return "e"
+		1: return "se"
+		2: return "s"
+		3: return "sw"
+		4: return "w"
+		5: return "nw"
+		6: return "n"
+		7: return "ne"
+	return "s"
+
 func update(delta: float, velocity: Vector2, aim_dir: Vector2, move_speed: float) -> void:
 	anim_time += delta
 	
@@ -78,6 +203,16 @@ func update(delta: float, velocity: Vector2, aim_dir: Vector2, move_speed: float
 			attack_completed.emit()
 			_transition_to(AnimState.IDLE)
 
+	# Track an eight-way facing direction for authored directional clips.
+	# Directional locomotion clips can change while moving. One-shot actions keep
+	# the direction captured when their trigger was called, preventing mid-swing flips.
+	if current_state == AnimState.IDLE or current_state == AnimState.RUN:
+		var direction_source := velocity if velocity.length_squared() > 100.0 else aim_dir
+		var next_direction := _get_direction_suffix(direction_source)
+		if next_direction != animation_direction:
+			animation_direction = next_direction
+			_play_authored_clip(_state_clip_name())
+
 	# Facing logic
 	if sprite and current_state != AnimState.DEFEAT:
 		var face_left: bool = false
@@ -87,27 +222,28 @@ func update(delta: float, velocity: Vector2, aim_dir: Vector2, move_speed: float
 			face_left = aim_dir.x < 0.0
 		sprite.flip_h = face_left
 
-	# Procedural Animation updates
-	match current_state:
-		AnimState.IDLE:
-			_process_idle(delta)
-		AnimState.RUN:
-			_process_run(delta, velocity, move_speed)
-		AnimState.ATTACK:
-			_process_attack(delta)
-		AnimState.SKILL:
-			_process_skill(delta)
-		AnimState.HURT:
-			_process_hurt(delta)
-		AnimState.DODGE:
-			_process_dodge(delta, velocity)
-		AnimState.DEFEAT:
-			_process_defeat(delta)
-		AnimState.VICTORY:
-			_process_victory(delta)
+	# Procedural animation is retained only when no authored clip is available.
+	if not authored_animation_active:
+		match current_state:
+			AnimState.IDLE:
+				_process_idle(delta)
+			AnimState.RUN:
+				_process_run(delta, velocity, move_speed)
+			AnimState.ATTACK:
+				_process_attack(delta)
+			AnimState.SKILL:
+				_process_skill(delta)
+			AnimState.HURT:
+				_process_hurt(delta)
+			AnimState.DODGE:
+				_process_dodge(delta, velocity)
+			AnimState.DEFEAT:
+				_process_defeat(delta)
+			AnimState.VICTORY:
+				_process_victory(delta)
 
 	# Apply final transforms to sprite
-	if sprite:
+	if sprite and not authored_animation_active:
 		sprite.position = base_sprite_pos + procedural_offset
 		sprite.scale = base_sprite_scale * procedural_scale
 		sprite.rotation = procedural_rotation
@@ -175,6 +311,7 @@ func _transition_to(new_state: AnimState) -> void:
 		return
 	var old_state := current_state
 	current_state = new_state
+	_play_authored_clip(_state_clip_name())
 	state_changed.emit(old_state, new_state)
 
 # State triggers
@@ -189,11 +326,12 @@ func play_run() -> void:
 	_transition_to(AnimState.RUN)
 
 func trigger_attack(aim_dir: Vector2, _attack_type: String = "slash") -> int:
+	# Capture the attack facing before selecting its directional authored clip.
+	animation_direction = _get_direction_suffix(aim_dir)
 	# Immediately interrupt previous attack or idle/run
 	_transition_to(AnimState.ATTACK)
 	is_locked = true
 	attack_duration = 0.20
-	attack_anim_timer = attack_duration
 	combo_reset_timer = COMBO_WINDOW
 	
 	var executed_stage: int = combo_stage
@@ -244,14 +382,22 @@ func trigger_attack(aim_dir: Vector2, _attack_type: String = "slash") -> int:
 				tw.parallel().tween_property(weapon_sprite, "scale", Vector2(0.22, 0.22), 0.14)
 			combo_stage = 0 # Cycle back
 			
+	var attack_clip_key := "attack_%d" % (executed_stage + 1)
+	_play_authored_clip(attack_clip_key, true)
+	attack_duration = maxf(0.20, get_authored_clip_duration(attack_clip_key))
+	attack_anim_timer = attack_duration
 	return executed_stage
 
 func trigger_skill() -> void:
 	_transition_to(AnimState.SKILL)
+	_play_authored_clip("skill", true)
 	is_locked = true
+	var skill_duration := maxf(0.45, get_authored_clip_duration("skill"))
 	var tw := create_tween()
 	tw.tween_property(self, "procedural_scale", Vector2(1.25, 1.25), 0.2).set_trans(Tween.TRANS_BACK)
 	tw.tween_property(self, "procedural_scale", Vector2.ONE, 0.25)
+	if skill_duration > 0.45:
+		tw.tween_interval(skill_duration - 0.45)
 	tw.tween_callback(func():
 		is_locked = false
 		_transition_to(AnimState.IDLE)
@@ -259,30 +405,38 @@ func trigger_skill() -> void:
 
 func trigger_hurt(hit_direction: Vector2 = Vector2.ZERO) -> void:
 	# Hurt has high interrupt priority over attack!
+	if hit_direction.length_squared() > 0.01:
+		animation_direction = _get_direction_suffix(-hit_direction)
 	_transition_to(AnimState.HURT)
 	is_locked = true
-	hurt_timer = 0.16
+	hurt_timer = maxf(0.16, get_authored_clip_duration("hurt"))
 	
 	# Recoil flinch backwards
 	procedural_offset = -hit_direction * 10.0
 	procedural_scale = Vector2(1.15, 0.85)
 	
-	if sprite:
-		var tw := sprite.create_tween()
-		sprite.modulate = Color(2.0, 0.3, 0.3, 1.0)
-		tw.tween_property(sprite, "modulate", Color(1.0, 1.0, 1.0, 1.0), 0.16)
+	var visual_target := _get_active_visual_target()
+	if visual_target:
+		var tw := visual_target.create_tween()
+		visual_target.modulate = Color(2.0, 0.3, 0.3, 1.0)
+		tw.tween_property(visual_target, "modulate", Color(1.0, 1.0, 1.0, 1.0), 0.16)
 
 func trigger_dodge(dash_dir: Vector2) -> void:
 	# Dodge cleanly cancels any attack lock immediately
+	animation_direction = _get_direction_suffix(dash_dir)
 	_transition_to(AnimState.DODGE)
 	is_locked = true
 	procedural_offset = dash_dir * 8.0
 	procedural_scale = Vector2(1.3, 0.75)
 	
-	if sprite:
-		var tw := sprite.create_tween()
-		sprite.modulate.a = 0.4
-		tw.tween_property(sprite, "modulate:a", 1.0, 0.22)
+	var visual_target := _get_active_visual_target()
+	if visual_target:
+		var dodge_duration := maxf(0.22, get_authored_clip_duration("dodge"))
+		var tw := visual_target.create_tween()
+		visual_target.modulate.a = 0.4
+		tw.tween_property(visual_target, "modulate:a", 1.0, 0.22)
+		if dodge_duration > 0.22:
+			tw.tween_interval(dodge_duration - 0.22)
 		tw.tween_callback(func():
 			is_locked = false
 			_transition_to(AnimState.IDLE)
@@ -291,9 +445,10 @@ func trigger_dodge(dash_dir: Vector2) -> void:
 func trigger_defeat() -> void:
 	_transition_to(AnimState.DEFEAT)
 	is_locked = true
-	if sprite:
-		var tw := sprite.create_tween()
-		tw.tween_property(sprite, "modulate", Color(0.4, 0.4, 0.5, 0.0), 0.8)
+	var visual_target := _get_active_visual_target()
+	if visual_target:
+		var tw := visual_target.create_tween()
+		tw.tween_property(visual_target, "modulate", Color(0.4, 0.4, 0.5, 0.0), 0.8)
 
 func trigger_victory() -> void:
 	_transition_to(AnimState.VICTORY)

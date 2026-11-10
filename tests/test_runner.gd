@@ -39,6 +39,8 @@ func _ready() -> void:
 	test_altar_weapon_and_item_moving()
 	test_valkyrie_blessing_pick_and_refresh()
 	test_summoning_circle_redesign()
+	test_authored_character_animation_fallbacks()
+	test_selected_character_visual_scene_mapping()
 	
 	print("\n==================================================")
 	print("  TEST RESULTS: %d PASSED, %d FAILED" % [tests_passed, tests_failed])
@@ -849,3 +851,59 @@ func test_summoning_circle_redesign() -> void:
 	assert_true(GameManager.altar_items.is_empty(), "Item removed from altar items after recycle")
 	
 	inv_view.queue_free()
+
+# 20. Test authored character rigs retain their visual when optional clips are absent.
+func test_authored_character_animation_fallbacks() -> void:
+	print("--- Test 20: Authored Character Animation Fallbacks ---")
+	var controller := CharacterAnimationController.new()
+	var legacy_sprite := Sprite2D.new()
+	var rig_root := Node2D.new()
+	var animation_player := AnimationPlayer.new()
+	add_child(controller)
+	add_child(legacy_sprite)
+	add_child(rig_root)
+	rig_root.add_child(animation_player)
+
+	var library := AnimationLibrary.new()
+	for clip_data in [
+		["idle", 0.8, Animation.LOOP_LINEAR],
+		["run", 0.4, Animation.LOOP_LINEAR],
+		["attack_1", 0.32, Animation.LOOP_NONE]
+	]:
+		var animation := Animation.new()
+		animation.length = float(clip_data[1])
+		animation.loop_mode = int(clip_data[2])
+		library.add_animation(str(clip_data[0]), animation)
+	animation_player.add_animation_library("", library)
+
+	controller.setup(legacy_sprite)
+	controller.bind_authored_animation_player(animation_player, {}, rig_root)
+	assert_true(controller.authored_animation_active, "Core authored clips activate the rig")
+	assert_true(rig_root.visible and not legacy_sprite.visible, "Authored rig replaces the legacy sprite")
+
+	controller.trigger_attack(Vector2.RIGHT)
+	assert_true(animation_player.current_animation == "attack_1", "First combo stage plays its authored attack")
+	controller.trigger_attack(Vector2.RIGHT)
+	assert_true(animation_player.current_animation == "attack_1", "Missing second combo clip falls back to attack_1")
+	assert_true(controller.authored_animation_active and rig_root.visible and not legacy_sprite.visible, "Missing optional attack clip does not flash the legacy sprite")
+	assert_true(is_equal_approx(controller.get_authored_clip_duration("attack_2"), 0.32), "Fallback attack uses the core clip duration")
+
+	controller.trigger_skill()
+	assert_true(animation_player.current_animation == "idle", "Missing skill clip falls back to idle")
+	controller.trigger_hurt()
+	assert_true(animation_player.current_animation == "idle", "Missing hurt clip falls back to idle")
+	controller.trigger_dodge(Vector2.RIGHT)
+	assert_true(animation_player.current_animation == "run", "Missing dodge clip falls back to run")
+
+	controller.queue_free()
+	legacy_sprite.queue_free()
+	rig_root.queue_free()
+
+# 21. Test generated visual scene mapping for each playable hero.
+func test_selected_character_visual_scene_mapping() -> void:
+	print("--- Test 21: Selected Character Visual Scene Mapping ---")
+	assert_true(PlayerController.AUTHORED_CHARACTER_SCENES.size() == 3, "All three playable characters have authored scene slots")
+	assert_true(PlayerController.AUTHORED_CHARACTER_SCENES.get("shadow_hunter") == "res://scenes/characters/shadow_hunter_visual.tscn", "Shadow Hunter maps to its generated visual scene")
+	assert_true(PlayerController.AUTHORED_CHARACTER_SCENES.get("storm_reaper") == "res://scenes/characters/storm_reaper_visual.tscn", "Storm Reaper maps to its generated visual scene")
+	assert_true(PlayerController.AUTHORED_CHARACTER_SCENES.get("soul_binder") == "res://scenes/characters/soul_binder_visual.tscn", "Soul Binder maps to its generated visual scene")
+	assert_true(PlayerController.AUTHORED_CHARACTER_SCENES.get("unknown_character", "").is_empty(), "Unknown characters do not resolve to an arbitrary rig")

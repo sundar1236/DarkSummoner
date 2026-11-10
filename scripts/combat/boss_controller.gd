@@ -3,6 +3,7 @@ extends CharacterBody2D
 
 const CoinPickupClass = preload("res://scripts/combat/coin_pickup.gd")
 const XpPickupClass = preload("res://scripts/combat/xp_pickup.gd")
+const CombatSpriteFeedback = preload("res://scripts/combat/combat_sprite_feedback.gd")
 
 # Floor Boss controller: "Lord Malakar, the Abyssal Dread".
 # Features multi-phase combat and readable animated warning telegraph danger zones.
@@ -18,6 +19,10 @@ var move_speed: float = 90.0
 var player_ref: Node2D
 var shadow_sprite: Sprite2D
 var sprite: Sprite2D
+var visual_root: Node2D
+var authored_animator: EnemyBossSpriteAnimation
+var authored_animation_active: bool = false
+var authored_locked_clip: String = ""
 
 var is_enraged: bool = false
 var is_performing_attack: bool = false
@@ -34,6 +39,7 @@ func _ready() -> void:
 	collision_mask = 1 | 4 | 16
 	
 	_setup_visuals()
+	_setup_authored_animation()
 
 func setup(p_floor: int) -> void:
 	var scale_mult := 1.0 + float(p_floor - 1) * 0.5
@@ -56,11 +62,14 @@ func _setup_visuals() -> void:
 	shadow_sprite.z_index = -1
 	add_child(shadow_sprite)
 	
-	# 2. Main Boss Sprite
+	# 2. Main Boss Sprite on a presentation-only wrapper.
+	visual_root = Node2D.new()
+	visual_root.name = "VisualRoot"
+	add_child(visual_root)
 	sprite = Sprite2D.new()
 	sprite.texture = TextureLoader.get_texture("res://assets/sprites/bosses/boss_abyssal_dread.png")
 	sprite.position = Vector2(0, -10)
-	add_child(sprite)
+	visual_root.add_child(sprite)
 	
 	# 3. Collision shape
 	var col := CollisionShape2D.new()
@@ -68,6 +77,43 @@ func _setup_visuals() -> void:
 	shape.radius = 42.0
 	col.shape = shape
 	add_child(col)
+
+func _setup_authored_animation() -> void:
+	var manifest_path := "res://assets/art/enemies/source/manifest.json"
+	if not FileAccess.file_exists(manifest_path) or not is_instance_valid(visual_root):
+		return
+	authored_animator = EnemyBossSpriteAnimation.new()
+	authored_animator.name = "AuthoredSpriteAnimation"
+	visual_root.add_child(authored_animator)
+	authored_animation_active = authored_animator.setup_from_manifest(manifest_path, "lord_malakar", "boss")
+	if authored_animation_active:
+		sprite.visible = false
+		_play_authored_animation("idle")
+	else:
+		authored_animator.queue_free()
+		authored_animator = null
+
+func _play_authored_animation(clip_name: String, force_restart: bool = false) -> void:
+	if not authored_animation_active or not is_instance_valid(authored_animator):
+		return
+	var resolved_clip := clip_name
+	if clip_name == "death" and not authored_animator.has_animation(resolved_clip):
+		resolved_clip = "defeat"
+	if not authored_animator.has_animation(resolved_clip):
+		return
+	authored_animator.play(resolved_clip, force_restart)
+	if not authored_animator.animated_sprite.sprite_frames.get_animation_loop(resolved_clip):
+		authored_locked_clip = resolved_clip
+
+func _update_authored_locomotion() -> void:
+	if not authored_animation_active or not is_instance_valid(authored_animator):
+		return
+	if not authored_locked_clip.is_empty():
+		if authored_animator.is_one_shot_playing(authored_locked_clip):
+			return
+		authored_locked_clip = ""
+	var locomotion_clip := "move" if velocity.length_squared() > 1.0 else "idle"
+	authored_animator.play(locomotion_clip)
 
 func _physics_process(delta: float) -> void:
 	if is_dead:
@@ -85,6 +131,8 @@ func _physics_process(delta: float) -> void:
 	if not is_enraged and (hp / max_hp) <= 0.5:
 		_enter_enraged_phase()
 		
+	# The authored idle/move clip is presentation-only; movement logic remains unchanged.
+	_update_authored_locomotion()
 	# Floating bobbing animation
 	var float_y := sin(anim_time * 2.5) * 6.0
 	sprite.position = Vector2(0, -10.0 + float_y)
@@ -135,7 +183,8 @@ func _attack_void_eruption() -> void:
 		
 	if AudioManager:
 		AudioManager.play_sfx("boss_warning")
-		
+	_play_authored_animation("attack", true)
+	
 	var target_pos := player_ref.global_position
 	
 	# Spawn warning circle indicator on ground
@@ -204,10 +253,9 @@ func _attack_abyssal_charge() -> void:
 	)
 	add_child(line_node)
 	
-	# 0.8s charging windup pulse
-	var tween := create_tween()
-	tween.tween_property(sprite, "scale", Vector2(1.25, 1.25), 0.4).set_trans(Tween.TRANS_BACK)
-	tween.tween_property(sprite, "scale", Vector2(1.0, 1.0), 0.4)
+	# 0.8s charging windup pulse; physics and collision remain on the boss body.
+	_play_authored_animation("attack", true)
+	CombatSpriteFeedback.play_telegraph(visual_root, charge_dir, 0.8, Vector2(1.18, 0.88))
 	
 	get_tree().create_timer(0.8).timeout.connect(func():
 		if is_instance_valid(line_node):
@@ -235,6 +283,7 @@ func _attack_abyssal_charge() -> void:
 func _attack_nova_ring() -> void:
 	if AudioManager:
 		AudioManager.play_sfx("boss_warning")
+	_play_authored_animation("attack", true)
 		
 	# Charge flare
 	var tween := create_tween()
@@ -264,6 +313,7 @@ func _attack_nova_ring() -> void:
 func _attack_abyssal_cross() -> void:
 	if AudioManager:
 		AudioManager.play_sfx("boss_warning")
+	_play_authored_animation("attack", true)
 	var cross_telegraph := Node2D.new()
 	cross_telegraph.global_position = global_position
 	cross_telegraph.z_index = -1
@@ -274,9 +324,7 @@ func _attack_abyssal_cross() -> void:
 		cross_telegraph.draw_circle(Vector2.ZERO, 34.0, Color(1.0, 0.12, 0.24, 0.18))
 	)
 	get_parent().add_child(cross_telegraph)
-	var pulse := create_tween()
-	pulse.tween_property(sprite, "scale", Vector2(1.18, 1.18), 0.24)
-	pulse.tween_property(sprite, "scale", Vector2.ONE, 0.24)
+	CombatSpriteFeedback.play_telegraph(visual_root, Vector2.UP, 0.48, Vector2(1.12, 0.9))
 	get_tree().create_timer(0.65).timeout.connect(func():
 		if is_instance_valid(cross_telegraph):
 			cross_telegraph.queue_free()
@@ -311,12 +359,11 @@ func take_damage(amount: float, is_crit: bool) -> void:
 	get_parent().add_child(dmg_num)
 	dmg_num.setup(amount, is_crit, global_position + Vector2(0, -20))
 	
-	var tween := create_tween()
-	sprite.modulate = Color(2.2, 2.2, 2.2, 1.0)
-	sprite.scale = Vector2(1.12, 0.9)
-	var rest_col := Color(1.5, 0.35, 0.35, 1.0) if is_enraged else Color(1.0, 1.0, 1.0, 1.0)
-	tween.tween_property(sprite, "scale", Vector2(1.0, 1.0), 0.12).set_trans(Tween.TRANS_QUAD)
-	tween.parallel().tween_property(sprite, "modulate", rest_col, 0.12)
+	var recoil_direction := Vector2.UP
+	if is_instance_valid(player_ref):
+		recoil_direction = global_position - player_ref.global_position
+	_play_authored_animation("hurt", true)
+	CombatSpriteFeedback.play_hit(visual_root, recoil_direction, 1.15)
 	
 	if is_crit:
 		if AudioManager: AudioManager.play_sfx("crit_hit")
@@ -362,9 +409,13 @@ func _on_boss_death() -> void:
 	boss_defeated.emit()
 	GameManager.complete_current_level()
 	
-	# Death dissolve sequence
-	var tween := create_tween()
-	tween.tween_property(sprite, "scale", Vector2(1.3, 1.3), 0.2)
-	tween.tween_property(sprite, "scale", Vector2(0.1, 0.1), 0.5).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_IN)
-	tween.parallel().tween_property(sprite, "modulate:a", 0.0, 0.5)
-	tween.tween_callback(queue_free)
+	# Dramatic boss dissolve is visual-only; rewards and level completion already fired above.
+	_play_authored_animation("death", true)
+	var death_tween := CombatSpriteFeedback.play_death(
+		visual_root,
+		0.7,
+		Vector2(1.3, 1.3),
+		Vector2(0.1, 0.1)
+	)
+	if death_tween:
+		death_tween.finished.connect(queue_free)

@@ -2,7 +2,15 @@ class_name PlayerController
 extends CharacterBody2D
 
 const CharacterAnimationControllerClass = preload("res://scripts/combat/character_animation_controller.gd")
+const CharacterVisualContractClass = preload("res://scripts/combat/character_visual_contract.gd")
 const OverheadHealthBarClass = preload("res://scripts/combat/overhead_health_bar.gd")
+
+# Optional generated character scenes. Missing files intentionally keep the legacy sprite.
+const AUTHORED_CHARACTER_SCENES: Dictionary = {
+	"shadow_hunter": "res://scenes/characters/shadow_hunter_visual.tscn",
+	"storm_reaper": "res://scenes/characters/storm_reaper_visual.tscn",
+	"soul_binder": "res://scenes/characters/soul_binder_visual.tscn"
+}
 
 # Lone Hunter player controller for Abyssal Altar.
 # Handles Archero 2-style stutter-step auto-aiming & movement, 3-stage combo attacks,
@@ -46,6 +54,9 @@ var overhead_hp_bar: OverheadHealthBar
 var anim_time: float = 0.0
 var footstep_timer: float = 0.0
 
+var visual_root: Node2D
+var authored_rig_root: Node2D
+var authored_visual_character_id: String = ""
 var shadow_sprite: Sprite2D
 var ground_ring: Node2D
 var sprite: Sprite2D
@@ -78,6 +89,12 @@ func _ready() -> void:
 		overhead_hp_bar.set_health(GameManager.player_hp, GameManager.player_max_hp)
 
 func _setup_visuals() -> void:
+	# Keep presentation separate from the CharacterBody2D gameplay/collision root.
+	# This container is the future host for Skeleton2D or authored sprite animations.
+	visual_root = Node2D.new()
+	visual_root.name = "CharacterVisualRoot"
+	add_child(visual_root)
+	
 	# 1. Ground contact shadow (Archero 2 style soft oval shadow)
 	shadow_sprite = Sprite2D.new()
 	shadow_sprite.texture = TextureLoader.get_texture("res://assets/sprites/vfx/ground_shadow.png")
@@ -85,20 +102,20 @@ func _setup_visuals() -> void:
 	shadow_sprite.scale = Vector2(1.15, 1.15)
 	shadow_sprite.modulate = Color(1.0, 1.0, 1.0, 0.78)
 	shadow_sprite.z_index = -2
-	add_child(shadow_sprite)
+	visual_root.add_child(shadow_sprite)
 	
 	# 2. Ground subtle hero indicator ring
 	ground_ring = Node2D.new()
 	ground_ring.z_index = -1
 	ground_ring.draw.connect(_draw_ground_ring)
-	add_child(ground_ring)
+	visual_root.add_child(ground_ring)
 	
 	# 3. Main Character Sprite
 	sprite = Sprite2D.new()
 	_update_character_sprite()
 	sprite.position = Vector2(0, -6)
 	sprite.scale = Vector2(0.44, 0.44)
-	add_child(sprite)
+	visual_root.add_child(sprite)
 	
 	# 4. Collision shape
 	var col := CollisionShape2D.new()
@@ -110,7 +127,7 @@ func _setup_visuals() -> void:
 	# 5. Weapon socket for projectile/slash spawning
 	weapon_socket = Marker2D.new()
 	weapon_socket.position = Vector2(16, 0)
-	add_child(weapon_socket)
+	visual_root.add_child(weapon_socket)
 	
 	weapon_sprite = Sprite2D.new()
 	weapon_sprite.scale = Vector2(0.35, 0.35)
@@ -120,13 +137,24 @@ func _setup_visuals() -> void:
 	
 	# 6. Animation Controller
 	anim_ctrl = CharacterAnimationControllerClass.new()
-	add_child(anim_ctrl)
+	visual_root.add_child(anim_ctrl)
 	anim_ctrl.setup(sprite, weapon_socket, weapon_sprite)
-	
+
+	# Dedicated attachment point for the future layered/Skeleton2D character scene.
+	# The legacy sprite remains visible until a valid authored clip is available.
+	authored_rig_root = Node2D.new()
+	authored_rig_root.name = "AuthoredRigRoot"
+	authored_rig_root.visible = false
+	visual_root.add_child(authored_rig_root)
+	var authored_animation_player := AnimationPlayer.new()
+	authored_animation_player.name = "AuthoredAnimationPlayer"
+	authored_rig_root.add_child(authored_animation_player)
+	anim_ctrl.bind_authored_animation_player(authored_animation_player, {}, authored_rig_root)
+
 	# 7. Aim reticle indicator line
 	aim_indicator = Node2D.new()
 	aim_indicator.draw.connect(_draw_aim_reticle)
-	add_child(aim_indicator)
+	visual_root.add_child(aim_indicator)
 	
 	# 8. Overhead floating health bar
 	overhead_hp_bar = OverheadHealthBarClass.new()
@@ -152,6 +180,67 @@ func _setup_visuals() -> void:
 	# 11. Character-Specific Ambience Nodes
 	_setup_character_ambience()
 
+# Installs a production character visual scene without replacing the gameplay body.
+# The supplied scene must have an AnimationPlayer somewhere beneath its Node2D root.
+func install_authored_visual(rig_scene: PackedScene, clip_names: Dictionary = {}) -> bool:
+	if rig_scene == null or not is_instance_valid(visual_root) or not is_instance_valid(anim_ctrl):
+		return false
+
+	var rig_instance := rig_scene.instantiate()
+	if not rig_instance is Node2D:
+		rig_instance.free()
+		push_warning("Authored character visual scene root must inherit Node2D.")
+		return false
+
+	var rig_root := rig_instance as Node2D
+	var animation_player := rig_root.find_child("AnimationPlayer", true, false) as AnimationPlayer
+	var contract_issues: Array[String] = CharacterVisualContractClass.validate(rig_root, animation_player, clip_names)
+	if not contract_issues.is_empty():
+		rig_root.free()
+		for issue in contract_issues:
+			push_warning("Authored character visual rejected: %s" % issue)
+		return false
+
+	if is_instance_valid(authored_rig_root):
+		authored_rig_root.free()
+		authored_rig_root = null
+
+	rig_root.name = "AuthoredRigRoot"
+	rig_root.visible = false
+	visual_root.add_child(rig_root)
+	authored_rig_root = rig_root
+	# Animation tracks resolve from the rig root regardless of where the player
+	# sits inside the scene hierarchy.
+	animation_player.root_node = animation_player.get_path_to(rig_root)
+	anim_ctrl.bind_authored_animation_player(animation_player, clip_names, rig_root)
+	return true
+
+# Resolve a named attachment point from the active authored rig.
+# Returns null while the legacy sprite fallback is active or when the socket is absent.
+func get_authored_socket(socket_name: String) -> Node2D:
+	if not is_instance_valid(authored_rig_root) or not anim_ctrl or not anim_ctrl.authored_animation_active:
+		return null
+	return CharacterVisualContractClass.find_socket(authored_rig_root, socket_name)
+
+
+# Load the selected character's generated visual scene when its production art
+# package has been built. Gameplay remains on the existing sprite otherwise.
+func _install_selected_character_visual() -> void:
+	if not GameManager.current_character:
+		return
+	var character_id := str(GameManager.current_character.id)
+	if character_id == authored_visual_character_id:
+		return
+	var scene_path := str(AUTHORED_CHARACTER_SCENES.get(character_id, ""))
+	if scene_path.is_empty() or not ResourceLoader.exists(scene_path):
+		return
+	var rig_scene := load(scene_path) as PackedScene
+	if rig_scene == null:
+		push_warning("Authored visual scene could not be loaded for %s: %s" % [character_id, scene_path])
+		return
+	if install_authored_visual(rig_scene):
+		authored_visual_character_id = character_id
+
 func _setup_character_ambience() -> void:
 	var char_id := "shadow_hunter"
 	if GameManager.current_character:
@@ -171,13 +260,13 @@ func _setup_character_ambience() -> void:
 			spirit_wisp = Node2D.new()
 			spirit_wisp.z_index = 5
 			spirit_wisp.draw.connect(_draw_spirit_wisp)
-			add_child(spirit_wisp)
+			visual_root.add_child(spirit_wisp)
 		"storm_reaper":
 			# Ambient electric crackle sparks for Storm Reaper
 			storm_sparks = Node2D.new()
 			storm_sparks.z_index = 4
 			storm_sparks.draw.connect(_draw_storm_sparks)
-			add_child(storm_sparks)
+			visual_root.add_child(storm_sparks)
 
 func _draw_ground_ring() -> void:
 	# Subtle hero circle indicator matching character primary color
@@ -260,6 +349,7 @@ func _refresh_stats() -> void:
 	if GameManager.current_character:
 		skill_cooldown = GameManager.current_character.active_skill_cooldown
 	_update_character_sprite()
+	_install_selected_character_visual()
 	_setup_character_ambience()
 
 func _spawn_pets() -> void:
@@ -361,6 +451,9 @@ func _handle_aim_and_attack(delta: float) -> void:
 	aim_indicator.queue_redraw()
 	weapon_socket.position = aim_direction * 20.0
 	weapon_socket.rotation = aim_direction.angle()
+	var authored_weapon_socket := get_authored_socket("WeaponSocket")
+	if authored_weapon_socket:
+		authored_weapon_socket.global_rotation = aim_direction.angle()
 	
 	# Attack continuous firing while stationary and targeting an enemy
 	# Shadow Hunter consecutive hits slightly accelerate firing speed
@@ -461,13 +554,14 @@ func _fire_basic_attack() -> void:
 			if combo_streak >= 4:
 				_spawn_afterimage()
 		
-	# Slash crescent visual swing
-	_spawn_slash_vfx(aim_direction, attack_type, combo_stage)
+	# Slash crescent visual swing and projectile muzzle share the active rig socket.
+	var attack_origin := _get_weapon_spawn_position()
+	_spawn_slash_vfx(aim_direction, attack_type, combo_stage, attack_origin)
 	if not ProjectileController.can_spawn_projectile():
 		return
 	var proj := ProjectileController.new()
 	get_parent().add_child(proj)
-	proj.global_position = weapon_socket.global_position
+	proj.global_position = attack_origin
 	
 	var p_speed := 720.0 if attack_type == "lightning" else 600.0
 	proj.setup(final_dmg, is_crit, aim_direction, p_speed, attack_type, true)
@@ -487,7 +581,7 @@ func _fire_basic_attack() -> void:
 			break
 		var extra_proj := ProjectileController.new()
 		get_parent().add_child(extra_proj)
-		extra_proj.global_position = weapon_socket.global_position
+		extra_proj.global_position = attack_origin
 		extra_proj.setup(final_dmg * 0.75, is_crit, side_dir, p_speed, attack_type, true)
 		if proj.has_burn: extra_proj.has_burn = true
 		if proj.has_life_steal: extra_proj.has_life_steal = true
@@ -495,10 +589,22 @@ func _fire_basic_attack() -> void:
 	if AudioManager:
 		AudioManager.play_sfx(sfx_name, 0.06)
 
-func _spawn_slash_vfx(dir: Vector2, atk_type: String, stage_idx: int = 0) -> void:
+func _get_weapon_spawn_position() -> Vector2:
+	var authored_socket := get_authored_socket("WeaponSocket")
+	if authored_socket:
+		return authored_socket.global_position
+	return weapon_socket.global_position if is_instance_valid(weapon_socket) else global_position
+
+func _spawn_slash_vfx(
+	dir: Vector2,
+	atk_type: String,
+	stage_idx: int = 0,
+	spawn_origin: Vector2 = Vector2.ZERO
+) -> void:
 	var slash := Sprite2D.new()
 	slash.texture = TextureLoader.get_texture("res://assets/sprites/projectiles/proj_slash.png")
-	slash.global_position = weapon_socket.global_position + dir * 10.0
+	var origin := spawn_origin if spawn_origin != Vector2.ZERO else _get_weapon_spawn_position()
+	slash.global_position = origin + dir * 10.0
 	slash.rotation = dir.angle()
 	
 	# Combo stage visual variance
