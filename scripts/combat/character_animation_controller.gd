@@ -110,7 +110,7 @@ func _state_clip_name() -> String:
 		AnimState.VICTORY: return "victory"
 	return "idle"
 
-func _play_authored_clip(clip_key: String) -> bool:
+func _play_authored_clip(clip_key: String, force_restart: bool = false) -> bool:
 	if not is_instance_valid(authored_animation_player):
 		_set_authored_visual_active(false)
 		return false
@@ -121,7 +121,7 @@ func _play_authored_clip(clip_key: String) -> bool:
 	if not authored_animation_player.has_animation(animation_name):
 		_set_authored_visual_active(false)
 		return false
-	if authored_animation_player.current_animation != animation_name:
+	if force_restart or authored_animation_player.current_animation != animation_name:
 		authored_animation_player.play(animation_name)
 	_set_authored_visual_active(true)
 	return true
@@ -346,11 +346,12 @@ func trigger_attack(aim_dir: Vector2, _attack_type: String = "slash") -> int:
 				tw.parallel().tween_property(weapon_sprite, "scale", Vector2(0.22, 0.22), 0.14)
 			combo_stage = 0 # Cycle back
 			
-	_play_authored_clip("attack_%d" % (executed_stage + 1))
+	_play_authored_clip("attack_%d" % (executed_stage + 1), true)
 	return executed_stage
 
 func trigger_skill() -> void:
 	_transition_to(AnimState.SKILL)
+	_play_authored_clip("skill", true)
 	is_locked = true
 	var tw := create_tween()
 	tw.tween_property(self, "procedural_scale", Vector2(1.25, 1.25), 0.2).set_trans(Tween.TRANS_BACK)
