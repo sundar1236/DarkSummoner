@@ -84,6 +84,12 @@ func bind_authored_animation_player(player: AnimationPlayer, clip_names: Diction
 	_set_authored_visual_active(false)
 	_play_authored_clip(_state_clip_name())
 
+# Detach a previously installed rig and return presentation to the legacy sprite.
+func clear_authored_animation() -> void:
+	_set_authored_visual_active(false)
+	authored_animation_player = null
+	authored_rig_root = null
+
 func _set_authored_visual_active(active: bool) -> void:
 	authored_animation_active = active
 	if is_instance_valid(authored_rig_root):
