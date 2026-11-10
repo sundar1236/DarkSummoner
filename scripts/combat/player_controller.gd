@@ -47,6 +47,7 @@ var anim_time: float = 0.0
 var footstep_timer: float = 0.0
 
 var visual_root: Node2D
+var authored_rig_root: Node2D
 var shadow_sprite: Sprite2D
 var ground_ring: Node2D
 var sprite: Sprite2D
@@ -130,11 +131,16 @@ func _setup_visuals() -> void:
 	visual_root.add_child(anim_ctrl)
 	anim_ctrl.setup(sprite, weapon_socket, weapon_sprite)
 
-	# Authored rig clips can be added without changing PlayerController state logic.
+	# Dedicated attachment point for the future layered/Skeleton2D character scene.
+	# The legacy sprite remains visible until a valid authored clip is available.
+	authored_rig_root = Node2D.new()
+	authored_rig_root.name = "AuthoredRigRoot"
+	authored_rig_root.visible = false
+	visual_root.add_child(authored_rig_root)
 	var authored_animation_player := AnimationPlayer.new()
 	authored_animation_player.name = "AuthoredAnimationPlayer"
-	visual_root.add_child(authored_animation_player)
-	anim_ctrl.bind_authored_animation_player(authored_animation_player)
+	authored_rig_root.add_child(authored_animation_player)
+	anim_ctrl.bind_authored_animation_player(authored_animation_player, {}, authored_rig_root)
 	
 	# 7. Aim reticle indicator line
 	aim_indicator = Node2D.new()
