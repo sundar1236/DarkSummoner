@@ -91,10 +91,11 @@ func _init_stats(floor_scale: int = 1) -> void:
 			shade_reward = 1
 			if shadow_sprite:
 				shadow_sprite.position = Vector2(0, 16)
-				shadow_sprite.scale = Vector2(0.8, 0.8)
+				shadow_sprite.scale = Vector2(0.9, 0.9)
 			if sprite:
 				sprite.texture = TextureLoader.get_texture("res://assets/sprites/enemies/enemy_swarmer.png")
-				sprite.position = Vector2(0, -4)
+				sprite.scale = Vector2(0.42, 0.42)
+				sprite.position = Vector2(0, -6)
 		"cultist":
 			max_hp = 45.0 * hp_mult
 			move_speed = 100.0
@@ -103,7 +104,7 @@ func _init_stats(floor_scale: int = 1) -> void:
 			shade_reward = 1
 			if shadow_sprite:
 				shadow_sprite.position = Vector2(0, 20)
-				shadow_sprite.scale = Vector2(0.9, 0.9)
+				shadow_sprite.scale = Vector2(1.0, 1.0)
 			if sprite:
 				sprite.texture = TextureLoader.get_texture("res://assets/sprites/enemies/enemy_cultist.png")
 				sprite.position = Vector2(0, -6)
@@ -121,6 +122,7 @@ func _init_stats(floor_scale: int = 1) -> void:
 				sprite.texture = TextureLoader.get_texture("res://assets/sprites/enemies/enemy_swarmer.png")
 				sprite.modulate = Color(1.0, 0.48, 0.32, 1.0)
 				sprite.scale = Vector2(1.12, 1.12)
+				sprite.position = Vector2(0, -8)
 		"elite":
 			max_hp = 140.0 * hp_mult
 			move_speed = 85.0
@@ -132,7 +134,8 @@ func _init_stats(floor_scale: int = 1) -> void:
 				shadow_sprite.scale = Vector2(1.4, 1.4)
 			if sprite:
 				sprite.texture = TextureLoader.get_texture("res://assets/sprites/enemies/enemy_elite.png")
-				sprite.position = Vector2(0, -10)
+				sprite.scale = Vector2(0.55, 0.55)
+				sprite.position = Vector2(0, -14)
 			if health_bar:
 				health_bar.size = Vector2(56, 7)
 				health_bar.position = Vector2(-28, -42)

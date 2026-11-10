@@ -65,7 +65,13 @@ func _connect_subsystems() -> void:
 		)
 		main_menu.continue_pressed.connect(_on_continue_pressed)
 		main_menu.characters_pressed.connect(func():
-			_show_screen("character_select")
+			if main_shell:
+				_show_screen("shell")
+				main_shell._switch_to_tab(1)
+				if main_shell.screen_loadout:
+					main_shell.screen_loadout._switch_subtab(0)
+			else:
+				_show_screen("character_select")
 		)
 		main_menu.sanctuary_pressed.connect(func():
 			_show_screen("progression")

@@ -97,6 +97,7 @@ func _setup_visuals() -> void:
 	sprite = Sprite2D.new()
 	_update_character_sprite()
 	sprite.position = Vector2(0, -6)
+	sprite.scale = Vector2(0.44, 0.44)
 	add_child(sprite)
 	
 	# 4. Collision shape
@@ -112,8 +113,9 @@ func _setup_visuals() -> void:
 	add_child(weapon_socket)
 	
 	weapon_sprite = Sprite2D.new()
-	weapon_sprite.scale = Vector2(0.22, 0.22)
-	weapon_sprite.position = Vector2(2, 0)
+	weapon_sprite.scale = Vector2(0.35, 0.35)
+	weapon_sprite.position = Vector2(10, 0)
+	weapon_sprite.visible = false # Hero sprite already holds dual glowing blades
 	weapon_socket.add_child(weapon_sprite)
 	
 	# 6. Animation Controller
@@ -233,7 +235,7 @@ func _update_character_sprite() -> void:
 			
 	sprite.texture = TextureLoader.get_texture(tex_path)
 	if weapon_sprite:
-		weapon_sprite.texture = load(weap_path) as Texture2D
+		weapon_sprite.texture = TextureLoader.get_texture(weap_path)
 
 func _draw_aim_reticle() -> void:
 	if not is_attacking:
