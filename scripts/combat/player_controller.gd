@@ -2,6 +2,7 @@ class_name PlayerController
 extends CharacterBody2D
 
 const CharacterAnimationControllerClass = preload("res://scripts/combat/character_animation_controller.gd")
+const CharacterVisualContractClass = preload("res://scripts/combat/character_visual_contract.gd")
 const OverheadHealthBarClass = preload("res://scripts/combat/overhead_health_bar.gd")
 
 # Lone Hunter player controller for Abyssal Altar.
@@ -47,6 +48,7 @@ var anim_time: float = 0.0
 var footstep_timer: float = 0.0
 
 var visual_root: Node2D
+var authored_rig_root: Node2D
 var shadow_sprite: Sprite2D
 var ground_ring: Node2D
 var sprite: Sprite2D
@@ -129,7 +131,18 @@ func _setup_visuals() -> void:
 	anim_ctrl = CharacterAnimationControllerClass.new()
 	visual_root.add_child(anim_ctrl)
 	anim_ctrl.setup(sprite, weapon_socket, weapon_sprite)
-	
+
+	# Dedicated attachment point for the future layered/Skeleton2D character scene.
+	# The legacy sprite remains visible until a valid authored clip is available.
+	authored_rig_root = Node2D.new()
+	authored_rig_root.name = "AuthoredRigRoot"
+	authored_rig_root.visible = false
+	visual_root.add_child(authored_rig_root)
+	var authored_animation_player := AnimationPlayer.new()
+	authored_animation_player.name = "AuthoredAnimationPlayer"
+	authored_rig_root.add_child(authored_animation_player)
+	anim_ctrl.bind_authored_animation_player(authored_animation_player, {}, authored_rig_root)
+
 	# 7. Aim reticle indicator line
 	aim_indicator = Node2D.new()
 	aim_indicator.draw.connect(_draw_aim_reticle)
@@ -158,6 +171,49 @@ func _setup_visuals() -> void:
 	
 	# 11. Character-Specific Ambience Nodes
 	_setup_character_ambience()
+
+# Installs a production character visual scene without replacing the gameplay body.
+# The supplied scene must have an AnimationPlayer somewhere beneath its Node2D root.
+func install_authored_visual(rig_scene: PackedScene, clip_names: Dictionary = {}) -> bool:
+	if rig_scene == null or not is_instance_valid(visual_root) or not is_instance_valid(anim_ctrl):
+		return false
+
+	var rig_instance := rig_scene.instantiate()
+	if not rig_instance is Node2D:
+		rig_instance.free()
+		push_warning("Authored character visual scene root must inherit Node2D.")
+		return false
+
+	var rig_root := rig_instance as Node2D
+	var animation_player := rig_root.find_child("AnimationPlayer", true, false) as AnimationPlayer
+	var contract_issues: Array[String] = CharacterVisualContractClass.validate(rig_root, animation_player, clip_names)
+	if not contract_issues.is_empty():
+		rig_root.free()
+		for issue in contract_issues:
+			push_warning("Authored character visual rejected: %s" % issue)
+		return false
+
+	if is_instance_valid(authored_rig_root):
+		authored_rig_root.free()
+		authored_rig_root = null
+
+	rig_root.name = "AuthoredRigRoot"
+	rig_root.visible = false
+	visual_root.add_child(rig_root)
+	authored_rig_root = rig_root
+	# Animation tracks resolve from the rig root regardless of where the player
+	# sits inside the scene hierarchy.
+	animation_player.root_node = animation_player.get_path_to(rig_root)
+	anim_ctrl.bind_authored_animation_player(animation_player, clip_names, rig_root)
+	return true
+
+# Resolve a named attachment point from the active authored rig.
+# Returns null while the legacy sprite fallback is active or when the socket is absent.
+func get_authored_socket(socket_name: String) -> Node2D:
+	if not is_instance_valid(authored_rig_root) or not anim_ctrl or not anim_ctrl.authored_animation_active:
+		return null
+	return CharacterVisualContractClass.find_socket(authored_rig_root, socket_name)
+
 
 func _setup_character_ambience() -> void:
 	var char_id := "shadow_hunter"
