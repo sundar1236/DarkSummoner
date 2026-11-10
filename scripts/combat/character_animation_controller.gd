@@ -28,6 +28,23 @@ var sprite: Sprite2D
 var weapon_socket: Marker2D
 var weapon_sprite: Sprite2D
 
+# Optional authored animation driver. When a matching AnimationPlayer clip exists,
+# it owns the character rig; the existing procedural sprite animation remains fallback.
+var authored_animation_player: AnimationPlayer
+var authored_animation_active: bool = false
+var authored_animation_names: Dictionary = {
+	"idle": "idle",
+	"run": "run",
+	"attack_1": "attack_1",
+	"attack_2": "attack_2",
+	"attack_3": "attack_3",
+	"skill": "skill",
+	"hurt": "hurt",
+	"dodge": "dodge",
+	"defeat": "defeat",
+	"victory": "victory"
+}
+
 # Combo Tracking
 var combo_stage: int = 0 # 0, 1, 2
 var combo_reset_timer: float = 0.0
@@ -53,6 +70,40 @@ func setup(p_sprite: Sprite2D, p_socket: Marker2D = null, p_weapon_sprite: Sprit
 	if sprite:
 		base_sprite_pos = sprite.position
 		base_sprite_scale = sprite.scale
+
+# Bind an AnimationPlayer owned by the character visual rig. Clip names can be
+# overridden per character; missing clips safely fall back to the legacy controller.
+func bind_authored_animation_player(player: AnimationPlayer, clip_names: Dictionary = {}) -> void:
+	authored_animation_player = player
+	for key in clip_names:
+		authored_animation_names[key] = str(clip_names[key])
+	authored_animation_active = false
+	_play_authored_clip(_state_clip_name())
+
+func _state_clip_name() -> String:
+	match current_state:
+		AnimState.IDLE: return "idle"
+		AnimState.RUN: return "run"
+		AnimState.ATTACK: return "attack_1"
+		AnimState.SKILL: return "skill"
+		AnimState.HURT: return "hurt"
+		AnimState.DODGE: return "dodge"
+		AnimState.DEFEAT: return "defeat"
+		AnimState.VICTORY: return "victory"
+	return "idle"
+
+func _play_authored_clip(clip_key: String) -> bool:
+	if not is_instance_valid(authored_animation_player):
+		authored_animation_active = false
+		return false
+	var animation_name := str(authored_animation_names.get(clip_key, clip_key))
+	if not authored_animation_player.has_animation(animation_name):
+		authored_animation_active = false
+		return false
+	if authored_animation_player.current_animation != animation_name:
+		authored_animation_player.play(animation_name)
+	authored_animation_active = true
+	return true
 
 func update(delta: float, velocity: Vector2, aim_dir: Vector2, move_speed: float) -> void:
 	anim_time += delta
@@ -87,27 +138,28 @@ func update(delta: float, velocity: Vector2, aim_dir: Vector2, move_speed: float
 			face_left = aim_dir.x < 0.0
 		sprite.flip_h = face_left
 
-	# Procedural Animation updates
-	match current_state:
-		AnimState.IDLE:
-			_process_idle(delta)
-		AnimState.RUN:
-			_process_run(delta, velocity, move_speed)
-		AnimState.ATTACK:
-			_process_attack(delta)
-		AnimState.SKILL:
-			_process_skill(delta)
-		AnimState.HURT:
-			_process_hurt(delta)
-		AnimState.DODGE:
-			_process_dodge(delta, velocity)
-		AnimState.DEFEAT:
-			_process_defeat(delta)
-		AnimState.VICTORY:
-			_process_victory(delta)
+	# Procedural animation is retained only when no authored clip is available.
+	if not authored_animation_active:
+		match current_state:
+			AnimState.IDLE:
+				_process_idle(delta)
+			AnimState.RUN:
+				_process_run(delta, velocity, move_speed)
+			AnimState.ATTACK:
+				_process_attack(delta)
+			AnimState.SKILL:
+				_process_skill(delta)
+			AnimState.HURT:
+				_process_hurt(delta)
+			AnimState.DODGE:
+				_process_dodge(delta, velocity)
+			AnimState.DEFEAT:
+				_process_defeat(delta)
+			AnimState.VICTORY:
+				_process_victory(delta)
 
 	# Apply final transforms to sprite
-	if sprite:
+	if sprite and not authored_animation_active:
 		sprite.position = base_sprite_pos + procedural_offset
 		sprite.scale = base_sprite_scale * procedural_scale
 		sprite.rotation = procedural_rotation
@@ -175,6 +227,7 @@ func _transition_to(new_state: AnimState) -> void:
 		return
 	var old_state := current_state
 	current_state = new_state
+	_play_authored_clip(_state_clip_name())
 	state_changed.emit(old_state, new_state)
 
 # State triggers
@@ -244,6 +297,7 @@ func trigger_attack(aim_dir: Vector2, _attack_type: String = "slash") -> int:
 				tw.parallel().tween_property(weapon_sprite, "scale", Vector2(0.22, 0.22), 0.14)
 			combo_stage = 0 # Cycle back
 			
+	_play_authored_clip("attack_%d" % (executed_stage + 1))
 	return executed_stage
 
 func trigger_skill() -> void:
