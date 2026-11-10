@@ -183,7 +183,8 @@ func _attack_void_eruption() -> void:
 		
 	if AudioManager:
 		AudioManager.play_sfx("boss_warning")
-		
+	_play_authored_animation("attack", true)
+	
 	var target_pos := player_ref.global_position
 	
 	# Spawn warning circle indicator on ground
@@ -282,6 +283,7 @@ func _attack_abyssal_charge() -> void:
 func _attack_nova_ring() -> void:
 	if AudioManager:
 		AudioManager.play_sfx("boss_warning")
+	_play_authored_animation("attack", true)
 		
 	# Charge flare
 	var tween := create_tween()
@@ -311,6 +313,7 @@ func _attack_nova_ring() -> void:
 func _attack_abyssal_cross() -> void:
 	if AudioManager:
 		AudioManager.play_sfx("boss_warning")
+	_play_authored_animation("attack", true)
 	var cross_telegraph := Node2D.new()
 	cross_telegraph.global_position = global_position
 	cross_telegraph.z_index = -1
