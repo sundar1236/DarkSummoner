@@ -196,51 +196,51 @@ func _add_weapon_socket(parent: Node2D, socket_name: String, owner_root: Node) -
 func _add_animations(player: AnimationPlayer) -> void:
 	var library := AnimationLibrary.new()
 	library.add_animation("idle", _make_animation(1.2, true, {
-		"Skeleton2D/Body": [[0.0, 0.0], [0.6, 0.015], [1.2, 0.0]],
+		"Skeleton2D/Root/Body": [[0.0, 0.0], [0.6, 0.015], [1.2, 0.0]],
 		"Skeleton2D/Body/Head": [[0.0, 0.0], [0.6, -0.025], [1.2, 0.0]],
-		"Skeleton2D/BackCape": [[0.0, 0.0], [0.6, 0.025], [1.2, 0.0]]
+		"Skeleton2D/Root/BackCape": [[0.0, 0.0], [0.6, 0.025], [1.2, 0.0]]
 	}))
 	library.add_animation("run", _make_animation(0.48, true, {
-		"Skeleton2D/Body": [[0.0, -0.035], [0.12, 0.035], [0.24, -0.035], [0.36, 0.035], [0.48, -0.035]],
-		"Skeleton2D/RearLegUpper": [[0.0, -0.45], [0.24, 0.45], [0.48, -0.45]],
-		"Skeleton2D/FrontLegUpper": [[0.0, 0.45], [0.24, -0.45], [0.48, 0.45]],
-		"Skeleton2D/RearArmUpper": [[0.0, 0.35], [0.24, -0.35], [0.48, 0.35]],
-		"Skeleton2D/FrontArmUpper": [[0.0, -0.35], [0.24, 0.35], [0.48, -0.35]]
+		"Skeleton2D/Root/Body": [[0.0, -0.035], [0.12, 0.035], [0.24, -0.035], [0.36, 0.035], [0.48, -0.035]],
+		"Skeleton2D/Root/Body/RearLegUpper": [[0.0, -0.45], [0.24, 0.45], [0.48, -0.45]],
+		"Skeleton2D/Root/Body/FrontLegUpper": [[0.0, 0.45], [0.24, -0.45], [0.48, 0.45]],
+		"Skeleton2D/Root/Body/RearArmUpper": [[0.0, 0.35], [0.24, -0.35], [0.48, 0.35]],
+		"Skeleton2D/Root/Body/FrontArmUpper": [[0.0, -0.35], [0.24, 0.35], [0.48, -0.35]]
 	}))
 	library.add_animation("attack_1", _make_animation(0.28, false, {
-		"Skeleton2D/FrontArmUpper": [[0.0, -0.15], [0.08, -1.0], [0.18, 0.25], [0.28, 0.0]],
-		"Skeleton2D/FrontArmLower": [[0.0, 0.0], [0.08, -0.55], [0.18, 0.45], [0.28, 0.0]],
-		"Skeleton2D/Body": [[0.0, 0.0], [0.08, -0.08], [0.18, 0.1], [0.28, 0.0]]
+		"Skeleton2D/Root/Body/FrontArmUpper": [[0.0, -0.15], [0.08, -1.0], [0.18, 0.25], [0.28, 0.0]],
+		"Skeleton2D/Root/Body/FrontArmUpper/FrontArmLower": [[0.0, 0.0], [0.08, -0.55], [0.18, 0.45], [0.28, 0.0]],
+		"Skeleton2D/Root/Body": [[0.0, 0.0], [0.08, -0.08], [0.18, 0.1], [0.28, 0.0]]
 	}))
 	library.add_animation("attack_2", _make_animation(0.3, false, {
-		"Skeleton2D/RearArmUpper": [[0.0, 0.0], [0.08, 0.95], [0.2, -0.2], [0.3, 0.0]],
-		"Skeleton2D/RearArmLower": [[0.0, 0.0], [0.08, 0.55], [0.2, -0.4], [0.3, 0.0]],
-		"Skeleton2D/Body": [[0.0, 0.0], [0.08, 0.1], [0.2, -0.08], [0.3, 0.0]]
+		"Skeleton2D/Root/Body/RearArmUpper": [[0.0, 0.0], [0.08, 0.95], [0.2, -0.2], [0.3, 0.0]],
+		"Skeleton2D/Root/Body/RearArmUpper/RearArmLower": [[0.0, 0.0], [0.08, 0.55], [0.2, -0.4], [0.3, 0.0]],
+		"Skeleton2D/Root/Body": [[0.0, 0.0], [0.08, 0.1], [0.2, -0.08], [0.3, 0.0]]
 	}))
 	library.add_animation("attack_3", _make_animation(0.42, false, {
-		"Skeleton2D/FrontArmUpper": [[0.0, 0.0], [0.1, -1.2], [0.25, 0.65], [0.42, 0.0]],
-		"Skeleton2D/RearArmUpper": [[0.0, 0.0], [0.1, 0.8], [0.25, -0.55], [0.42, 0.0]],
-		"Skeleton2D/Body": [[0.0, 0.0], [0.1, -0.14], [0.25, 0.16], [0.42, 0.0]]
+		"Skeleton2D/Root/Body/FrontArmUpper": [[0.0, 0.0], [0.1, -1.2], [0.25, 0.65], [0.42, 0.0]],
+		"Skeleton2D/Root/Body/RearArmUpper": [[0.0, 0.0], [0.1, 0.8], [0.25, -0.55], [0.42, 0.0]],
+		"Skeleton2D/Root/Body": [[0.0, 0.0], [0.1, -0.14], [0.25, 0.16], [0.42, 0.0]]
 	}))
 	library.add_animation("skill", _make_animation(0.75, false, {
-		"Skeleton2D/Body": [[0.0, 0.0], [0.2, -0.18], [0.5, 0.08], [0.75, 0.0]],
-		"Skeleton2D/FrontArmUpper": [[0.0, 0.0], [0.2, -1.25], [0.5, -1.55], [0.75, 0.0]],
-		"Skeleton2D/RearArmUpper": [[0.0, 0.0], [0.2, 1.25], [0.5, 1.55], [0.75, 0.0]]
+		"Skeleton2D/Root/Body": [[0.0, 0.0], [0.2, -0.18], [0.5, 0.08], [0.75, 0.0]],
+		"Skeleton2D/Root/Body/FrontArmUpper": [[0.0, 0.0], [0.2, -1.25], [0.5, -1.55], [0.75, 0.0]],
+		"Skeleton2D/Root/Body/RearArmUpper": [[0.0, 0.0], [0.2, 1.25], [0.5, 1.55], [0.75, 0.0]]
 	}))
 	library.add_animation("hurt", _make_animation(0.22, false, {
-		"Skeleton2D/Body": [[0.0, 0.0], [0.06, -0.18], [0.22, 0.0]]
+		"Skeleton2D/Root/Body": [[0.0, 0.0], [0.06, -0.18], [0.22, 0.0]]
 	}))
 	library.add_animation("dodge", _make_animation(0.24, false, {
-		"Skeleton2D/Body": [[0.0, 0.0], [0.08, -0.3], [0.16, 0.25], [0.24, 0.0]],
-		"Skeleton2D/BackCape": [[0.0, 0.0], [0.12, -0.35], [0.24, 0.0]]
+		"Skeleton2D/Root/Body": [[0.0, 0.0], [0.08, -0.3], [0.16, 0.25], [0.24, 0.0]],
+		"Skeleton2D/Root/BackCape": [[0.0, 0.0], [0.12, -0.35], [0.24, 0.0]]
 	}))
 	library.add_animation("defeat", _make_animation(0.8, false, {
-		"Skeleton2D/Body": [[0.0, 0.0], [0.45, 1.0], [0.8, 1.25]],
-		"Skeleton2D/Head": [[0.0, 0.0], [0.45, 0.35], [0.8, 0.55]]
+		"Skeleton2D/Root/Body": [[0.0, 0.0], [0.45, 1.0], [0.8, 1.25]],
+		"Skeleton2D/Root/Body/Head": [[0.0, 0.0], [0.45, 0.35], [0.8, 0.55]]
 	}))
 	library.add_animation("victory", _make_animation(0.9, false, {
-		"Skeleton2D/Body": [[0.0, 0.0], [0.25, -0.12], [0.55, 0.08], [0.9, 0.0]],
-		"Skeleton2D/FrontArmUpper": [[0.0, 0.0], [0.25, -1.0], [0.55, -0.9], [0.9, 0.0]]
+		"Skeleton2D/Root/Body": [[0.0, 0.0], [0.25, -0.12], [0.55, 0.08], [0.9, 0.0]],
+		"Skeleton2D/Root/Body/FrontArmUpper": [[0.0, 0.0], [0.25, -1.0], [0.55, -0.9], [0.9, 0.0]]
 	}))
 	player.add_animation_library("", library)
 
