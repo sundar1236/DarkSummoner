@@ -85,7 +85,7 @@ func _setup_authored_animation() -> void:
 	authored_animator = EnemyBossSpriteAnimation.new()
 	authored_animator.name = "AuthoredSpriteAnimation"
 	visual_root.add_child(authored_animator)
-	authored_animation_active = authored_animator.setup_from_manifest(manifest_path, "lord_malakar")
+	authored_animation_active = authored_animator.setup_from_manifest(manifest_path, "lord_malakar", "boss")
 	if authored_animation_active:
 		sprite.visible = false
 		_play_authored_animation("idle")
