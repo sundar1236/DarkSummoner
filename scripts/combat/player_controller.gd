@@ -5,6 +5,13 @@ const CharacterAnimationControllerClass = preload("res://scripts/combat/characte
 const CharacterVisualContractClass = preload("res://scripts/combat/character_visual_contract.gd")
 const OverheadHealthBarClass = preload("res://scripts/combat/overhead_health_bar.gd")
 
+# Optional generated character scenes. Missing files intentionally keep the legacy sprite.
+const AUTHORED_CHARACTER_SCENES: Dictionary = {
+	"shadow_hunter": "res://scenes/characters/shadow_hunter_visual.tscn",
+	"storm_reaper": "res://scenes/characters/storm_reaper_visual.tscn",
+	"soul_binder": "res://scenes/characters/soul_binder_visual.tscn"
+}
+
 # Lone Hunter player controller for Abyssal Altar.
 # Handles Archero 2-style stutter-step auto-aiming & movement, 3-stage combo attacks,
 # state-driven 2.5D chibi animations, overhead floating health bar, weapon sockets,
@@ -49,6 +56,7 @@ var footstep_timer: float = 0.0
 
 var visual_root: Node2D
 var authored_rig_root: Node2D
+var authored_visual_character_id: String = ""
 var shadow_sprite: Sprite2D
 var ground_ring: Node2D
 var sprite: Sprite2D
@@ -215,6 +223,24 @@ func get_authored_socket(socket_name: String) -> Node2D:
 	return CharacterVisualContractClass.find_socket(authored_rig_root, socket_name)
 
 
+# Load the selected character's generated visual scene when its production art
+# package has been built. Gameplay remains on the existing sprite otherwise.
+func _install_selected_character_visual() -> void:
+	if not GameManager.current_character:
+		return
+	var character_id := str(GameManager.current_character.id)
+	if character_id == authored_visual_character_id:
+		return
+	var scene_path := str(AUTHORED_CHARACTER_SCENES.get(character_id, ""))
+	if scene_path.is_empty() or not ResourceLoader.exists(scene_path):
+		return
+	var rig_scene := load(scene_path) as PackedScene
+	if rig_scene == null:
+		push_warning("Authored visual scene could not be loaded for %s: %s" % [character_id, scene_path])
+		return
+	if install_authored_visual(rig_scene):
+		authored_visual_character_id = character_id
+
 func _setup_character_ambience() -> void:
 	var char_id := "shadow_hunter"
 	if GameManager.current_character:
@@ -323,6 +349,7 @@ func _refresh_stats() -> void:
 	if GameManager.current_character:
 		skill_cooldown = GameManager.current_character.active_skill_cooldown
 	_update_character_sprite()
+	_install_selected_character_visual()
 	_setup_character_ambience()
 
 func _spawn_pets() -> void:
