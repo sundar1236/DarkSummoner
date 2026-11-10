@@ -129,6 +129,12 @@ func _setup_visuals() -> void:
 	anim_ctrl = CharacterAnimationControllerClass.new()
 	visual_root.add_child(anim_ctrl)
 	anim_ctrl.setup(sprite, weapon_socket, weapon_sprite)
+
+	# Authored rig clips can be added without changing PlayerController state logic.
+	var authored_animation_player := AnimationPlayer.new()
+	authored_animation_player.name = "AuthoredAnimationPlayer"
+	visual_root.add_child(authored_animation_player)
+	anim_ctrl.bind_authored_animation_player(authored_animation_player)
 	
 	# 7. Aim reticle indicator line
 	aim_indicator = Node2D.new()
