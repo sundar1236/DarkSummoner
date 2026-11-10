@@ -142,6 +142,35 @@ func _setup_visuals() -> void:
 	authored_rig_root.add_child(authored_animation_player)
 	anim_ctrl.bind_authored_animation_player(authored_animation_player, {}, authored_rig_root)
 
+	# 7. Aim reticle indicator line
+	aim_indicator = Node2D.new()
+	aim_indicator.draw.connect(_draw_aim_reticle)
+	visual_root.add_child(aim_indicator)
+	
+	# 8. Overhead floating health bar
+	overhead_hp_bar = OverheadHealthBarClass.new()
+	overhead_hp_bar.position = Vector2(0, -42)
+	add_child(overhead_hp_bar)
+	
+	# 9. Combo streak badge label
+	combo_streak_label = Label.new()
+	combo_streak_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	combo_streak_label.add_theme_font_size_override("font_size", 10)
+	combo_streak_label.add_theme_color_override("font_color", Color(1.0, 0.85, 0.2, 1.0))
+	combo_streak_label.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 1.0))
+	combo_streak_label.size = Vector2(80, 16)
+	combo_streak_label.position = Vector2(-40, -58)
+	combo_streak_label.visible = false
+	combo_streak_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(combo_streak_label)
+	
+	# 10. Companions container
+	pet_container = Node2D.new()
+	add_child(pet_container)
+	
+	# 11. Character-Specific Ambience Nodes
+	_setup_character_ambience()
+
 # Installs a production character visual scene without replacing the gameplay body.
 # The supplied scene must have an AnimationPlayer somewhere beneath its Node2D root.
 func install_authored_visual(rig_scene: PackedScene, clip_names: Dictionary = {}) -> bool:
@@ -175,34 +204,6 @@ func install_authored_visual(rig_scene: PackedScene, clip_names: Dictionary = {}
 	anim_ctrl.bind_authored_animation_player(animation_player, clip_names, rig_root)
 	return true
 	
-	# 7. Aim reticle indicator line
-	aim_indicator = Node2D.new()
-	aim_indicator.draw.connect(_draw_aim_reticle)
-	visual_root.add_child(aim_indicator)
-	
-	# 8. Overhead floating health bar
-	overhead_hp_bar = OverheadHealthBarClass.new()
-	overhead_hp_bar.position = Vector2(0, -42)
-	add_child(overhead_hp_bar)
-	
-	# 9. Combo streak badge label
-	combo_streak_label = Label.new()
-	combo_streak_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	combo_streak_label.add_theme_font_size_override("font_size", 10)
-	combo_streak_label.add_theme_color_override("font_color", Color(1.0, 0.85, 0.2, 1.0))
-	combo_streak_label.add_theme_color_override("font_shadow_color", Color(0, 0, 0, 1.0))
-	combo_streak_label.size = Vector2(80, 16)
-	combo_streak_label.position = Vector2(-40, -58)
-	combo_streak_label.visible = false
-	combo_streak_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(combo_streak_label)
-	
-	# 10. Companions container
-	pet_container = Node2D.new()
-	add_child(pet_container)
-	
-	# 11. Character-Specific Ambience Nodes
-	_setup_character_ambience()
 
 func _setup_character_ambience() -> void:
 	var char_id := "shadow_hunter"
