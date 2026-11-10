@@ -46,6 +46,7 @@ var overhead_hp_bar: OverheadHealthBar
 var anim_time: float = 0.0
 var footstep_timer: float = 0.0
 
+var visual_root: Node2D
 var shadow_sprite: Sprite2D
 var ground_ring: Node2D
 var sprite: Sprite2D
@@ -78,6 +79,12 @@ func _ready() -> void:
 		overhead_hp_bar.set_health(GameManager.player_hp, GameManager.player_max_hp)
 
 func _setup_visuals() -> void:
+	# Keep presentation separate from the CharacterBody2D gameplay/collision root.
+	# This container is the future host for Skeleton2D or authored sprite animations.
+	visual_root = Node2D.new()
+	visual_root.name = "CharacterVisualRoot"
+	add_child(visual_root)
+	
 	# 1. Ground contact shadow (Archero 2 style soft oval shadow)
 	shadow_sprite = Sprite2D.new()
 	shadow_sprite.texture = TextureLoader.get_texture("res://assets/sprites/vfx/ground_shadow.png")
@@ -85,20 +92,20 @@ func _setup_visuals() -> void:
 	shadow_sprite.scale = Vector2(1.15, 1.15)
 	shadow_sprite.modulate = Color(1.0, 1.0, 1.0, 0.78)
 	shadow_sprite.z_index = -2
-	add_child(shadow_sprite)
+	visual_root.add_child(shadow_sprite)
 	
 	# 2. Ground subtle hero indicator ring
 	ground_ring = Node2D.new()
 	ground_ring.z_index = -1
 	ground_ring.draw.connect(_draw_ground_ring)
-	add_child(ground_ring)
+	visual_root.add_child(ground_ring)
 	
 	# 3. Main Character Sprite
 	sprite = Sprite2D.new()
 	_update_character_sprite()
 	sprite.position = Vector2(0, -6)
 	sprite.scale = Vector2(0.44, 0.44)
-	add_child(sprite)
+	visual_root.add_child(sprite)
 	
 	# 4. Collision shape
 	var col := CollisionShape2D.new()
@@ -110,7 +117,7 @@ func _setup_visuals() -> void:
 	# 5. Weapon socket for projectile/slash spawning
 	weapon_socket = Marker2D.new()
 	weapon_socket.position = Vector2(16, 0)
-	add_child(weapon_socket)
+	visual_root.add_child(weapon_socket)
 	
 	weapon_sprite = Sprite2D.new()
 	weapon_sprite.scale = Vector2(0.35, 0.35)
@@ -120,13 +127,13 @@ func _setup_visuals() -> void:
 	
 	# 6. Animation Controller
 	anim_ctrl = CharacterAnimationControllerClass.new()
-	add_child(anim_ctrl)
+	visual_root.add_child(anim_ctrl)
 	anim_ctrl.setup(sprite, weapon_socket, weapon_sprite)
 	
 	# 7. Aim reticle indicator line
 	aim_indicator = Node2D.new()
 	aim_indicator.draw.connect(_draw_aim_reticle)
-	add_child(aim_indicator)
+	visual_root.add_child(aim_indicator)
 	
 	# 8. Overhead floating health bar
 	overhead_hp_bar = OverheadHealthBarClass.new()
@@ -171,13 +178,13 @@ func _setup_character_ambience() -> void:
 			spirit_wisp = Node2D.new()
 			spirit_wisp.z_index = 5
 			spirit_wisp.draw.connect(_draw_spirit_wisp)
-			add_child(spirit_wisp)
+			visual_root.add_child(spirit_wisp)
 		"storm_reaper":
 			# Ambient electric crackle sparks for Storm Reaper
 			storm_sparks = Node2D.new()
 			storm_sparks.z_index = 4
 			storm_sparks.draw.connect(_draw_storm_sparks)
-			add_child(storm_sparks)
+			visual_root.add_child(storm_sparks)
 
 func _draw_ground_ring() -> void:
 	# Subtle hero circle indicator matching character primary color
