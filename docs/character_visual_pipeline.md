@@ -62,3 +62,12 @@ when the fallback sprite is active.
 
 The integration test exercises all eight compass directions and checks that the primary
 socket changes its vertical placement for upward/downward aiming.
+
+
+## Phase 5: layered combat presentation
+
+The procedural renderer now adds a second detail pass over the base chibi forms: engraved chest trim, belt hardware, shoulder rivets, and hero-specific finishing elements. Shadow Hunter uses split hood tails and paired wrist blades; Storm Reaper uses segmented storm armor and a charged crescent weapon accent; Soul Binder uses rune-chain details and a floating diamond focus.
+
+The action_pose property is animated by the existing clips. Attack stages use different positive/reverse pose values, while skill, dodge, hurt, defeat, and victory have their own pose accents. The draw pass uses this value to move arm/weapon details and render a restrained directional action arc. This is still a procedural 2D presentation layer; it is not a hand-painted sprite sheet or a bone-based Skeleton2D rig.
+
+The character animation test checks that all ten clips animate action_pose, that the first two combo clips have distinct swing directions, and that the three hero palettes remain distinct.
