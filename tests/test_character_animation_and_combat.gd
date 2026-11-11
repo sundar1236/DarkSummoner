@@ -148,7 +148,7 @@ func test_authored_visual_action_tracks() -> void:
 		palette_signatures.append(str(palette.main))
 		rig.queue_free()
 	assert_eq(palette_signatures.size(), 3, "All three heroes expose a visual palette")
-	assert_eq(palette_signatures.duplicate().unique().size(), 3, "Each hero keeps a distinct core armor palette")
+	assert_true(palette_signatures[0] != palette_signatures[1] and palette_signatures[1] != palette_signatures[2] and palette_signatures[0] != palette_signatures[2], "Each hero keeps a distinct core armor palette")
 
 
 func test_three_stage_combo_cycle() -> void:
