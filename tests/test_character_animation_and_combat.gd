@@ -18,6 +18,7 @@ func _ready() -> void:
 	
 	test_animation_controller_state_machine()
 	test_authored_character_visual_scenes()
+	test_authored_visual_action_tracks()
 	test_three_stage_combo_cycle()
 	test_overhead_health_bar()
 	test_character_sprites_and_ambience()
@@ -113,6 +114,42 @@ func test_authored_character_visual_scenes() -> void:
 			assert_eq(issues.size(), 0, "%s passes the authored visual contract" % character_id)
 		assert_true(rig.find_child("WeaponSocket", true, false) is Node2D, "%s exposes a weapon attachment socket" % character_id)
 		rig.queue_free()
+
+
+func test_authored_visual_action_tracks() -> void:
+	print("\n--- Test: Layered Character Action Poses ---")
+	var scene_paths := [
+		"res://scenes/characters/shadow_hunter_visual.tscn",
+		"res://scenes/characters/storm_reaper_visual.tscn",
+		"res://scenes/characters/soul_binder_visual.tscn"
+	]
+	var palette_signatures: Array[String] = []
+	for scene_path in scene_paths:
+		var packed := load(scene_path) as PackedScene
+		if packed == null:
+			assert_true(false, "Character scene loads for action-pose validation: %s" % scene_path)
+			continue
+		var rig := packed.instantiate() as CharacterRigVisual
+		add_child(rig)
+		var animation_player := rig.find_child("AnimationPlayer", true, false) as AnimationPlayer
+		assert_true(animation_player != null, "Character rig exposes its action animation player")
+		if animation_player:
+			for clip_name in ["idle", "run", "attack_1", "attack_2", "attack_3", "skill", "hurt", "dodge", "defeat", "victory"]:
+				var clip := animation_player.get_animation(clip_name)
+				var pose_track := clip.find_track(NodePath(".:action_pose"), Animation.TYPE_VALUE) if clip else -1
+				assert_true(pose_track >= 0, "%s contains an animation-driven action pose" % clip_name)
+			var attack_one := animation_player.get_animation("attack_1")
+			var attack_two := animation_player.get_animation("attack_2")
+			var track_one := attack_one.find_track(NodePath(".:action_pose"), Animation.TYPE_VALUE)
+			var track_two := attack_two.find_track(NodePath(".:action_pose"), Animation.TYPE_VALUE)
+			assert_true(attack_one.track_get_key_value(track_one, 1) > 0.5, "First combo pose drives a positive cleave")
+			assert_true(attack_two.track_get_key_value(track_two, 1) < -0.5, "Second combo pose drives a reverse swing")
+		var palette: Dictionary = CharacterRigVisual.PALETTES[rig.character_id]
+		palette_signatures.append(str(palette.main))
+		rig.queue_free()
+	assert_eq(palette_signatures.size(), 3, "All three heroes expose a visual palette")
+	assert_true(palette_signatures[0] != palette_signatures[1] and palette_signatures[1] != palette_signatures[2] and palette_signatures[0] != palette_signatures[2], "Each hero keeps a distinct core armor palette")
+
 
 func test_three_stage_combo_cycle() -> void:
 	print("\n--- Test: 3-Stage Attack Combo Cycle ---")
