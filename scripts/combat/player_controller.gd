@@ -79,6 +79,7 @@ func _ready() -> void:
 	collision_mask = 2 | 8 | 16 # Enemy, EnemyProjectile, Walls
 	
 	_setup_visuals()
+	_install_selected_character_visual()
 	_refresh_stats()
 	_spawn_pets()
 	
@@ -194,21 +195,23 @@ func install_authored_visual(rig_scene: PackedScene, clip_names: Dictionary = {}
 		return false
 
 	var rig_root := rig_instance as Node2D
+	# Enter the scene tree before validation so runtime-built rig nodes and clips
+	# created in _ready() are available to the contract check.
+	rig_root.name = "AuthoredRigRoot"
+	rig_root.visible = false
+	visual_root.add_child(rig_root)
 	var animation_player := rig_root.find_child("AnimationPlayer", true, false) as AnimationPlayer
 	var contract_issues: Array[String] = CharacterVisualContractClass.validate(rig_root, animation_player, clip_names)
 	if not contract_issues.is_empty():
-		rig_root.free()
+		rig_root.queue_free()
 		for issue in contract_issues:
 			push_warning("Authored character visual rejected: %s" % issue)
 		return false
 
 	if is_instance_valid(authored_rig_root):
-		authored_rig_root.free()
+		authored_rig_root.queue_free()
 		authored_rig_root = null
 
-	rig_root.name = "AuthoredRigRoot"
-	rig_root.visible = false
-	visual_root.add_child(rig_root)
 	authored_rig_root = rig_root
 	# Animation tracks resolve from the rig root regardless of where the player
 	# sits inside the scene hierarchy.
