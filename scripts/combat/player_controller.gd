@@ -499,9 +499,7 @@ func _handle_aim_and_attack(delta: float) -> void:
 	aim_indicator.queue_redraw()
 	weapon_socket.position = aim_direction * 20.0
 	weapon_socket.rotation = aim_direction.angle()
-	var authored_weapon_socket := get_authored_socket("WeaponSocket")
-	if authored_weapon_socket:
-		authored_weapon_socket.global_rotation = aim_direction.angle()
+	_sync_authored_attachment_points()
 	
 	# Attack continuous firing while stationary and targeting an enemy
 	# Shadow Hunter consecutive hits slightly accelerate firing speed
@@ -636,6 +634,28 @@ func _fire_basic_attack() -> void:
 		
 	if AudioManager:
 		AudioManager.play_sfx(sfx_name, 0.06)
+
+# Keep authored hand/weapon markers aligned with the same eight-way aim
+# direction used by combat. This keeps projectile origins attached to the hero.
+func _sync_authored_attachment_points() -> void:
+	if not anim_ctrl or not anim_ctrl.authored_animation_active:
+		return
+	var direction := aim_direction.normalized()
+	if direction.length_squared() < 0.01:
+		direction = Vector2.RIGHT
+	var side := Vector2(-direction.y, direction.x)
+	var weapon := get_authored_socket("WeaponSocket")
+	if weapon:
+		weapon.position = direction * 24.0 + Vector2(0, -5)
+		weapon.rotation = direction.angle()
+	var left_hand := get_authored_socket("LeftWeaponSocket")
+	if left_hand:
+		left_hand.position = direction * 10.0 - side * 9.0 + Vector2(0, -5)
+		left_hand.rotation = direction.angle()
+	var right_hand := get_authored_socket("RightWeaponSocket")
+	if right_hand:
+		right_hand.position = direction * 10.0 + side * 9.0 + Vector2(0, -5)
+		right_hand.rotation = direction.angle()
 
 func _get_weapon_spawn_position() -> Vector2:
 	var authored_socket := get_authored_socket("WeaponSocket")
