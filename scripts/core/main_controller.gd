@@ -164,25 +164,28 @@ func _on_character_selection_confirmed(char_id: String) -> void:
 	_on_start_run_requested(char_id)
 
 func _show_screen(screen_name: String) -> void:
+	# Reject unknown or unavailable destinations before changing the current UI.
+	if not _set_active_root_screen(screen_name):
+		return
 	# A hub modal must never remain visible when navigating to another root screen.
 	if main_shell and main_shell.has_method("close_all_modals"):
 		main_shell.close_all_modals()
-	_set_active_root_screen(screen_name)
 	if inventory_view:
 		inventory_view.process_mode = Node.PROCESS_MODE_ALWAYS if screen_name == "inventory" and is_inventory_from_pause else Node.PROCESS_MODE_INHERIT
 	if settings_modal: settings_modal.visible = false
-	
+
 	if is_instance_valid(current_arena):
 		current_arena.visible = (screen_name == "combat")
 		var hud_layer = current_arena.get_node_or_null("HUDLayer") as CanvasLayer
 		if hud_layer:
 			hud_layer.visible = (screen_name == "combat")
-	
+
 	if screen_name == "inventory" and inventory_view:
 		inventory_view.refresh_inventory_ui()
 
-# Root-screen visibility is owned here so transitions cannot leave overlapping screens.
-func _set_active_root_screen(screen_name: String) -> void:
+# Root-screen visibility is owned here; invalid destinations leave the current UI untouched.
+# Combat is a valid destination managed by the arena rather than a Control root screen.
+func _set_active_root_screen(screen_name: String) -> bool:
 	var root_screens: Dictionary = {
 		"intro": intro_screen,
 		"story_intro": story_intro,
@@ -195,10 +198,24 @@ func _set_active_root_screen(screen_name: String) -> void:
 		"reward": reward_view,
 		"game_over": game_over_view
 	}
+	if screen_name == "combat":
+		for screen_value in root_screens.values():
+			var inactive_screen := screen_value as Control
+			if is_instance_valid(inactive_screen):
+				inactive_screen.visible = false
+		return true
+	if not root_screens.has(screen_name):
+		push_warning("MainController ignored unknown screen: %s" % screen_name)
+		return false
+	var target_screen := root_screens[screen_name] as Control
+	if not is_instance_valid(target_screen):
+		push_warning("MainController cannot open unavailable screen: %s" % screen_name)
+		return false
 	for screen_key in root_screens:
 		var screen := root_screens[screen_key] as Control
 		if is_instance_valid(screen):
 			screen.visible = (screen_key == screen_name)
+	return true
 
 func _show_modal(modal_name: String) -> void:
 	if modal_name == "settings" and settings_modal:
