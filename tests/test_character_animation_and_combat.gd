@@ -101,7 +101,7 @@ func test_authored_character_visual_scenes() -> void:
 		assert_true(packed != null, "%s authored visual scene loads as PackedScene" % character_id)
 		if packed == null:
 			continue
-		var rig := packed.instantiate()
+		var rig := packed.instantiate() as CharacterRigVisual
 		add_child(rig)
 		assert_eq(rig.character_id, character_id, "%s scene declares its own character identity" % character_id)
 		var player := rig.find_child("AnimationPlayer", true, false) as AnimationPlayer
