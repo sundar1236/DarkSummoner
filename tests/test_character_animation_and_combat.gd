@@ -162,16 +162,23 @@ func test_character_sprites_and_ambience() -> void:
 	# Verify overhead health bar attached
 	assert_true(is_instance_valid(player.overhead_hp_bar), "Player overhead health bar attached")
 	
+	# Test Shadow Hunter shadow-trail identity
+	GameManager.set_character("shadow_hunter")
+	player._setup_character_ambience()
+	assert_true(is_instance_valid(player.shadow_trails), "Shadow Hunter creates a dedicated shadow-trail effect")
+
 	# Test Soul Binder spirit companion
 	GameManager.set_character("soul_binder")
 	player._setup_character_ambience()
 	assert_true(is_instance_valid(player.spirit_wisp), "Soul Binder spawns orbiting spirit wisp")
+	assert_true(player.shadow_trails == null, "Previous Shadow Hunter trail is cleaned up")
 	
 	# Test Storm Reaper electric sparks
 	GameManager.set_character("storm_reaper")
 	player._setup_character_ambience()
 	assert_true(is_instance_valid(player.storm_sparks), "Storm Reaper spawns electric spark ambience")
 	assert_true(player.spirit_wisp == null, "Previous wisp cleanly cleaned up")
+	assert_true(player.shadow_trails == null, "Previous Shadow Hunter trail remains cleared")
 	
 	# Reset to default
 	GameManager.set_character("shadow_hunter")
@@ -263,12 +270,29 @@ func test_summoning_circle_hero_presentation() -> void:
 	assert_true(board.get_socket_pos(0) != Vector2.ZERO, "Socket 0 has valid position")
 	assert_true(board.get_socket_pos(12) != Vector2.ZERO, "Socket 12 has valid position")
 	
+	# Verify all three dedicated hero portraits exist and resolve to separate assets.
+	var portrait_paths := [
+		"res://assets/art/characters/shadow_hunter_portrait.png",
+		"res://assets/art/characters/storm_reaper_portrait.png",
+		"res://assets/art/characters/soul_binder_portrait.png"
+	]
+	for portrait_path in portrait_paths:
+		assert_true(ResourceLoader.exists(portrait_path), "Dedicated character portrait exists: %s" % portrait_path)
+	var unique_portrait_paths := portrait_paths.duplicate()
+	unique_portrait_paths.sort()
+	assert_eq(unique_portrait_paths.size(), 3, "Three unique character portrait paths are registered")
+
 	# Verify Hero Pedestal view
 	var ped := HeroPedestalView.new()
 	ped.size = Vector2(300, 300)
 	ped.character_id = "shadow_hunter"
 	add_child(ped)
 	assert_true(is_instance_valid(ped), "HeroPedestalView renders properly")
+	ped._ensure_character_portrait()
+	assert_true(ped._portrait_texture != null, "Hero pedestal loads the selected character portrait")
+	ped.character_id = "storm_reaper"
+	ped._ensure_character_portrait()
+	assert_eq(ped._loaded_character_id, "storm_reaper", "Hero pedestal refreshes its portrait after character changes")
 	
 	board.queue_free()
 	ped.queue_free()

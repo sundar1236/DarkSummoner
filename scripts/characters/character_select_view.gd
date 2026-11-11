@@ -39,16 +39,32 @@ const PORTRAIT_PATHS: Dictionary = {
 
 func _ready() -> void:
 	CharacterDatabase.init_database()
+	_sync_selected_character()
 	_setup_signals()
 	_refresh_tabs()
-	_select_character("shadow_hunter")
+	_update_view()
 	
 	visibility_changed.connect(func():
 		if visible:
+			_sync_selected_character()
 			_update_shades_display()
 			_refresh_tabs()
 			_update_view()
 	)
+
+func _sync_selected_character() -> void:
+	if is_initial_selection:
+		selected_character_id = "shadow_hunter"
+		return
+	var preferred_id := ""
+	if GameManager and GameManager.current_character:
+		preferred_id = str(GameManager.current_character.id)
+	elif SaveManager:
+		preferred_id = str(SaveManager.active_character_id)
+	if not preferred_id.is_empty() and CharacterDatabase.get_character(preferred_id):
+		selected_character_id = preferred_id
+	elif not CharacterDatabase.get_character(selected_character_id):
+		selected_character_id = "shadow_hunter"
 
 func _setup_signals() -> void:
 	if btn_back:
@@ -104,7 +120,10 @@ func _refresh_tabs() -> void:
 		card_art.offset_top = 5.0
 		card_art.offset_right = -5.0
 		card_art.offset_bottom = -5.0
-		card_art.texture = load(str(CARD_ART_PATHS.get(ch.id, ""))) as Texture2D
+		var card_texture_path := str(CARD_ART_PATHS.get(ch.id, ""))
+		card_art.texture = load(card_texture_path) as Texture2D if not card_texture_path.is_empty() else null
+		if card_art.texture == null:
+			card_art.texture = load(str(PORTRAIT_PATHS.get(ch.id, ""))) as Texture2D
 		card_art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		card_art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
 		card_art.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -144,6 +163,9 @@ func _make_card_style(selected: bool) -> StyleBoxFlat:
 	return style
 
 func _select_character(char_id: String) -> void:
+	if CharacterDatabase.get_character(char_id) == null:
+		push_warning("Character selection ignored unknown id: %s" % char_id)
+		return
 	selected_character_id = char_id
 	if AudioManager:
 		AudioManager.play_sfx("ui_click")
@@ -161,6 +183,8 @@ func _update_view() -> void:
 	var path: String = PORTRAIT_PATHS.get(ch.id, "res://assets/art/characters/shadow_hunter_portrait.png")
 	if portrait_rect:
 		var tex := TextureLoader.get_texture(path)
+		if tex == null:
+			tex = load(str(CARD_ART_PATHS.get(ch.id, ""))) as Texture2D
 		portrait_rect.texture = tex
 		
 	var is_unlocked: bool = is_initial_selection or (SaveManager.is_character_unlocked(ch.id) if SaveManager else true)

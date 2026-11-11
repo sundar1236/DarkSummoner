@@ -68,6 +68,7 @@ var weapon_socket: Marker2D
 # Character-Specific Visuals
 var spirit_wisp: Node2D
 var storm_sparks: Node2D
+var shadow_trails: Node2D
 var combo_streak: int = 0
 var combo_streak_timer: float = 0.0
 var combo_streak_label: Label
@@ -270,8 +271,16 @@ func _setup_character_ambience() -> void:
 	if storm_sparks:
 		storm_sparks.queue_free()
 		storm_sparks = null
+	if shadow_trails:
+		shadow_trails.queue_free()
+		shadow_trails = null
 		
 	match char_id:
+		"shadow_hunter":
+			shadow_trails = Node2D.new()
+			shadow_trails.z_index = 3
+			shadow_trails.draw.connect(_draw_shadow_trails)
+			visual_root.add_child(shadow_trails)
 		"soul_binder":
 			# Clearly visible floating spirit companion orbiting Soul Binder
 			spirit_wisp = Node2D.new()
@@ -308,6 +317,14 @@ func _draw_spirit_wisp() -> void:
 	var tail_pos := wisp_pos - Vector2(cos(orbit_angle + 0.3), sin(orbit_angle + 0.3)) * 6.0
 	spirit_wisp.draw_circle(tail_pos, 2.5, Color(0.2, 0.9, 0.55, 0.4))
 
+func _draw_shadow_trails() -> void:
+	if not shadow_trails:
+		return
+	var pulse := 0.5 + 0.5 * sin(anim_time * 5.0)
+	var trail_color := Color(0.42, 0.2, 0.78, 0.28 + pulse * 0.22)
+	shadow_trails.draw_arc(Vector2(-2, -8), 28.0 + pulse * 3.0, 0.25, 2.75, 24, trail_color, 2.0)
+	shadow_trails.draw_arc(Vector2(2, -8), 34.0 + pulse * 2.0, 3.3, 5.8, 24, Color(0.72, 0.42, 1.0, 0.2 + pulse * 0.18), 1.4)
+
 func _draw_storm_sparks() -> void:
 	if not storm_sparks:
 		return
@@ -328,18 +345,23 @@ func _update_character_sprite() -> void:
 		
 	var tex_path := "res://assets/sprites/characters/player_shadow_hunter.png"
 	var weap_path := "res://assets/art/items/item_shadow_blade.png"
+	var hero_tint := Color.WHITE
 	match char_id:
 		"storm_reaper":
 			tex_path = "res://assets/sprites/characters/player_storm_reaper.png"
 			weap_path = "res://assets/art/items/item_abyssal_scythe.png"
+			hero_tint = Color(0.78, 0.91, 1.0, 1.0)
 		"soul_binder":
 			tex_path = "res://assets/sprites/characters/player_soul_binder.png"
 			weap_path = "res://assets/art/items/item_lightning_orb.png"
+			hero_tint = Color(0.82, 1.0, 0.88, 1.0)
 		_:
 			tex_path = "res://assets/sprites/characters/player_shadow_hunter.png"
 			weap_path = "res://assets/art/items/item_shadow_blade.png"
+			hero_tint = Color(1.0, 0.94, 1.0, 1.0)
 			
 	sprite.texture = TextureLoader.get_texture(tex_path)
+	sprite.modulate = hero_tint
 	if weapon_sprite:
 		weapon_sprite.texture = TextureLoader.get_texture(weap_path)
 
@@ -401,6 +423,12 @@ func _on_player_hp_changed(curr: float, max_v: float) -> void:
 
 func _physics_process(delta: float) -> void:
 	anim_time += delta
+	if is_instance_valid(shadow_trails):
+		shadow_trails.queue_redraw()
+	if is_instance_valid(storm_sparks):
+		storm_sparks.queue_redraw()
+	if is_instance_valid(spirit_wisp):
+		spirit_wisp.queue_redraw()
 	_handle_movement(delta)
 	_handle_aim_and_attack(delta)
 	_handle_animations(delta)

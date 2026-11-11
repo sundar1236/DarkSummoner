@@ -6,6 +6,14 @@ extends Control
 
 @export var character_id: String = "shadow_hunter"
 var _t: float = 0.0
+var _loaded_character_id: String = ""
+var _portrait_texture: Texture2D
+
+func _ensure_character_portrait() -> void:
+	if _loaded_character_id == character_id:
+		return
+	_loaded_character_id = character_id
+	_portrait_texture = TextureLoader.get_texture("res://assets/art/characters/%s_portrait.png" % character_id)
 
 func _process(delta: float) -> void:
 	_t += delta
@@ -46,11 +54,14 @@ func _draw() -> void:
 	elif character_id == "soul_binder":
 		iris_col = Color(0.3, 0.95, 0.65, 1.0)
 		
-	var tex := TextureLoader.get_texture("res://assets/sprites/characters/player_" + character_id + ".png")
-	if tex:
-		var spr_size := Vector2(110, 110)
-		var spr_rect := Rect2(hero_pos - spr_size * 0.5 + Vector2(0, -10), spr_size)
-		draw_texture_rect(tex, spr_rect, false)
+	_ensure_character_portrait()
+	if _portrait_texture:
+		var source_size := _portrait_texture.get_size()
+		var target_size := Vector2(150, 174)
+		var fit_scale := minf(target_size.x / maxf(source_size.x, 1.0), target_size.y / maxf(source_size.y, 1.0))
+		var render_size := source_size * fit_scale
+		var portrait_rect := Rect2(hero_pos - render_size * 0.5 + Vector2(0, -8), render_size)
+		draw_texture_rect(_portrait_texture, portrait_rect, false)
 	else:
 		# Cape / Shadows behind
 		var cape_pts := PackedVector2Array([
