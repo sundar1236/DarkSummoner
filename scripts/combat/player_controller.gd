@@ -423,6 +423,12 @@ func _on_player_hp_changed(curr: float, max_v: float) -> void:
 
 func _physics_process(delta: float) -> void:
 	anim_time += delta
+	if is_instance_valid(shadow_trails):
+		shadow_trails.queue_redraw()
+	if is_instance_valid(storm_sparks):
+		storm_sparks.queue_redraw()
+	if is_instance_valid(spirit_wisp):
+		spirit_wisp.queue_redraw()
 	_handle_movement(delta)
 	_handle_aim_and_attack(delta)
 	_handle_animations(delta)
