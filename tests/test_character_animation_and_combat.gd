@@ -117,7 +117,7 @@ func test_authored_character_visual_scenes() -> void:
 
 
 func test_authored_visual_action_tracks() -> void:
-	print("\\n--- Test: Layered Character Action Poses ---")
+	print("\n--- Test: Layered Character Action Poses ---")
 	var scene_paths := [
 		"res://scenes/characters/shadow_hunter_visual.tscn",
 		"res://scenes/characters/storm_reaper_visual.tscn",
