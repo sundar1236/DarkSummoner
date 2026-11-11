@@ -49,3 +49,16 @@ fall back to the legacy sprite rather than breaking combat.
 Run the existing `test_character_animation_and_combat.tscn` test scene. It checks that all
 three scenes load, expose the complete animation library, pass the visual contract and
 provide a weapon socket. Also verify hero switching and combat animations in a live run.
+
+
+## Combat-facing attachment synchronization
+
+The player controller updates all three attachment markers from the current aim vector.
+The primary `WeaponSocket` therefore follows the target direction rather than remaining
+fixed on one side of the hero. The left/right hand markers are offset along the perpendicular
+axis and rotate with the same aim direction. Projectile and slash spawn positions resolve
+from the primary authored socket when the authored rig is active, and use the legacy marker
+when the fallback sprite is active.
+
+The integration test exercises all eight compass directions and checks that the primary
+socket changes its vertical placement for upward/downward aiming.
