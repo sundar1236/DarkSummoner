@@ -173,7 +173,9 @@ func _show_screen(screen_name: String) -> void:
 	if main_shell: main_shell.visible = (screen_name == "shell")
 	if character_select_view: character_select_view.visible = (screen_name == "character_select")
 	if progression_view: progression_view.visible = (screen_name == "progression")
-	if inventory_view: inventory_view.visible = (screen_name == "inventory")
+	if inventory_view:
+		inventory_view.visible = (screen_name == "inventory")
+		inventory_view.process_mode = Node.PROCESS_MODE_ALWAYS if screen_name == "inventory" and is_inventory_from_pause else Node.PROCESS_MODE_INHERIT
 	if shop_view: shop_view.visible = (screen_name == "shop")
 	if reward_view: reward_view.visible = (screen_name == "reward")
 	if game_over_view: game_over_view.visible = (screen_name == "game_over")
@@ -259,6 +261,9 @@ func _on_encounter_won(is_boss: bool) -> void:
 func _on_inventory_closed() -> void:
 	if is_inventory_from_pause:
 		is_inventory_from_pause = false
+		if inventory_view:
+			inventory_view.visible = false
+			inventory_view.process_mode = Node.PROCESS_MODE_INHERIT
 		if settings_modal:
 			settings_modal.visible = true
 	else:
