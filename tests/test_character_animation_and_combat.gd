@@ -17,6 +17,7 @@ func _ready() -> void:
 	print("--- Running Phase 3 Character Animation & Combat Tests ---")
 	
 	test_animation_controller_state_machine()
+	test_authored_character_visual_scenes()
 	test_three_stage_combo_cycle()
 	test_overhead_health_bar()
 	test_character_sprites_and_ambience()
@@ -84,6 +85,34 @@ func test_animation_controller_state_machine() -> void:
 	
 	anim_ctrl.queue_free()
 	test_sprite.queue_free()
+
+
+func test_authored_character_visual_scenes() -> void:
+	print("\n--- Test: Authored Hero Visual Scenes & Animation Contract ---")
+	var scene_paths := {
+		"shadow_hunter": "res://scenes/characters/shadow_hunter_visual.tscn",
+		"storm_reaper": "res://scenes/characters/storm_reaper_visual.tscn",
+		"soul_binder": "res://scenes/characters/soul_binder_visual.tscn"
+	}
+	for character_id in scene_paths:
+		var scene_path: String = scene_paths[character_id]
+		assert_true(ResourceLoader.exists(scene_path), "%s authored visual scene exists" % character_id)
+		var packed := load(scene_path) as PackedScene
+		assert_true(packed != null, "%s authored visual scene loads as PackedScene" % character_id)
+		if packed == null:
+			continue
+		var rig := packed.instantiate()
+		add_child(rig)
+		assert_eq(rig.character_id, character_id, "%s scene declares its own character identity" % character_id)
+		var player := rig.find_child("AnimationPlayer", true, false) as AnimationPlayer
+		assert_true(player != null, "%s creates an AnimationPlayer" % character_id)
+		if player:
+			for clip in ["idle", "run", "attack_1", "attack_2", "attack_3", "skill", "hurt", "dodge", "defeat", "victory"]:
+				assert_true(player.has_animation(clip), "%s exposes '%s' animation" % [character_id, clip])
+			var issues := CharacterVisualContract.validate(rig, player)
+			assert_eq(issues.size(), 0, "%s passes the authored visual contract" % character_id)
+		assert_true(rig.find_child("WeaponSocket", true, false) is Node2D, "%s exposes a weapon attachment socket" % character_id)
+		rig.queue_free()
 
 func test_three_stage_combo_cycle() -> void:
 	print("\n--- Test: 3-Stage Attack Combo Cycle ---")
