@@ -508,6 +508,16 @@ func test_pause_inventory_interaction() -> void:
 
 	controller._show_screen("shell")
 	assert_test(shell != null and shell.visible and not inventory.visible, "Hub is the only active root screen after returning to shell")
+
+	controller._show_modal("settings")
+	controller._show_screen("unknown_destination")
+	assert_test(shell.visible and settings.visible, "Unknown destination leaves the active screen and overlay unchanged")
+	controller._show_screen("menu")
+	assert_test(shell.visible and settings.visible, "Unavailable optional screen cannot blank the current UI")
+	controller._show_screen("combat")
+	assert_test(not shell.visible and not inventory.visible and not settings.visible, "Combat is accepted as a non-Control root destination")
+	controller._show_screen("shell")
+
 	controller._show_screen("inventory")
 	assert_test(inventory.visible and (shell == null or not shell.visible), "Opening inventory hides the previous hub root screen")
 
