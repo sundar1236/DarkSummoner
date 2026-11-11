@@ -102,19 +102,27 @@ func _ready() -> void:
 			)
 	_switch_to_tab(current_tab)
 
+func close_all_modals() -> void:
+	for modal in [modal_energy, modal_profile, modal_blacksmith]:
+		if is_instance_valid(modal):
+			modal.visible = false
+
 func open_energy_modal() -> void:
+	close_all_modals()
 	if modal_energy and modal_energy.has_method("open_modal"):
 		modal_energy.open_modal()
 	elif modal_energy:
 		modal_energy.visible = true
 
 func open_profile_modal() -> void:
+	close_all_modals()
 	if modal_profile and modal_profile.has_method("open_modal"):
 		modal_profile.open_modal()
 	elif modal_profile:
 		modal_profile.visible = true
 
 func open_blacksmith_modal() -> void:
+	close_all_modals()
 	if modal_blacksmith and modal_blacksmith.has_method("open_modal"):
 		modal_blacksmith.open_modal()
 	elif modal_blacksmith:
@@ -124,7 +132,13 @@ func _on_tab_changed(tab_idx: int) -> void:
 	_switch_to_tab(tab_idx)
 
 func _switch_to_tab(tab_idx: int) -> void:
+	if tab_idx < 0 or tab_idx > 4:
+		push_warning("MainShellUI ignored invalid tab index: %d" % tab_idx)
+		return
+	close_all_modals()
 	current_tab = tab_idx
+	if nav_dock and nav_dock.has_method("set_selected_tab"):
+		nav_dock.set_selected_tab(tab_idx)
 	if screen_shop: screen_shop.visible = (tab_idx == 0)
 	if screen_loadout: screen_loadout.visible = (tab_idx == 1)
 	if screen_campaign: screen_campaign.visible = (tab_idx == 2)
