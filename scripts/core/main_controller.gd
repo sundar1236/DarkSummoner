@@ -164,6 +164,9 @@ func _on_character_selection_confirmed(char_id: String) -> void:
 	_on_start_run_requested(char_id)
 
 func _show_screen(screen_name: String) -> void:
+	# A hub modal must never remain visible when navigating to another root screen.
+	if main_shell and main_shell.has_method("close_all_modals"):
+		main_shell.close_all_modals()
 	if intro_screen: intro_screen.visible = (screen_name == "intro")
 	if story_intro: story_intro.visible = (screen_name == "story_intro")
 	if main_menu: main_menu.visible = (screen_name == "menu")
