@@ -187,6 +187,22 @@ func test_character_sprites_and_ambience() -> void:
 	assert_eq(player.authored_visual_character_id, "shadow_hunter", "Player installs the selected authored character scene on spawn")
 	assert_true(is_instance_valid(player.authored_rig_root), "Authored character rig is active in combat")
 	assert_true(player.sprite == null or not player.sprite.visible, "Legacy sprite is hidden while the authored rig is active")
+	var authored_weapon := player.get_authored_socket("WeaponSocket")
+	var authored_left := player.get_authored_socket("LeftWeaponSocket")
+	var authored_right := player.get_authored_socket("RightWeaponSocket")
+	assert_true(authored_weapon != null and authored_left != null and authored_right != null, "All three authored weapon/hand sockets are available")
+	if authored_weapon and authored_left and authored_right:
+		player.aim_direction = Vector2.UP
+		player._sync_authored_attachment_points()
+		assert_true(authored_weapon.position.y < -20.0, "Weapon socket moves above the hero when aiming upward")
+		assert_true(authored_left.position != authored_right.position, "Left and right hand sockets remain distinct")
+		player.aim_direction = Vector2.DOWN
+		player._sync_authored_attachment_points()
+		assert_true(authored_weapon.position.y > 15.0, "Weapon socket moves below the hero when aiming downward")
+		for direction in [Vector2.RIGHT, Vector2.DOWN_RIGHT, Vector2.DOWN, Vector2.DOWN_LEFT, Vector2.LEFT, Vector2.UP_LEFT, Vector2.UP, Vector2.UP_RIGHT]:
+			player.aim_direction = direction.normalized()
+			player._sync_authored_attachment_points()
+			assert_true(is_finite(authored_weapon.rotation), "Weapon socket rotation remains finite for eight-way aim")
 	
 	# Verify ground shadow
 	assert_true(is_instance_valid(player.shadow_sprite), "Player ground contact shadow created")
