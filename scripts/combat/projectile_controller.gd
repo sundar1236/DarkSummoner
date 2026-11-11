@@ -21,6 +21,7 @@ var has_life_steal: bool = false
 
 var sprite: Sprite2D
 var timer: float = 0.0
+var hit_target_ids: Dictionary = {}
 
 static func can_spawn_projectile() -> bool:
 	var tree := Engine.get_main_loop() as SceneTree
@@ -141,7 +142,13 @@ func _handle_hit(target: Node) -> void:
 		return
 		
 	if is_player_projectile:
-		if target.has_method("take_damage"):
+		if target is Node2D and target.has_method("take_damage"):
+			if not _is_valid_enemy_target(target as Node2D):
+				return
+			var target_id := target.get_instance_id()
+			if hit_target_ids.has(target_id):
+				return
+			hit_target_ids[target_id] = true
 			target.take_damage(damage, is_crit)
 			
 			# Spawn impact spark
