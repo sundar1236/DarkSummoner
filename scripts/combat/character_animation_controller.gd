@@ -452,17 +452,18 @@ func trigger_dodge(dash_dir: Vector2) -> void:
 	procedural_offset = dash_dir * 8.0
 	procedural_scale = Vector2(1.3, 0.75)
 	
+	var dodge_duration := maxf(0.22, get_authored_clip_duration("dodge"))
 	var visual_target := _get_active_visual_target()
 	if visual_target:
-		var dodge_duration := maxf(0.22, get_authored_clip_duration("dodge"))
-		var tw := visual_target.create_tween()
+		var visual_tween := visual_target.create_tween()
 		visual_target.modulate.a = 0.4
-		tw.tween_property(visual_target, "modulate:a", 1.0, 0.22)
-		if dodge_duration > 0.22:
-			tw.tween_interval(dodge_duration - 0.22)
-		tw.tween_callback(func():
-			_complete_timed_action(action_token, AnimState.DODGE)
-		)
+		visual_tween.tween_property(visual_target, "modulate:a", 1.0, 0.22)
+	var action_tween := create_tween()
+	if dodge_duration > 0.22:
+		action_tween.tween_interval(dodge_duration - 0.22)
+	action_tween.tween_callback(func():
+		_complete_timed_action(action_token, AnimState.DODGE)
+	)
 
 func trigger_defeat() -> void:
 	_begin_action()
