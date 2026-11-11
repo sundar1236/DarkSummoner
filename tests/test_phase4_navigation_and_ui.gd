@@ -189,7 +189,7 @@ func test_main_shell_orchestration() -> void:
 		assert_test(visible_count == 1 and hub_screens[tab_index].visible, "Hub tab %d displays exactly one root screen" % tab_index)
 		assert_test(not shell.modal_energy.visible and not shell.modal_profile.visible and not shell.modal_blacksmith.visible, "Changing to hub tab %d closes all modals" % tab_index)
 
-	var active_tab_before_invalid := shell.current_tab
+	var active_tab_before_invalid: int = int(shell.current_tab)
 	shell._switch_to_tab(99)
 	assert_test(shell.current_tab == active_tab_before_invalid, "Invalid hub tab index leaves the active screen unchanged")
 	
