@@ -169,7 +169,29 @@ func test_main_shell_orchestration() -> void:
 	
 	shell.open_blacksmith_modal()
 	assert_test(shell.modal_blacksmith.visible, "BlacksmithModal opened via open_blacksmith_modal()")
-	shell.modal_blacksmith.visible = false
+	assert_test(not shell.modal_energy.visible and not shell.modal_profile.visible, "Opening Blacksmith closes every other modal")
+
+	# Every hub tab must expose one and only one root screen.
+	var hub_screens: Array = [
+		shell.screen_shop,
+		shell.screen_loadout,
+		shell.screen_campaign,
+		shell.screen_collectible,
+		shell.screen_sanctuary
+	]
+	for tab_index in range(hub_screens.size()):
+		shell._switch_to_tab(tab_index)
+		await get_tree().process_frame
+		var visible_count := 0
+		for screen in hub_screens:
+			if is_instance_valid(screen) and screen.visible:
+				visible_count += 1
+		assert_test(visible_count == 1 and hub_screens[tab_index].visible, "Hub tab %d displays exactly one root screen" % tab_index)
+		assert_test(not shell.modal_energy.visible and not shell.modal_profile.visible and not shell.modal_blacksmith.visible, "Changing to hub tab %d closes all modals" % tab_index)
+
+	var active_tab_before_invalid := shell.current_tab
+	shell._switch_to_tab(99)
+	assert_test(shell.current_tab == active_tab_before_invalid, "Invalid hub tab index leaves the active screen unchanged")
 	
 	shell.queue_free()
 	await get_tree().process_frame
