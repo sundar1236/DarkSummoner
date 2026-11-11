@@ -59,13 +59,20 @@ func _ready() -> void:
 	_update_tab_visuals()
 
 func select_tab(idx: int) -> void:
-	if current_tab == idx:
+	if idx < 0 or idx >= tab_buttons.size() or current_tab == idx:
 		return
-	current_tab = idx
 	if AudioManager:
 		AudioManager.play_sfx("ui_click")
+	set_selected_tab(idx, true)
+
+func set_selected_tab(idx: int, emit_change: bool = false) -> void:
+	if idx < 0 or idx >= tab_buttons.size():
+		push_warning("BottomNavDock ignored invalid tab index: %d" % idx)
+		return
+	current_tab = idx
 	_update_tab_visuals()
-	tab_changed.emit(current_tab)
+	if emit_change:
+		tab_changed.emit(current_tab)
 
 func refresh_badges() -> void:
 	if not SaveManager: return
