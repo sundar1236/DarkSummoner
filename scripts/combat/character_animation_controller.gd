@@ -57,6 +57,7 @@ var attack_duration: float = 0.22
 # State lock
 var is_locked: bool = false
 var hurt_timer: float = 0.0
+var _action_token: int = 0
 
 # Base transforms for procedural offsets
 var base_sprite_pos: Vector2 = Vector2(0, -6)
@@ -320,6 +321,18 @@ func _transition_to(new_state: AnimState) -> void:
 	_play_authored_clip(_state_clip_name())
 	state_changed.emit(old_state, new_state)
 
+# Timed action callbacks must not complete after a higher-priority action interrupts them.
+func _begin_action() -> int:
+	_action_token += 1
+	return _action_token
+
+func _complete_timed_action(action_token: int, expected_state: AnimState) -> bool:
+	if action_token != _action_token or current_state != expected_state:
+		return false
+	is_locked = false
+	_transition_to(AnimState.IDLE)
+	return true
+
 # State triggers
 func play_idle() -> void:
 	if is_locked and current_state != AnimState.ATTACK:
@@ -332,6 +345,7 @@ func play_run() -> void:
 	_transition_to(AnimState.RUN)
 
 func trigger_attack(aim_dir: Vector2, _attack_type: String = "slash") -> int:
+	_begin_action()
 	# Capture the attack facing before selecting its directional authored clip.
 	animation_direction = _get_direction_suffix(aim_dir)
 	# Immediately interrupt previous attack or idle/run
@@ -395,21 +409,23 @@ func trigger_attack(aim_dir: Vector2, _attack_type: String = "slash") -> int:
 	return executed_stage
 
 func trigger_skill() -> void:
+	var action_token := _begin_action()
 	_transition_to(AnimState.SKILL)
 	_play_authored_clip("skill", true)
 	is_locked = true
 	var skill_duration := maxf(0.45, get_authored_clip_duration("skill"))
 	var tw := create_tween()
-	tw.tween_property(self, "procedural_scale", Vector2(1.25, 1.25), 0.2).set_trans(Tween.TRANS_BACK)
-	tw.tween_property(self, "procedural_scale", Vector2.ONE, 0.25)
+	if not authored_animation_active:
+		tw.tween_property(self, "procedural_scale", Vector2(1.25, 1.25), 0.2).set_trans(Tween.TRANS_BACK)
+		tw.tween_property(self, "procedural_scale", Vector2.ONE, 0.25)
 	if skill_duration > 0.45:
 		tw.tween_interval(skill_duration - 0.45)
 	tw.tween_callback(func():
-		is_locked = false
-		_transition_to(AnimState.IDLE)
+		_complete_timed_action(action_token, AnimState.SKILL)
 	)
 
 func trigger_hurt(hit_direction: Vector2 = Vector2.ZERO) -> void:
+	_begin_action()
 	# Hurt has high interrupt priority over attack!
 	if hit_direction.length_squared() > 0.01:
 		animation_direction = _get_direction_suffix(-hit_direction)
@@ -428,6 +444,7 @@ func trigger_hurt(hit_direction: Vector2 = Vector2.ZERO) -> void:
 		tw.tween_property(visual_target, "modulate", Color(1.0, 1.0, 1.0, 1.0), 0.16)
 
 func trigger_dodge(dash_dir: Vector2) -> void:
+	var action_token := _begin_action()
 	# Dodge cleanly cancels any attack lock immediately
 	animation_direction = _get_direction_suffix(dash_dir)
 	_transition_to(AnimState.DODGE)
@@ -435,20 +452,21 @@ func trigger_dodge(dash_dir: Vector2) -> void:
 	procedural_offset = dash_dir * 8.0
 	procedural_scale = Vector2(1.3, 0.75)
 	
+	var dodge_duration := maxf(0.22, get_authored_clip_duration("dodge"))
 	var visual_target := _get_active_visual_target()
 	if visual_target:
-		var dodge_duration := maxf(0.22, get_authored_clip_duration("dodge"))
-		var tw := visual_target.create_tween()
+		var visual_tween := visual_target.create_tween()
 		visual_target.modulate.a = 0.4
-		tw.tween_property(visual_target, "modulate:a", 1.0, 0.22)
-		if dodge_duration > 0.22:
-			tw.tween_interval(dodge_duration - 0.22)
-		tw.tween_callback(func():
-			is_locked = false
-			_transition_to(AnimState.IDLE)
-		)
+		visual_tween.tween_property(visual_target, "modulate:a", 1.0, 0.22)
+	var action_tween := create_tween()
+	if dodge_duration > 0.22:
+		action_tween.tween_interval(dodge_duration - 0.22)
+	action_tween.tween_callback(func():
+		_complete_timed_action(action_token, AnimState.DODGE)
+	)
 
 func trigger_defeat() -> void:
+	_begin_action()
 	_transition_to(AnimState.DEFEAT)
 	is_locked = true
 	var visual_target := _get_active_visual_target()
@@ -457,5 +475,6 @@ func trigger_defeat() -> void:
 		tw.tween_property(visual_target, "modulate", Color(0.4, 0.4, 0.5, 0.0), 0.8)
 
 func trigger_victory() -> void:
+	_begin_action()
 	_transition_to(AnimState.VICTORY)
 	is_locked = true

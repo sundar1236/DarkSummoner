@@ -71,3 +71,15 @@ The procedural renderer now adds a second detail pass over the base chibi forms:
 The action_pose property is animated by the existing clips. Attack stages use different positive/reverse pose values, while skill, dodge, hurt, defeat, and victory have their own pose accents. The draw pass uses this value to move arm/weapon details and render a restrained directional action arc. This is still a procedural 2D presentation layer; it is not a hand-painted sprite sheet or a bone-based Skeleton2D rig.
 
 The character animation test checks that all ten clips animate action_pose, that the first two combo clips have distinct swing directions, and that the three hero palettes remain distinct.
+
+
+## Phase 6: interruption-safe combat actions
+
+Timed skill and dodge callbacks carry an action token and expected animation state. Starting a
+new attack, skill, hurt, dodge, defeat, or victory invalidates older callbacks. A stale timer
+therefore cannot unlock the player or switch a newer hurt/defeat state back to idle. Authored
+skill clips own their scale animation; the legacy procedural scale tween runs only when the
+authored rig is not active.
+
+The combat test covers skill-to-hurt and dodge-to-hurt interruptions, including lock preservation
+and recovery through the hurt timer.

@@ -17,6 +17,7 @@ func _ready() -> void:
 	print("--- Running Phase 3 Character Animation & Combat Tests ---")
 	
 	test_animation_controller_state_machine()
+	test_timed_action_interrupts()
 	test_authored_character_visual_scenes()
 	test_authored_visual_action_tracks()
 	test_three_stage_combo_cycle()
@@ -84,6 +85,35 @@ func test_animation_controller_state_machine() -> void:
 	anim_ctrl.trigger_victory()
 	assert_eq(anim_ctrl.current_state, CharacterAnimationControllerClass.AnimState.VICTORY, "Transitions to VICTORY celebration")
 	
+	anim_ctrl.queue_free()
+	test_sprite.queue_free()
+
+
+func test_timed_action_interrupts() -> void:
+	print("\n--- Test: Timed Action Interrupt Safety ---")
+	var anim_ctrl = CharacterAnimationControllerClass.new()
+	var test_sprite := Sprite2D.new()
+	add_child(anim_ctrl)
+	add_child(test_sprite)
+	anim_ctrl.setup(test_sprite)
+
+	anim_ctrl.trigger_skill()
+	var skill_token: int = anim_ctrl._action_token
+	anim_ctrl.trigger_hurt(Vector2.LEFT)
+	assert_true(not anim_ctrl._complete_timed_action(skill_token, CharacterAnimationControllerClass.AnimState.SKILL), "Interrupted skill callback cannot clear the hurt state")
+	assert_eq(anim_ctrl.current_state, CharacterAnimationControllerClass.AnimState.HURT, "Hurt remains active after stale skill completion")
+	assert_true(anim_ctrl.is_locked, "Stale skill callback cannot unlock the player during hurt")
+
+	anim_ctrl.hurt_timer = 0.01
+	anim_ctrl.update(0.02, Vector2.ZERO, Vector2.RIGHT, 240.0)
+	assert_eq(anim_ctrl.current_state, CharacterAnimationControllerClass.AnimState.IDLE, "Hurt recovers through its own timer")
+
+	anim_ctrl.trigger_dodge(Vector2.RIGHT)
+	var dodge_token: int = anim_ctrl._action_token
+	anim_ctrl.trigger_hurt(Vector2.UP)
+	assert_true(not anim_ctrl._complete_timed_action(dodge_token, CharacterAnimationControllerClass.AnimState.DODGE), "Interrupted dodge callback cannot clear the hurt state")
+	assert_eq(anim_ctrl.current_state, CharacterAnimationControllerClass.AnimState.HURT, "Hurt keeps priority over a stale dodge completion")
+
 	anim_ctrl.queue_free()
 	test_sprite.queue_free()
 
