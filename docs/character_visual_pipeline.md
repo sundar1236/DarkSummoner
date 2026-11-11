@@ -83,3 +83,13 @@ authored rig is not active.
 
 The combat test covers skill-to-hurt and dodge-to-hurt interruptions, including lock preservation
 and recovery through the hurt timer.
+
+
+## Phase 7: projectile hit validation
+
+Player projectiles now validate that a collision target is a living enemy before applying
+damage or hit effects. Each projectile records enemy instance IDs it has already hit, so
+duplicate body/area collision notifications cannot apply repeated damage to the same enemy.
+Piercing remains supported: a projectile may still hit different living enemies until its
+pierce count is exhausted. Dead or invalid targets do not consume pierce count or trigger
+impact effects.
