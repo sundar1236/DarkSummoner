@@ -493,7 +493,9 @@ func test_pause_inventory_interaction() -> void:
 	var settings := settings_scene.instantiate() as SettingsModal
 	var shell_scene := load("res://scenes/main/main_shell.tscn") as PackedScene
 	assert_test(shell_scene != null, "Main hub scene loads for root-screen transition checks")
-	var shell := shell_scene.instantiate() as MainShellUI if shell_scene else null
+	var shell: MainShellUI = null
+	if shell_scene:
+		shell = shell_scene.instantiate() as MainShellUI
 	controller.main_shell = shell
 	controller.inventory_view = inventory
 	controller.settings_modal = settings
