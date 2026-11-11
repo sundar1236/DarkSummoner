@@ -167,18 +167,9 @@ func _show_screen(screen_name: String) -> void:
 	# A hub modal must never remain visible when navigating to another root screen.
 	if main_shell and main_shell.has_method("close_all_modals"):
 		main_shell.close_all_modals()
-	if intro_screen: intro_screen.visible = (screen_name == "intro")
-	if story_intro: story_intro.visible = (screen_name == "story_intro")
-	if main_menu: main_menu.visible = (screen_name == "menu")
-	if main_shell: main_shell.visible = (screen_name == "shell")
-	if character_select_view: character_select_view.visible = (screen_name == "character_select")
-	if progression_view: progression_view.visible = (screen_name == "progression")
+	_set_active_root_screen(screen_name)
 	if inventory_view:
-		inventory_view.visible = (screen_name == "inventory")
 		inventory_view.process_mode = Node.PROCESS_MODE_ALWAYS if screen_name == "inventory" and is_inventory_from_pause else Node.PROCESS_MODE_INHERIT
-	if shop_view: shop_view.visible = (screen_name == "shop")
-	if reward_view: reward_view.visible = (screen_name == "reward")
-	if game_over_view: game_over_view.visible = (screen_name == "game_over")
 	if settings_modal: settings_modal.visible = false
 	
 	if is_instance_valid(current_arena):
@@ -189,6 +180,25 @@ func _show_screen(screen_name: String) -> void:
 	
 	if screen_name == "inventory" and inventory_view:
 		inventory_view.refresh_inventory_ui()
+
+# Root-screen visibility is owned here so transitions cannot leave overlapping screens.
+func _set_active_root_screen(screen_name: String) -> void:
+	var root_screens: Dictionary = {
+		"intro": intro_screen,
+		"story_intro": story_intro,
+		"menu": main_menu,
+		"shell": main_shell,
+		"character_select": character_select_view,
+		"progression": progression_view,
+		"inventory": inventory_view,
+		"shop": shop_view,
+		"reward": reward_view,
+		"game_over": game_over_view
+	}
+	for screen_key in root_screens:
+		var screen := root_screens[screen_key] as Control
+		if is_instance_valid(screen):
+			screen.visible = (screen_key == screen_name)
 
 func _show_modal(modal_name: String) -> void:
 	if modal_name == "settings" and settings_modal:
