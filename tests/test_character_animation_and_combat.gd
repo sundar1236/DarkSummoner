@@ -180,9 +180,13 @@ func test_character_sprites_and_ambience() -> void:
 		if tex:
 			assert_true(tex.get_width() > 0 and tex.get_height() > 0, "Character sprite has valid dimensions (%dx%d)" % [tex.get_width(), tex.get_height()])
 			
-	# Test PlayerController character switching & ambience
+	# Test PlayerController character switching & authored scene installation.
+	GameManager.set_character("shadow_hunter")
 	var player := PlayerController.new()
 	add_child(player)
+	assert_eq(player.authored_visual_character_id, "shadow_hunter", "Player installs the selected authored character scene on spawn")
+	assert_true(is_instance_valid(player.authored_rig_root), "Authored character rig is active in combat")
+	assert_true(player.sprite == null or not player.sprite.visible, "Legacy sprite is hidden while the authored rig is active")
 	
 	# Verify ground shadow
 	assert_true(is_instance_valid(player.shadow_sprite), "Player ground contact shadow created")
