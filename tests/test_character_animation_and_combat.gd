@@ -25,6 +25,7 @@ func _ready() -> void:
 	test_character_sprites_and_ambience()
 	test_enemy_visual_distinctions_and_telegraphs()
 	test_impact_sparks_and_projectiles()
+	test_projectile_target_validation()
 	test_boss_controller_telegraphs()
 	test_summoning_circle_hero_presentation()
 	
@@ -358,6 +359,33 @@ func test_impact_sparks_and_projectiles() -> void:
 		proj.setup(10.0, false, Vector2.RIGHT, 500.0, p_type, true)
 		assert_true(proj.sprite != null and proj.sprite.texture != null, "Projectile type '%s' loads texture" % p_type)
 		proj.queue_free()
+
+
+func test_projectile_target_validation() -> void:
+	print("\n--- Test: Projectile Target Validation ---")
+	var enemy := EnemyController.new()
+	add_child(enemy)
+	enemy.setup("swarmer", 1)
+	var projectile := ProjectileController.new()
+	add_child(projectile)
+	projectile.setup(12.0, false, Vector2.RIGHT, 500.0, "slash", true)
+	var starting_hp: float = enemy.hp
+	projectile._handle_hit(enemy)
+	assert_eq(enemy.hp, starting_hp - 12.0, "Player projectile applies damage to a living enemy")
+	var hp_after_first_hit: float = enemy.hp
+	projectile._handle_hit(enemy)
+	assert_eq(enemy.hp, hp_after_first_hit, "One projectile cannot damage the same target twice")
+	var dead_enemy := EnemyController.new()
+	add_child(dead_enemy)
+	dead_enemy.setup("swarmer", 1)
+	dead_enemy.is_dead = true
+	var dead_hp: float = dead_enemy.hp
+	projectile._handle_hit(dead_enemy)
+	assert_eq(dead_enemy.hp, dead_hp, "Projectile ignores enemies already marked dead")
+	projectile.queue_free()
+	enemy.queue_free()
+	dead_enemy.queue_free()
+
 
 func test_boss_controller_telegraphs() -> void:
 	print("\n--- Test: Boss Controller & Danger Telegraphs ---")
