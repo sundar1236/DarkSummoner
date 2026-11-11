@@ -162,16 +162,23 @@ func test_character_sprites_and_ambience() -> void:
 	# Verify overhead health bar attached
 	assert_true(is_instance_valid(player.overhead_hp_bar), "Player overhead health bar attached")
 	
+	# Test Shadow Hunter shadow-trail identity
+	GameManager.set_character("shadow_hunter")
+	player._setup_character_ambience()
+	assert_true(is_instance_valid(player.shadow_trails), "Shadow Hunter creates a dedicated shadow-trail effect")
+
 	# Test Soul Binder spirit companion
 	GameManager.set_character("soul_binder")
 	player._setup_character_ambience()
 	assert_true(is_instance_valid(player.spirit_wisp), "Soul Binder spawns orbiting spirit wisp")
+	assert_true(player.shadow_trails == null, "Previous Shadow Hunter trail is cleaned up")
 	
 	# Test Storm Reaper electric sparks
 	GameManager.set_character("storm_reaper")
 	player._setup_character_ambience()
 	assert_true(is_instance_valid(player.storm_sparks), "Storm Reaper spawns electric spark ambience")
 	assert_true(player.spirit_wisp == null, "Previous wisp cleanly cleaned up")
+	assert_true(player.shadow_trails == null, "Previous Shadow Hunter trail remains cleared")
 	
 	# Reset to default
 	GameManager.set_character("shadow_hunter")
