@@ -17,6 +17,7 @@ func _ready() -> void:
 	await test_hero_loadout_subtabs_and_progression()
 	await test_shop_screen_atomic_purchases()
 	await test_modals_functionality()
+	await test_pause_inventory_interaction()
 	
 	print("\n==================================================")
 	print("  PHASE 4 TEST RESULTS: %d PASSED, %d FAILED" % [passed, failed])
@@ -453,4 +454,42 @@ func test_modals_functionality() -> void:
 	assert_test(not arena_background.reduced_motion_enabled and arena_background.is_processing(), "Full arena motion can be restored")
 	settings_modal.queue_free()
 	arena_background.queue_free()
+	await get_tree().process_frame
+
+
+# Pause-menu inventory must remain interactive without exposing two root screens.
+func test_pause_inventory_interaction() -> void:
+	print("--- 8. Pause Inventory Interaction & Screen Cleanup ---")
+	var inventory_scene := load("res://scenes/inventory/inventory_view.tscn") as PackedScene
+	var settings_scene := load("res://scenes/ui/settings_modal.tscn") as PackedScene
+	assert_test(inventory_scene != null and settings_scene != null, "Pause inventory and settings scenes load")
+	if not inventory_scene or not settings_scene:
+		return
+
+	var controller := MainController.new()
+	var inventory := inventory_scene.instantiate() as InventoryView
+	var settings := settings_scene.instantiate() as SettingsModal
+	controller.inventory_view = inventory
+	controller.settings_modal = settings
+	add_child(controller)
+	controller.add_child(inventory)
+	controller.add_child(settings)
+	await get_tree().process_frame
+
+	var was_paused := get_tree().paused
+	get_tree().paused = true
+	controller.is_inventory_from_pause = true
+	controller._show_screen("inventory")
+	assert_test(inventory.visible, "Pause menu opens the inventory screen")
+	assert_test(inventory.process_mode == Node.PROCESS_MODE_ALWAYS, "Inventory remains interactive while combat is paused")
+	assert_test(not settings.visible, "Settings overlay hides while inventory is open")
+
+	controller._on_inventory_closed()
+	assert_test(not inventory.visible, "Closing pause inventory hides its root screen")
+	assert_test(inventory.process_mode == Node.PROCESS_MODE_INHERIT, "Closed inventory returns to inherited processing")
+	assert_test(settings.visible, "Closing pause inventory restores the settings overlay")
+	assert_test(get_tree().paused, "Combat remains paused after returning to settings")
+
+	get_tree().paused = was_paused
+	controller.queue_free()
 	await get_tree().process_frame
