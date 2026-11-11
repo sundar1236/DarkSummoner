@@ -90,7 +90,7 @@ func test_animation_controller_state_machine() -> void:
 
 
 func test_timed_action_interrupts() -> void:
-	print("\\n--- Test: Timed Action Interrupt Safety ---")
+	print("\n--- Test: Timed Action Interrupt Safety ---")
 	var anim_ctrl = CharacterAnimationControllerClass.new()
 	var test_sprite := Sprite2D.new()
 	add_child(anim_ctrl)
