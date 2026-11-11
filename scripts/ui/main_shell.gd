@@ -139,15 +139,25 @@ func _switch_to_tab(tab_idx: int) -> void:
 	current_tab = tab_idx
 	if nav_dock and nav_dock.has_method("set_selected_tab"):
 		nav_dock.set_selected_tab(tab_idx)
-	if screen_shop: screen_shop.visible = (tab_idx == 0)
-	if screen_loadout: screen_loadout.visible = (tab_idx == 1)
-	if screen_campaign: screen_campaign.visible = (tab_idx == 2)
-	if screen_collectible: screen_collectible.visible = (tab_idx == 3)
-	if screen_sanctuary: screen_sanctuary.visible = (tab_idx == 4)
+	_set_active_tab_screen(tab_idx)
 	
 	if top_bar:
 		top_bar.refresh_display()
 	screen_selected.emit(tab_idx)
+
+# Keep hub navigation mutually exclusive: exactly one registered tab screen is visible.
+func _set_active_tab_screen(tab_idx: int) -> void:
+	var tab_screens: Array = [
+		screen_shop,
+		screen_loadout,
+		screen_campaign,
+		screen_collectible,
+		screen_sanctuary
+	]
+	for index in range(tab_screens.size()):
+		var screen := tab_screens[index] as Control
+		if is_instance_valid(screen):
+			screen.visible = (index == tab_idx)
 
 func _apply_safe_area() -> void:
 	var safe: Dictionary = SafeAreaHelper.get_safe_margins()
