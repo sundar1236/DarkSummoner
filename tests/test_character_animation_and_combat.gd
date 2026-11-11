@@ -17,6 +17,7 @@ func _ready() -> void:
 	print("--- Running Phase 3 Character Animation & Combat Tests ---")
 	
 	test_animation_controller_state_machine()
+	test_authored_character_visual_scenes()
 	test_three_stage_combo_cycle()
 	test_overhead_health_bar()
 	test_character_sprites_and_ambience()
@@ -85,6 +86,34 @@ func test_animation_controller_state_machine() -> void:
 	anim_ctrl.queue_free()
 	test_sprite.queue_free()
 
+
+func test_authored_character_visual_scenes() -> void:
+	print("\n--- Test: Authored Hero Visual Scenes & Animation Contract ---")
+	var scene_paths := {
+		"shadow_hunter": "res://scenes/characters/shadow_hunter_visual.tscn",
+		"storm_reaper": "res://scenes/characters/storm_reaper_visual.tscn",
+		"soul_binder": "res://scenes/characters/soul_binder_visual.tscn"
+	}
+	for character_id in scene_paths:
+		var scene_path: String = scene_paths[character_id]
+		assert_true(ResourceLoader.exists(scene_path), "%s authored visual scene exists" % character_id)
+		var packed := load(scene_path) as PackedScene
+		assert_true(packed != null, "%s authored visual scene loads as PackedScene" % character_id)
+		if packed == null:
+			continue
+		var rig := packed.instantiate() as CharacterRigVisual
+		add_child(rig)
+		assert_eq(rig.character_id, character_id, "%s scene declares its own character identity" % character_id)
+		var player := rig.find_child("AnimationPlayer", true, false) as AnimationPlayer
+		assert_true(player != null, "%s creates an AnimationPlayer" % character_id)
+		if player:
+			for clip in ["idle", "run", "attack_1", "attack_2", "attack_3", "skill", "hurt", "dodge", "defeat", "victory"]:
+				assert_true(player.has_animation(clip), "%s exposes '%s' animation" % [character_id, clip])
+			var issues := CharacterVisualContract.validate(rig, player)
+			assert_eq(issues.size(), 0, "%s passes the authored visual contract" % character_id)
+		assert_true(rig.find_child("WeaponSocket", true, false) is Node2D, "%s exposes a weapon attachment socket" % character_id)
+		rig.queue_free()
+
 func test_three_stage_combo_cycle() -> void:
 	print("\n--- Test: 3-Stage Attack Combo Cycle ---")
 	var anim_ctrl = CharacterAnimationControllerClass.new()
@@ -151,9 +180,13 @@ func test_character_sprites_and_ambience() -> void:
 		if tex:
 			assert_true(tex.get_width() > 0 and tex.get_height() > 0, "Character sprite has valid dimensions (%dx%d)" % [tex.get_width(), tex.get_height()])
 			
-	# Test PlayerController character switching & ambience
+	# Test PlayerController character switching & authored scene installation.
+	GameManager.set_character("shadow_hunter")
 	var player := PlayerController.new()
 	add_child(player)
+	assert_eq(player.authored_visual_character_id, "shadow_hunter", "Player installs the selected authored character scene on spawn")
+	assert_true(is_instance_valid(player.authored_rig_root), "Authored character rig is active in combat")
+	assert_true(player.sprite == null or not player.sprite.visible, "Legacy sprite is hidden while the authored rig is active")
 	
 	# Verify ground shadow
 	assert_true(is_instance_valid(player.shadow_sprite), "Player ground contact shadow created")
