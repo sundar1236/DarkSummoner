@@ -199,7 +199,7 @@ func test_character_sprites_and_ambience() -> void:
 		player.aim_direction = Vector2.DOWN
 		player._sync_authored_attachment_points()
 		assert_true(authored_weapon.position.y > 15.0, "Weapon socket moves below the hero when aiming downward")
-		for direction in [Vector2.RIGHT, Vector2.DOWN_RIGHT, Vector2.DOWN, Vector2.DOWN_LEFT, Vector2.LEFT, Vector2.UP_LEFT, Vector2.UP, Vector2.UP_RIGHT]:
+		for direction in [Vector2.RIGHT, Vector2(1, 1), Vector2.DOWN, Vector2(-1, 1), Vector2.LEFT, Vector2(-1, -1), Vector2.UP, Vector2(1, -1)]:
 			player.aim_direction = direction.normalized()
 			player._sync_authored_attachment_points()
 			assert_true(is_finite(authored_weapon.rotation), "Weapon socket rotation remains finite for eight-way aim")
