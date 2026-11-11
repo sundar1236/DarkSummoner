@@ -13,3 +13,10 @@ The combat pause flow keeps the arena paused while allowing the player to inspec
 Normal reward/shop inventory navigation continues to use inherited processing. The pause-specific process override must not remain active after the inventory view closes.
 
 The Phase 8 navigation regression test verifies screen visibility, process mode restoration, settings restoration, and preservation of the paused SceneTree.
+
+
+## Root-screen transition contract
+
+`MainController._set_active_root_screen()` owns visibility for the top-level screens: intro, story intro, menu, hub, character selection, progression, inventory, shop, reward, and game over. A transition first hides every registered root screen and then reveals only the requested one. The settings modal remains a separate overlay and is hidden during root-screen changes.
+
+The Phase 10 regression coverage verifies that navigating from the hub to inventory hides the hub rather than leaving both root screens active. Inventory's pause-specific processing override remains managed separately from visibility.
