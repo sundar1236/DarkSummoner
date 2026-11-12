@@ -66,10 +66,16 @@ var _selected_gear_uid: String = ""
 
 func _ready() -> void:
 	if btn_sub_characters:
+		btn_sub_characters.text = "Characters"
+		btn_sub_characters.focus_mode = Control.FOCUS_NONE
 		btn_sub_characters.pressed.connect(func(): _switch_subtab(0))
 	if btn_sub_gear:
+		btn_sub_gear.text = "Gear"
+		btn_sub_gear.focus_mode = Control.FOCUS_NONE
 		btn_sub_gear.pressed.connect(func(): _switch_subtab(1))
 	if btn_sub_runes:
+		btn_sub_runes.text = "Runes"
+		btn_sub_runes.focus_mode = Control.FOCUS_NONE
 		btn_sub_runes.pressed.connect(func(): _switch_subtab(2))
 		
 	var btn_blacksmith := $ContentContainer/ViewGear/MiddleBar/BlacksmithBtn as Button
@@ -185,6 +191,7 @@ func _refresh_gear_inventory_grid() -> void:
 		var button := Button.new()
 		button.custom_minimum_size = Vector2(104, 104)
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		button.focus_mode = Control.FOCUS_NONE
 		var equipped := str(SaveManager.equipped_gear.get(slot_name, "")) == item.uid
 		
 		var style := StyleBoxFlat.new()
@@ -196,6 +203,7 @@ func _refresh_gear_inventory_grid() -> void:
 		button.add_theme_stylebox_override("normal", style)
 		button.add_theme_stylebox_override("hover", style)
 		button.add_theme_stylebox_override("pressed", style)
+		button.add_theme_stylebox_override("focus", style)
 		
 		var title_col := Color(1.0, 0.9, 0.45, 1.0) if equipped else Color(0.85, 0.88, 0.95, 1.0)
 		button.add_theme_color_override("font_color", title_col)
@@ -758,15 +766,32 @@ func _switch_subtab(idx: int) -> void:
 	active_style.set_border_width_all(1)
 	active_style.border_width_bottom = 2
 	active_style.set_corner_radius_all(8)
+	active_style.content_margin_left = 16.0
+	active_style.content_margin_right = 16.0
+	active_style.content_margin_top = 6.0
+	active_style.content_margin_bottom = 6.0
 	
 	var empty_style := StyleBoxEmpty.new()
+	empty_style.content_margin_left = 16.0
+	empty_style.content_margin_right = 16.0
+	empty_style.content_margin_top = 6.0
+	empty_style.content_margin_bottom = 6.0
 	
 	var subtab_buttons := [btn_sub_characters, btn_sub_gear, btn_sub_runes]
+	var subtab_names := ["Characters", "Gear", "Runes"]
 	for i in range(subtab_buttons.size()):
 		var btn = subtab_buttons[i]
 		if btn:
 			var is_cur := (i == idx)
-			btn.add_theme_color_override("font_color", active_color if is_cur else inactive_color)
-			btn.add_theme_stylebox_override("normal", active_style if is_cur else empty_style)
-			btn.add_theme_stylebox_override("hover", active_style if is_cur else empty_style)
-			btn.add_theme_stylebox_override("pressed", active_style if is_cur else empty_style)
+			btn.text = subtab_names[i]
+			btn.focus_mode = Control.FOCUS_NONE
+			var cur_col := active_color if is_cur else inactive_color
+			btn.add_theme_color_override("font_color", cur_col)
+			btn.add_theme_color_override("font_hover_color", active_color)
+			btn.add_theme_color_override("font_pressed_color", active_color)
+			btn.add_theme_color_override("font_focus_color", cur_col)
+			var cur_style: StyleBox = active_style if is_cur else empty_style
+			btn.add_theme_stylebox_override("normal", cur_style)
+			btn.add_theme_stylebox_override("hover", cur_style)
+			btn.add_theme_stylebox_override("pressed", cur_style)
+			btn.add_theme_stylebox_override("focus", cur_style)

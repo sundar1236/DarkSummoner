@@ -164,7 +164,7 @@ var hover_cell: Vector2i = Vector2i(-999, -999)
 var _anim_time: float = 0.0
 
 func _ready() -> void:
-	custom_minimum_size = Vector2(380, 380)
+	custom_minimum_size = Vector2(530, 530)
 
 func _process(delta: float) -> void:
 	_anim_time += delta
@@ -188,7 +188,7 @@ func get_socket_pos(socket_id: int) -> Vector2:
 
 func get_socket_at_pos(pos: Vector2) -> int:
 	var best_id := -1
-	var min_dist := 36.0 # Touch target radius
+	var min_dist := 46.0 # Touch target radius for large centered circle
 	for i in range(SOCKET_DEFS.size()):
 		var spos := get_socket_pos(i)
 		var d := pos.distance_to(spos)
@@ -341,7 +341,7 @@ func _draw() -> void:
 		# Draw socket contents
 		if not is_unlocked:
 			# Padlock icon for locked sockets
-			draw_string(ThemeDB.fallback_font, spos + Vector2(-9, 6), "🔒", HORIZONTAL_ALIGNMENT_CENTER, -1, 16, Color(0.65, 0.65, 0.75, 0.8))
+			draw_string(ThemeDB.fallback_font, spos + Vector2(-10, 7), "🔒", HORIZONTAL_ALIGNMENT_CENTER, -1, 18, Color(0.65, 0.65, 0.75, 0.8))
 		elif item_in_sock and item_in_sock.data:
 			# Draw real item artwork, stars and upgrade badge
 			_draw_socket_item(spos, item_in_sock, is_selected, is_candidate)
@@ -360,12 +360,12 @@ func _draw() -> void:
 		# Translucent ghost icon
 		var tex := sel_item.data.get_icon_texture()
 		if tex:
-			var g_rect := Rect2(cpos - Vector2(20, 20), Vector2(40, 40))
+			var g_rect := Rect2(cpos - Vector2(25, 25), Vector2(50, 50))
 			draw_texture_rect(tex, g_rect, false, Color(ghost_col.r, ghost_col.g, ghost_col.b, 0.75))
-		draw_arc(cpos, 28.0, 0.0, TAU, 32, ghost_col, 2.5, true)
+		draw_arc(cpos, 34.0, 0.0, TAU, 32, ghost_col, 2.5, true)
 
 func _draw_socket_shape(pos: Vector2, shape: String, unlocked: bool, item: ItemInstance, selected: bool, valid: bool, invalid: bool, candidate: bool, pulse: float) -> void:
-	var r := 26.0
+	var r := 32.0
 	var fill_color := Color(0.06, 0.08, 0.15, 0.94)
 	var border_color := Color(0.25, 0.55, 0.9, 0.75)
 	var border_width := 1.8
@@ -422,7 +422,7 @@ func _draw_socket_item(pos: Vector2, item: ItemInstance, selected: bool, candida
 		
 	# Draw item icon texture
 	var icon_tex := d.get_icon_texture()
-	var draw_size := 38.0
+	var draw_size := 48.0
 	var alpha: float = 0.45 if (selected and is_dragging) else 1.0
 	
 	if icon_tex:
@@ -431,25 +431,25 @@ func _draw_socket_item(pos: Vector2, item: ItemInstance, selected: bool, candida
 	else:
 		# Text icon fallback
 		var ico_str := "🗡" if d.tags.has("weapon") else ("🔥" if d.tags.has("fire") else "🐺")
-		draw_string(ThemeDB.fallback_font, pos + Vector2(-9, 7), ico_str, HORIZONTAL_ALIGNMENT_CENTER, -1, 20, Color(1, 1, 1, alpha))
+		draw_string(ThemeDB.fallback_font, pos + Vector2(-12, 9), ico_str, HORIZONTAL_ALIGNMENT_CENTER, -1, 26, Color(1, 1, 1, alpha))
 
 	# Tier Stars badge on top
 	var stars_str := ""
 	for s in range(d.tier): stars_str += "★"
-	draw_string(ThemeDB.fallback_font, pos + Vector2(-16, -14), stars_str, HORIZONTAL_ALIGNMENT_CENTER, -1, 10, Color(1.0, 0.85, 0.25, alpha))
+	draw_string(ThemeDB.fallback_font, pos + Vector2(-20, -18), stars_str, HORIZONTAL_ALIGNMENT_CENTER, -1, 12, Color(1.0, 0.85, 0.25, alpha))
 
 func _draw_empty_glyph(pos: Vector2, shape: String) -> void:
 	var glyph_col := Color(0.35, 0.5, 0.75, 0.45)
-	draw_line(pos + Vector2(-6, 0), pos + Vector2(6, 0), glyph_col, 1.0)
-	draw_line(pos + Vector2(0, -6), pos + Vector2(0, 6), glyph_col, 1.0)
-	draw_circle(pos, 2.0, Color(0.4, 0.65, 0.95, 0.5))
+	draw_line(pos + Vector2(-8, 0), pos + Vector2(8, 0), glyph_col, 1.2)
+	draw_line(pos + Vector2(0, -8), pos + Vector2(0, 8), glyph_col, 1.2)
+	draw_circle(pos, 2.5, Color(0.4, 0.65, 0.95, 0.5))
 
 func _draw_central_hero(center: Vector2, t: float) -> void:
 	var bob := sin(t * 3.0) * 3.5
 	var hero_pos := center + Vector2(0, 10.0 + bob)
 	
 	# Hero base shadow
-	draw_circle(center + Vector2(0, 32), 24.0, Color(0.02, 0.04, 0.08, 0.85))
+	draw_circle(center + Vector2(0, 36), 32.0, Color(0.02, 0.04, 0.08, 0.85))
 	
 	var char_id := GameManager.current_character.id if GameManager and GameManager.current_character else "shadow_hunter"
 	var iris_col := Color(0.7, 0.3, 1.0, 1.0)
@@ -458,7 +458,7 @@ func _draw_central_hero(center: Vector2, t: float) -> void:
 	
 	var tex := TextureLoader.get_texture("res://assets/sprites/characters/player_" + char_id + ".png")
 	if tex:
-		var spr_size := Vector2(88, 88)
+		var spr_size := Vector2(106, 106)
 		var spr_rect := Rect2(hero_pos - spr_size * 0.5 + Vector2(0, -6), spr_size)
 		draw_texture_rect(tex, spr_rect, false)
 	else:

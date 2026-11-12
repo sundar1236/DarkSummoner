@@ -150,16 +150,22 @@ theme_override_font_sizes/font_size = 16
 text = "Choose a blessing from the Valkyrie"
 horizontal_alignment = 1
 
-[node name="CardsHBox" type="HBoxContainer" parent="Content"]
+[node name="TopSpacer" type="Control" parent="Content"]
 layout_mode = 2
 size_flags_vertical = 3
+
+[node name="CardsHBox" type="HBoxContainer" parent="Content"]
+custom_minimum_size = Vector2(0, 480)
+layout_mode = 2
+size_flags_vertical = 4
 alignment = 1
 theme_override_constants/separation = 16
 
 [node name="SkillCard1" type="PanelContainer" parent="Content/CardsHBox"]
-custom_minimum_size = Vector2(0, 500)
+custom_minimum_size = Vector2(0, 480)
 layout_mode = 2
 size_flags_horizontal = 3
+size_flags_vertical = 4
 theme_override_styles/panel = SubResource("StyleBoxFlat_card_base")
 
 [node name="VBox" type="VBoxContainer" parent="Content/CardsHBox/SkillCard1"]
@@ -223,9 +229,10 @@ layout_mode = 2
 flat = true
 
 [node name="SkillCard2" type="PanelContainer" parent="Content/CardsHBox"]
-custom_minimum_size = Vector2(0, 500)
+custom_minimum_size = Vector2(0, 480)
 layout_mode = 2
 size_flags_horizontal = 3
+size_flags_vertical = 4
 theme_override_styles/panel = SubResource("StyleBoxFlat_card_base")
 
 [node name="VBox" type="VBoxContainer" parent="Content/CardsHBox/SkillCard2"]
@@ -289,9 +296,10 @@ layout_mode = 2
 flat = true
 
 [node name="SkillCard3" type="PanelContainer" parent="Content/CardsHBox"]
-custom_minimum_size = Vector2(0, 500)
+custom_minimum_size = Vector2(0, 480)
 layout_mode = 2
 size_flags_horizontal = 3
+size_flags_vertical = 4
 theme_override_styles/panel = SubResource("StyleBoxFlat_card_base")
 
 [node name="VBox" type="VBoxContainer" parent="Content/CardsHBox/SkillCard3"]
@@ -353,6 +361,10 @@ autowrap_mode = 2
 [node name="CardButton" type="Button" parent="Content/CardsHBox/SkillCard3"]
 layout_mode = 2
 flat = true
+
+[node name="BottomSpacer" type="Control" parent="Content"]
+layout_mode = 2
+size_flags_vertical = 3
 
 [node name="BottomBar" type="HBoxContainer" parent="Content"]
 custom_minimum_size = Vector2(0, 72)

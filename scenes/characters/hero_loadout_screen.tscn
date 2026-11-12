@@ -147,32 +147,48 @@ theme_override_constants/separation = 24
 [node name="BtnCharacters" type="Button" parent="SubTabHeader/HBox"]
 custom_minimum_size = Vector2(130, 44)
 layout_mode = 2
+focus_mode = 0
 theme_override_colors/font_color = Color(0.65, 0.7, 0.8, 1)
+theme_override_colors/font_hover_color = Color(1, 0.95, 0.75, 1)
+theme_override_colors/font_pressed_color = Color(1, 0.88, 0.35, 1)
+theme_override_colors/font_focus_color = Color(1, 0.88, 0.35, 1)
 theme_override_font_sizes/font_size = 20
 theme_override_styles/normal = SubResource("StyleBoxEmpty_tabbtn")
 theme_override_styles/hover = SubResource("StyleBoxEmpty_tabbtn")
 theme_override_styles/pressed = SubResource("StyleBoxEmpty_tabbtn")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_tabbtn")
 flat = true
 text = "Characters"
 
 [node name="BtnGear" type="Button" parent="SubTabHeader/HBox"]
 custom_minimum_size = Vector2(110, 44)
 layout_mode = 2
+focus_mode = 0
 theme_override_colors/font_color = Color(1, 0.88, 0.35, 1)
+theme_override_colors/font_hover_color = Color(1, 0.95, 0.75, 1)
+theme_override_colors/font_pressed_color = Color(1, 0.88, 0.35, 1)
+theme_override_colors/font_focus_color = Color(1, 0.88, 0.35, 1)
 theme_override_font_sizes/font_size = 20
 theme_override_styles/normal = SubResource("StyleBoxFlat_subtab_active")
 theme_override_styles/hover = SubResource("StyleBoxFlat_subtab_active")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_subtab_active")
+theme_override_styles/focus = SubResource("StyleBoxFlat_subtab_active")
+flat = true
 text = "Gear"
 
 [node name="BtnRunes" type="Button" parent="SubTabHeader/HBox"]
 custom_minimum_size = Vector2(110, 44)
 layout_mode = 2
+focus_mode = 0
 theme_override_colors/font_color = Color(0.65, 0.7, 0.8, 1)
+theme_override_colors/font_hover_color = Color(1, 0.95, 0.75, 1)
+theme_override_colors/font_pressed_color = Color(1, 0.88, 0.35, 1)
+theme_override_colors/font_focus_color = Color(1, 0.88, 0.35, 1)
 theme_override_font_sizes/font_size = 20
 theme_override_styles/normal = SubResource("StyleBoxEmpty_tabbtn")
 theme_override_styles/hover = SubResource("StyleBoxEmpty_tabbtn")
 theme_override_styles/pressed = SubResource("StyleBoxEmpty_tabbtn")
+theme_override_styles/focus = SubResource("StyleBoxEmpty_tabbtn")
 flat = true
 text = "Runes"
 

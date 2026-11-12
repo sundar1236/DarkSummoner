@@ -86,11 +86,11 @@ text = "Altar Grid: 4x4"
 horizontal_alignment = 1
 
 [node name="AltarContainer" type="CenterContainer" parent="MainLayout"]
-custom_minimum_size = Vector2(0, 390)
+custom_minimum_size = Vector2(0, 540)
 layout_mode = 2
 
 [node name="AltarBoard" type="Control" parent="MainLayout/AltarContainer" node_paths=PackedStringArray("inventory_view")]
-custom_minimum_size = Vector2(380, 380)
+custom_minimum_size = Vector2(530, 530)
 layout_mode = 2
 script = ExtResource("2_altar")
 inventory_view = NodePath("../../..")

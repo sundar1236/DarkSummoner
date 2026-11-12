@@ -206,6 +206,9 @@ func _show_modal(modal_name: String) -> void:
 			var hud := current_arena.get_node_or_null("HUDLayer/CombatHUD") as CombatHUD
 			if hud:
 				hud.hide_announcement()
+			var fb := current_arena.get_node_or_null("HUDLayer/CombatHUD/FeedbackBanner") as CanvasItem
+			if fb:
+				fb.visible = false
 		settings_modal.visible = true
 
 func _on_continue_pressed() -> void:

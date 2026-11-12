@@ -86,7 +86,10 @@ func _connect_signals() -> void:
 	if btn_potion:
 		btn_potion.pressed.connect(_on_potion_pressed)
 	if btn_pause:
-		btn_pause.pressed.connect(func(): pause_requested.emit())
+		btn_pause.pressed.connect(func():
+			hide_announcement()
+			pause_requested.emit()
+		)
 	if btn_speed:
 		btn_speed.pressed.connect(_on_speed_toggle)
 		
@@ -183,6 +186,8 @@ func update_revives_display() -> void:
 func show_announcement(msg: String, duration: float = 2.0, col: Color = Color.WHITE) -> void:
 	if not feedback_banner or not feedback_label:
 		return
+	if get_tree().paused:
+		return
 		
 	feedback_label.text = msg
 	feedback_label.modulate = col
@@ -208,6 +213,7 @@ func hide_announcement() -> void:
 		feedback_tween.kill()
 	if feedback_banner:
 		feedback_banner.visible = false
+		feedback_banner.modulate.a = 0.0
 
 func _on_dodge_pressed() -> void:
 	if is_instance_valid(player_ref):

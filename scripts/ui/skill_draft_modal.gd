@@ -42,19 +42,19 @@ func _ready() -> void:
 	if not get_tree().root.size_changed.is_connected(_apply_safe_area):
 		get_tree().root.size_changed.connect(_apply_safe_area)
 		
-	card_1_panel.custom_minimum_size = Vector2(0, 500)
-	card_2_panel.custom_minimum_size = Vector2(0, 500)
-	card_1_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	card_2_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	var cards_row := $Content/CardsHBox as HBoxContainer
-	cards_row.add_theme_constant_override("separation", 8)
+	cards_row.custom_minimum_size = Vector2(0, 480)
+	cards_row.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	cards_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	cards_row.add_theme_constant_override("separation", 10)
 	for panel in [card_1_panel, card_2_panel, card_3_panel]:
-		panel.custom_minimum_size = Vector2(0, 500)
+		panel.custom_minimum_size = Vector2(0, 480)
 		panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		panel.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 		var card_vbox := panel.get_node("VBox") as VBoxContainer
 		card_vbox.add_theme_constant_override("separation", 6)
 		var icon_box := panel.get_node("VBox/IconBox") as PanelContainer
-		icon_box.custom_minimum_size = Vector2(60, 60)
+		icon_box.custom_minimum_size = Vector2(64, 64)
 
 	if refresh_btn:
 		refresh_btn.pressed.connect(_on_refresh_pressed)
