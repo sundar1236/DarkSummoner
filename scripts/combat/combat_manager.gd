@@ -86,9 +86,9 @@ func _spawn_wave_group(floor_num: int, level_num: int, enc_type: String) -> void
 	if hud_ref:
 		hud_ref.update_wave_progress(current_wave, total_waves, enemies_remaining)
 		if is_elite_room:
-			hud_ref.show_announcement("⚠ ELITE HORDE — WAVE %d/%d ⚠" % [current_wave, total_waves], 2.2, Color(1.0, 0.45, 0.2))
+			hud_ref.show_announcement("⚠ ELITE HORDE — WAVE %d/%d ⚠" % [current_wave, total_waves], 1.8, Color(1.0, 0.45, 0.2))
 		else:
-			hud_ref.show_announcement("✦ WAVE %d/%d — DEFEAT THE ABYSSAL SWARM ✦" % [current_wave, total_waves], 2.0, Color(0.4, 0.85, 1.0))
+			hud_ref.show_announcement("✦ WAVE %d/%d — DEFEAT THE ABYSSAL SWARM ✦" % [current_wave, total_waves], 1.6, Color(0.4, 0.85, 1.0))
 
 	for i in range(enemy_count):
 		var enemy := EnemyController.new()
@@ -144,7 +144,7 @@ func _start_next_wave() -> void:
 		return
 	current_wave += 1
 	if hud_ref:
-		hud_ref.show_announcement("⚔ INCOMING — WAVE %d ⚔" % current_wave, 1.8, Color(1.0, 0.72, 0.3))
+		hud_ref.show_announcement("⚔ INCOMING — WAVE %d ⚔" % current_wave, 1.6, Color(1.0, 0.72, 0.3))
 	_spawn_wave_group(GameManager.floor_number, GameManager.level_number, GameManager.current_encounter_type)
 
 func _spawn_boss_encounter(floor_num: int) -> void:

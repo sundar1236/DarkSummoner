@@ -192,7 +192,8 @@ func show_announcement(msg: String, duration: float = 2.0, col: Color = Color.WH
 	feedback_label.text = msg
 	feedback_label.modulate = col
 	feedback_banner.visible = true
-	feedback_banner.scale = Vector2(0.85, 0.85)
+	feedback_banner.pivot_offset = Vector2(260.0, 30.0)
+	feedback_banner.scale = Vector2(0.9, 0.9)
 	feedback_banner.modulate.a = 0.0
 	
 	if feedback_tween and feedback_tween.is_valid():

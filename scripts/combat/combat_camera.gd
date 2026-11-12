@@ -1,23 +1,25 @@
 class_name CombatCamera
 extends Camera2D
 
-# Smooth 2.5D tracking camera with subtle combat impact response and arena clamping.
+# 2.5D fixed arena camera centered permanently on the bounded 720x1280 combat field
+# with subtle combat impact response and screen shake.
 
 @export var target: Node2D
 var shake_intensity: float = 0.0
 var shake_timer: float = 0.0
 
+const ARENA_CENTER := Vector2(360.0, 640.0)
+
 func _ready() -> void:
-	position_smoothing_enabled = true
-	position_smoothing_speed = 6.0
+	position_smoothing_enabled = false
+	global_position = ARENA_CENTER
 	limit_left = 0
 	limit_top = 0
 	limit_right = 720
 	limit_bottom = 1280
 
 func _process(delta: float) -> void:
-	if is_instance_valid(target):
-		global_position = target.global_position
+	global_position = ARENA_CENTER
 		
 	if shake_timer > 0.0:
 		shake_timer -= delta
@@ -33,3 +35,4 @@ func apply_impact(intensity: float = 4.5, duration: float = 0.12) -> void:
 		return
 	shake_intensity = intensity
 	shake_timer = duration
+
