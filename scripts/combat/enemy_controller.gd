@@ -6,6 +6,35 @@ const XpPickupClass = preload("res://scripts/combat/xp_pickup.gd")
 const CombatSpriteFeedback = preload("res://scripts/combat/combat_sprite_feedback.gd")
 const EnemyBossSpriteAnimationClass = preload("res://scripts/combat/enemy_boss_sprite_animation.gd")
 
+class EliteAuraVisual extends Node2D:
+	var enemy_ref: CharacterBody2D
+	func _draw() -> void:
+		if not is_instance_valid(enemy_ref): return
+		var r: float = (48.0 if enemy_ref.enemy_type == "mini_boss" else 32.0) + sin(enemy_ref.anim_time * 5.0) * 2.0
+		var ring_center := Vector2(0, 26) if enemy_ref.enemy_type == "mini_boss" else Vector2(0, 20)
+		draw_arc(ring_center, r, 0.0, TAU, 32, Color(1.0, 0.75, 0.2, 0.65), 3.0)
+		draw_circle(ring_center, r * 0.95, Color(1.0, 0.3, 0.1, 0.12))
+
+class DangerRingTelegraph extends Node2D:
+	var danger_radius: float = 112.0
+	func _draw() -> void:
+		draw_circle(Vector2.ZERO, danger_radius, Color(0.9, 0.08, 0.12, 0.18))
+		draw_arc(Vector2.ZERO, danger_radius, 0.0, TAU, 40, Color(1.0, 0.22, 0.2, 0.9), 4.0)
+
+class LineTelegraphVisual extends Node2D:
+	var dir: Vector2 = Vector2.RIGHT
+	var length: float = 260.0
+	var col: Color = Color(1.0, 0.25, 0.35, 0.65)
+	func _draw() -> void:
+		draw_line(Vector2.ZERO, dir * length, col, 3.0)
+		draw_circle(dir * length, 6.0, col)
+
+class ChargeTelegraphVisual extends Node2D:
+	var dir: Vector2 = Vector2.RIGHT
+	func _draw() -> void:
+		draw_line(Vector2.ZERO, dir * 320.0, Color(1.0, 0.28, 0.18, 0.8), 5.0)
+		draw_circle(dir * 320.0, 8.0, Color(1.0, 0.35, 0.2, 0.9))
+
 # Unified 2.5D enemy controller for swarmers, ranged cultists, charging hunters, and elite brutes.
 # Features distinct telegraph indicators, elite visual auras, crisp hit-flashes, and coin drops.
 
@@ -229,15 +258,10 @@ func _init_stats(floor_scale: int = 1) -> void:
 func _setup_elite_aura() -> void:
 	if elite_aura:
 		return
-	elite_aura = Node2D.new()
-	elite_aura.z_index = -1
-	elite_aura.draw.connect(func():
-		# Glowing golden-red menacing ring beneath elite brute
-		var r: float = (48.0 if enemy_type == "mini_boss" else 32.0) + sin(anim_time * 5.0) * 2.0
-		var ring_center := Vector2(0, 26) if enemy_type == "mini_boss" else Vector2(0, 20)
-		elite_aura.draw_arc(ring_center, r, 0.0, TAU, 32, Color(1.0, 0.75, 0.2, 0.65), 3.0)
-		elite_aura.draw_circle(ring_center, r * 0.95, Color(1.0, 0.3, 0.1, 0.12))
-	)
+	var aura := EliteAuraVisual.new()
+	aura.z_index = -1
+	aura.enemy_ref = self
+	elite_aura = aura
 	add_child(elite_aura)
 	
 	# Crown badge over elite health bar
@@ -367,24 +391,29 @@ func _physics_process(delta: float) -> void:
 	lunge_offset = lunge_offset.move_toward(Vector2.ZERO, 60.0 * delta)
 
 func _telegraph_mini_boss_slam() -> void:
-	if is_dead or is_telegraphing or not is_instance_valid(player_ref):
+	if is_dead or is_telegraphing or not is_instance_valid(player_ref) or not is_inside_tree():
 		return
 	is_telegraphing = true
 	velocity = Vector2.ZERO
 	var target_position := player_ref.global_position
 	var danger_radius := 112.0
-	var warning := Node2D.new()
+	var warning := DangerRingTelegraph.new()
+	warning.danger_radius = danger_radius
 	warning.global_position = target_position
 	warning.z_index = -1
-	warning.draw.connect(func():
-		warning.draw_circle(Vector2.ZERO, danger_radius, Color(0.9, 0.08, 0.12, 0.18))
-		warning.draw_arc(Vector2.ZERO, danger_radius, 0.0, TAU, 40, Color(1.0, 0.22, 0.2, 0.9), 4.0)
-	)
-	get_parent().add_child(warning)
+	var parent_node := get_parent()
+	if not parent_node:
+		is_telegraphing = false
+		return
+	parent_node.add_child(warning)
 	if AudioManager:
 		AudioManager.play_sfx("boss_warning")
 	_play_authored_animation("attack", true)
 	CombatSpriteFeedback.play_telegraph(visual_root, Vector2.UP, 0.52, Vector2(1.16, 0.84))
+	if not is_inside_tree() or get_tree() == null:
+		if is_instance_valid(warning): warning.queue_free()
+		is_telegraphing = false
+		return
 	get_tree().create_timer(0.85).timeout.connect(func():
 		if is_instance_valid(warning):
 			warning.queue_free()
@@ -399,49 +428,52 @@ func _lunge_attack(dir: Vector2) -> void:
 	lunge_offset = dir * 14.0
 
 func _telegraph_cultist_attack(dir: Vector2) -> void:
+	if is_dead or is_telegraphing or not is_inside_tree():
+		return
 	is_telegraphing = true
 	velocity = Vector2.ZERO
 	
 	# Create telegraph warning lane
-	var telegraph := Node2D.new()
+	var telegraph := LineTelegraphVisual.new()
+	telegraph.dir = dir
 	telegraph.z_index = -1
-	telegraph.draw.connect(func():
-		var col := Color(1.0, 0.25, 0.35, 0.65)
-		telegraph.draw_line(Vector2.ZERO, dir * 260.0, col, 3.0)
-		telegraph.draw_circle(dir * 260.0, 6.0, col)
-	)
 	add_child(telegraph)
 	
 	# Casting windup animation pulse
 	_play_authored_animation("attack", true)
 	CombatSpriteFeedback.play_telegraph(visual_root, dir, 0.34, Vector2(1.12, 0.92))
 	
+	if not is_inside_tree() or get_tree() == null:
+		if is_instance_valid(telegraph): telegraph.queue_free()
+		is_telegraphing = false
+		return
 	get_tree().create_timer(0.34).timeout.connect(func():
 		if is_instance_valid(telegraph):
 			telegraph.queue_free()
 		is_telegraphing = false
-		if is_instance_valid(self) and hp > 0.0:
+		if is_instance_valid(self) and is_inside_tree() and hp > 0.0:
 			_fire_cultist_projectile(dir)
 	)
 
 
 func _telegraph_charger(dir: Vector2) -> void:
-	if is_dead or is_telegraphing or is_charging:
+	if is_dead or is_telegraphing or is_charging or not is_inside_tree():
 		return
 	is_telegraphing = true
 	velocity = Vector2.ZERO
 	charge_direction = dir.normalized()
-	var warning := Node2D.new()
+	var warning := ChargeTelegraphVisual.new()
+	warning.dir = charge_direction
 	warning.z_index = -1
-	warning.draw.connect(func():
-		warning.draw_line(Vector2.ZERO, charge_direction * 320.0, Color(1.0, 0.28, 0.18, 0.8), 5.0)
-		warning.draw_circle(charge_direction * 320.0, 8.0, Color(1.0, 0.35, 0.2, 0.9))
-	)
 	add_child(warning)
 	if AudioManager:
 		AudioManager.play_sfx("boss_warning")
 	_play_authored_animation("attack", true)
 	CombatSpriteFeedback.play_telegraph(visual_root, charge_direction, 0.44, Vector2(1.18, 0.82))
+	if not is_inside_tree() or get_tree() == null:
+		if is_instance_valid(warning): warning.queue_free()
+		is_telegraphing = false
+		return
 	get_tree().create_timer(0.55).timeout.connect(func():
 		if is_instance_valid(warning):
 			warning.queue_free()
@@ -527,20 +559,22 @@ func _on_death() -> void:
 	enemy_defeated.emit(self)
 	
 	# Spawn collectible gold coins that pop and magnetize
-	var coin_count := clampi(gold_reward, 1, 5)
-	for i in range(coin_count):
-		var coin = CoinPickupClass.new()
-		get_parent().call_deferred("add_child", coin)
-		coin.setup(int(ceil(float(gold_reward) / float(coin_count))), global_position)
-		
-	# Spawn collectible celestial XP soul crystals
-	var xp_val: float = 25.0
-	if enemy_type == "cultist": xp_val = 35.0
-	elif enemy_type == "charger": xp_val = 50.0
-	elif enemy_type == "elite": xp_val = 75.0
-	var xp_crystal = XpPickupClass.new()
-	get_parent().call_deferred("add_child", xp_crystal)
-	xp_crystal.setup(xp_val, global_position)
+	var parent_node := get_parent()
+	if is_inside_tree() and parent_node:
+		var coin_count := clampi(gold_reward, 1, 5)
+		for i in range(coin_count):
+			var coin = CoinPickupClass.new()
+			parent_node.call_deferred("add_child", coin)
+			coin.setup(int(ceil(float(gold_reward) / float(coin_count))), global_position)
+			
+		# Spawn collectible celestial XP soul crystals
+		var xp_val: float = 25.0
+		if enemy_type == "cultist": xp_val = 35.0
+		elif enemy_type == "charger": xp_val = 50.0
+		elif enemy_type == "elite": xp_val = 75.0
+		var xp_crystal = XpPickupClass.new()
+		parent_node.call_deferred("add_child", xp_crystal)
+		xp_crystal.setup(xp_val, global_position)
 	
 	# Death dissolve animates only the visual wrapper; collision and rewards stay unchanged.
 	_play_authored_animation("death", true)

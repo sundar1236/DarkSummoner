@@ -58,6 +58,8 @@ func _physics_process(delta: float) -> void:
 			attack_timer = 0.0
 
 func _find_nearest_enemy() -> Node2D:
+	if not is_inside_tree() or get_tree() == null:
+		return null
 	var enemies := get_tree().get_nodes_in_group("enemies")
 	var nearest: Node2D = null
 	var min_dist: float = attack_range
@@ -70,15 +72,16 @@ func _find_nearest_enemy() -> Node2D:
 	return nearest
 
 func _attack_target(target: Node2D) -> void:
-	if not ProjectileController.can_spawn_projectile():
+	if not ProjectileController.can_spawn_projectile() or not is_inside_tree():
+		return
+	var parent_node := get_parent()
+	if not parent_node:
 		return
 	var dir := (target.global_position - global_position).normalized()
-	if not ProjectileController.can_spawn_projectile():
-		return
 	
 	# Spawn pet projectile
 	var proj := ProjectileController.new()
-	get_parent().add_child(proj)
+	parent_node.add_child(proj)
 	proj.global_position = global_position
 	
 	var is_soul_binder: bool = (GameManager.current_character and GameManager.current_character.id == "soul_binder")

@@ -47,6 +47,8 @@ func _physics_process(delta: float) -> void:
 		if magnetize_delay <= 0.0:
 			is_magnetized = true
 	if not is_instance_valid(target_player):
+		if not is_inside_tree() or get_tree() == null:
+			return
 		var p_nodes := get_tree().get_nodes_in_group("player")
 		if not p_nodes.is_empty():
 			target_player = p_nodes[0]

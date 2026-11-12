@@ -9,7 +9,7 @@ static func can_spawn_spark() -> bool:
 	return tree == null or tree.get_nodes_in_group("impact_sparks").size() < MAX_ACTIVE_SPARKS
 
 func _ready() -> void:
-	if get_tree().get_nodes_in_group("impact_sparks").size() >= MAX_ACTIVE_SPARKS:
+	if not is_inside_tree() or get_tree() == null or get_tree().get_nodes_in_group("impact_sparks").size() >= MAX_ACTIVE_SPARKS:
 		queue_free()
 		return
 	add_to_group("impact_sparks")

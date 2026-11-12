@@ -36,6 +36,8 @@ func _ready() -> void:
 	else:
 		print("SUCCESS: All Phase 5 assertions passed successfully!")
 		
+	await get_tree().process_frame
+	await get_tree().process_frame
 	get_tree().quit(tests_failed)
 
 func assert_true(condition: bool, message: String) -> void:
@@ -87,9 +89,9 @@ func test_single_stick_and_touch_safety() -> void:
 	move_joy._unhandled_input(release_ev)
 	assert_true(not move_joy.is_pressed and move_joy.touch_index == -1, "Touch release cancels a stuck movement joystick")
 
-	player.queue_free()
-	move_joy.queue_free()
-	enemy.queue_free()
+	player.free()
+	move_joy.free()
+	enemy.free()
 
 # 2. Test projectile collision roles and living homing targets.
 func test_projectile_collision_roles_and_homing_filter() -> void:
@@ -122,8 +124,8 @@ func test_projectile_collision_roles_and_homing_filter() -> void:
 	assert_true(not player_projectile._is_valid_enemy_target(dead_boss), "Homing ignores defeated bosses")
 	assert_true(player_projectile._is_valid_enemy_target(living_enemy), "Homing accepts a living enemy")
 
-	projectile.queue_free()
-	player_projectile.queue_free()
+	projectile.free()
+	player_projectile.free()
 	dead_enemy.free()
 	living_enemy.free()
 	dead_boss.free()
@@ -275,7 +277,7 @@ func test_hud_reactivity_and_game_speed() -> void:
 	hud._process(65.0) # simulate 65 seconds
 	assert_true(hud.timer_label.text == "01:05", "Stage timer formats elapsed MM:SS (01:05)")
 	
-	arena.queue_free()
+	arena.free()
 
 
 # 3. Test two-wave encounter progression and duplicate defeat protection
@@ -285,7 +287,9 @@ func test_combat_wave_progression() -> void:
 	arena.current_wave = 1
 	arena.total_waves = 2
 	arena.enemies_remaining = 1
-	arena._on_enemy_defeated(Node2D.new())
+	var dummy_enemy := Node2D.new()
+	arena._on_enemy_defeated(dummy_enemy)
+	dummy_enemy.free()
 
 	assert_true(arena.current_wave == 2, "Clearing wave one advances to wave two")
 	assert_true(arena.enemies_remaining == arena._get_wave_enemy_count(GameManager.level_number, 2), "Second wave spawns its own enemy group")
@@ -387,7 +391,7 @@ func test_valkyrie_draft_modal_and_offers() -> void:
 	assert_true(GameManager.run_learned_skills.has(chosen_id), "Selected skill applied to GameManager")
 	assert_true(GameManager.run_learned_skills[chosen_id] == 1, "Skill level initialized at Rank 1")
 	
-	modal.queue_free()
+	modal.free()
 
 	# Verify the third card can be selected, not just displayed.
 	var third_modal := draft_scene.instantiate() as SkillDraftModal
@@ -397,7 +401,7 @@ func test_valkyrie_draft_modal_and_offers() -> void:
 	var third_choice: String = third_modal.card_3_offer["id"]
 	third_modal._choose_card(3)
 	assert_true(GameManager.run_learned_skills.has(third_choice), "Selecting the third card applies its skill")
-	third_modal.queue_free()
+	third_modal.free()
 
 # 5. Test Skill Stat Application & Upgrade Progression
 func test_skill_stat_application_and_progression() -> void:
@@ -492,7 +496,7 @@ func test_learned_skills_drawer() -> void:
 	modal.close_drawer_btn.pressed.emit()
 	assert_true(not modal.learned_drawer.visible, "LearnedDrawer closed cleanly")
 	
-	modal.queue_free()
+	modal.free()
 
 # 7. Test Combat Feedback Announcements
 func test_combat_feedback_announcements() -> void:
@@ -516,8 +520,8 @@ func test_combat_feedback_announcements() -> void:
 	dmg.setup(85.0, true, Vector2(100, 100))
 	assert_true(dmg.label.text.begins_with("CRIT!"), "DamageNumber marks critical strikes")
 	
-	dmg.queue_free()
-	arena.queue_free()
+	dmg.free()
+	arena.free()
 
 # 8. Test Pause Confirmation and Defeat Revive
 func test_pause_confirmation_and_defeat_revive() -> void:
@@ -539,7 +543,7 @@ func test_pause_confirmation_and_defeat_revive() -> void:
 	set_modal.btn_abandon.pressed.emit()
 	assert_true(abandon_emitted[0], "Second abandon click emits abandon_run_requested")
 	
-	set_modal.queue_free()
+	set_modal.free()
 	
 	# Defeat Screen Revive Button
 	var gov_scene := load("res://scenes/ui/game_over_view.tscn") as PackedScene
@@ -562,4 +566,4 @@ func test_pause_confirmation_and_defeat_revive() -> void:
 	gov.setup(1, 3)
 	assert_true(not gov.btn_revive.visible, "Revive button hidden when revives == 0")
 	
-	gov.queue_free()
+	gov.free()

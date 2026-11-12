@@ -50,6 +50,8 @@ func _ready() -> void:
 		print("FAILED SOME TESTS!")
 	else:
 		print("ALL ACCEPTANCE TESTS PASSED SUCCESSFULLY!")
+	await get_tree().process_frame
+	await get_tree().process_frame
 	get_tree().quit(tests_failed)
 
 func assert_true(condition: bool, message: String) -> void:
@@ -95,9 +97,9 @@ func test_independent_movement_and_aim() -> void:
 	assert_true(player.is_attacking, "Stationary hunter auto-fires at nearest enemy")
 	assert_true(player.aim_direction.x > 0.0, "Aim locks onto enemy at (+200, 0)")
 	
-	dummy_enemy.queue_free()
-	player.queue_free()
-	move_joy.queue_free()
+	dummy_enemy.free()
+	player.free()
+	move_joy.free()
 
 
 # Persistent profile gear is independent from run altar items.
@@ -179,7 +181,7 @@ func test_gear_item_details_and_comparison() -> void:
 	SaveManager.equipped_gear = original_equipped
 	SaveManager.profile_gold = original_gold
 	SaveManager.save_profile()
-	loadout.queue_free()
+	loadout.free()
 
 
 func test_gear_inventory_sorting() -> void:
@@ -211,7 +213,7 @@ func test_gear_inventory_sorting() -> void:
 	assert_true(by_slot[0].data.equipment_slot == "helmet", "Slot sort follows the fixed equipment slot order")
 	assert_true(by_slot[1].data.equipment_slot == "boots", "Boots follow helmet in slot sort")
 	assert_true(by_slot[2].data.equipment_slot == "ring", "Ring follows boots in slot sort")
-	loadout.queue_free()
+	loadout.free()
 
 
 func test_combat_power_breakdown() -> void:
@@ -366,7 +368,7 @@ func test_boss_gear_rewards_are_persistent() -> void:
 
 	SaveManager.gear_inventory = original_inventory
 	SaveManager.save_profile()
-	reward.queue_free()
+	reward.free()
 
 
 func test_run_altar_excludes_persistent_gear() -> void:
@@ -600,7 +602,7 @@ func test_character_selection_and_unlock_flow() -> void:
 		assert_true(csv.locked_overlay.visible, "Locked overlay visible for Soul Binder")
 		assert_true(csv.lbl_unlock_requirement.text.contains("80 SHADES"), "Shows 80 Shades unlock requirement")
 		
-	csv.queue_free()
+	csv.free()
 
 # 14b. Test First-Run Three-Champion Selection
 func test_initial_three_character_draft() -> void:
@@ -642,7 +644,7 @@ func test_initial_three_character_draft() -> void:
 	GameManager.current_character = original_current_character
 	SaveManager.save_profile()
 	controller.free()
-	picker.queue_free()
+	picker.free()
 
 # 15. Test Opening Experience & Main Menu Navigation
 func test_opening_navigation_flow() -> void:
@@ -653,7 +655,7 @@ func test_opening_navigation_flow() -> void:
 	add_child(intro)
 	assert_true(intro.has_signal("intro_completed"), "IntroScreen provides intro_completed signal")
 	assert_true(intro.btn_skip != null, "IntroScreen has working skip button")
-	intro.queue_free()
+	intro.free()
 	
 	var menu_scene := load("res://scenes/menus/main_menu.tscn") as PackedScene
 	assert_true(menu_scene != null, "MainMenu scene loads cleanly")
@@ -672,7 +674,7 @@ func test_opening_navigation_flow() -> void:
 	assert_true(menu.btn_continue.text.contains("FLOOR 2"), "Continue button displays current Floor progress")
 	GameManager.is_in_run = false
 	
-	menu.queue_free()
+	menu.free()
 
 # 16. Test Story Intro & Illustrated Assets
 func test_story_intro_and_illustrated_assets() -> void:
@@ -684,7 +686,7 @@ func test_story_intro_and_illustrated_assets() -> void:
 	assert_true(story.has_signal("story_completed"), "StoryIntro provides story_completed signal")
 	assert_true(story.btn_skip != null, "StoryIntro has functional skip button")
 	assert_true(story.acts.size() == 4, "StoryIntro contains all 4 narrative lore acts")
-	story.queue_free()
+	story.free()
 	
 	# Verify item icon loading
 	var dagger := ItemDatabase.get_item("shadow_dagger")
@@ -762,7 +764,7 @@ func test_altar_weapon_and_item_moving() -> void:
 	assert_true(not inv_view.is_move_mode, "Exited move mode on cancel")
 	assert_true(blade.grid_pos == old_pos, "Position preserved on move cancel")
 	assert_true(blade.rotation_step == 1, "Rotation restored on move cancel")
-	inv_view.queue_free()
+	inv_view.free()
 
 	# 6b. Auto-entering move mode after an invalid rotation must preserve the
 	# pre-rotation orientation so Cancel Move can restore it.
@@ -777,7 +779,7 @@ func test_altar_weapon_and_item_moving() -> void:
 	edge_inv.cancel_move_mode()
 	assert_true(edge_blade.rotation_step == 0, "Cancel Move restores orientation after auto-entered rotation mode")
 	assert_true(edge_blade.grid_pos == Vector2i(3, 0), "Cancel Move preserves edge item position")
-	edge_inv.queue_free()
+	edge_inv.free()
 
 	# 7. Move an item participating in adjacency synergy
 	GameManager.altar_items.clear()
@@ -821,7 +823,7 @@ func test_valkyrie_blessing_pick_and_refresh() -> void:
 	assert_true(rwd.btn_refresh.disabled, "Refresh button disabled when out of rolls")
 	assert_true(rwd.choices_container.get_child_count() > 0, "New blessing cards re-rolled after refresh")
 	
-	rwd.queue_free()
+	rwd.free()
 
 # 19. Test Phase 2: Functional Summoning Circle Altar Redesign
 func test_summoning_circle_redesign() -> void:
@@ -850,7 +852,7 @@ func test_summoning_circle_redesign() -> void:
 	assert_true(GameManager.run_gold == pre_gold + 25, "Gold added to GameManager")
 	assert_true(GameManager.altar_items.is_empty(), "Item removed from altar items after recycle")
 	
-	inv_view.queue_free()
+	inv_view.free()
 
 # 20. Test authored character rigs retain their visual when optional clips are absent.
 func test_authored_character_animation_fallbacks() -> void:
@@ -895,9 +897,9 @@ func test_authored_character_animation_fallbacks() -> void:
 	controller.trigger_dodge(Vector2.RIGHT)
 	assert_true(animation_player.current_animation == "run", "Missing dodge clip falls back to run")
 
-	controller.queue_free()
-	legacy_sprite.queue_free()
-	rig_root.queue_free()
+	controller.free()
+	legacy_sprite.free()
+	rig_root.free()
 
 # 21. Test generated visual scene mapping for each playable hero.
 func test_selected_character_visual_scene_mapping() -> void:

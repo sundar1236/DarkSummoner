@@ -65,6 +65,16 @@ class StormSparksVisual extends Node2D:
 			var p3 := p2 + Vector2(randf_range(-8, 8), randf_range(-8, 8))
 			draw_polyline([p1, p2, p3], Color(0.4, 0.9, 1.0, 0.85), 1.6)
 
+class ShadowTrailsVisual extends Node2D:
+	var player_ref: CharacterBody2D
+	func _draw() -> void:
+		if not is_instance_valid(player_ref):
+			return
+		var pulse := 0.5 + 0.5 * sin(player_ref.anim_time * 5.0)
+		var trail_color := Color(0.42, 0.2, 0.78, 0.28 + pulse * 0.22)
+		draw_arc(Vector2(-2, -8), 28.0 + pulse * 3.0, 0.25, 2.75, 24, trail_color, 2.0)
+		draw_arc(Vector2(2, -8), 34.0 + pulse * 2.0, 3.3, 5.8, 24, Color(0.72, 0.42, 1.0, 0.2 + pulse * 0.18), 1.4)
+
 signal skill_cooldown_updated(current: float, max_val: float)
 signal dodge_cooldown_updated(current: float, max_val: float)
 
@@ -84,6 +94,7 @@ var is_invulnerable: bool = false
 var dodge_cooldown: float = 1.3
 var dodge_timer: float = 0.0
 var dodge_duration: float = 0.25
+var dodge_duration_timer: float = 0.0
 var dodge_speed_mult: float = 2.8
 var afterimage_timer: float = 0.0
 
@@ -329,9 +340,10 @@ func _setup_character_ambience() -> void:
 		
 	match char_id:
 		"shadow_hunter":
-			shadow_trails = Node2D.new()
-			shadow_trails.z_index = 3
-			shadow_trails.draw.connect(_draw_shadow_trails)
+			var trails := ShadowTrailsVisual.new()
+			trails.z_index = 3
+			trails.player_ref = self
+			shadow_trails = trails
 			visual_root.add_child(shadow_trails)
 		"soul_binder":
 			# Clearly visible floating spirit companion orbiting Soul Binder
@@ -355,12 +367,7 @@ func _draw_spirit_wisp() -> void:
 	if spirit_wisp: spirit_wisp.queue_redraw()
 
 func _draw_shadow_trails() -> void:
-	if not shadow_trails:
-		return
-	var pulse := 0.5 + 0.5 * sin(anim_time * 5.0)
-	var trail_color := Color(0.42, 0.2, 0.78, 0.28 + pulse * 0.22)
-	shadow_trails.draw_arc(Vector2(-2, -8), 28.0 + pulse * 3.0, 0.25, 2.75, 24, trail_color, 2.0)
-	shadow_trails.draw_arc(Vector2(2, -8), 34.0 + pulse * 2.0, 3.3, 5.8, 24, Color(0.72, 0.42, 1.0, 0.2 + pulse * 0.18), 1.4)
+	if shadow_trails: shadow_trails.queue_redraw()
 
 func _draw_storm_sparks() -> void:
 	if storm_sparks: storm_sparks.queue_redraw()
@@ -458,13 +465,18 @@ func _physics_process(delta: float) -> void:
 
 func _handle_movement(_delta: float) -> void:
 	if is_dodging:
-		move_and_slide()
-		# Emit shadow afterimages during dash
-		afterimage_timer += _delta
-		if afterimage_timer >= 0.05:
-			afterimage_timer = 0.0
-			_spawn_afterimage()
-		return
+		dodge_duration_timer -= _delta
+		if dodge_duration_timer <= 0.0:
+			is_dodging = false
+			is_invulnerable = false
+		else:
+			move_and_slide()
+			# Emit shadow afterimages during dash
+			afterimage_timer += _delta
+			if afterimage_timer >= 0.05:
+				afterimage_timer = 0.0
+				_spawn_afterimage()
+			return
 		
 	var move_vec := Vector2.ZERO
 	if move_joystick:
@@ -745,10 +757,7 @@ func trigger_dodge() -> bool:
 	if AudioManager:
 		AudioManager.play_sfx("dodge")
 		
-	get_tree().create_timer(dodge_duration).timeout.connect(func():
-		is_dodging = false
-		is_invulnerable = false
-	)
+	dodge_duration_timer = dodge_duration
 	return true
 
 func _spawn_afterimage() -> void:
@@ -918,6 +927,11 @@ func trigger_victory() -> void:
 		anim_ctrl.trigger_victory()
 
 func _trigger_camera_impact(intensity: float, duration: float) -> void:
-	var cam := get_viewport().get_camera_2d()
+	if not is_inside_tree():
+		return
+	var vp := get_viewport()
+	if not vp:
+		return
+	var cam := vp.get_camera_2d()
 	if cam and cam.has_method("apply_impact"):
 		cam.apply_impact(intensity, duration)

@@ -118,6 +118,8 @@ func _is_valid_enemy_target(target: Node2D) -> bool:
 	return true
 
 func _find_nearest_enemy() -> Node2D:
+	if not is_inside_tree() or get_tree() == null:
+		return null
 	var enemies := get_tree().get_nodes_in_group("enemies")
 	var nearest: Node2D = null
 	var min_dist: float = 600.0
@@ -152,7 +154,7 @@ func _handle_hit(target: Node) -> void:
 			target.take_damage(damage, is_crit)
 			
 			# Spawn impact spark
-			if ImpactSparkVFXClass.can_spawn_spark():
+			if ImpactSparkVFXClass.can_spawn_spark() and is_inside_tree() and get_parent() != null:
 				var spark = ImpactSparkVFXClass.new()
 				var p_tint := Color(0.95, 0.75, 1.0)
 				if sprite and sprite.texture:

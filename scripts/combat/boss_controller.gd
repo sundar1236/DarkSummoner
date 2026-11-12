@@ -6,6 +6,28 @@ const XpPickupClass = preload("res://scripts/combat/xp_pickup.gd")
 const CombatSpriteFeedback = preload("res://scripts/combat/combat_sprite_feedback.gd")
 const EnemyBossSpriteAnimationClass = preload("res://scripts/combat/enemy_boss_sprite_animation.gd")
 
+class VoidEruptionTelegraph extends Node2D:
+	var radius: float = 80.0
+	var progress: float = 0.0
+	func _draw() -> void:
+		draw_arc(Vector2.ZERO, radius, 0, TAU, 36, Color(1.0, 0.25, 0.3, 0.85), 3.0)
+		draw_circle(Vector2.ZERO, radius, Color(1.0, 0.1, 0.2, 0.18))
+		var fill_r: float = radius * clampf(progress, 0.0, 1.0)
+		draw_circle(Vector2.ZERO, fill_r, Color(1.0, 0.15, 0.25, 0.45))
+
+class ChargeLineTelegraph extends Node2D:
+	var charge_dir: Vector2 = Vector2.RIGHT
+	func _draw() -> void:
+		draw_line(Vector2.ZERO, charge_dir * 320.0, Color(1.0, 0.2, 0.3, 0.7), 4.0)
+		draw_circle(charge_dir * 320.0, 12.0, Color(1.0, 0.3, 0.4, 0.8))
+
+class CrossTelegraphVisual extends Node2D:
+	func _draw() -> void:
+		var line_color := Color(1.0, 0.22, 0.36, 0.78)
+		draw_line(Vector2(-360, 0), Vector2(360, 0), line_color, 4.0)
+		draw_line(Vector2(0, -360), Vector2(0, 360), line_color, 4.0)
+		draw_circle(Vector2.ZERO, 34.0, Color(1.0, 0.12, 0.24, 0.18))
+
 # Floor Boss controller: "Lord Malakar, the Abyssal Dread".
 # Features multi-phase combat and readable animated warning telegraph danger zones.
 
@@ -178,7 +200,7 @@ func _execute_next_attack() -> void:
 
 # Attack 1: Telegraphed Ground Danger Zone with animated filling countdown disk
 func _attack_void_eruption() -> void:
-	if not is_instance_valid(player_ref):
+	if not is_instance_valid(player_ref) or not is_inside_tree():
 		is_performing_attack = false
 		return
 		
@@ -187,31 +209,28 @@ func _attack_void_eruption() -> void:
 	_play_authored_animation("attack", true)
 	
 	var target_pos := player_ref.global_position
-	
+	var parent_node := get_parent()
+	if not parent_node:
+		is_performing_attack = false
+		return
+		
 	# Spawn warning circle indicator on ground
-	var warn_node := Node2D.new()
+	var warn_node := VoidEruptionTelegraph.new()
 	warn_node.global_position = target_pos
 	warn_node.z_index = -1
-	get_parent().add_child(warn_node)
-	
-	var progress: float = 0.0
-	warn_node.draw.connect(func():
-		var radius: float = 80.0
-		# Static red border circle
-		warn_node.draw_arc(Vector2.ZERO, radius, 0, TAU, 36, Color(1.0, 0.25, 0.3, 0.85), 3.0)
-		warn_node.draw_circle(Vector2.ZERO, radius, Color(1.0, 0.1, 0.2, 0.18))
-		# Expanding danger inner fill indicating countdown
-		var fill_r: float = radius * clampf(progress, 0.0, 1.0)
-		warn_node.draw_circle(Vector2.ZERO, fill_r, Color(1.0, 0.15, 0.25, 0.45))
-	)
+	parent_node.add_child(warn_node)
 	
 	var tween := create_tween()
 	tween.tween_method(func(v: float):
-		progress = v
 		if is_instance_valid(warn_node):
+			warn_node.progress = v
 			warn_node.queue_redraw()
 	, 0.0, 1.0, 1.0)
 	
+	if not is_inside_tree() or get_tree() == null:
+		if is_instance_valid(warn_node): warn_node.queue_free()
+		is_performing_attack = false
+		return
 	get_tree().create_timer(1.0).timeout.connect(func():
 		if is_dead or not is_inside_tree():
 			if is_instance_valid(warn_node):
@@ -221,7 +240,8 @@ func _attack_void_eruption() -> void:
 		if is_instance_valid(warn_node):
 			if AudioManager:
 				AudioManager.play_sfx("boss_hit")
-			var cam := get_viewport().get_camera_2d()
+			var vp := get_viewport()
+			var cam = vp.get_camera_2d() if vp else null
 			if cam and cam.has_method("apply_impact"):
 				cam.apply_impact(6.0, 0.18)
 				
@@ -236,7 +256,7 @@ func _attack_void_eruption() -> void:
 
 # Attack 2: Telegraphed Charge Dash with directional guide line
 func _attack_abyssal_charge() -> void:
-	if not is_instance_valid(player_ref):
+	if not is_instance_valid(player_ref) or not is_inside_tree():
 		is_performing_attack = false
 		return
 		
@@ -246,18 +266,19 @@ func _attack_abyssal_charge() -> void:
 	var charge_dir := (player_ref.global_position - global_position).normalized()
 	
 	# Draw directional telegraph line
-	var line_node := Node2D.new()
+	var line_node := ChargeLineTelegraph.new()
+	line_node.charge_dir = charge_dir
 	line_node.z_index = -1
-	line_node.draw.connect(func():
-		line_node.draw_line(Vector2.ZERO, charge_dir * 320.0, Color(1.0, 0.2, 0.3, 0.7), 4.0)
-		line_node.draw_circle(charge_dir * 320.0, 12.0, Color(1.0, 0.3, 0.4, 0.8))
-	)
 	add_child(line_node)
 	
 	# 0.8s charging windup pulse; physics and collision remain on the boss body.
 	_play_authored_animation("attack", true)
 	CombatSpriteFeedback.play_telegraph(visual_root, charge_dir, 0.8, Vector2(1.18, 0.88))
 	
+	if not is_inside_tree() or get_tree() == null:
+		if is_instance_valid(line_node): line_node.queue_free()
+		is_performing_attack = false
+		return
 	get_tree().create_timer(0.8).timeout.connect(func():
 		if is_instance_valid(line_node):
 			line_node.queue_free()
@@ -268,7 +289,7 @@ func _attack_abyssal_charge() -> void:
 		var charge_time := 0.48
 		var timer := 0.0
 		while timer < charge_time:
-			if not is_inside_tree() or is_dead: break
+			if not is_inside_tree() or is_dead or get_tree() == null: break
 			move_and_slide()
 			# Check contact with player
 			if is_instance_valid(player_ref) and global_position.distance_to(player_ref.global_position) < 58.0:
@@ -282,6 +303,8 @@ func _attack_abyssal_charge() -> void:
 
 # Attack 3: Nova Ring (360 Projectile Burst)
 func _attack_nova_ring() -> void:
+	if not is_inside_tree():
+		return
 	if AudioManager:
 		AudioManager.play_sfx("boss_warning")
 	_play_authored_animation("attack", true)
@@ -291,18 +314,25 @@ func _attack_nova_ring() -> void:
 	tween.tween_property(sprite, "modulate", Color(2.0, 0.5, 0.8, 1.0), 0.3)
 	tween.tween_property(sprite, "modulate", Color(1.5, 0.35, 0.35, 1.0) if is_enraged else Color(1.0, 1.0, 1.0, 1.0), 0.3)
 	
+	if not is_inside_tree() or get_tree() == null:
+		is_performing_attack = false
+		return
 	get_tree().create_timer(0.6).timeout.connect(func():
 		if is_dead or not is_inside_tree():
 			is_performing_attack = false
 			return
 		var count: int = 14 if is_enraged else 11
+		var parent_node := get_parent()
+		if not parent_node:
+			is_performing_attack = false
+			return
 		for i in range(count):
 			if not ProjectileController.can_spawn_projectile():
 				break
 			var angle := (TAU / float(count)) * float(i)
 			var dir := Vector2.RIGHT.rotated(angle)
 			var proj := ProjectileController.new()
-			get_parent().add_child(proj)
+			parent_node.add_child(proj)
 			proj.global_position = global_position
 			proj.setup(14.0 * damage_multiplier, false, dir, 320.0, "enemy", false)
 		if AudioManager:
@@ -312,24 +342,32 @@ func _attack_nova_ring() -> void:
 
 
 func _attack_abyssal_cross() -> void:
+	if not is_inside_tree():
+		return
 	if AudioManager:
 		AudioManager.play_sfx("boss_warning")
 	_play_authored_animation("attack", true)
-	var cross_telegraph := Node2D.new()
+	var parent_node := get_parent()
+	if not parent_node:
+		is_performing_attack = false
+		return
+	var cross_telegraph := CrossTelegraphVisual.new()
 	cross_telegraph.global_position = global_position
 	cross_telegraph.z_index = -1
-	cross_telegraph.draw.connect(func():
-		var line_color := Color(1.0, 0.22, 0.36, 0.78)
-		cross_telegraph.draw_line(Vector2(-360, 0), Vector2(360, 0), line_color, 4.0)
-		cross_telegraph.draw_line(Vector2(0, -360), Vector2(0, 360), line_color, 4.0)
-		cross_telegraph.draw_circle(Vector2.ZERO, 34.0, Color(1.0, 0.12, 0.24, 0.18))
-	)
-	get_parent().add_child(cross_telegraph)
+	parent_node.add_child(cross_telegraph)
 	CombatSpriteFeedback.play_telegraph(visual_root, Vector2.UP, 0.48, Vector2(1.12, 0.9))
+	if not is_inside_tree() or get_tree() == null:
+		if is_instance_valid(cross_telegraph): cross_telegraph.queue_free()
+		is_performing_attack = false
+		return
 	get_tree().create_timer(0.65).timeout.connect(func():
 		if is_instance_valid(cross_telegraph):
 			cross_telegraph.queue_free()
 		if is_dead or not is_inside_tree():
+			is_performing_attack = false
+			return
+		var parent_n := get_parent()
+		if not parent_n:
 			is_performing_attack = false
 			return
 		var damage: float = (20.0 if is_enraged else 16.0) * damage_multiplier
@@ -337,7 +375,7 @@ func _attack_abyssal_cross() -> void:
 			if not ProjectileController.can_spawn_projectile():
 				break
 			var projectile := ProjectileController.new()
-			get_parent().add_child(projectile)
+			parent_n.add_child(projectile)
 			projectile.global_position = global_position
 			projectile.setup(damage, false, Vector2.RIGHT.rotated(angle), 400.0, "enemy", false)
 		if AudioManager:
@@ -351,14 +389,16 @@ static func get_attack_pattern_name(index: int) -> String:
 
 
 func take_damage(amount: float, is_crit: bool) -> void:
-	if is_dead or amount <= 0.0:
+	if is_dead or amount <= 0.0 or not is_inside_tree():
 		return
 	hp = maxf(0.0, hp - amount)
 	boss_hp_changed.emit(hp, max_hp)
 	
-	var dmg_num := DamageNumber.new()
-	get_parent().add_child(dmg_num)
-	dmg_num.setup(amount, is_crit, global_position + Vector2(0, -20))
+	var parent_node := get_parent()
+	if parent_node:
+		var dmg_num := DamageNumber.new()
+		parent_node.add_child(dmg_num)
+		dmg_num.setup(amount, is_crit, global_position + Vector2(0, -20))
 	
 	var recoil_direction := Vector2.UP
 	if is_instance_valid(player_ref):
@@ -383,9 +423,11 @@ func _claim_boss_defeat() -> bool:
 func _on_boss_death() -> void:
 	if not _claim_boss_defeat():
 		return
-	var cam := get_viewport().get_camera_2d()
-	if cam and cam.has_method("apply_impact"):
-		cam.apply_impact(10.0, 0.5)
+	if is_inside_tree():
+		var vp := get_viewport()
+		var cam = vp.get_camera_2d() if vp else null
+		if cam and cam.has_method("apply_impact"):
+			cam.apply_impact(10.0, 0.5)
 		
 	# Award floor victory rewards
 	if SaveManager:
@@ -395,17 +437,19 @@ func _on_boss_death() -> void:
 		SaveManager.record_achievement_progress("lord_breaker", 1)
 	GameManager.add_run_shades(15)
 	
-	# Spawn boss gold shower
-	for i in range(10):
-		var coin = CoinPickupClass.new()
-		get_parent().call_deferred("add_child", coin)
-		coin.setup(6, global_position + Vector2(randf_range(-30, 30), randf_range(-20, 20)))
-		
-	# Spawn boss celestial XP crystals
-	for i in range(3):
-		var xp_crystal = XpPickupClass.new()
-		get_parent().call_deferred("add_child", xp_crystal)
-		xp_crystal.setup(50.0, global_position + Vector2(randf_range(-40, 40), randf_range(-30, 30)))
+	var parent_node := get_parent()
+	if is_inside_tree() and parent_node:
+		# Spawn boss gold shower
+		for i in range(10):
+			var coin = CoinPickupClass.new()
+			parent_node.call_deferred("add_child", coin)
+			coin.setup(6, global_position + Vector2(randf_range(-30, 30), randf_range(-20, 20)))
+			
+		# Spawn boss celestial XP crystals
+		for i in range(3):
+			var xp_crystal = XpPickupClass.new()
+			parent_node.call_deferred("add_child", xp_crystal)
+			xp_crystal.setup(50.0, global_position + Vector2(randf_range(-40, 40), randf_range(-30, 30)))
 		
 	boss_defeated.emit()
 	GameManager.complete_current_level()
