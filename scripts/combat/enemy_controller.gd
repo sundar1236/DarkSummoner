@@ -4,6 +4,7 @@ extends CharacterBody2D
 const CoinPickupClass = preload("res://scripts/combat/coin_pickup.gd")
 const XpPickupClass = preload("res://scripts/combat/xp_pickup.gd")
 const CombatSpriteFeedback = preload("res://scripts/combat/combat_sprite_feedback.gd")
+const EnemyBossSpriteAnimationClass = preload("res://scripts/combat/enemy_boss_sprite_animation.gd")
 
 # Unified 2.5D enemy controller for swarmers, ranged cultists, charging hunters, and elite brutes.
 # Features distinct telegraph indicators, elite visual auras, crisp hit-flashes, and coin drops.
@@ -32,7 +33,7 @@ var player_ref: Node2D
 var shadow_sprite: Sprite2D
 var sprite: Sprite2D
 var visual_root: Node2D
-var authored_animator: EnemyBossSpriteAnimation
+var authored_animator: Node
 var authored_animation_active: bool = false
 var authored_locked_clip: String = ""
 var health_bar: ProgressBar
@@ -96,7 +97,7 @@ func _setup_authored_animation() -> void:
 	var manifest_path := "res://assets/art/enemies/source/manifest.json"
 	if not FileAccess.file_exists(manifest_path) or not is_instance_valid(visual_root):
 		return
-	authored_animator = EnemyBossSpriteAnimation.new()
+	authored_animator = EnemyBossSpriteAnimationClass.new()
 	authored_animator.name = "AuthoredSpriteAnimation"
 	visual_root.add_child(authored_animator)
 	var authored_actor_id := _resolve_authored_actor_id()
@@ -546,3 +547,5 @@ func _on_death() -> void:
 	var death_tween := CombatSpriteFeedback.play_death(visual_root, 0.2)
 	if death_tween:
 		death_tween.finished.connect(queue_free)
+	else:
+		queue_free()

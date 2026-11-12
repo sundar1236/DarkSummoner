@@ -18,6 +18,53 @@ const AUTHORED_CHARACTER_SCENES: Dictionary = {
 # character-specific visual ambience (Shadow Hunter streaks, Storm Reaper lightning sparks,
 # Soul Binder orbiting spirit companion), dodge shadow afterimages, and active skills.
 
+# Visual Helper Classes for safe canvas drawing
+class GroundRingVisual extends Node2D:
+	var player_ref: Node2D
+	func _draw() -> void:
+		var col := Color(0.8, 0.4, 1.0, 0.4)
+		if GameManager.current_character:
+			col = Color(GameManager.current_character.primary_color.r, GameManager.current_character.primary_color.g, GameManager.current_character.primary_color.b, 0.35)
+		draw_arc(Vector2(0, 22), 22.0, 0.0, TAU, 32, col, 1.5, true)
+
+class AimReticleVisual extends Node2D:
+	var player_ref: CharacterBody2D
+	func _draw() -> void:
+		if not is_instance_valid(player_ref) or not player_ref.is_attacking:
+			return
+		var line_len := 46.0
+		var col := Color(0.8, 0.4, 1.0, 0.65)
+		if GameManager.current_character:
+			col = Color(GameManager.current_character.primary_color.r, GameManager.current_character.primary_color.g, GameManager.current_character.primary_color.b, 0.75)
+		draw_line(Vector2(14, 0), Vector2(line_len, 0), col, 2.0)
+		draw_circle(Vector2(line_len, 0), 3.5, Color(1.0, 1.0, 1.0, 0.9))
+		draw_arc(Vector2(line_len, 0), 6.0, 0.0, TAU, 16, col, 1.5, true)
+
+class SpiritWispVisual extends Node2D:
+	var player_ref: CharacterBody2D
+	func _draw() -> void:
+		if not is_instance_valid(player_ref):
+			return
+		var orbit_angle: float = player_ref.anim_time * 3.2
+		var wisp_pos := Vector2(cos(orbit_angle) * 36.0, -16.0 + sin(orbit_angle) * 12.0)
+		draw_circle(wisp_pos, 8.0, Color(0.2, 0.95, 0.6, 0.35))
+		draw_circle(wisp_pos, 4.5, Color(0.5, 1.0, 0.8, 0.9))
+		draw_circle(wisp_pos + Vector2(1, -1), 1.8, Color(1.0, 1.0, 1.0, 0.95))
+		var tail_pos := wisp_pos - Vector2(cos(orbit_angle + 0.3), sin(orbit_angle + 0.3)) * 6.0
+		draw_circle(tail_pos, 2.5, Color(0.2, 0.9, 0.55, 0.4))
+
+class StormSparksVisual extends Node2D:
+	var player_ref: CharacterBody2D
+	func _draw() -> void:
+		if not is_instance_valid(player_ref):
+			return
+		var spark_cycle: float = fmod(player_ref.anim_time * 6.0, 1.0)
+		if spark_cycle < 0.4:
+			var p1 := Vector2(randf_range(-14, 14), randf_range(-24, 6))
+			var p2 := p1 + Vector2(randf_range(-10, 10), randf_range(-10, 10))
+			var p3 := p2 + Vector2(randf_range(-8, 8), randf_range(-8, 8))
+			draw_polyline([p1, p2, p3], Color(0.4, 0.9, 1.0, 0.85), 1.6)
+
 signal skill_cooldown_updated(current: float, max_val: float)
 signal dodge_cooldown_updated(current: float, max_val: float)
 
@@ -107,9 +154,10 @@ func _setup_visuals() -> void:
 	visual_root.add_child(shadow_sprite)
 	
 	# 2. Ground subtle hero indicator ring
-	ground_ring = Node2D.new()
-	ground_ring.z_index = -1
-	ground_ring.draw.connect(_draw_ground_ring)
+	var g_ring := GroundRingVisual.new()
+	g_ring.z_index = -1
+	g_ring.player_ref = self
+	ground_ring = g_ring
 	visual_root.add_child(ground_ring)
 	
 	# 3. Main Character Sprite
@@ -154,8 +202,9 @@ func _setup_visuals() -> void:
 	anim_ctrl.bind_authored_animation_player(authored_animation_player, {}, authored_rig_root)
 
 	# 7. Aim reticle indicator line
-	aim_indicator = Node2D.new()
-	aim_indicator.draw.connect(_draw_aim_reticle)
+	var a_ind := AimReticleVisual.new()
+	a_ind.player_ref = self
+	aim_indicator = a_ind
 	visual_root.add_child(aim_indicator)
 	
 	# 8. Overhead floating health bar
@@ -286,39 +335,24 @@ func _setup_character_ambience() -> void:
 			visual_root.add_child(shadow_trails)
 		"soul_binder":
 			# Clearly visible floating spirit companion orbiting Soul Binder
-			spirit_wisp = Node2D.new()
-			spirit_wisp.z_index = 5
-			spirit_wisp.draw.connect(_draw_spirit_wisp)
+			var wisp := SpiritWispVisual.new()
+			wisp.z_index = 5
+			wisp.player_ref = self
+			spirit_wisp = wisp
 			visual_root.add_child(spirit_wisp)
 		"storm_reaper":
 			# Ambient electric crackle sparks for Storm Reaper
-			storm_sparks = Node2D.new()
-			storm_sparks.z_index = 4
-			storm_sparks.draw.connect(_draw_storm_sparks)
+			var sparks := StormSparksVisual.new()
+			sparks.z_index = 4
+			sparks.player_ref = self
+			storm_sparks = sparks
 			visual_root.add_child(storm_sparks)
 
 func _draw_ground_ring() -> void:
-	# Subtle hero circle indicator matching character primary color
-	var col := Color(0.8, 0.4, 1.0, 0.4)
-	if GameManager.current_character:
-		col = Color(GameManager.current_character.primary_color.r, GameManager.current_character.primary_color.g, GameManager.current_character.primary_color.b, 0.35)
-	ground_ring.draw_arc(Vector2(0, 22), 22.0, 0.0, TAU, 32, col, 1.5, true)
+	if ground_ring: ground_ring.queue_redraw()
 
 func _draw_spirit_wisp() -> void:
-	if not spirit_wisp:
-		return
-	# Orbit around player at radius 36.0, height -16.0
-	var orbit_angle := anim_time * 3.2
-	var wisp_pos := Vector2(cos(orbit_angle) * 36.0, -16.0 + sin(orbit_angle) * 12.0)
-	
-	# Outer soft soul glow
-	spirit_wisp.draw_circle(wisp_pos, 8.0, Color(0.2, 0.95, 0.6, 0.35))
-	# Inner bright spirit core
-	spirit_wisp.draw_circle(wisp_pos, 4.5, Color(0.5, 1.0, 0.8, 0.9))
-	spirit_wisp.draw_circle(wisp_pos + Vector2(1, -1), 1.8, Color(1.0, 1.0, 1.0, 0.95))
-	# Little ethereal tail
-	var tail_pos := wisp_pos - Vector2(cos(orbit_angle + 0.3), sin(orbit_angle + 0.3)) * 6.0
-	spirit_wisp.draw_circle(tail_pos, 2.5, Color(0.2, 0.9, 0.55, 0.4))
+	if spirit_wisp: spirit_wisp.queue_redraw()
 
 func _draw_shadow_trails() -> void:
 	if not shadow_trails:
@@ -329,15 +363,7 @@ func _draw_shadow_trails() -> void:
 	shadow_trails.draw_arc(Vector2(2, -8), 34.0 + pulse * 2.0, 3.3, 5.8, 24, Color(0.72, 0.42, 1.0, 0.2 + pulse * 0.18), 1.4)
 
 func _draw_storm_sparks() -> void:
-	if not storm_sparks:
-		return
-	# Crackling intermittent cyan electric arcs around the storm armor
-	var spark_cycle: float = fmod(anim_time * 6.0, 1.0)
-	if spark_cycle < 0.4:
-		var p1 := Vector2(randf_range(-14, 14), randf_range(-24, 6))
-		var p2 := p1 + Vector2(randf_range(-10, 10), randf_range(-10, 10))
-		var p3 := p2 + Vector2(randf_range(-8, 8), randf_range(-8, 8))
-		storm_sparks.draw_polyline([p1, p2, p3], Color(0.4, 0.9, 1.0, 0.85), 1.6)
+	if storm_sparks: storm_sparks.queue_redraw()
 
 func _update_character_sprite() -> void:
 	if not sprite:
@@ -369,16 +395,7 @@ func _update_character_sprite() -> void:
 		weapon_sprite.texture = TextureLoader.get_texture(weap_path)
 
 func _draw_aim_reticle() -> void:
-	if not is_attacking:
-		return
-	# Sleek target lock reticle indicating auto-aim locked enemy
-	var line_len := 46.0
-	var col := Color(0.8, 0.4, 1.0, 0.65)
-	if GameManager.current_character:
-		col = Color(GameManager.current_character.primary_color.r, GameManager.current_character.primary_color.g, GameManager.current_character.primary_color.b, 0.75)
-	aim_indicator.draw_line(Vector2(14, 0), Vector2(line_len, 0), col, 2.0)
-	aim_indicator.draw_circle(Vector2(line_len, 0), 3.5, Color(1.0, 1.0, 1.0, 0.9))
-	aim_indicator.draw_arc(Vector2(line_len, 0), 6.0, 0.0, TAU, 16, col, 1.5, true)
+	if aim_indicator: aim_indicator.queue_redraw()
 
 func _refresh_stats() -> void:
 	var stats := GameManager.get_player_effective_stats()

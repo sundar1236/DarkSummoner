@@ -203,6 +203,12 @@ func show_announcement(msg: String, duration: float = 2.0, col: Color = Color.WH
 	feedback_tween.tween_property(feedback_banner, "modulate:a", 0.0, 0.3)
 	feedback_tween.tween_callback(func(): feedback_banner.visible = false)
 
+func hide_announcement() -> void:
+	if feedback_tween and feedback_tween.is_valid():
+		feedback_tween.kill()
+	if feedback_banner:
+		feedback_banner.visible = false
+
 func _on_dodge_pressed() -> void:
 	if is_instance_valid(player_ref):
 		player_ref.trigger_dodge()

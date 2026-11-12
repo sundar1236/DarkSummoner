@@ -183,22 +183,57 @@ func _refresh_gear_inventory_grid() -> void:
 			continue
 		var slot_name := item.data.equipment_slot
 		var button := Button.new()
-		button.custom_minimum_size = Vector2(104, 96)
+		button.custom_minimum_size = Vector2(104, 104)
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		var equipped := str(SaveManager.equipped_gear.get(slot_name, "")) == item.uid
+		
+		var style := StyleBoxFlat.new()
+		style.bg_color = Color(0.1, 0.12, 0.18, 0.95) if equipped else Color(0.06, 0.08, 0.13, 0.92)
+		style.border_color = Color(0.95, 0.78, 0.25, 1.0) if equipped else Color(0.32, 0.4, 0.55, 0.75)
+		style.set_border_width_all(2 if equipped else 1)
+		style.set_corner_radius_all(10)
+		
+		button.add_theme_stylebox_override("normal", style)
+		button.add_theme_stylebox_override("hover", style)
+		button.add_theme_stylebox_override("pressed", style)
+		
+		var title_col := Color(1.0, 0.9, 0.45, 1.0) if equipped else Color(0.85, 0.88, 0.95, 1.0)
+		button.add_theme_color_override("font_color", title_col)
 		button.text = "%s\n%s\n%s" % [
 			slot_icons.get(slot_name, "◆"),
 			item.data.name,
-			"Equipped" if equipped else item.rarity.capitalize()
+			"★ Equipped" if equipped else item.rarity.capitalize()
 		]
-		button.add_theme_font_size_override("font_size", 13)
+		button.add_theme_font_size_override("font_size", 12)
 		var item_uid := item.uid
 		if item.uid == _selected_gear_uid:
-			button.text += "\nSelected"
+			button.text += "\n[Selected]"
 		button.pressed.connect(func():
 			_show_gear_details(item_uid)
 		)
 		gear_grid.add_child(button)
+
+	# Fill remaining slots up to at least 25 (5 full rows of 5) with clean gothic empty backpack slots
+	var total_slots := maxi(25, ((items.size() + 4) / 5) * 5)
+	for i in range(items.size(), total_slots):
+		var empty_panel := PanelContainer.new()
+		empty_panel.custom_minimum_size = Vector2(104, 104)
+		empty_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		var empty_style := StyleBoxFlat.new()
+		empty_style.bg_color = Color(0.04, 0.05, 0.08, 0.55)
+		empty_style.border_color = Color(0.18, 0.22, 0.32, 0.5)
+		empty_style.set_border_width_all(1)
+		empty_style.set_corner_radius_all(8)
+		empty_panel.add_theme_stylebox_override("panel", empty_style)
+		
+		var empty_lbl := Label.new()
+		empty_lbl.text = "✦"
+		empty_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		empty_lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		empty_lbl.add_theme_font_size_override("font_size", 16)
+		empty_lbl.add_theme_color_override("font_color", Color(0.25, 0.3, 0.4, 0.45))
+		empty_panel.add_child(empty_lbl)
+		gear_grid.add_child(empty_panel)
 
 
 func _get_sorted_gear_items(items: Array[ItemInstance], sort_index: int) -> Array[ItemInstance]:
@@ -717,9 +752,21 @@ func _switch_subtab(idx: int) -> void:
 	var active_color := Color(1.0, 0.88, 0.35, 1.0)
 	var inactive_color := Color(0.65, 0.7, 0.8, 0.8)
 	
-	if btn_sub_characters:
-		btn_sub_characters.add_theme_color_override("font_color", active_color if idx == 0 else inactive_color)
-	if btn_sub_gear:
-		btn_sub_gear.add_theme_color_override("font_color", active_color if idx == 1 else inactive_color)
-	if btn_sub_runes:
-		btn_sub_runes.add_theme_color_override("font_color", active_color if idx == 2 else inactive_color)
+	var active_style := StyleBoxFlat.new()
+	active_style.bg_color = Color(0.14, 0.1, 0.24, 0.95)
+	active_style.border_color = Color(0.95, 0.8, 0.35, 1.0)
+	active_style.set_border_width_all(1)
+	active_style.border_width_bottom = 2
+	active_style.set_corner_radius_all(8)
+	
+	var empty_style := StyleBoxEmpty.new()
+	
+	var subtab_buttons := [btn_sub_characters, btn_sub_gear, btn_sub_runes]
+	for i in range(subtab_buttons.size()):
+		var btn = subtab_buttons[i]
+		if btn:
+			var is_cur := (i == idx)
+			btn.add_theme_color_override("font_color", active_color if is_cur else inactive_color)
+			btn.add_theme_stylebox_override("normal", active_style if is_cur else empty_style)
+			btn.add_theme_stylebox_override("hover", active_style if is_cur else empty_style)
+			btn.add_theme_stylebox_override("pressed", active_style if is_cur else empty_style)

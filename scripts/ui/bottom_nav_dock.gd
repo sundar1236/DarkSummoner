@@ -103,6 +103,17 @@ func _update_tab_visuals() -> void:
 		var lbl := tab_labels[i]
 		var ico := tab_icons[i]
 		
+		var indicator: ColorRect = cont.get_node_or_null("ActiveIndicator")
+		if not indicator:
+			indicator = ColorRect.new()
+			indicator.name = "ActiveIndicator"
+			indicator.custom_minimum_size = Vector2(0, 3)
+			indicator.color = Color(1.0, 0.88, 0.35, 0.95)
+			indicator.anchors_preset = Control.PRESET_TOP_WIDE
+			indicator.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			cont.add_child(indicator)
+		indicator.visible = is_active
+		
 		if is_active:
 			cont.modulate = Color(1.0, 1.0, 1.0, 1.0)
 			lbl.add_theme_color_override("font_color", Color(1.0, 0.88, 0.35, 1.0))

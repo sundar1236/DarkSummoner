@@ -6,6 +6,8 @@ extends Area2D
 
 var value: int = 1
 var is_magnetized: bool = false
+var magnetize_delay: float = 0.35
+var is_collected: bool = false
 var velocity: Vector2 = Vector2.ZERO
 var target_player: Node2D
 var sprite: Sprite2D
@@ -36,14 +38,14 @@ func setup(p_val: int, start_pos: Vector2) -> void:
 	var angle := randf() * TAU
 	var pop_force := randf_range(60.0, 140.0)
 	velocity = Vector2.RIGHT.rotated(angle) * pop_force
-	
-	# Magnetize after brief delay
-	get_tree().create_timer(0.35).timeout.connect(func():
-		is_magnetized = true
-	)
+	magnetize_delay = 0.35
 
 func _physics_process(delta: float) -> void:
 	lifetime += delta
+	if not is_magnetized:
+		magnetize_delay -= delta
+		if magnetize_delay <= 0.0:
+			is_magnetized = true
 	if not is_instance_valid(target_player):
 		var p_nodes := get_tree().get_nodes_in_group("player")
 		if not p_nodes.is_empty():
@@ -75,6 +77,10 @@ func _on_body_entered(body: Node2D) -> void:
 		_collect()
 
 func _collect() -> void:
+	if is_collected:
+		return
+	is_collected = true
+	set_deferred("monitoring", false)
 	GameManager.add_gold(value)
 	if AudioManager:
 		AudioManager.play_sfx("coin_pickup", 0.05)

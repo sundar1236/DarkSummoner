@@ -31,7 +31,7 @@ inventory_view = NodePath("InventoryView")
 shop_view = NodePath("ShopView")
 reward_view = NodePath("RewardView")
 game_over_view = NodePath("GameOverView")
-settings_modal = NodePath("SettingsModal")
+settings_modal = NodePath("ModalLayer/SettingsModal")
 combat_container = NodePath("CombatContainer")
 
 [node name="CombatContainer" type="Node2D" parent="."]
@@ -75,6 +75,9 @@ layout_mode = 1
 visible = false
 layout_mode = 1
 
-[node name="SettingsModal" parent="." instance=ExtResource("10_set")]
+[node name="ModalLayer" type="CanvasLayer" parent="."]
+layer = 100
+
+[node name="SettingsModal" parent="ModalLayer" instance=ExtResource("10_set")]
 visible = false
 layout_mode = 1

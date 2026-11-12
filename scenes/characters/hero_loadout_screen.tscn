@@ -17,9 +17,21 @@
 bg_color = Color(0.04, 0.05, 0.09, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_subtab_bg"]
-bg_color = Color(0.08, 0.1, 0.16, 0.95)
+bg_color = Color(0.06, 0.05, 0.1, 0.98)
 border_width_bottom = 2
-border_color = Color(0.2, 0.25, 0.35, 0.8)
+border_color = Color(0.85, 0.72, 0.3, 0.85)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_subtab_active"]
+bg_color = Color(0.14, 0.1, 0.24, 0.95)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 2
+border_color = Color(0.95, 0.8, 0.35, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_tabbtn"]
 
@@ -106,12 +118,13 @@ custom_minimum_size = Vector2(0, 52)
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
-offset_top = 116.0
-offset_bottom = 168.0
+offset_top = 0.0
+offset_bottom = 52.0
 grow_horizontal = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_subtab_bg")
 
 [node name="SubTabBgTex" type="TextureRect" parent="SubTabHeader"]
+visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -129,51 +142,47 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 alignment = 1
-theme_override_constants/separation = 40
+theme_override_constants/separation = 24
 
 [node name="BtnCharacters" type="Button" parent="SubTabHeader/HBox"]
-custom_minimum_size = Vector2(130, 48)
+custom_minimum_size = Vector2(130, 44)
 layout_mode = 2
-theme_override_colors/font_color = Color(0, 0, 0, 0)
-theme_override_colors/font_focus_color = Color(0, 0, 0, 0)
-theme_override_colors/font_hover_color = Color(0, 0, 0, 0)
-theme_override_colors/font_pressed_color = Color(0, 0, 0, 0)
+theme_override_colors/font_color = Color(0.65, 0.7, 0.8, 1)
+theme_override_font_sizes/font_size = 20
 theme_override_styles/normal = SubResource("StyleBoxEmpty_tabbtn")
 theme_override_styles/hover = SubResource("StyleBoxEmpty_tabbtn")
 theme_override_styles/pressed = SubResource("StyleBoxEmpty_tabbtn")
 flat = true
+text = "Characters"
 
 [node name="BtnGear" type="Button" parent="SubTabHeader/HBox"]
-custom_minimum_size = Vector2(100, 48)
+custom_minimum_size = Vector2(110, 44)
 layout_mode = 2
-theme_override_colors/font_color = Color(0, 0, 0, 0)
-theme_override_colors/font_focus_color = Color(0, 0, 0, 0)
-theme_override_colors/font_hover_color = Color(0, 0, 0, 0)
-theme_override_colors/font_pressed_color = Color(0, 0, 0, 0)
-theme_override_styles/normal = SubResource("StyleBoxEmpty_tabbtn")
-theme_override_styles/hover = SubResource("StyleBoxEmpty_tabbtn")
-theme_override_styles/pressed = SubResource("StyleBoxEmpty_tabbtn")
-flat = true
+theme_override_colors/font_color = Color(1, 0.88, 0.35, 1)
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("StyleBoxFlat_subtab_active")
+theme_override_styles/hover = SubResource("StyleBoxFlat_subtab_active")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_subtab_active")
+text = "Gear"
 
 [node name="BtnRunes" type="Button" parent="SubTabHeader/HBox"]
-custom_minimum_size = Vector2(100, 48)
+custom_minimum_size = Vector2(110, 44)
 layout_mode = 2
-theme_override_colors/font_color = Color(0, 0, 0, 0)
-theme_override_colors/font_focus_color = Color(0, 0, 0, 0)
-theme_override_colors/font_hover_color = Color(0, 0, 0, 0)
-theme_override_colors/font_pressed_color = Color(0, 0, 0, 0)
+theme_override_colors/font_color = Color(0.65, 0.7, 0.8, 1)
+theme_override_font_sizes/font_size = 20
 theme_override_styles/normal = SubResource("StyleBoxEmpty_tabbtn")
 theme_override_styles/hover = SubResource("StyleBoxEmpty_tabbtn")
 theme_override_styles/pressed = SubResource("StyleBoxEmpty_tabbtn")
 flat = true
+text = "Runes"
 
 [node name="ContentContainer" type="Control" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = 168.0
-offset_bottom = -120.0
+offset_top = 52.0
+offset_bottom = 0.0
 grow_horizontal = 2
 grow_vertical = 2
 

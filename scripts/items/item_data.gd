@@ -41,4 +41,19 @@ extends Resource
 
 func get_icon_texture() -> Texture2D:
 	var path := "res://assets/art/items/item_%s.png" % id
-	return TextureLoader.get_texture(path)
+	if FileAccess.file_exists(path) or ResourceLoader.exists(path):
+		var tex := TextureLoader.get_texture(path)
+		if tex:
+			return tex
+	var fallback_path := "res://assets/art/items/item_shadow_dagger.png"
+	if tags.has("amulet") or equipment_slot == "amulet":
+		fallback_path = "res://assets/art/items/item_blood_chalice.png"
+	elif tags.has("ring") or equipment_slot == "ring":
+		fallback_path = "res://assets/art/items/item_demon_core.png"
+	elif tags.has("helmet") or equipment_slot == "helmet":
+		fallback_path = "res://assets/art/items/item_void_shield.png"
+	elif tags.has("boots") or equipment_slot == "boots":
+		fallback_path = "res://assets/art/items/item_iron_shield.png"
+	elif tags.has("rune") or tags.has("core"):
+		fallback_path = "res://assets/art/items/item_fire_rune.png"
+	return TextureLoader.get_texture(fallback_path)

@@ -6,6 +6,8 @@ extends Area2D
 
 var value: float = 25.0
 var is_magnetized: bool = false
+var magnetize_delay: float = 0.28
+var is_collected: bool = false
 var velocity: Vector2 = Vector2.ZERO
 var target_player: Node2D
 var lifetime: float = 0.0
@@ -30,11 +32,7 @@ func setup(p_val: float, start_pos: Vector2) -> void:
 	var angle := randf() * TAU
 	var pop_force := randf_range(70.0, 160.0)
 	velocity = Vector2.RIGHT.rotated(angle) * pop_force
-	
-	# Magnetize after brief burst duration
-	get_tree().create_timer(0.28).timeout.connect(func():
-		is_magnetized = true
-	)
+	magnetize_delay = 0.28
 
 func _draw() -> void:
 	# Draw glowing celestial soul crystal (diamond shape)
@@ -62,6 +60,11 @@ func _physics_process(delta: float) -> void:
 	lifetime += delta
 	queue_redraw()
 	
+	if not is_magnetized:
+		magnetize_delay -= delta
+		if magnetize_delay <= 0.0:
+			is_magnetized = true
+	
 	if not is_instance_valid(target_player):
 		var p_nodes := get_tree().get_nodes_in_group("player")
 		if not p_nodes.is_empty():
@@ -87,6 +90,10 @@ func _on_body_entered(body: Node2D) -> void:
 		_collect()
 
 func _collect() -> void:
+	if is_collected:
+		return
+	is_collected = true
+	set_deferred("monitoring", false)
 	GameManager.add_run_xp(value)
 	if AudioManager:
 		AudioManager.play_sfx("coin_pickup", 0.1)

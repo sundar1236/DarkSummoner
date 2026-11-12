@@ -140,6 +140,14 @@ func _switch_to_tab(tab_idx: int) -> void:
 	if nav_dock and nav_dock.has_method("set_selected_tab"):
 		nav_dock.set_selected_tab(tab_idx)
 	_set_active_tab_screen(tab_idx)
+	if nav_dock and nav_dock.current_tab != tab_idx:
+		nav_dock.current_tab = tab_idx
+		nav_dock._update_tab_visuals()
+	if screen_shop: screen_shop.visible = (tab_idx == 0)
+	if screen_loadout: screen_loadout.visible = (tab_idx == 1)
+	if screen_campaign: screen_campaign.visible = (tab_idx == 2)
+	if screen_collectible: screen_collectible.visible = (tab_idx == 3)
+	if screen_sanctuary: screen_sanctuary.visible = (tab_idx == 4)
 	
 	if top_bar:
 		top_bar.refresh_display()

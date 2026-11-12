@@ -202,6 +202,10 @@ func _set_active_root_screen(screen_name: String) -> void:
 
 func _show_modal(modal_name: String) -> void:
 	if modal_name == "settings" and settings_modal:
+		if is_instance_valid(current_arena):
+			var hud := current_arena.get_node_or_null("HUDLayer/CombatHUD") as CombatHUD
+			if hud:
+				hud.hide_announcement()
 		settings_modal.visible = true
 
 func _on_continue_pressed() -> void:
@@ -274,6 +278,7 @@ func _on_inventory_closed() -> void:
 		if inventory_view:
 			inventory_view.visible = false
 			inventory_view.process_mode = Node.PROCESS_MODE_INHERIT
+		_show_screen("combat")
 		if settings_modal:
 			settings_modal.visible = true
 	else:

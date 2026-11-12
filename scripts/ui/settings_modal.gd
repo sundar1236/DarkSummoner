@@ -26,6 +26,18 @@ func _ready() -> void:
 	_setup_signals()
 	_load_current_values()
 
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_VISIBILITY_CHANGED and is_visible_in_tree():
+		_load_current_values()
+		_reset_confirm_state()
+		var in_run: bool = GameManager and GameManager.is_in_run
+		if btn_inventory:
+			btn_inventory.visible = in_run
+		if btn_abandon:
+			btn_abandon.visible = in_run
+		if btn_resume:
+			btn_resume.text = "RESUME" if in_run else "CLOSE"
+
 func _setup_signals() -> void:
 	if btn_resume:
 		btn_resume.pressed.connect(func():

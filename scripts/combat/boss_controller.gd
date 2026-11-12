@@ -4,6 +4,7 @@ extends CharacterBody2D
 const CoinPickupClass = preload("res://scripts/combat/coin_pickup.gd")
 const XpPickupClass = preload("res://scripts/combat/xp_pickup.gd")
 const CombatSpriteFeedback = preload("res://scripts/combat/combat_sprite_feedback.gd")
+const EnemyBossSpriteAnimationClass = preload("res://scripts/combat/enemy_boss_sprite_animation.gd")
 
 # Floor Boss controller: "Lord Malakar, the Abyssal Dread".
 # Features multi-phase combat and readable animated warning telegraph danger zones.
@@ -20,7 +21,7 @@ var player_ref: Node2D
 var shadow_sprite: Sprite2D
 var sprite: Sprite2D
 var visual_root: Node2D
-var authored_animator: EnemyBossSpriteAnimation
+var authored_animator: Node
 var authored_animation_active: bool = false
 var authored_locked_clip: String = ""
 
@@ -82,7 +83,7 @@ func _setup_authored_animation() -> void:
 	var manifest_path := "res://assets/art/enemies/source/manifest.json"
 	if not FileAccess.file_exists(manifest_path) or not is_instance_valid(visual_root):
 		return
-	authored_animator = EnemyBossSpriteAnimation.new()
+	authored_animator = EnemyBossSpriteAnimationClass.new()
 	authored_animator.name = "AuthoredSpriteAnimation"
 	visual_root.add_child(authored_animator)
 	authored_animation_active = authored_animator.setup_from_manifest(manifest_path, "lord_malakar", "boss")
@@ -419,3 +420,5 @@ func _on_boss_death() -> void:
 	)
 	if death_tween:
 		death_tween.finished.connect(queue_free)
+	else:
+		queue_free()

@@ -1,6 +1,85 @@
-[gd_scene load_steps=2 format=3 uid="uid://c6settingsmodal01"]
+[gd_scene load_steps=8 format=3 uid="uid://c6settingsmodal01"]
 
 [ext_resource type="Script" path="res://scripts/ui/settings_modal.gd" id="1_set"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dim"]
+bg_color = Color(0.02, 0.025, 0.05, 0.92)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_card"]
+content_margin_left = 32.0
+content_margin_top = 28.0
+content_margin_right = 32.0
+content_margin_bottom = 28.0
+bg_color = Color(0.07, 0.08, 0.13, 0.98)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.85, 0.72, 0.25, 1)
+corner_radius_top_left = 18
+corner_radius_top_right = 18
+corner_radius_bottom_right = 18
+corner_radius_bottom_left = 18
+shadow_color = Color(0, 0, 0, 0.85)
+shadow_size = 32
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel_inset"]
+content_margin_left = 18.0
+content_margin_top = 14.0
+content_margin_right = 18.0
+content_margin_bottom = 14.0
+bg_color = Color(0.04, 0.05, 0.08, 0.9)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.35, 0.38, 0.5, 0.6)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_resume"]
+bg_color = Color(0.18, 0.32, 0.58, 0.95)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.95, 0.82, 0.35, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+shadow_color = Color(0, 0, 0, 0.6)
+shadow_size = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_inventory"]
+bg_color = Color(0.1, 0.12, 0.18, 0.95)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.5, 0.58, 0.75, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+shadow_color = Color(0, 0, 0, 0.6)
+shadow_size = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btn_abandon"]
+bg_color = Color(0.22, 0.08, 0.1, 0.95)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.7, 0.28, 0.28, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+shadow_color = Color(0, 0, 0, 0.6)
+shadow_size = 6
 
 [node name="SettingsModal" type="Control" node_paths=PackedStringArray("slider_master", "slider_music", "slider_sfx", "slider_ambience", "check_mute", "check_screen_shake", "check_reduced_motion", "btn_resume", "btn_inventory", "btn_abandon")]
 process_mode = 3
@@ -11,62 +90,85 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_set")
-slider_master = NodePath("VBox/Sliders/MasterRow/MasterSlider")
-slider_music = NodePath("VBox/Sliders/MusicRow/MusicSlider")
-slider_sfx = NodePath("VBox/Sliders/SfxRow/SfxSlider")
-slider_ambience = NodePath("VBox/Sliders/AmbienceRow/AmbienceSlider")
-check_mute = NodePath("VBox/CheckMute")
-check_screen_shake = NodePath("VBox/CheckScreenShake")
-check_reduced_motion = NodePath("VBox/CheckReducedMotion")
-btn_resume = NodePath("VBox/Buttons/BtnResume")
-btn_inventory = NodePath("VBox/Buttons/BtnInventory")
-btn_abandon = NodePath("VBox/Buttons/BtnAbandon")
+slider_master = NodePath("CenterContainer/Card/VBox/SlidersPanel/Sliders/MasterRow/MasterSlider")
+slider_music = NodePath("CenterContainer/Card/VBox/SlidersPanel/Sliders/MusicRow/MusicSlider")
+slider_sfx = NodePath("CenterContainer/Card/VBox/SlidersPanel/Sliders/SfxRow/SfxSlider")
+slider_ambience = NodePath("CenterContainer/Card/VBox/SlidersPanel/Sliders/AmbienceRow/AmbienceSlider")
+check_mute = NodePath("CenterContainer/Card/VBox/CheckMute")
+check_screen_shake = NodePath("CenterContainer/Card/VBox/CheckScreenShake")
+check_reduced_motion = NodePath("CenterContainer/Card/VBox/CheckReducedMotion")
+btn_resume = NodePath("CenterContainer/Card/VBox/Buttons/BtnResume")
+btn_inventory = NodePath("CenterContainer/Card/VBox/Buttons/BtnInventory")
+btn_abandon = NodePath("CenterContainer/Card/VBox/Buttons/BtnAbandon")
 
-[node name="Bg" type="ColorRect" parent="."]
+[node name="Bg" type="Panel" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.05, 0.04, 0.07, 0.96)
+mouse_filter = 0
+theme_override_styles/panel = SubResource("StyleBoxFlat_dim")
 
-[node name="VBox" type="VBoxContainer" parent="."]
+[node name="CenterContainer" type="CenterContainer" parent="."]
 layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -280.0
-offset_top = -340.0
-offset_right = 280.0
-offset_bottom = 340.0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/separation = 18
 
-[node name="Title" type="Label" parent="VBox"]
+[node name="Card" type="PanelContainer" parent="CenterContainer"]
+custom_minimum_size = Vector2(560, 0)
 layout_mode = 2
-theme_override_font_sizes/font_size = 28
-theme_override_colors/font_color = Color(0.9, 0.75, 1, 1)
-text = "PAUSED / SETTINGS"
-horizontal_alignment = 1
+theme_override_styles/panel = SubResource("StyleBoxFlat_card")
 
-[node name="Sliders" type="VBoxContainer" parent="VBox"]
+[node name="VBox" type="VBoxContainer" parent="CenterContainer/Card"]
 layout_mode = 2
 theme_override_constants/separation = 14
 
-[node name="MasterRow" type="HBoxContainer" parent="VBox/Sliders"]
+[node name="HeaderHBox" type="HBoxContainer" parent="CenterContainer/Card/VBox"]
+layout_mode = 2
+alignment = 1
+
+[node name="Icon" type="Label" parent="CenterContainer/Card/VBox/HeaderHBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.88, 0.35, 1)
+theme_override_font_sizes/font_size = 28
+text = "⚙ "
+
+[node name="Title" type="Label" parent="CenterContainer/Card/VBox/HeaderHBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.88, 0.35, 1)
+theme_override_font_sizes/font_size = 26
+text = "PAUSED / SETTINGS"
+horizontal_alignment = 1
+
+[node name="Divider" type="ColorRect" parent="CenterContainer/Card/VBox"]
+custom_minimum_size = Vector2(0, 2)
+layout_mode = 2
+color = Color(0.85, 0.72, 0.25, 0.45)
+
+[node name="SlidersPanel" type="PanelContainer" parent="CenterContainer/Card/VBox"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel_inset")
+
+[node name="Sliders" type="VBoxContainer" parent="CenterContainer/Card/VBox/SlidersPanel"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="MasterRow" type="HBoxContainer" parent="CenterContainer/Card/VBox/SlidersPanel/Sliders"]
 layout_mode = 2
 
-[node name="Lbl" type="Label" parent="VBox/Sliders/MasterRow"]
+[node name="Lbl" type="Label" parent="CenterContainer/Card/VBox/SlidersPanel/Sliders/MasterRow"]
 custom_minimum_size = Vector2(130, 0)
 layout_mode = 2
-theme_override_font_sizes/font_size = 20
+theme_override_colors/font_color = Color(0.88, 0.88, 0.95, 1)
+theme_override_font_sizes/font_size = 18
 text = "Master:"
 
-[node name="MasterSlider" type="HSlider" parent="VBox/Sliders/MasterRow"]
+[node name="MasterSlider" type="HSlider" parent="CenterContainer/Card/VBox/SlidersPanel/Sliders/MasterRow"]
 custom_minimum_size = Vector2(0, 32)
 layout_mode = 2
 size_flags_horizontal = 3
@@ -75,16 +177,17 @@ max_value = 1.0
 step = 0.05
 value = 0.8
 
-[node name="SfxRow" type="HBoxContainer" parent="VBox/Sliders"]
+[node name="SfxRow" type="HBoxContainer" parent="CenterContainer/Card/VBox/SlidersPanel/Sliders"]
 layout_mode = 2
 
-[node name="Lbl" type="Label" parent="VBox/Sliders/SfxRow"]
+[node name="Lbl" type="Label" parent="CenterContainer/Card/VBox/SlidersPanel/Sliders/SfxRow"]
 custom_minimum_size = Vector2(130, 0)
 layout_mode = 2
-theme_override_font_sizes/font_size = 20
+theme_override_colors/font_color = Color(0.88, 0.88, 0.95, 1)
+theme_override_font_sizes/font_size = 18
 text = "SFX:"
 
-[node name="SfxSlider" type="HSlider" parent="VBox/Sliders/SfxRow"]
+[node name="SfxSlider" type="HSlider" parent="CenterContainer/Card/VBox/SlidersPanel/Sliders/SfxRow"]
 custom_minimum_size = Vector2(0, 32)
 layout_mode = 2
 size_flags_horizontal = 3
@@ -93,16 +196,17 @@ max_value = 1.0
 step = 0.05
 value = 0.8
 
-[node name="MusicRow" type="HBoxContainer" parent="VBox/Sliders"]
+[node name="MusicRow" type="HBoxContainer" parent="CenterContainer/Card/VBox/SlidersPanel/Sliders"]
 layout_mode = 2
 
-[node name="Lbl" type="Label" parent="VBox/Sliders/MusicRow"]
+[node name="Lbl" type="Label" parent="CenterContainer/Card/VBox/SlidersPanel/Sliders/MusicRow"]
 custom_minimum_size = Vector2(130, 0)
 layout_mode = 2
-theme_override_font_sizes/font_size = 20
+theme_override_colors/font_color = Color(0.88, 0.88, 0.95, 1)
+theme_override_font_sizes/font_size = 18
 text = "Music:"
 
-[node name="MusicSlider" type="HSlider" parent="VBox/Sliders/MusicRow"]
+[node name="MusicSlider" type="HSlider" parent="CenterContainer/Card/VBox/SlidersPanel/Sliders/MusicRow"]
 custom_minimum_size = Vector2(0, 32)
 layout_mode = 2
 size_flags_horizontal = 3
@@ -111,16 +215,17 @@ max_value = 1.0
 step = 0.05
 value = 0.7
 
-[node name="AmbienceRow" type="HBoxContainer" parent="VBox/Sliders"]
+[node name="AmbienceRow" type="HBoxContainer" parent="CenterContainer/Card/VBox/SlidersPanel/Sliders"]
 layout_mode = 2
 
-[node name="Lbl" type="Label" parent="VBox/Sliders/AmbienceRow"]
+[node name="Lbl" type="Label" parent="CenterContainer/Card/VBox/SlidersPanel/Sliders/AmbienceRow"]
 custom_minimum_size = Vector2(130, 0)
 layout_mode = 2
-theme_override_font_sizes/font_size = 20
+theme_override_colors/font_color = Color(0.88, 0.88, 0.95, 1)
+theme_override_font_sizes/font_size = 18
 text = "Ambience:"
 
-[node name="AmbienceSlider" type="HSlider" parent="VBox/Sliders/AmbienceRow"]
+[node name="AmbienceSlider" type="HSlider" parent="CenterContainer/Card/VBox/SlidersPanel/Sliders/AmbienceRow"]
 custom_minimum_size = Vector2(0, 32)
 layout_mode = 2
 size_flags_horizontal = 3
@@ -129,42 +234,57 @@ max_value = 1.0
 step = 0.05
 value = 0.6
 
-[node name="CheckMute" type="CheckBox" parent="VBox"]
-custom_minimum_size = Vector2(0, 44)
+[node name="CheckMute" type="CheckBox" parent="CenterContainer/Card/VBox"]
+custom_minimum_size = Vector2(0, 38)
 layout_mode = 2
-theme_override_font_sizes/font_size = 21
+theme_override_colors/font_color = Color(0.88, 0.88, 0.95, 1)
+theme_override_font_sizes/font_size = 18
 text = "Mute All Audio"
 
-[node name="CheckScreenShake" type="CheckBox" parent="VBox"]
-custom_minimum_size = Vector2(0, 42)
+[node name="CheckScreenShake" type="CheckBox" parent="CenterContainer/Card/VBox"]
+custom_minimum_size = Vector2(0, 38)
 layout_mode = 2
-theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0.88, 0.88, 0.95, 1)
+theme_override_font_sizes/font_size = 17
 text = "Screen Shake"
 
-[node name="CheckReducedMotion" type="CheckBox" parent="VBox"]
-custom_minimum_size = Vector2(0, 42)
+[node name="CheckReducedMotion" type="CheckBox" parent="CenterContainer/Card/VBox"]
+custom_minimum_size = Vector2(0, 38)
 layout_mode = 2
-theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0.88, 0.88, 0.95, 1)
+theme_override_font_sizes/font_size = 17
 text = "Reduce Motion Effects"
 
-[node name="Buttons" type="VBoxContainer" parent="VBox"]
+[node name="Buttons" type="VBoxContainer" parent="CenterContainer/Card/VBox"]
 layout_mode = 2
-theme_override_constants/separation = 12
+theme_override_constants/separation = 10
 
-[node name="BtnResume" type="Button" parent="VBox/Buttons"]
-custom_minimum_size = Vector2(0, 58)
+[node name="BtnResume" type="Button" parent="CenterContainer/Card/VBox/Buttons"]
+custom_minimum_size = Vector2(0, 52)
 layout_mode = 2
-theme_override_font_sizes/font_size = 21
+theme_override_colors/font_color = Color(1, 0.92, 0.55, 1)
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_resume")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_resume")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_resume")
 text = "RESUME"
 
-[node name="BtnInventory" type="Button" parent="VBox/Buttons"]
-custom_minimum_size = Vector2(0, 58)
+[node name="BtnInventory" type="Button" parent="CenterContainer/Card/VBox/Buttons"]
+custom_minimum_size = Vector2(0, 50)
 layout_mode = 2
-theme_override_font_sizes/font_size = 20
+theme_override_colors/font_color = Color(0.9, 0.92, 0.98, 1)
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_inventory")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_inventory")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_inventory")
 text = "VIEW ALTAR & INVENTORY"
 
-[node name="BtnAbandon" type="Button" parent="VBox/Buttons"]
-custom_minimum_size = Vector2(0, 54)
+[node name="BtnAbandon" type="Button" parent="CenterContainer/Card/VBox/Buttons"]
+custom_minimum_size = Vector2(0, 46)
 layout_mode = 2
-theme_override_font_sizes/font_size = 19
+theme_override_colors/font_color = Color(0.95, 0.75, 0.75, 1)
+theme_override_font_sizes/font_size = 17
+theme_override_styles/normal = SubResource("StyleBoxFlat_btn_abandon")
+theme_override_styles/hover = SubResource("StyleBoxFlat_btn_abandon")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_btn_abandon")
 text = "ABANDON RUN"

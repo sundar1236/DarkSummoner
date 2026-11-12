@@ -4,9 +4,12 @@
 [ext_resource type="Texture2D" path="res://assets/art/ui_reference/footer_dock_master.png" id="2_fdk"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bg"]
-bg_color = Color(0.06, 0.07, 0.11, 0.98)
+bg_color = Color(0.06, 0.05, 0.1, 0.98)
 border_width_top = 2
-border_color = Color(0.22, 0.25, 0.35, 0.8)
+border_color = Color(0.85, 0.72, 0.3, 0.9)
+shadow_color = Color(0, 0, 0, 0.7)
+shadow_size = 12
+shadow_offset = Vector2(0, -4)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_badge"]
 bg_color = Color(0.9, 0.2, 0.25, 1)
@@ -39,6 +42,7 @@ grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_bg")
 
 [node name="FooterDockTex" type="TextureRect" parent="NavPanel"]
+visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -49,7 +53,6 @@ texture = ExtResource("2_fdk")
 expand_mode = 1
 
 [node name="TabHBox" type="HBoxContainer" parent="NavPanel"]
-modulate = Color(1, 1, 1, 0)
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0

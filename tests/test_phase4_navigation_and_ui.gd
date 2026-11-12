@@ -106,6 +106,8 @@ func test_bottom_nav_dock_tabs_and_badges() -> void:
 	assert_test(dock.tab_labels[2].get_theme_font_size("font_size") == 17, "Inactive tab label size is 17px")
 	
 	# Badge tests
+	SaveManager.daily_mission_progress.clear()
+	SaveManager.daily_mission_claimed.clear()
 	SaveManager.daily_free_energy_claim_date = ""
 	SaveManager.daily_free_energy_claimed = false
 	dock.refresh_badges()
