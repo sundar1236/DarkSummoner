@@ -34,7 +34,7 @@ def box(n,loc,scale,ma,bone,bevel=.06):
     bpy.ops.mesh.primitive_cube_add(size=1,location=loc); o=bpy.context.object; o.name=n; o.scale=scale
     bpy.ops.object.transform_apply(location=False,rotation=False,scale=True); o.data.materials.append(ma)
     be=o.modifiers.new("Soft Armor Edges","BEVEL"); be.width=bevel; be.segments=2
-    o.modifiers.new("Weighted Normals","WEIGHTED_NORMAL"); return bind(o,bone)
+    return bind(o,bone)
 def ball(n,loc,scale,ma,bone):
     bpy.ops.mesh.primitive_uv_sphere_add(segments=16,ring_count=12,location=loc); o=bpy.context.object; o.name=n; o.scale=scale
     bpy.ops.object.transform_apply(location=False,rotation=False,scale=True); o.data.materials.append(ma)
