@@ -67,7 +67,7 @@ func _build_viewport() -> void:
 
 	var world_environment := WorldEnvironment.new()
 	var environment := Environment.new()
-	environment.background_mode = Environment.BG_CLEAR
+	environment.background_mode = Environment.BG_CLEAR_COLOR
 	environment.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	environment.ambient_light_color = Color(0.62, 0.58, 0.72, 1.0)
 	environment.ambient_light_energy = 0.85
