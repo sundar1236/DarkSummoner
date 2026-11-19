@@ -82,6 +82,7 @@ func _ready() -> void:
         library.add_animation(clip, animation)
     wrapper_player.add_animation_library("", library)
     wrapper_player.animation_started.connect(_on_wrapper_animation_started)
+    model_animation_player.animation_finished.connect(_on_model_animation_finished)
     wrapper_player.play("idle")
 
 func _on_wrapper_animation_started(animation_name: StringName) -> void:
@@ -89,8 +90,16 @@ func _on_wrapper_animation_started(animation_name: StringName) -> void:
         return
     var requested := String(animation_name)
     for candidate in model_animation_player.get_animation_list():
-        var plain_name := String(candidate).get_slice("/", -1)
+        var parts := String(candidate).split("/")
+        var plain_name := parts[parts.size() - 1]
         if plain_name == requested:
             model_animation_player.play(candidate)
             return
     push_warning("GLB animation clip is missing: " + requested)
+
+func _on_model_animation_finished(_animation_name: StringName) -> void:
+    if not is_instance_valid(model_animation_player):
+        return
+    var current := String(model_animation_player.current_animation)
+    if current == "idle" or current == "run":
+        model_animation_player.play(current)
