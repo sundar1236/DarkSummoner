@@ -53,7 +53,7 @@ jobs:
             echo "Godot import reported script errors."
             exit 1
           fi
-          find .godot/imported -iname '*shadow_hunter*' -type f -print
+          godot --headless --path . --script tools/ci/validate_generated_glb.gd
       - name: Run Core Gameplay Test Suite
         run: bash tools/ci/run_godot_test.sh "res://tests/test_runner.tscn" "ALL ACCEPTANCE TESTS PASSED SUCCESSFULLY!"
       - name: Run Summoning Circle Test Suite
@@ -64,6 +64,17 @@ jobs:
         run: bash tools/ci/run_godot_test.sh "res://tests/test_phase4_navigation_and_ui.tscn" "PHASE 4 TEST RESULTS:"
       - name: Run Phase 5 Combat, HUD & Skills Tests
         run: bash tools/ci/run_godot_test.sh "res://tests/test_phase5_combat_and_skills.tscn" "PHASE 5 TEST RESULTS:"
+      - name: Configure Godot Android SDK paths
+        shell: bash
+        run: |
+          set -euo pipefail
+          JAVA_HOME="$(dirname "$(dirname "$(readlink -f "$(command -v javac)")")")"
+          mkdir -p "$HOME/.config/godot"
+          cat > "$HOME/.config/godot/editor_settings-4.tres" <<EOF
+          [resource]
+          export/android/android_sdk_path = "$ANDROID_SDK_ROOT"
+          export/android/java_sdk_path = "$JAVA_HOME"
+          EOF
       - name: Create CI-only Android debug keystore
         run: |
           keytool -genkeypair -v -keystore "$RUNNER_TEMP/dark-summoner-debug.keystore" -storepass android -alias androiddebugkey -keypass android -dname "CN=Android Debug,O=Android,C=US" -keyalg RSA -keysize 2048 -validity 10000
