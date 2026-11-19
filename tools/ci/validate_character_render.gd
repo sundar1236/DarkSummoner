@@ -117,7 +117,7 @@ func _run_validation() -> void:
 		_fail("Character selection showcase did not display the generated Shadow Hunter model.")
 		return
 
-	print("CHARACTER RENDER INTEGRATION PASSED: visible mesh geometry, correctly aimed live camera, %d rendered pixels, all 10 runtime clips, combat scene, hero pedestal, and character-selection preview." % rendered_pixel_count")
+	print("CHARACTER RENDER INTEGRATION PASSED: visible mesh geometry, correctly aimed live camera, %d rendered pixels, all 10 runtime clips, combat scene, hero pedestal, and character-selection preview." % rendered_pixel_count)
 	quit(0)
 
 func _fail(message: String) -> void:
