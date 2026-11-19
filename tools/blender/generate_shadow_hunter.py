@@ -11,7 +11,7 @@ def mat(name, color, metallic=0.0, rough=0.5, emission=None):
     bs=m.node_tree.nodes.get("Principled BSDF"); bs.inputs["Base Color"].default_value=(*color,1)
     bs.inputs["Metallic"].default_value=metallic; bs.inputs["Roughness"].default_value=rough
     if emission:
-        bs.inputs["Emission Color"].default_value=(*emission,1); bs.inputs["Emission Strength"].default_value=1.4
+        (bs.inputs["Emission Color"] if "Emission Color" in bs.inputs else bs.inputs["Emission"]).default_value=(*emission,1); bs.inputs["Emission Strength"].default_value=1.4
     return m
 obs=mat("Obsidian Armor",(0.055,0.045,0.09),.62,.3); cloth=mat("Royal Violet Cloth",(.19,.11,.32),.18,.68)
 silver=mat("Antique Silver",(.42,.43,.55),.8,.24); skin=mat("Warm Pale Skin",(.55,.39,.34),0,.8)
@@ -82,5 +82,5 @@ action("defeat",[(1,{"spine":{"r":Z}}),(20,{"spine":{"r":(0,0,1.25)},"head":{"r"
 action("victory",[(1,{"arm.L":{"r":Z},"arm.R":{"r":Z}}),(12,{"arm.L":{"r":(-1.1,0,0)},"arm.R":{"r":(1.1,0,0)}}),(24,{"arm.L":{"r":Z},"arm.R":{"r":Z}})])
 
 bpy.ops.object.select_all(action="DESELECT"); rig.select_set(True); bpy.context.view_layer.objects.active=rig
-bpy.ops.export_scene.gltf(filepath=OUT,export_format="GLB",use_selection=True,export_apply=True,export_animations=True,export_animation_mode="ACTIONS",export_skins=True,export_materials="EXPORT")
+bpy.ops.export_scene.gltf(filepath=OUT,export_format="GLB",use_selection=False,export_apply=True,export_animations=True,export_animation_mode="ACTIONS",export_skins=True,export_materials="EXPORT")
 print("DARK_SUMMONER_GLB_EXPORTED="+OUT)
