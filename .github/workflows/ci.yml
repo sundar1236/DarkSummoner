@@ -16,10 +16,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v5
 
-      - name: Install Blender for GLB generation
+      - name: Install Blender 4.3.2 for GLB generation
         run: |
           apt-get update
-          apt-get install -y blender
+          apt-get install -y xz-utils
+          wget -q https://download.blender.org/release/Blender4.3/blender-4.3.2-linux-x64.tar.xz -O "$RUNNER_TEMP/blender.tar.xz"
+          tar -xJf "$RUNNER_TEMP/blender.tar.xz" -C "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/blender-4.3.2-linux-x64" >> "$GITHUB_PATH"
 
       - name: Generate rigged Shadow Hunter GLB
         run: |
