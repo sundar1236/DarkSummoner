@@ -15,7 +15,7 @@ var _model_preview_loaded := false
 var _preview_character_id := ""
 
 func _ready() -> void:
-	var preview := GLBCharacterPreviewClass.new()
+	var preview := GLBCharacterPreviewClass.new() as Control
 	preview.name = "GeneratedHeroPreview"
 	preview.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	preview.set("model_scale", 1.0)
