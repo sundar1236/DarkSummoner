@@ -9,7 +9,7 @@ func _ready() -> void:
 	super._ready()
 	animation_player.animation_started.connect(_on_wrapper_animation_started)
 
-	var preview := GLBCharacterPreviewClass.new()
+	var preview := GLBCharacterPreviewClass.new() as Control
 	preview.name = "GeneratedShadowHunterViewport"
 	preview.position = Vector2(-82.0, -82.0)
 	preview.size = Vector2(164.0, 164.0)
