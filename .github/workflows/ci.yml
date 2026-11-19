@@ -65,6 +65,16 @@ jobs:
         run: >-
           bash tools/ci/run_godot_test.sh "res://tests/test_phase5_combat_and_skills.tscn" "PHASE 5 TEST RESULTS:"
 
+      - name: Install Android SDK components for Godot 4.3
+        run: |
+          if command -v sdkmanager >/dev/null 2>&1; then
+            yes | sdkmanager --sdk_root="$ANDROID_HOME" --licenses >/dev/null
+            sdkmanager --sdk_root="$ANDROID_HOME" "platforms;android-34" "build-tools;34.0.0" "ndk;23.2.8568313" "cmake;3.22.1"
+          else
+            echo "sdkmanager is not available in the Godot CI image."
+            exit 1
+          fi
+
       - name: Configure Android export paths
         shell: bash
         run: |
