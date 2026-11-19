@@ -109,6 +109,14 @@ func _load_character_model() -> void:
 		model_root = null
 	model_animation_player = null
 
+	# Godot headless CI uses the dummy renderer, which cannot render 3D meshes.
+	# Keep the established 2D fallback in headless tests; the real GLB is loaded
+	# by desktop/mobile renderers and by the Xvfb software-render visibility test.
+	if DisplayServer.get_name().to_lower() == "headless":
+		if is_instance_valid(viewport_container):
+			viewport_container.visible = false
+		return
+
 	var model_path := str(CHARACTER_MODELS.get(character_id, ""))
 	if model_path.is_empty() or not ResourceLoader.exists(model_path):
 		if is_instance_valid(viewport_container):
