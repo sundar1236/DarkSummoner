@@ -45,6 +45,9 @@ jobs:
       - name: Validate generated GLB rig and animation clips
         run: godot --headless --path . --script tools/ci/validate_generated_glb.gd
 
+      - name: Validate visible GLB character in combat and UI previews
+        run: godot --headless --path . --script tools/ci/validate_character_render.gd
+
       - name: Run Core Gameplay Test Suite (116 tests)
         run: >-
           bash tools/ci/run_godot_test.sh "res://tests/test_runner.tscn" "ALL ACCEPTANCE TESTS PASSED SUCCESSFULLY!"
