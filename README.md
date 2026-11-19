@@ -216,6 +216,6 @@ mkdir -p assets/generated
 blender --background --factory-startup --python tools/blender/generate_shadow_hunter.py
 ```
 
-The **Dark Summoner Build** GitHub Actions workflow imports and validates the GLB, runs the five existing Godot test suites, and exports an Android debug APK. The workflow uploads the APK and generated GLB together as `dark-summoner-android-debug-and-glb`. Build artifacts are automatically retained for **1 day** and then deleted by GitHub Actions; source code and the Blender generator are not deleted.
+The **CI Tests** GitHub Actions workflow imports and validates the GLB, runs the five existing Godot test suites, and exports an Android debug APK. The workflow uploads the APK and generated GLB together as `dark-summoner-android-debug-and-glb`. Build artifacts are automatically retained for **1 day** and then deleted by GitHub Actions; source code and the Blender generator are not deleted.
 
 The Android package identity is `com.darksummoner.game` and the exported app name is **Dark Summoner**. CI creates a temporary debug keystore for each build; no developer machine keystore path or signing secret is stored in the repository.
