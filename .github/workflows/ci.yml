@@ -19,7 +19,7 @@ jobs:
       - name: Install Blender 4.3.2 for GLB generation
         run: |
           apt-get update
-          apt-get install -y xz-utils
+          apt-get install -y xz-utils libsm6 libxrender1 libxext6 libxi6 libxfixes3 libxkbcommon0 libgl1 libegl1 libxxf86vm1 libxcb1 libxrandr2 libxinerama1 libxcursor1 libxcomposite1 libxdamage1 libxss1 libasound2 libwayland-client0
           wget -q https://download.blender.org/release/Blender4.3/blender-4.3.2-linux-x64.tar.xz -O "$RUNNER_TEMP/blender.tar.xz"
           tar -xJf "$RUNNER_TEMP/blender.tar.xz" -C "$RUNNER_TEMP"
           echo "$RUNNER_TEMP/blender-4.3.2-linux-x64" >> "$GITHUB_PATH"
