@@ -44,7 +44,7 @@ func _ready() -> void:
 	CharacterDatabase.init_database()
 	if portrait_rect:
 		portrait_rect.clip_contents = true
-		var preview := GLBCharacterPreviewClass.new()
+		var preview := GLBCharacterPreviewClass.new() as Control
 		preview.name = "GeneratedCharacterSelectionPreview"
 		preview.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 		preview.mouse_filter = Control.MOUSE_FILTER_IGNORE
