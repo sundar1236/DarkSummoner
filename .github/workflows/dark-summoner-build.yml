@@ -14,7 +14,7 @@ jobs:
     timeout-minutes: 45
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Install build dependencies
         run: |
           sudo apt-get update
@@ -36,7 +36,7 @@ jobs:
       - name: Install Android platform and build tools
         run: |
           yes | sdkmanager --licenses >/dev/null
-          sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0" "cmdline-tools;latest"
+          sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0" "cmdline-tools;latest" "ndk;23.2.8568313" "cmake;3.22.1"
       - name: Generate the rigged Shadow Hunter GLB with Blender
         run: |
           mkdir -p assets/generated
