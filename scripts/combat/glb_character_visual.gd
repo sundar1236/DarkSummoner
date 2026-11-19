@@ -13,11 +13,11 @@ func _ready() -> void:
 	preview.name = "GeneratedShadowHunterViewport"
 	preview.position = Vector2(-82.0, -82.0)
 	preview.size = Vector2(164.0, 164.0)
-	preview.model_scale = 0.82
-	preview.camera_orthographic_size = 3.1
+	preview.set("model_scale", 0.82)
+	preview.set("camera_orthographic_size", 3.1)
 	preview.visible = false
-	preview.model_loaded.connect(_on_model_loaded)
-	preview.model_failed.connect(_on_model_failed)
+	preview.connect("model_loaded", Callable(self, "_on_model_loaded"))
+	preview.connect("model_failed", Callable(self, "_on_model_failed"))
 	model_view = preview
 	add_child(preview)
 
@@ -42,5 +42,5 @@ func _on_wrapper_animation_started(animation_name: StringName) -> void:
 func _play_model_animation(requested: String) -> void:
 	if not _model_ready or not is_instance_valid(model_view) or requested.is_empty():
 		return
-	if not model_view.play_animation(requested):
+	if not bool(model_view.call("play_animation", requested)):
 		push_warning("Generated Shadow Hunter GLB has no animation clip: " + requested)
