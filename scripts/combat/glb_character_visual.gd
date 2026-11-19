@@ -1,14 +1,14 @@
-extends Node2D
+extends CharacterRigVisual
 
 const MODEL_PATH := "res://assets/generated/shadow_hunter.glb"
-const CLIPS := ["idle", "run", "attack_1", "attack_2", "attack_3", "skill", "hurt", "dodge", "defeat", "victory"]
 
 var model_animation_player: AnimationPlayer
-var viewport: SubViewport
+var _model_ready := false
 
 func _ready() -> void:
+    super._ready()
     if not ResourceLoader.exists(MODEL_PATH):
-        push_warning("Generated Shadow Hunter GLB is missing; keep the legacy sprite visual.")
+        push_warning("Generated Shadow Hunter GLB is missing; using the existing procedural visual fallback.")
         return
 
     var container := SubViewportContainer.new()
@@ -19,7 +19,7 @@ func _ready() -> void:
     container.mouse_filter = Control.MOUSE_FILTER_IGNORE
     add_child(container)
 
-    viewport = SubViewport.new()
+    var viewport := SubViewport.new()
     viewport.name = "ModelViewport"
     viewport.size = Vector2i(256, 256)
     viewport.transparent_bg = true
@@ -52,10 +52,12 @@ func _ready() -> void:
     var packed_model := load(MODEL_PATH) as PackedScene
     if packed_model == null:
         push_error("Shadow Hunter GLB did not import as a PackedScene.")
+        container.queue_free()
         return
     var model := packed_model.instantiate() as Node3D
     if model == null:
         push_error("Shadow Hunter GLB root is not Node3D.")
+        container.queue_free()
         return
     model.name = "ShadowHunterModel"
     model.scale = Vector3.ONE * 0.82
@@ -64,31 +66,25 @@ func _ready() -> void:
     model_animation_player = model.find_child("AnimationPlayer", true, false) as AnimationPlayer
     if model_animation_player == null:
         push_error("Shadow Hunter GLB has no AnimationPlayer.")
+        container.queue_free()
         return
 
-    var wrapper_player := AnimationPlayer.new()
-    wrapper_player.name = "AnimationPlayer"
-    add_child(wrapper_player)
-    var library := AnimationLibrary.new()
-    for clip in CLIPS:
-        var animation := Animation.new()
-        animation.length = 0.65
-        if clip == "idle":
-            animation.length = 1.0
-            animation.loop_mode = Animation.LOOP_LINEAR
-        elif clip == "run":
-            animation.length = 0.55
-            animation.loop_mode = Animation.LOOP_LINEAR
-        library.add_animation(clip, animation)
-    wrapper_player.add_animation_library("", library)
-    wrapper_player.animation_started.connect(_on_wrapper_animation_started)
+    animation_player.animation_started.connect(_on_wrapper_animation_started)
     model_animation_player.animation_finished.connect(_on_model_animation_finished)
-    wrapper_player.play("idle")
+    _model_ready = true
+    _play_model_animation(String(animation_player.current_animation))
+
+func _draw() -> void:
+    if _model_ready:
+        return
+    super._draw()
 
 func _on_wrapper_animation_started(animation_name: StringName) -> void:
-    if not is_instance_valid(model_animation_player):
+    _play_model_animation(String(animation_name))
+
+func _play_model_animation(requested: String) -> void:
+    if not is_instance_valid(model_animation_player) or requested.is_empty():
         return
-    var requested := String(animation_name)
     for candidate in model_animation_player.get_animation_list():
         var parts := String(candidate).split("/")
         var plain_name := parts[parts.size() - 1]
@@ -102,4 +98,4 @@ func _on_model_animation_finished(_animation_name: StringName) -> void:
         return
     var current := String(model_animation_player.current_animation)
     if current == "idle" or current == "run":
-        model_animation_player.play(current)
+        _play_model_animation(current)
