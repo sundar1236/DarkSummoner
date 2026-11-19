@@ -55,6 +55,23 @@ func _run_validation() -> void:
 		_fail("The generated model viewport is not updating continuously.")
 		return
 
+	for _frame in range(4):
+		await process_frame
+	await RenderingServer.frame_post_draw
+	var rendered_image := model_viewport.get_texture().get_image()
+	if rendered_image == null or rendered_image.is_empty():
+		_fail("The generated character viewport did not produce a readable render texture.")
+		return
+	var rendered_pixel_count := 0
+	for y in range(0, rendered_image.get_height(), 2):
+		for x in range(0, rendered_image.get_width(), 2):
+			var pixel := rendered_image.get_pixel(x, y)
+			if pixel.a > 0.05 and pixel.r + pixel.g + pixel.b > 0.05:
+				rendered_pixel_count += 1
+	if rendered_pixel_count < 100:
+		_fail("The generated character viewport rendered too few visible pixels: %d" % rendered_pixel_count)
+		return
+
 	for clip_name in ["idle", "run", "attack_1", "attack_2", "attack_3", "skill", "hurt", "dodge", "defeat", "victory"]:
 		var found := false
 		for candidate in animation_player.get_animation_list():
@@ -100,7 +117,7 @@ func _run_validation() -> void:
 		_fail("Character selection showcase did not display the generated Shadow Hunter model.")
 		return
 
-	print("CHARACTER RENDER INTEGRATION PASSED: visible mesh geometry, correctly aimed live camera, all 10 runtime clips, combat scene, hero pedestal, and character-selection preview.")
+	print("CHARACTER RENDER INTEGRATION PASSED: visible mesh geometry, correctly aimed live camera, %d rendered pixels, all 10 runtime clips, combat scene, hero pedestal, and character-selection preview." % rendered_pixel_count")
 	quit(0)
 
 func _fail(message: String) -> void:
