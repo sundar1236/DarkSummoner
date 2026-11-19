@@ -16,6 +16,17 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v5
 
+      - name: Install Blender for GLB generation
+        run: |
+          apt-get update
+          apt-get install -y blender
+
+      - name: Generate rigged Shadow Hunter GLB
+        run: |
+          mkdir -p assets/generated
+          DARK_SUMMONER_GLB_OUT="$PWD/assets/generated/shadow_hunter.glb" blender --background --factory-startup --python tools/blender/generate_shadow_hunter.py
+          test -s assets/generated/shadow_hunter.glb
+
       - name: Scan project, generate global class cache, and import assets
         shell: bash
         run: |
@@ -27,6 +38,9 @@ jobs:
             echo "Godot project import reported script errors."
             exit 1
           fi
+
+      - name: Validate generated GLB rig and animation clips
+        run: godot --headless --path . --script tools/ci/validate_generated_glb.gd
 
       - name: Run Core Gameplay Test Suite (116 tests)
         run: >-
@@ -47,3 +61,36 @@ jobs:
       - name: Run Phase 5 Combat, HUD & Skills Tests
         run: >-
           bash tools/ci/run_godot_test.sh "res://tests/test_phase5_combat_and_skills.tscn" "PHASE 5 TEST RESULTS:"
+
+      - name: Configure Android export paths
+        shell: bash
+        run: |
+          set -euo pipefail
+          JAVA_HOME="$(dirname "$(dirname "$(readlink -f "$(command -v javac)")")")"
+          mkdir -p "$HOME/.config/godot"
+          cat > "$HOME/.config/godot/editor_settings-4.tres" <<EOF
+          [resource]
+          export/android/android_sdk_path = "$ANDROID_HOME"
+          export/android/java_sdk_path = "$JAVA_HOME"
+          EOF
+
+      - name: Create temporary Android debug keystore
+        run: |
+          keytool -genkeypair -v -keystore "$RUNNER_TEMP/dark-summoner-debug.keystore" -storepass android -alias androiddebugkey -keypass android -dname "CN=Android Debug,O=Android,C=US" -keyalg RSA -keysize 2048 -validity 10000
+          sed -i "s|^keystore/debug=.*|keystore/debug=\"$RUNNER_TEMP/dark-summoner-debug.keystore\"|" export_presets.cfg
+
+      - name: Export Android debug APK
+        run: |
+          mkdir -p export
+          godot --headless --path . --export-debug "Android" export/DarkSummoner-debug.apk
+          test -s export/DarkSummoner-debug.apk
+
+      - name: Upload APK and generated GLB (expires after 1 day)
+        uses: actions/upload-artifact@v4
+        with:
+          name: dark-summoner-android-debug-and-glb
+          path: |
+            export/DarkSummoner-debug.apk
+            assets/generated/shadow_hunter.glb
+          if-no-files-found: error
+          retention-days: 1
