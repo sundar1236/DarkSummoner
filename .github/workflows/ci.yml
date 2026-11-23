@@ -16,6 +16,20 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v5
 
+      - name: Install Blender 4.3.2 for GLB generation
+        run: |
+          apt-get update
+          apt-get install -y xz-utils libsm6 libxrender1 libxext6 libxi6 libxfixes3 libxkbcommon0 libgl1 libegl1 libxxf86vm1 libxcb1 libxrandr2 libxinerama1 libxcursor1 libxcomposite1 libxdamage1 libxss1 libasound2 libwayland-client0 xvfb libgl1-mesa-dri
+          wget -q https://download.blender.org/release/Blender4.3/blender-4.3.2-linux-x64.tar.xz -O "$RUNNER_TEMP/blender.tar.xz"
+          tar -xJf "$RUNNER_TEMP/blender.tar.xz" -C "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/blender-4.3.2-linux-x64" >> "$GITHUB_PATH"
+
+      - name: Generate rigged Shadow Hunter GLB
+        run: |
+          mkdir -p assets/generated
+          DARK_SUMMONER_GLB_OUT="$PWD/assets/generated/shadow_hunter.glb" blender --background --factory-startup --python tools/blender/generate_shadow_hunter.py
+          test -s assets/generated/shadow_hunter.glb
+
       - name: Scan project, generate global class cache, and import assets
         shell: bash
         run: |
@@ -27,6 +41,12 @@ jobs:
             echo "Godot project import reported script errors."
             exit 1
           fi
+
+      - name: Validate generated GLB rig and animation clips
+        run: godot --headless --path . --script tools/ci/validate_generated_glb.gd
+
+      - name: Validate visible GLB character in combat and UI previews
+        run: xvfb-run -a env LIBGL_ALWAYS_SOFTWARE=1 godot --path . --rendering-method gl_compatibility --script tools/ci/validate_character_render.gd
 
       - name: Run Core Gameplay Test Suite (116 tests)
         run: >-
@@ -47,3 +67,62 @@ jobs:
       - name: Run Phase 5 Combat, HUD & Skills Tests
         run: >-
           bash tools/ci/run_godot_test.sh "res://tests/test_phase5_combat_and_skills.tscn" "PHASE 5 TEST RESULTS:"
+
+      - name: Install Android SDK components for Godot 4.3
+        run: |
+          if command -v sdkmanager >/dev/null 2>&1; then
+            yes | sdkmanager --sdk_root="$ANDROID_HOME" --licenses >/dev/null
+            sdkmanager --sdk_root="$ANDROID_HOME" "platforms;android-34" "build-tools;34.0.0" "ndk;23.2.8568313" "cmake;3.22.1"
+          else
+            echo "sdkmanager is not available in the Godot CI image."
+            exit 1
+          fi
+
+      - name: Install Godot 4.3 Android export templates
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/godot-templates" "$HOME/.local/share/godot/export_templates/4.3.stable"
+          wget -q https://github.com/godotengine/godot/releases/download/4.3-stable/Godot_v4.3-stable_export_templates.tpz -O "$RUNNER_TEMP/godot-templates.tpz"
+          unzip -q "$RUNNER_TEMP/godot-templates.tpz" -d "$RUNNER_TEMP/godot-templates"
+          cp -a "$RUNNER_TEMP/godot-templates/templates/." "$HOME/.local/share/godot/export_templates/4.3.stable/"
+          test -s "$HOME/.local/share/godot/export_templates/4.3.stable/android_debug.apk"
+
+      - name: Configure Android export paths
+        shell: bash
+        run: |
+          set -euo pipefail
+          JAVA_HOME="$(dirname "$(dirname "$(readlink -f "$(command -v javac)")")")"
+          mkdir -p "$HOME/.config/godot"
+          test -x "$JAVA_HOME/bin/java"
+          test -x "$JAVA_HOME/bin/javac"
+          echo "JAVA_HOME=$JAVA_HOME" >> "$GITHUB_ENV"
+          cat > "$HOME/.config/godot/editor_settings-4.tres" <<EOF
+          [gd_resource type="EditorSettings" format=3]
+          [resource]
+          export/android/android_sdk_path = "$ANDROID_HOME"
+          export/android/java_sdk_path = "$JAVA_HOME"
+          EOF
+          cp "$HOME/.config/godot/editor_settings-4.tres" "$HOME/.config/godot/editor_settings-4.3.tres"
+          cat "$HOME/.config/godot/editor_settings-4.3.tres"
+
+      - name: Create temporary Android debug keystore
+        run: |
+          keytool -genkeypair -v -keystore "$RUNNER_TEMP/dark-summoner-debug.keystore" -storepass android -alias androiddebugkey -keypass android -dname "CN=Android Debug,O=Android,C=US" -keyalg RSA -keysize 2048 -validity 10000
+          sed -i "s|^keystore/debug=.*|keystore/debug=\"$RUNNER_TEMP/dark-summoner-debug.keystore\"|" export_presets.cfg
+
+      - name: Export Android debug APK
+        run: |
+          mkdir -p export
+          godot --headless --path . --export-debug "Android" export/DarkSummoner-debug.apk
+          test -s export/DarkSummoner-debug.apk
+
+      - name: Upload APK and generated GLB (expires after 1 day)
+        uses: actions/upload-artifact@v4
+        with:
+          name: dark-summoner-android-debug-and-glb
+          path: |
+            export/DarkSummoner-debug.apk
+            assets/generated/shadow_hunter.glb
+          if-no-files-found: error
+          retention-days: 1

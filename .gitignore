@@ -15,4 +15,7 @@ Thumbs.db
 *.tmp
 screenshot_test.*
 
+
+# Generated 3D art is rebuilt by the Blender CI pipeline
+assets/generated/
 .env

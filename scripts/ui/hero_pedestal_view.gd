@@ -1,6 +1,8 @@
 class_name HeroPedestalView
 extends Control
 
+const GLBCharacterPreviewClass = preload("res://scripts/combat/glb_character_preview.gd")
+
 # Renders the Chibi Hero on a glowing elemental pedestal with breathing bob,
 # oversized weapon, and a floating elemental spirit companion (Ref Images 4, 5, 6).
 
@@ -8,6 +10,41 @@ extends Control
 var _t: float = 0.0
 var _loaded_character_id: String = ""
 var _portrait_texture: Texture2D
+var _model_preview: Control
+var _model_preview_loaded := false
+var _preview_character_id := ""
+
+func _ready() -> void:
+	var preview := GLBCharacterPreviewClass.new() as Control
+	preview.name = "GeneratedHeroPreview"
+	preview.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	preview.set("model_scale", 1.0)
+	preview.set("camera_orthographic_size", 3.1)
+	_model_preview = preview
+	add_child(preview)
+	_sync_character_visual()
+	_update_preview_rect()
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_RESIZED:
+		_update_preview_rect()
+
+func _update_preview_rect() -> void:
+	if not is_instance_valid(_model_preview):
+		return
+	_model_preview.position = size * 0.5 + Vector2(-82.0, -73.0)
+	_model_preview.size = Vector2(164.0, 190.0)
+
+func _sync_character_visual() -> void:
+	if _preview_character_id == character_id:
+		return
+	_preview_character_id = character_id
+	_ensure_character_portrait()
+	_model_preview_loaded = false
+	if is_instance_valid(_model_preview):
+		_model_preview_loaded = bool(_model_preview.call("set_character", character_id))
+		_model_preview.visible = _model_preview_loaded
+	queue_redraw()
 
 func _ensure_character_portrait() -> void:
 	if _loaded_character_id == character_id:
@@ -17,6 +54,8 @@ func _ensure_character_portrait() -> void:
 
 func _process(delta: float) -> void:
 	_t += delta
+	if _preview_character_id != character_id:
+		_sync_character_visual()
 	queue_redraw()
 
 func _draw() -> void:
@@ -55,7 +94,9 @@ func _draw() -> void:
 		iris_col = Color(0.3, 0.95, 0.65, 1.0)
 		
 	_ensure_character_portrait()
-	if _portrait_texture:
+	if _model_preview_loaded:
+		pass # The live GLB viewport renders the selected Shadow Hunter here.
+	elif _portrait_texture:
 		var source_size := _portrait_texture.get_size()
 		var target_size := Vector2(150, 174)
 		var fit_scale := minf(target_size.x / maxf(source_size.x, 1.0), target_size.y / maxf(source_size.y, 1.0))
