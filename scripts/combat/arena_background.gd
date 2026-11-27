@@ -27,10 +27,23 @@ func _ready() -> void:
 	add_to_group("arena_backgrounds")
 	set_floor_theme(GameManager.floor_number)
 	set_reduced_motion(bool(SaveManager.settings_data.get("reduced_motion", false)) if SaveManager else false)
+	if get_tree() and get_tree().root and not get_tree().root.size_changed.is_connected(_update_authored_art_scale):
+		get_tree().root.size_changed.connect(_update_authored_art_scale)
+
+func _update_authored_art_scale() -> void:
+	var art_root := get_node_or_null("AuthoredFloorArt") as Node2D
+	if art_root == null:
+		return
+	var vp_size := get_viewport_rect().size
+	if vp_size.x <= 0.0 or vp_size.y <= 0.0:
+		return
+	var cover_scale := maxf(vp_size.x / 720.0, vp_size.y / 1280.0)
+	art_root.position = Vector2(360.0, 640.0)
+	art_root.scale = Vector2(cover_scale, cover_scale)
 
 func set_reduced_motion(enabled: bool) -> void:
 	reduced_motion_enabled = enabled
-	set_process(not enabled and not using_authored_floor_art)
+	set_process(not enabled)
 	if enabled:
 		flicker_timer = 0.0
 	queue_redraw()
@@ -85,13 +98,14 @@ func set_floor_theme(floor_num: int) -> String:
 			brazier_flame_color = Color(1.0, 0.42, 0.25, 0.95)
 
 	using_authored_floor_art = _install_authored_floor_art(maxi(floor_num, 1))
-	set_process(not reduced_motion_enabled and not using_authored_floor_art)
+	set_process(not reduced_motion_enabled)
 	queue_redraw()
 	return floor_theme_name
 
 func _install_authored_floor_art(floor_num: int) -> bool:
 	var old_art := get_node_or_null("AuthoredFloorArt")
 	if old_art != null:
+		remove_child(old_art)
 		old_art.queue_free()
 	if not FileAccess.file_exists(FLOOR_ART_MANIFEST):
 		return false
@@ -151,15 +165,17 @@ func _install_authored_floor_art(floor_num: int) -> bool:
 
 	var art_root := Node2D.new()
 	art_root.name = "AuthoredFloorArt"
+	art_root.position = Vector2(360.0, 640.0)
 	add_child(art_root)
 	for role in FLOOR_ART_ROLES:
 		var layer_sprite := Sprite2D.new()
 		layer_sprite.name = role.capitalize()
 		layer_sprite.texture = textures[role]
-		layer_sprite.position = Vector2(360.0, 640.0)
+		layer_sprite.position = Vector2.ZERO
 		layer_sprite.z_index = int(FLOOR_ART_Z[role])
 		art_root.add_child(layer_sprite)
 
+	_update_authored_art_scale()
 	return true
 
 func _shade_color(base: Color, amount: float) -> Color:

@@ -14,7 +14,7 @@ signal pause_requested()
 
 const SafeAreaHelper = preload("res://scripts/ui/safe_area_helper.gd")
 
-@export var move_joystick: VirtualJoystick
+@export var move_joystick: MobileVirtualJoystick
 @export var skill_draft_modal: SkillDraftModal = null
 @export var feedback_banner: PanelContainer = null
 @export var feedback_label: Label = null

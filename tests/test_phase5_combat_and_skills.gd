@@ -52,7 +52,7 @@ func assert_true(condition: bool, message: String) -> void:
 func test_single_stick_and_touch_safety() -> void:
 	print("--- 1. Single-Stick Archero Controls & Input Safety ---")
 	var player := PlayerController.new()
-	var move_joy := VirtualJoystick.new()
+	var move_joy := MobileVirtualJoystick.new()
 
 	add_child(player)
 	add_child(move_joy)

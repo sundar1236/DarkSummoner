@@ -5,6 +5,7 @@ const CoinPickupClass = preload("res://scripts/combat/coin_pickup.gd")
 const XpPickupClass = preload("res://scripts/combat/xp_pickup.gd")
 const CombatSpriteFeedback = preload("res://scripts/combat/combat_sprite_feedback.gd")
 const EnemyBossSpriteAnimationClass = preload("res://scripts/combat/enemy_boss_sprite_animation.gd")
+const DirectionalSprite8Class = preload("res://scripts/combat/directional_sprite_8.gd")
 
 class EliteAuraVisual extends Node2D:
 	var enemy_ref: CharacterBody2D
@@ -62,6 +63,9 @@ var player_ref: Node2D
 var shadow_sprite: Sprite2D
 var sprite: Sprite2D
 var visual_root: Node2D
+var enemy_8dir: DirectionalSprite8Class
+var _model_ready: bool = false
+var _current_floor: int = 1
 var authored_animator: Node
 var authored_animation_active: bool = false
 var authored_locked_clip: String = ""
@@ -95,6 +99,12 @@ func _setup_visuals() -> void:
 	add_child(visual_root)
 	sprite = Sprite2D.new()
 	visual_root.add_child(sprite)
+
+	var s8 := DirectionalSprite8Class.new()
+	s8.name = "Enemy8DirSprite"
+	s8.visible = false
+	enemy_8dir = s8
+	visual_root.add_child(s8)
 	
 	# 3. Collision shape
 	var col := CollisionShape2D.new()
@@ -138,7 +148,56 @@ func _setup_authored_animation() -> void:
 		authored_animator.queue_free()
 		authored_animator = null
 
+func _play_model_animation(clip: String) -> void:
+	if _model_ready and is_instance_valid(enemy_8dir):
+		if clip == "attack":
+			enemy_8dir.trigger_attack_pulse()
+		enemy_8dir.update_pose(clip, anim_time, 0.016, velocity)
+
+func _setup_8dir_enemy_visual(p_floor: int) -> void:
+	if not is_instance_valid(enemy_8dir):
+		return
+	var floor_idx := posmod(maxi(p_floor, 1) - 1, 5) + 1
+	var role := "swarmer"
+	var target_h := 72.0
+	var foot_y := 18.0
+	match enemy_type:
+		"swarmer":
+			role = "swarmer"
+			target_h = 68.0
+			foot_y = 16.0
+		"cultist":
+			role = "cultist"
+			target_h = 80.0
+			foot_y = 20.0
+		"charger":
+			role = "charger"
+			target_h = 78.0
+			foot_y = 18.0
+		"elite":
+			role = "elite"
+			target_h = 104.0
+			foot_y = 26.0
+		"mini_boss":
+			role = "elite"
+			target_h = 132.0
+			foot_y = 32.0
+	var strip_path := "res://assets/art/enemies/8dir/f%d_%s_8dir.png" % [floor_idx, role]
+	if enemy_8dir.setup(strip_path, target_h, foot_y):
+		_model_ready = true
+		enemy_8dir.visible = true
+		if enemy_type == "mini_boss":
+			enemy_8dir.set_tint(Color(1.08, 0.85, 0.85, 1.0))
+		else:
+			enemy_8dir.set_tint(Color.WHITE)
+		if is_instance_valid(sprite):
+			sprite.visible = false
+	else:
+		_model_ready = false
+		enemy_8dir.visible = false
+
 func _play_authored_animation(clip_name: String, force_restart: bool = false) -> void:
+	_play_model_animation(clip_name)
 	if not authored_animation_active or not is_instance_valid(authored_animator):
 		return
 	var resolved_clip := clip_name
@@ -151,18 +210,23 @@ func _play_authored_animation(clip_name: String, force_restart: bool = false) ->
 		authored_locked_clip = resolved_clip
 
 func _update_authored_locomotion() -> void:
+	var locomotion_clip := "move" if velocity.length_squared() > 1.0 else "idle"
+	if _model_ready and is_instance_valid(enemy_8dir):
+		var pose_clip := authored_locked_clip if not authored_locked_clip.is_empty() else locomotion_clip
+		enemy_8dir.update_pose(pose_clip, anim_time, 0.016, velocity)
 	if not authored_animation_active or not is_instance_valid(authored_animator):
 		return
 	if not authored_locked_clip.is_empty():
 		if authored_animator.is_one_shot_playing(authored_locked_clip):
 			return
 		authored_locked_clip = ""
-	var locomotion_clip := "move" if velocity.length_squared() > 1.0 else "idle"
 	authored_animator.play(locomotion_clip)
 
 func setup(p_type: String, p_floor: int) -> void:
 	enemy_type = p_type
+	_current_floor = p_floor
 	_init_stats(p_floor)
+	_setup_8dir_enemy_visual(p_floor)
 	_setup_authored_animation()
 
 func _init_stats(floor_scale: int = 1) -> void:
@@ -300,9 +364,13 @@ func _physics_process(delta: float) -> void:
 	
 	# Keep authored clip state synchronized without changing enemy movement or timing.
 	_update_authored_locomotion()
-	# Horizontal Directional Facing
-	if abs(dir.x) > 0.05 and not is_telegraphing:
-		sprite.flip_h = (dir.x < 0.0)
+	# 8-Directional and horizontal facing
+	if not is_telegraphing:
+		var face_dir := velocity if velocity.length_squared() > 9.0 else dir
+		if is_instance_valid(enemy_8dir) and _model_ready:
+			enemy_8dir.set_facing_vector(face_dir)
+		if abs(dir.x) > 0.05:
+			sprite.flip_h = (dir.x < 0.0)
 		
 	match enemy_type:
 		"swarmer":

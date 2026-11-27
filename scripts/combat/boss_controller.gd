@@ -5,6 +5,7 @@ const CoinPickupClass = preload("res://scripts/combat/coin_pickup.gd")
 const XpPickupClass = preload("res://scripts/combat/xp_pickup.gd")
 const CombatSpriteFeedback = preload("res://scripts/combat/combat_sprite_feedback.gd")
 const EnemyBossSpriteAnimationClass = preload("res://scripts/combat/enemy_boss_sprite_animation.gd")
+const DirectionalSprite8Class = preload("res://scripts/combat/directional_sprite_8.gd")
 
 class VoidEruptionTelegraph extends Node2D:
 	var radius: float = 80.0
@@ -43,6 +44,8 @@ var player_ref: Node2D
 var shadow_sprite: Sprite2D
 var sprite: Sprite2D
 var visual_root: Node2D
+var boss_8dir: DirectionalSprite8Class
+var _model_ready: bool = false
 var authored_animator: Node
 var authored_animation_active: bool = false
 var authored_locked_clip: String = ""
@@ -71,6 +74,7 @@ func setup(p_floor: int) -> void:
 	damage_multiplier = float(difficulty_mods.get("boss_damage", 1.0))
 	hp = max_hp
 	boss_hp_changed.emit(hp, max_hp)
+	_setup_8dir_boss_visual(p_floor)
 	if AudioManager:
 		AudioManager.play_sfx("boss_intro")
 		AudioManager.play_music("boss")
@@ -93,6 +97,12 @@ func _setup_visuals() -> void:
 	sprite.texture = TextureLoader.get_texture("res://assets/sprites/bosses/boss_abyssal_dread.png")
 	sprite.position = Vector2(0, -10)
 	visual_root.add_child(sprite)
+
+	var s8 := DirectionalSprite8Class.new()
+	s8.name = "Boss8DirSprite"
+	s8.visible = false
+	boss_8dir = s8
+	visual_root.add_child(s8)
 	
 	# 3. Collision shape
 	var col := CollisionShape2D.new()
@@ -116,7 +126,28 @@ func _setup_authored_animation() -> void:
 		authored_animator.queue_free()
 		authored_animator = null
 
+func _setup_8dir_boss_visual(p_floor: int) -> void:
+	if not is_instance_valid(boss_8dir):
+		return
+	var boss_idx := posmod(maxi(p_floor, 1) - 1, 5) + 1
+	var strip_path := "res://assets/art/bosses/8dir/boss_%d_8dir.png" % boss_idx
+	if boss_8dir.setup(strip_path, 168.0, 46.0):
+		_model_ready = true
+		boss_8dir.visible = true
+		if is_instance_valid(sprite):
+			sprite.visible = false
+	else:
+		_model_ready = false
+		boss_8dir.visible = false
+
+func _play_model_animation(clip: String) -> void:
+	if _model_ready and is_instance_valid(boss_8dir):
+		if clip == "attack":
+			boss_8dir.trigger_attack_pulse()
+		boss_8dir.update_pose(clip, anim_time, 0.016, velocity)
+
 func _play_authored_animation(clip_name: String, force_restart: bool = false) -> void:
+	_play_model_animation(clip_name)
 	if not authored_animation_active or not is_instance_valid(authored_animator):
 		return
 	var resolved_clip := clip_name
@@ -129,13 +160,16 @@ func _play_authored_animation(clip_name: String, force_restart: bool = false) ->
 		authored_locked_clip = resolved_clip
 
 func _update_authored_locomotion() -> void:
+	var locomotion_clip := "move" if velocity.length_squared() > 1.0 else "idle"
+	if _model_ready and is_instance_valid(boss_8dir):
+		var pose_clip := authored_locked_clip if not authored_locked_clip.is_empty() else ("attack" if is_performing_attack else locomotion_clip)
+		boss_8dir.update_pose(pose_clip, anim_time, 0.016, velocity)
 	if not authored_animation_active or not is_instance_valid(authored_animator):
 		return
 	if not authored_locked_clip.is_empty():
 		if authored_animator.is_one_shot_playing(authored_locked_clip):
 			return
 		authored_locked_clip = ""
-	var locomotion_clip := "move" if velocity.length_squared() > 1.0 else "idle"
 	authored_animator.play(locomotion_clip)
 
 func _physics_process(delta: float) -> void:
@@ -160,8 +194,10 @@ func _physics_process(delta: float) -> void:
 	var float_y := sin(anim_time * 2.5) * 6.0
 	sprite.position = Vector2(0, -10.0 + float_y)
 	
-	# Directional Facing
+	# 8-Directional and horizontal facing
 	var dir_to_p := (player_ref.global_position - global_position).normalized()
+	if _model_ready and is_instance_valid(boss_8dir):
+		boss_8dir.set_facing_vector(dir_to_p)
 	if abs(dir_to_p.x) > 0.05:
 		sprite.flip_h = (dir_to_p.x < 0.0)
 		
@@ -177,6 +213,8 @@ func _physics_process(delta: float) -> void:
 
 func _enter_enraged_phase() -> void:
 	is_enraged = true
+	if _model_ready and is_instance_valid(boss_8dir):
+		boss_8dir.set_enraged(true)
 	if AudioManager:
 		AudioManager.play_sfx("boss_intro")
 	var cam := get_viewport().get_camera_2d()

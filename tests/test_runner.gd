@@ -66,7 +66,7 @@ func assert_true(condition: bool, message: String) -> void:
 func test_independent_movement_and_aim() -> void:
 	print("--- Test 1: Single Joystick Movement & Stutter-Step Auto-Aim ---")
 	var player := PlayerController.new()
-	var move_joy := VirtualJoystick.new()
+	var move_joy := MobileVirtualJoystick.new()
 	
 	add_child(player)
 	add_child(move_joy)

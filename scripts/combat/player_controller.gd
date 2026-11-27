@@ -4,6 +4,15 @@ extends CharacterBody2D
 const CharacterAnimationControllerClass = preload("res://scripts/combat/character_animation_controller.gd")
 const CharacterVisualContractClass = preload("res://scripts/combat/character_visual_contract.gd")
 const OverheadHealthBarClass = preload("res://scripts/combat/overhead_health_bar.gd")
+const DirectionalSprite8Class = preload("res://scripts/combat/directional_sprite_8.gd")
+
+const HERO_8DIR_STRIPS: Dictionary = {
+	"shadow_hunter": "res://assets/art/characters/8dir/shadow_hunter_8dir.png",
+	"storm_reaper": "res://assets/art/characters/8dir/storm_reaper_8dir.png",
+	"soul_binder": "res://assets/art/characters/8dir/soul_binder_8dir.png",
+	"1": "res://assets/art/characters/8dir/soul_binder_8dir.png",
+	"summaner": "res://assets/art/characters/8dir/soul_binder_8dir.png"
+}
 
 # Optional generated character scenes. Missing files intentionally keep the legacy sprite.
 const AUTHORED_CHARACTER_SCENES: Dictionary = {
@@ -78,7 +87,7 @@ class ShadowTrailsVisual extends Node2D:
 signal skill_cooldown_updated(current: float, max_val: float)
 signal dodge_cooldown_updated(current: float, max_val: float)
 
-@export var move_joystick: VirtualJoystick
+@export var move_joystick: MobileVirtualJoystick
 
 var base_speed: float = 240.0
 var current_speed: float = 240.0
@@ -115,6 +124,8 @@ var footstep_timer: float = 0.0
 var visual_root: Node2D
 var authored_rig_root: Node2D
 var authored_visual_character_id: String = ""
+var sprite_8dir: DirectionalSprite8Class
+var _model_ready: bool = false
 var shadow_sprite: Sprite2D
 var ground_ring: Node2D
 var sprite: Sprite2D
@@ -211,6 +222,12 @@ func _setup_visuals() -> void:
 	authored_animation_player.name = "AuthoredAnimationPlayer"
 	authored_rig_root.add_child(authored_animation_player)
 	anim_ctrl.bind_authored_animation_player(authored_animation_player, {}, authored_rig_root)
+
+	var s8 := DirectionalSprite8Class.new()
+	s8.name = "Player8DirSprite"
+	s8.visible = false
+	sprite_8dir = s8
+	visual_root.add_child(s8)
 
 	# 7. Aim reticle indicator line
 	var a_ind := AimReticleVisual.new()
@@ -400,6 +417,20 @@ func _update_character_sprite() -> void:
 	sprite.modulate = hero_tint
 	if weapon_sprite:
 		weapon_sprite.texture = TextureLoader.get_texture(weap_path)
+	if is_instance_valid(sprite_8dir):
+		var strip_path := str(HERO_8DIR_STRIPS.get(char_id, HERO_8DIR_STRIPS["shadow_hunter"]))
+		if sprite_8dir.setup(strip_path, 96.0, 24.0):
+			_model_ready = true
+			sprite_8dir.visible = true
+			if is_instance_valid(sprite):
+				sprite.visible = false
+			if is_instance_valid(authored_rig_root):
+				authored_rig_root.visible = false
+			if is_instance_valid(overhead_hp_bar):
+				overhead_hp_bar.position = Vector2(0, -68)
+		else:
+			_model_ready = false
+			sprite_8dir.visible = false
 
 func _draw_aim_reticle() -> void:
 	if aim_indicator: aim_indicator.queue_redraw()
@@ -570,6 +601,27 @@ func _handle_animations(delta: float) -> void:
 		elif not is_dodging and not is_attacking and anim_ctrl.current_state != CharacterAnimationController.AnimState.ATTACK:
 			anim_ctrl.play_idle()
 		anim_ctrl.update(delta, velocity, aim_direction, current_speed)
+	if _model_ready and is_instance_valid(sprite_8dir):
+		var face_vec := velocity if velocity.length_squared() > 100.0 else aim_direction
+		sprite_8dir.set_facing_vector(face_vec)
+		var state_key := "idle"
+		if anim_ctrl:
+			match anim_ctrl.current_state:
+				CharacterAnimationController.AnimState.RUN: state_key = "run"
+				CharacterAnimationController.AnimState.ATTACK: state_key = "attack"
+				CharacterAnimationController.AnimState.SKILL: state_key = "skill"
+				CharacterAnimationController.AnimState.HURT: state_key = "hurt"
+				CharacterAnimationController.AnimState.DODGE: state_key = "dodge"
+				CharacterAnimationController.AnimState.DEFEAT: state_key = "defeat"
+				CharacterAnimationController.AnimState.VICTORY: state_key = "victory"
+				_: state_key = "idle"
+		elif is_moving and not is_dodging:
+			state_key = "run"
+		sprite_8dir.update_pose(state_key, anim_time, delta, velocity)
+		if is_instance_valid(authored_rig_root) and authored_rig_root.visible:
+			authored_rig_root.visible = false
+		if is_instance_valid(sprite) and sprite.visible:
+			sprite.visible = false
 		
 	if spirit_wisp:
 		spirit_wisp.queue_redraw()
@@ -610,6 +662,8 @@ func _fire_basic_attack() -> void:
 	var combo_stage: int = 0
 	if anim_ctrl:
 		combo_stage = anim_ctrl.trigger_attack(aim_direction, attack_type)
+	if _model_ready and is_instance_valid(sprite_8dir):
+		sprite_8dir.trigger_attack_pulse()
 		
 	# Combo stage scaling: Stage 2 (heavy thrust) deals +30% bonus damage
 	if combo_stage == 2:
@@ -750,6 +804,8 @@ func trigger_dodge() -> bool:
 	# Cleanly interrupt attack with dodge in animation controller
 	if anim_ctrl:
 		anim_ctrl.trigger_dodge(dash_dir)
+	if _model_ready and is_instance_valid(sprite_8dir):
+		sprite_8dir.set_facing_vector(dash_dir)
 		
 	# Spawn initial shadow afterimage
 	_spawn_afterimage()
@@ -763,13 +819,18 @@ func trigger_dodge() -> bool:
 func _spawn_afterimage() -> void:
 	if SaveManager and bool(SaveManager.settings_data.get("reduced_motion", false)):
 		return
-	if not sprite or not sprite.texture:
-		return
 	var afterimage := ShadowAfterimage.new()
 	var tint := Color(0.65, 0.25, 1.0, 0.6)
 	if GameManager.current_character:
 		tint = Color(GameManager.current_character.primary_color.r, GameManager.current_character.primary_color.g, GameManager.current_character.primary_color.b, 0.65)
-	afterimage.setup(sprite.texture, global_position + sprite.position, sprite.rotation, sprite.flip_h, tint)
+	if _model_ready and is_instance_valid(sprite_8dir) and is_instance_valid(sprite_8dir.sprite) and sprite_8dir.sprite.texture:
+		var s: Sprite2D = sprite_8dir.sprite
+		afterimage.setup(s.texture, global_position + s.position, s.rotation, false, tint, s.scale, s.hframes, s.frame)
+	elif sprite and sprite.texture:
+		afterimage.setup(sprite.texture, global_position + sprite.position, sprite.rotation, sprite.flip_h, tint, sprite.scale)
+	else:
+		afterimage.queue_free()
+		return
 	get_parent().add_child(afterimage)
 
 func trigger_active_skill() -> bool:
@@ -782,6 +843,8 @@ func trigger_active_skill() -> bool:
 		
 	if anim_ctrl:
 		anim_ctrl.trigger_skill()
+	if _model_ready and is_instance_valid(sprite_8dir):
+		sprite_8dir.trigger_attack_pulse()
 		
 	var char_id := GameManager.current_character.id if GameManager.current_character else "shadow_hunter"
 	var stats := GameManager.get_player_effective_stats()

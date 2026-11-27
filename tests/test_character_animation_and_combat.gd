@@ -28,6 +28,7 @@ func _ready() -> void:
 	test_projectile_target_validation()
 	test_boss_controller_telegraphs()
 	test_summoning_circle_hero_presentation()
+	test_eight_directional_split_assets_and_floors()
 	
 	print("\n=== Phase 3 Test Results: %d/%d PASSED (%d failed) ===" % [passed, total, failed])
 	if failed == 0:
@@ -440,3 +441,49 @@ func test_summoning_circle_hero_presentation() -> void:
 	
 	board.queue_free()
 	ped.queue_free()
+
+
+func test_eight_directional_split_assets_and_floors() -> void:
+	print("\n--- Test: 8-Directional Split Sprites & 5-Floor Environments ---")
+	for cid in ["shadow_hunter", "storm_reaper", "soul_binder"]:
+		GameManager.current_character = CharacterDatabase.get_character(cid)
+		var player := PlayerController.new()
+		add_child(player)
+		assert_true(player._model_ready, "%s player activates 8-dir split view" % cid)
+		assert_true(is_instance_valid(player.sprite_8dir) and player.sprite_8dir.is_loaded, "%s 8-dir strip loaded" % cid)
+		if is_instance_valid(player.sprite_8dir) and player.sprite_8dir.is_loaded:
+			player.sprite_8dir.set_facing_vector(Vector2.RIGHT)
+			assert_eq(player.sprite_8dir.sprite.frame, 0, "%s East frame is 0" % cid)
+			player.sprite_8dir.set_facing_vector(Vector2(1, 1).normalized())
+			assert_eq(player.sprite_8dir.sprite.frame, 1, "%s South-East frame is 1" % cid)
+			player.sprite_8dir.set_facing_vector(Vector2.DOWN)
+			assert_eq(player.sprite_8dir.sprite.frame, 2, "%s South frame is 2" % cid)
+			player.sprite_8dir.set_facing_vector(Vector2(-1, 1).normalized())
+			assert_eq(player.sprite_8dir.sprite.frame, 3, "%s South-West frame is 3" % cid)
+			player.sprite_8dir.set_facing_vector(Vector2.LEFT)
+			assert_eq(player.sprite_8dir.sprite.frame, 4, "%s West frame is 4" % cid)
+			player.sprite_8dir.set_facing_vector(Vector2(-1, -1).normalized())
+			assert_eq(player.sprite_8dir.sprite.frame, 5, "%s North-West frame is 5" % cid)
+			player.sprite_8dir.set_facing_vector(Vector2.UP)
+			assert_eq(player.sprite_8dir.sprite.frame, 6, "%s North frame is 6" % cid)
+			player.sprite_8dir.set_facing_vector(Vector2(1, -1).normalized())
+			assert_eq(player.sprite_8dir.sprite.frame, 7, "%s North-East frame is 7" % cid)
+		player.queue_free()
+
+	var arena_bg := ArenaBackground.new()
+	add_child(arena_bg)
+	for floor_num in range(1, 6):
+		var theme := arena_bg.set_floor_theme(floor_num)
+		assert_true(arena_bg.using_authored_floor_art, "Floor %d (%s) loads authored 2.5D layers" % [floor_num, theme])
+		for etype in ["swarmer", "cultist", "charger", "elite", "mini_boss"]:
+			var enemy := EnemyController.new()
+			add_child(enemy)
+			enemy.setup(etype, floor_num)
+			assert_true(enemy._model_ready and is_instance_valid(enemy.enemy_8dir) and enemy.enemy_8dir.is_loaded, "Floor %d %s loads 8-dir sprite" % [floor_num, etype])
+			enemy.queue_free()
+		var boss := BossController.new()
+		add_child(boss)
+		boss.setup(floor_num)
+		assert_true(boss._model_ready and is_instance_valid(boss.boss_8dir) and boss.boss_8dir.is_loaded, "Floor %d boss loads 8-dir sprite" % floor_num)
+		boss.queue_free()
+	arena_bg.queue_free()

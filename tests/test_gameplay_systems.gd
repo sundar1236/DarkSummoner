@@ -50,7 +50,7 @@ func assert_true(condition: bool, message: String) -> void:
 func test_independent_movement_and_aim() -> void:
 	print("--- Test 1: Single-Stick Movement & Auto-Attack Behaviour ---")
 	var player := PlayerController.new()
-	var move_joy := VirtualJoystick.new()
+	var move_joy := MobileVirtualJoystick.new()
 	player.move_joystick = move_joy
 
 	# Moving with the single joystick moves the hunter and suppresses attacks.
