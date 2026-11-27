@@ -13,6 +13,7 @@ extends Control
 # - Compatible with MoveTransaction, item selection, drag-and-drop, tap-to-move,
 #   rotation, rollback, active synergy conduits, and save/load persistence.
 
+@warning_ignore("unused_signal")
 signal item_selected(item: ItemInstance, source: String)
 signal socket_clicked(socket_id: int)
 signal cell_clicked(grid_pos: Vector2i)
@@ -366,7 +367,7 @@ func _draw() -> void:
 			draw_texture_rect(tex, g_rect, false, Color(ghost_col.r, ghost_col.g, ghost_col.b, 0.75))
 		draw_arc(cpos, 34.0, 0.0, TAU, 32, ghost_col, 2.5, true)
 
-func _draw_socket_shape(pos: Vector2, shape: String, unlocked: bool, item: ItemInstance, selected: bool, valid: bool, invalid: bool, candidate: bool, pulse: float) -> void:
+func _draw_socket_shape(pos: Vector2, shape: String, unlocked: bool, _item: ItemInstance, selected: bool, valid: bool, invalid: bool, candidate: bool, pulse: float) -> void:
 	var r := 32.0
 	var fill_color := Color(0.06, 0.08, 0.15, 0.94)
 	var border_color := Color(0.25, 0.55, 0.9, 0.75)
@@ -413,15 +414,9 @@ func _draw_socket_shape(pos: Vector2, shape: String, unlocked: bool, item: ItemI
 			draw_arc(pos, r, 0.0, TAU, 36, border_color, border_width, true)
 			draw_arc(pos, r * 0.75, 0.0, TAU, 24, Color(border_color.r, border_color.g, border_color.b, 0.3), 1.0, true)
 
-func _draw_socket_item(pos: Vector2, item: ItemInstance, selected: bool, candidate: bool) -> void:
+func _draw_socket_item(pos: Vector2, item: ItemInstance, selected: bool, _candidate: bool) -> void:
 	var d := item.data
-	# Rarity border tint
-	var rarity_col := Color(0.65, 0.7, 0.8, 1.0)
-	match item.rarity:
-		"rare": rarity_col = Color(0.2, 0.75, 1.0, 1.0)
-		"epic": rarity_col = Color(0.85, 0.35, 1.0, 1.0)
-		"legendary": rarity_col = Color(1.0, 0.85, 0.25, 1.0)
-		
+	
 	# Draw item icon texture
 	var icon_tex := d.get_icon_texture()
 	var draw_size := 48.0
@@ -440,7 +435,7 @@ func _draw_socket_item(pos: Vector2, item: ItemInstance, selected: bool, candida
 	for s in range(d.tier): stars_str += "★"
 	draw_string(ThemeDB.fallback_font, pos + Vector2(-20, -18), stars_str, HORIZONTAL_ALIGNMENT_CENTER, -1, 12, Color(1.0, 0.85, 0.25, alpha))
 
-func _draw_empty_glyph(pos: Vector2, shape: String) -> void:
+func _draw_empty_glyph(pos: Vector2, _shape: String) -> void:
 	var glyph_col := Color(0.35, 0.5, 0.75, 0.45)
 	draw_line(pos + Vector2(-8, 0), pos + Vector2(8, 0), glyph_col, 1.2)
 	draw_line(pos + Vector2(0, -8), pos + Vector2(0, 8), glyph_col, 1.2)
@@ -519,7 +514,7 @@ func _draw_central_hero(center: Vector2, t: float) -> void:
 	draw_circle(comp_pos, 6.0, Color(iris_col.r, iris_col.g, iris_col.b, 0.9))
 	draw_circle(comp_pos + Vector2(-1.5, -1.5), 2.0, Color.WHITE)
 
-func _draw_synergy_conduits(t: float, pulse: float) -> void:
+func _draw_synergy_conduits(_t: float, pulse: float) -> void:
 	if not GameManager: return
 	var items := GameManager.altar_items
 	

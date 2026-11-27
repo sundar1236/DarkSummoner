@@ -128,6 +128,7 @@ func _format_number(val: int) -> String:
 	if val >= 1000000:
 		return "%.1fM" % (float(val) / 1000000.0)
 	elif val >= 1000:
+		@warning_ignore("integer_division")
 		var thousands := val / 1000
 		var remainder := val % 1000
 		return "%d,%03d" % [thousands, remainder]

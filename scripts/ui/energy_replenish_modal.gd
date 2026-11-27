@@ -86,4 +86,6 @@ func _process(delta: float) -> void:
 			if SaveManager and SaveManager.energy < SaveManager.max_energy:
 				SaveManager.add_energy(1)
 		if lbl_timer:
-			lbl_timer.text = "Next +1 Energy in: %02d:%02d" % [_timer_secs / 60, _timer_secs % 60]
+			@warning_ignore("integer_division")
+			var mins := _timer_secs / 60
+			lbl_timer.text = "Next +1 Energy in: %02d:%02d" % [mins, _timer_secs % 60]

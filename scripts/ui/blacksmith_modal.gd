@@ -142,6 +142,7 @@ func _upgrade_slot(slot: String) -> void:
 func _format_num(val: int) -> String:
 	if val < 1000:
 		return str(val)
+	@warning_ignore("integer_division")
 	var thousands := val / 1000
 	var rem := val % 1000
 	return "%d,%03d" % [thousands, rem]

@@ -246,6 +246,6 @@ func _draw() -> void:
 	draw_circle(comp_pos, 8.0, Color(iris_col.r, iris_col.g, iris_col.b, 0.9))
 	draw_circle(comp_pos + Vector2(-2, -2), 3.0, Color.WHITE)
 	# Tiny wisp trail
-	for tr in range(3):
-		var tra := comp_pos + Vector2(float(tr) * 4.0, 10.0 + float(tr) * 5.0)
-		draw_circle(tra, (3.0 - float(tr)) * 0.8, Color(iris_col.r, iris_col.g, iris_col.b, 0.5 - float(tr) * 0.15))
+	for trail_idx in range(3):
+		var tra := comp_pos + Vector2(float(trail_idx) * 4.0, 10.0 + float(trail_idx) * 5.0)
+		draw_circle(tra, (3.0 - float(trail_idx)) * 0.8, Color(iris_col.r, iris_col.g, iris_col.b, 0.5 - float(trail_idx) * 0.15))

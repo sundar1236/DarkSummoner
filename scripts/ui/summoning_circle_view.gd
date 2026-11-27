@@ -209,7 +209,7 @@ func _draw_hex_socket(pos: Vector2, is_sel: bool, is_hov: bool, has_it: bool) ->
 		# Large star rune icon inside empty socket
 		draw_string(ThemeDB.fallback_font, pos + Vector2(-8, 7), "✦", HORIZONTAL_ALIGNMENT_CENTER, -1, 20, Color(0.35, 0.65, 0.95, 0.45))
 
-func _draw_spirit_socket(pos: Vector2, is_sel: bool, is_hov: bool, has_it: bool) -> void:
+func _draw_spirit_socket(pos: Vector2, is_sel: bool, _is_hov: bool, has_it: bool) -> void:
 	var fill_col := Color(0.06, 0.1, 0.18, 0.9)
 	var border_col := Color(0.3, 0.85, 0.7, 0.7)
 	if is_sel: border_col = Color(0.25, 0.95, 0.45, 1.0)
@@ -218,7 +218,7 @@ func _draw_spirit_socket(pos: Vector2, is_sel: bool, is_hov: bool, has_it: bool)
 	if not has_it:
 		draw_string(ThemeDB.fallback_font, pos + Vector2(-8, 7), "◈", HORIZONTAL_ALIGNMENT_CENTER, -1, 20, Color(0.3, 0.85, 0.7, 0.45))
 
-func _draw_diamond_socket(pos: Vector2, is_sel: bool, is_hov: bool, has_it: bool, is_padlocked: bool) -> void:
+func _draw_diamond_socket(pos: Vector2, _is_sel: bool, _is_hov: bool, has_it: bool, is_padlocked: bool) -> void:
 	var pts := PackedVector2Array([
 		pos + Vector2(0, -28),
 		pos + Vector2(26, 0),

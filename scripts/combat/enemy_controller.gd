@@ -3,7 +3,7 @@ extends CharacterBody2D
 
 const CoinPickupClass = preload("res://scripts/combat/coin_pickup.gd")
 const XpPickupClass = preload("res://scripts/combat/xp_pickup.gd")
-const CombatSpriteFeedback = preload("res://scripts/combat/combat_sprite_feedback.gd")
+const CombatSpriteFeedbackClass = preload("res://scripts/combat/combat_sprite_feedback.gd")
 const EnemyBossSpriteAnimationClass = preload("res://scripts/combat/enemy_boss_sprite_animation.gd")
 const DirectionalSprite8Class = preload("res://scripts/combat/directional_sprite_8.gd")
 
@@ -477,7 +477,7 @@ func _telegraph_mini_boss_slam() -> void:
 	if AudioManager:
 		AudioManager.play_sfx("boss_warning")
 	_play_authored_animation("attack", true)
-	CombatSpriteFeedback.play_telegraph(visual_root, Vector2.UP, 0.52, Vector2(1.16, 0.84))
+	CombatSpriteFeedbackClass.play_telegraph(visual_root, Vector2.UP, 0.52, Vector2(1.16, 0.84))
 	if not is_inside_tree() or get_tree() == null:
 		if is_instance_valid(warning): warning.queue_free()
 		is_telegraphing = false
@@ -509,7 +509,7 @@ func _telegraph_cultist_attack(dir: Vector2) -> void:
 	
 	# Casting windup animation pulse
 	_play_authored_animation("attack", true)
-	CombatSpriteFeedback.play_telegraph(visual_root, dir, 0.34, Vector2(1.12, 0.92))
+	CombatSpriteFeedbackClass.play_telegraph(visual_root, dir, 0.34, Vector2(1.12, 0.92))
 	
 	if not is_inside_tree() or get_tree() == null:
 		if is_instance_valid(telegraph): telegraph.queue_free()
@@ -537,7 +537,7 @@ func _telegraph_charger(dir: Vector2) -> void:
 	if AudioManager:
 		AudioManager.play_sfx("boss_warning")
 	_play_authored_animation("attack", true)
-	CombatSpriteFeedback.play_telegraph(visual_root, charge_direction, 0.44, Vector2(1.18, 0.82))
+	CombatSpriteFeedbackClass.play_telegraph(visual_root, charge_direction, 0.44, Vector2(1.18, 0.82))
 	if not is_inside_tree() or get_tree() == null:
 		if is_instance_valid(warning): warning.queue_free()
 		is_telegraphing = false
@@ -600,7 +600,7 @@ func take_damage(amount: float, is_crit: bool) -> void:
 	if is_instance_valid(player_ref):
 		recoil_direction = global_position - player_ref.global_position
 	_play_authored_animation("hurt", true)
-	CombatSpriteFeedback.play_hit(visual_root, recoil_direction, 1.0)
+	CombatSpriteFeedbackClass.play_hit(visual_root, recoil_direction, 1.0)
 	
 	if is_crit:
 		if AudioManager: AudioManager.play_sfx("crit_hit")
@@ -646,7 +646,7 @@ func _on_death() -> void:
 	
 	# Death dissolve animates only the visual wrapper; collision and rewards stay unchanged.
 	_play_authored_animation("death", true)
-	var death_tween := CombatSpriteFeedback.play_death(visual_root, 0.2)
+	var death_tween := CombatSpriteFeedbackClass.play_death(visual_root, 0.2)
 	if death_tween:
 		death_tween.finished.connect(queue_free)
 	else:

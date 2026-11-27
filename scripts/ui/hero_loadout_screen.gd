@@ -4,10 +4,12 @@ extends Control
 # Hero Loadout Screen (Screen B - Ref Images 4, 5, 6)
 # Houses the 3 sub-tabs: Characters (0), Gear (1), Runes / Summoning Circle (2).
 
+@warning_ignore("unused_signal")
 signal back_requested()
 signal character_changed(char_id: String)
 signal star_up_requested(char_id: String)
 signal blacksmith_requested()
+@warning_ignore("unused_signal")
 signal rune_workshop_requested()
 
 @export var active_subtab: int = 1 # Default to Gear or Runes
@@ -365,6 +367,7 @@ func _refresh_gear_inventory_grid() -> void:
 		gear_grid.add_child(button)
 
 	# Fill remaining slots up to at least 20 (4 full rows of 5) with carved stone rune empty slots
+	@warning_ignore("integer_division")
 	var total_slots := maxi(20, ((items.size() + 4) / 5) * 5)
 	for i in range(items.size(), total_slots):
 		var empty_panel := PanelContainer.new()
@@ -574,8 +577,8 @@ func _format_gear_stat(value: float) -> String:
 
 func _format_gear_delta(value: float, as_percent: bool) -> String:
 	var display_value := value * 100.0 if as_percent else value
-	var sign := "+" if display_value >= 0.0 else ""
-	return "%s%.1f%s" % [sign, display_value, "%" if as_percent else ""]
+	var prefix_sign := "+" if display_value >= 0.0 else ""
+	return "%s%.1f%s" % [prefix_sign, display_value, "%" if as_percent else ""]
 
 func _on_gear_detail_equip_pressed() -> void:
 	if not SaveManager or _selected_gear_uid.is_empty():
@@ -897,6 +900,7 @@ func _on_gear_slot_pressed(slot_name: String) -> void:
 func _format_num(val: int) -> String:
 	if val < 1000:
 		return str(val)
+	@warning_ignore("integer_division")
 	var thousands := val / 1000
 	var rem := val % 1000
 	return "%d,%03d" % [thousands, rem]
@@ -944,7 +948,7 @@ func _switch_subtab(idx: int) -> void:
 			btn.add_theme_color_override("font_hover_color", active_color)
 			btn.add_theme_color_override("font_pressed_color", active_color)
 			btn.add_theme_color_override("font_focus_color", cur_col)
-			var cur_style: StyleBox = active_style if is_cur else empty_style
+			var cur_style: StyleBox = (active_style as StyleBox) if is_cur else (empty_style as StyleBox)
 			btn.add_theme_stylebox_override("normal", cur_style)
 			btn.add_theme_stylebox_override("hover", cur_style)
 			btn.add_theme_stylebox_override("pressed", cur_style)

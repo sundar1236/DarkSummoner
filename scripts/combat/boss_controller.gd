@@ -3,7 +3,7 @@ extends CharacterBody2D
 
 const CoinPickupClass = preload("res://scripts/combat/coin_pickup.gd")
 const XpPickupClass = preload("res://scripts/combat/xp_pickup.gd")
-const CombatSpriteFeedback = preload("res://scripts/combat/combat_sprite_feedback.gd")
+const CombatSpriteFeedbackClass = preload("res://scripts/combat/combat_sprite_feedback.gd")
 const EnemyBossSpriteAnimationClass = preload("res://scripts/combat/enemy_boss_sprite_animation.gd")
 const DirectionalSprite8Class = preload("res://scripts/combat/directional_sprite_8.gd")
 
@@ -311,7 +311,7 @@ func _attack_abyssal_charge() -> void:
 	
 	# 0.8s charging windup pulse; physics and collision remain on the boss body.
 	_play_authored_animation("attack", true)
-	CombatSpriteFeedback.play_telegraph(visual_root, charge_dir, 0.8, Vector2(1.18, 0.88))
+	CombatSpriteFeedbackClass.play_telegraph(visual_root, charge_dir, 0.8, Vector2(1.18, 0.88))
 	
 	if not is_inside_tree() or get_tree() == null:
 		if is_instance_valid(line_node): line_node.queue_free()
@@ -393,7 +393,7 @@ func _attack_abyssal_cross() -> void:
 	cross_telegraph.global_position = global_position
 	cross_telegraph.z_index = -1
 	parent_node.add_child(cross_telegraph)
-	CombatSpriteFeedback.play_telegraph(visual_root, Vector2.UP, 0.48, Vector2(1.12, 0.9))
+	CombatSpriteFeedbackClass.play_telegraph(visual_root, Vector2.UP, 0.48, Vector2(1.12, 0.9))
 	if not is_inside_tree() or get_tree() == null:
 		if is_instance_valid(cross_telegraph): cross_telegraph.queue_free()
 		is_performing_attack = false
@@ -442,7 +442,7 @@ func take_damage(amount: float, is_crit: bool) -> void:
 	if is_instance_valid(player_ref):
 		recoil_direction = global_position - player_ref.global_position
 	_play_authored_animation("hurt", true)
-	CombatSpriteFeedback.play_hit(visual_root, recoil_direction, 1.15)
+	CombatSpriteFeedbackClass.play_hit(visual_root, recoil_direction, 1.15)
 	
 	if is_crit:
 		if AudioManager: AudioManager.play_sfx("crit_hit")
@@ -494,7 +494,7 @@ func _on_boss_death() -> void:
 	
 	# Dramatic boss dissolve is visual-only; rewards and level completion already fired above.
 	_play_authored_animation("death", true)
-	var death_tween := CombatSpriteFeedback.play_death(
+	var death_tween := CombatSpriteFeedbackClass.play_death(
 		visual_root,
 		0.7,
 		Vector2(1.3, 1.3),

@@ -25,7 +25,11 @@ func _refresh_patrol() -> void:
 		patrol_button.disabled = false
 	else:
 		var remaining: int = int(status.get("seconds_remaining", 0))
-		patrol_status.text = "Next reward in %02d:%02d" % [remaining / 3600, (remaining % 3600) / 60]
+		@warning_ignore("integer_division")
+		var hours: int = remaining / 3600
+		@warning_ignore("integer_division")
+		var minutes: int = (remaining % 3600) / 60
+		patrol_status.text = "Next reward in %02d:%02d" % [hours, minutes]
 		patrol_button.text = "COOLDOWN"
 		patrol_button.disabled = true
 

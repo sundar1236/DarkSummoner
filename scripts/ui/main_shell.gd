@@ -27,7 +27,7 @@ signal settings_requested()
 @onready var modal_profile: Control = get_node_or_null("PlayerProfileModal")
 @onready var modal_blacksmith: Control = get_node_or_null("BlacksmithModal")
 
-const SafeAreaHelper = preload("res://scripts/ui/safe_area_helper.gd")
+const SafeAreaHelperClass = preload("res://scripts/ui/safe_area_helper.gd")
 
 var current_tab: int = 2
 
@@ -194,7 +194,7 @@ func _set_active_tab_screen(tab_idx: int) -> void:
 			screen.visible = (index == tab_idx)
 
 func _apply_safe_area() -> void:
-	var safe: Dictionary = SafeAreaHelper.get_safe_margins()
+	var safe: Dictionary = SafeAreaHelperClass.get_safe_margins()
 	var top_inset: float = safe.get("top", 46.0)
 	var bot_inset: float = safe.get("bottom", 28.0)
 	var left_inset: float = safe.get("left", 14.0)

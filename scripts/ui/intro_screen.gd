@@ -12,7 +12,6 @@ signal intro_completed()
 @export var prompt_label: Label
 @export var btn_skip: Button
 
-var _can_proceed: bool = true
 var _has_proceeded: bool = false
 
 func _ready() -> void:

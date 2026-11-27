@@ -339,7 +339,9 @@ func _process(delta: float) -> void:
 		_update_timer_text()
 
 func _update_timer_text() -> void:
+	@warning_ignore("integer_division")
 	var h := remaining_seconds / 3600
+	@warning_ignore("integer_division")
 	var m := (remaining_seconds % 3600) / 60
 	var s := remaining_seconds % 60
 	if timer_label:

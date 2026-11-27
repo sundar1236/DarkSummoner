@@ -12,7 +12,7 @@ extends Control
 
 signal pause_requested()
 
-const SafeAreaHelper = preload("res://scripts/ui/safe_area_helper.gd")
+const SafeAreaHelperClass = preload("res://scripts/ui/safe_area_helper.gd")
 
 @export var move_joystick: MobileVirtualJoystick
 @export var skill_draft_modal: SkillDraftModal = null
@@ -55,6 +55,7 @@ func _process(delta: float) -> void:
 	var total_secs := int(battle_seconds)
 	if timer_label and total_secs != _last_displayed_second:
 		_last_displayed_second = total_secs
+		@warning_ignore("integer_division")
 		var mins := total_secs / 60
 		var secs := total_secs % 60
 		timer_label.text = "%02d:%02d" % [mins, secs]
@@ -276,7 +277,7 @@ func _on_skill_cooldown(current: float, _max_v: float) -> void:
 			btn_skill.disabled = false
 
 func _apply_safe_area() -> void:
-	var safe: Dictionary = SafeAreaHelper.get_safe_margins()
+	var safe: Dictionary = SafeAreaHelperClass.get_safe_margins()
 	var top_inset: float = safe.get("top", 46.0)
 	var bot_inset: float = safe.get("bottom", 28.0)
 	var right_inset: float = safe.get("right", 14.0)

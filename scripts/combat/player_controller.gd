@@ -768,7 +768,7 @@ func _fire_basic_attack() -> void:
 	var extra_projs: int = stats.get("extra_projectiles", 0)
 	for i in range(extra_projs):
 		var sign_mult := 1.0 if i % 2 == 0 else -1.0
-		var spread_angle := (float(i / 2 + 1) * 0.18) * sign_mult
+		var spread_angle := (float((i >> 1) + 1) * 0.18) * sign_mult
 		var side_dir := aim_direction.rotated(spread_angle)
 		if not ProjectileController.can_spawn_projectile():
 			break

@@ -165,7 +165,6 @@ func _draw() -> void:
 	var dark: Color = palette.dark
 	var glow: Color = palette.glow
 	var metal: Color = palette.metal
-	var skin: Color = palette.skin
 	var bob := sin(_pulse * 3.0) * 1.2
 	var pose := action_pose
 	# Cape / mantle creates the readable silhouette behind the body.

@@ -274,7 +274,7 @@ func test_hud_reactivity_and_game_speed() -> void:
 	hud.pause_requested.disconnect(pause_conn)
 	
 	# Stage timer increments
-	var initial_timer_text := hud.timer_label.text if hud.timer_label else ""
+	var _initial_timer_text := hud.timer_label.text if hud.timer_label else ""
 	hud._process(65.0) # simulate 65 seconds
 	assert_true(hud.timer_label.text == "01:05", "Stage timer formats elapsed MM:SS (01:05)")
 	
@@ -376,7 +376,7 @@ func test_valkyrie_draft_modal_and_offers() -> void:
 	assert_true(modal.refreshes_left == 1, "Initial refreshes count is 1")
 	assert_true(modal.refresh_btn != null and not modal.refresh_btn.disabled, "Refresh button is enabled")
 	
-	var initial_offer1_id: String = modal.card_1_offer["id"]
+	var _initial_offer1_id: String = modal.card_1_offer["id"]
 	modal._on_refresh_pressed()
 	assert_true(modal.refreshes_left == 0, "Refresh count decremented to 0")
 	assert_true(modal.refresh_btn.disabled, "Refresh button disabled when out of rolls")
@@ -413,7 +413,7 @@ func test_skill_stat_application_and_progression() -> void:
 	
 	var base_stats := GameManager.get_player_effective_stats()
 	var base_atk: float = base_stats["atk"]
-	var base_crit: float = base_stats["crit_chance"]
+	var _base_crit: float = base_stats["crit_chance"]
 	
 	# Apply Rank 1 Shadow Flurry (+15 ATK, +0.15 ATK SPD)
 	GameManager.apply_run_skill("shadow_flurry")

@@ -297,7 +297,9 @@ func _on_hunt_pressed() -> void:
 	var claimed: Dictionary = SaveManager.claim_patrol_rewards()
 	if not bool(claimed.get("ready", false)):
 		var remaining: int = int(claimed.get("seconds_remaining", 0))
+		@warning_ignore("integer_division")
 		var hours: int = remaining / 3600
+		@warning_ignore("integer_division")
 		var minutes: int = (remaining % 3600) / 60
 		show_toast("Patrol rewards ready in %02d:%02d" % [hours, minutes])
 		return

@@ -881,7 +881,7 @@ func test_authored_character_animation_fallbacks() -> void:
 	]:
 		var animation := Animation.new()
 		animation.length = float(clip_data[1])
-		animation.loop_mode = int(clip_data[2])
+		animation.loop_mode = clip_data[2] as Animation.LoopMode
 		library.add_animation(str(clip_data[0]), animation)
 	animation_player.add_animation_library("", library)
 

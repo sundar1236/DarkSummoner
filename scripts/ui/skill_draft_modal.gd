@@ -10,7 +10,7 @@ extends Control
 signal skill_chosen(skill_offer: Dictionary)
 signal learned_skills_requested()
 
-const SafeAreaHelper = preload("res://scripts/ui/safe_area_helper.gd")
+const SafeAreaHelperClass = preload("res://scripts/ui/safe_area_helper.gd")
 const RunSkillDatabaseClass = preload("res://scripts/combat/run_skill_database.gd")
 
 @export var is_modal_active: bool = false
@@ -301,7 +301,7 @@ func _populate_learned_drawer() -> void:
 		learned_list.add_child(card)
 
 func _apply_safe_area() -> void:
-	var safe: Dictionary = SafeAreaHelper.get_safe_margins()
+	var safe: Dictionary = SafeAreaHelperClass.get_safe_margins()
 	var top_inset: float = safe.get("top", 46.0)
 	var bot_inset: float = safe.get("bottom", 28.0)
 	var right_inset: float = safe.get("right", 14.0)
