@@ -71,18 +71,10 @@ func _ready() -> void:
 		btn_skip.pressed.connect(_finish_story)
 	if btn_next and not btn_next.pressed.is_connected(_on_next_pressed):
 		btn_next.pressed.connect(_on_next_pressed)
-	_preload_act_textures()
 
 
 func _exit_tree() -> void:
 	_kill_tweens()
-
-
-func _preload_act_textures() -> void:
-	for act_data in acts:
-		var img_path := str(act_data.get("image_path", ""))
-		if not img_path.is_empty() and ResourceLoader.exists(img_path):
-			_texture_cache[img_path] = ResourceLoader.load(img_path) as Texture2D
 
 
 func _get_act_texture(img_path: String) -> Texture2D:

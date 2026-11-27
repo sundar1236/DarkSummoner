@@ -28,6 +28,16 @@ static func create_pcm_stream(samples: PackedFloat32Array) -> AudioStreamWAV:
 	stream.data = byte_array
 	return stream
 
+
+static func _create_looping_pcm_stream(samples: PackedFloat32Array) -> AudioStreamWAV:
+	var stream := create_pcm_stream(samples)
+	stream.loop_mode = AudioStreamWAV.LOOP_FORWARD
+	stream.loop_begin = 0
+	# Keep loop_end safely inside sample bounds so Android's AudioTrack resampler
+	# never reads past the end of the PCM buffer during multi-tap interpolation.
+	stream.loop_end = maxi(1, samples.size() - 4)
+	return stream
+
 # 1. UI Click
 static func gen_ui_click() -> AudioStreamWAV:
 	var duration: float = 0.05
@@ -394,11 +404,7 @@ static func gen_dark_ambience() -> AudioStreamWAV:
 		var pulse: float = (1.0 + sin(t * 0.5 * TAU)) * 0.5
 		var whisper: float = (randf() * 2.0 - 1.0) * 0.04
 		samples[i] = (drone1 + drone2 * pulse + whisper) * 0.5
-	var stream: AudioStreamWAV = create_pcm_stream(samples)
-	stream.loop_mode = AudioStreamWAV.LOOP_FORWARD
-	stream.loop_begin = 0
-	stream.loop_end = count
-	return stream
+	return _create_looping_pcm_stream(samples)
 
 # 24. Combat Music Loop
 static func gen_combat_music() -> AudioStreamWAV:
@@ -429,11 +435,7 @@ static func gen_combat_music() -> AudioStreamWAV:
 		var synth: float = sin(note_pos * notes[note_idx] * TAU) * synth_env * 0.35
 		
 		samples[i] = kick + hat + synth
-	var stream: AudioStreamWAV = create_pcm_stream(samples)
-	stream.loop_mode = AudioStreamWAV.LOOP_FORWARD
-	stream.loop_begin = 0
-	stream.loop_end = count
-	return stream
+	return _create_looping_pcm_stream(samples)
 
 # 25. Boss Music Loop (Intense, aggressive tempo)
 static func gen_boss_music() -> AudioStreamWAV:
@@ -461,11 +463,7 @@ static func gen_boss_music() -> AudioStreamWAV:
 		var arp: float = sin(eighth_pos * arp_notes[arp_idx] * TAU) * arp_env * 0.4
 		
 		samples[i] = kick + sub + arp
-	var stream: AudioStreamWAV = create_pcm_stream(samples)
-	stream.loop_mode = AudioStreamWAV.LOOP_FORWARD
-	stream.loop_begin = 0
-	stream.loop_end = count
-	return stream
+	return _create_looping_pcm_stream(samples)
 
 # 26. Gothic Horror Menu & Intro Music (Tense, dark, ominous horror)
 static func gen_horror_menu_music() -> AudioStreamWAV:
@@ -505,11 +503,7 @@ static func gen_horror_menu_music() -> AudioStreamWAV:
 		
 		samples[i] = clampf(bell + drone + (tritone * chord_env) + chime + wind, -1.0, 1.0) * 0.8
 		
-	var stream: AudioStreamWAV = create_pcm_stream(samples)
-	stream.loop_mode = AudioStreamWAV.LOOP_FORWARD
-	stream.loop_begin = 0
-	stream.loop_end = count
-	return stream
+	return _create_looping_pcm_stream(samples)
 
 # 27. Crisp Punchy Player Weapon Slash & Projectile Launch
 static func gen_shoot_slash() -> AudioStreamWAV:
