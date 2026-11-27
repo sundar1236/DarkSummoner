@@ -89,6 +89,8 @@ func _ensure_character_portrait() -> void:
 	_portrait_texture = TextureLoader.get_texture("res://assets/art/characters/%s_portrait.png" % character_id)
 
 func _process(delta: float) -> void:
+	if not is_visible_in_tree():
+		return
 	_t += delta
 	if _preview_character_id != character_id:
 		_sync_character_visual()

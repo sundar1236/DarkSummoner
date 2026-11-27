@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://scripts/ui/main_menu.gd" id="1_mnu"]
 [ext_resource type="Theme" path="res://assets/themes/dark_fantasy_theme.tres" id="2_thm"]
 [ext_resource type="Texture2D" path="res://assets/art/backgrounds/tower_altar_bg.png" id="3_bg"]
-[ext_resource type="Texture2D" path="res://assets/art/ui/abyssal_altar_logo.png" id="4_logo"]
+[ext_resource type="Texture2D" path="res://assets/art/ui/dark_summoner_logo.png" id="4_logo"]
 [ext_resource type="Texture2D" path="res://assets/art/ui/icon_shade.png" id="5_shd"]
 [ext_resource type="Script" path="res://scripts/ui/hero_pedestal_view.gd" id="6_ped"]
 
@@ -183,7 +183,7 @@ theme_override_font_sizes/font_size = 19
 text = "◆ 0 Shades"
 
 [node name="Logo" type="TextureRect" parent="MainLayout/Header"]
-custom_minimum_size = Vector2(0, 145)
+custom_minimum_size = Vector2(0, 180)
 layout_mode = 2
 texture = ExtResource("4_logo")
 expand_mode = 1

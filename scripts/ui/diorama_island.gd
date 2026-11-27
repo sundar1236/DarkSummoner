@@ -27,6 +27,8 @@ func _load_textures() -> void:
 		_fire_tex = TextureLoader.get_texture("res://assets/art/ui_campaign/prop_campfire_tall.png")
 
 func _process(delta: float) -> void:
+	if not is_visible_in_tree():
+		return
 	_anim_time += delta
 	queue_redraw()
 

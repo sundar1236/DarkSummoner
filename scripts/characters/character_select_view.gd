@@ -48,7 +48,7 @@ class ShowcasePedestalBackdrop extends Control:
 	var _t: float = 0.0
 
 	func _process(delta: float) -> void:
-		if visible:
+		if is_visible_in_tree():
 			_t += delta
 			queue_redraw()
 

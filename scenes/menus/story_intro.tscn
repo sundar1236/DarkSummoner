@@ -1,23 +1,109 @@
-[gd_scene load_steps=3 format=3 uid="uid://c6storyintro01"]
+[gd_scene load_steps=10 format=3 uid="uid://c6storyintro01"]
 
 [ext_resource type="Script" path="res://scripts/ui/story_intro.gd" id="1_sty"]
-[ext_resource type="Texture2D" path="res://assets/art/story/story_scene_1_tower.png" id="2_img"]
+[ext_resource type="Theme" path="res://assets/themes/dark_fantasy_theme.tres" id="2_thm"]
+[ext_resource type="Texture2D" path="res://assets/art/story/story_act_1_fall.png" id="3_img"]
 
-[node name="StoryIntro" type="Control" node_paths=PackedStringArray("scene_texture_rect", "title_label", "subtitle_label", "narrative_label", "act_dots_container", "btn_skip", "progress_bar")]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_skip"]
+content_margin_left = 14.0
+content_margin_top = 6.0
+content_margin_right = 14.0
+content_margin_bottom = 6.0
+bg_color = Color(0.08, 0.075, 0.1, 0.92)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.62, 0.52, 0.34, 0.85)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bar_bg"]
+bg_color = Color(0.11, 0.11, 0.14, 1)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bar_fill"]
+bg_color = Color(0.86, 0.72, 0.42, 1)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_artframe"]
+content_margin_left = 3.0
+content_margin_top = 3.0
+content_margin_right = 3.0
+content_margin_bottom = 3.0
+bg_color = Color(0.04, 0.04, 0.055, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.55, 0.46, 0.3, 0.9)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_narrative"]
+content_margin_left = 24.0
+content_margin_top = 22.0
+content_margin_right = 24.0
+content_margin_bottom = 22.0
+bg_color = Color(0.055, 0.055, 0.075, 0.96)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.45, 0.39, 0.28, 0.75)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_cta"]
+content_margin_left = 24.0
+content_margin_top = 12.0
+content_margin_right = 24.0
+content_margin_bottom = 12.0
+bg_color = Color(0.11, 0.13, 0.18, 0.98)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.76, 0.62, 0.38, 0.95)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+shadow_color = Color(0.9, 0.42, 0.12, 0.32)
+shadow_size = 8
+shadow_offset = Vector2(0, 3)
+
+[node name="StoryIntro" type="Control" node_paths=PackedStringArray("scene_texture_rect", "act_num_label", "title_label", "subtitle_label", "narrative_label", "act_dots_container", "segments_container", "btn_skip", "btn_next", "progress_bar")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme = ExtResource("2_thm")
 script = ExtResource("1_sty")
-scene_texture_rect = NodePath("ArtLayer/Illustration")
-title_label = NodePath("UILayer/BottomVBox/ActTitle")
-subtitle_label = NodePath("UILayer/BottomVBox/ActSubtitle")
-narrative_label = NodePath("UILayer/BottomVBox/NarrativePanel/NarrativeText")
-act_dots_container = NodePath("UILayer/BottomVBox/DotsRow")
-btn_skip = NodePath("UILayer/TopBar/BtnSkip")
-progress_bar = NodePath("UILayer/TopBar/ProgressBar")
+scene_texture_rect = NodePath("MainMargin/MainVBox/IllustrationFrame/ArtClip/Illustration")
+act_num_label = NodePath("MainMargin/MainVBox/HeadingVBox/ActNum")
+title_label = NodePath("MainMargin/MainVBox/HeadingVBox/ActTitle")
+subtitle_label = NodePath("MainMargin/MainVBox/HeadingVBox/ActSubtitle")
+narrative_label = NodePath("MainMargin/MainVBox/NarrativePanel/NarrativeScroll/NarrativeText")
+act_dots_container = NodePath("MainMargin/MainVBox/DotsRow")
+segments_container = NodePath("MainMargin/MainVBox/SegmentsRow")
+btn_skip = NodePath("MainMargin/MainVBox/TopHeader/BtnSkip")
+btn_next = NodePath("MainMargin/MainVBox/BottomRow/BtnNext")
+progress_bar = NodePath("MainMargin/MainVBox/ProgressBar")
 
 [node name="BaseBg" type="ColorRect" parent="."]
 layout_mode = 1
@@ -26,159 +112,245 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.04, 0.03, 0.06, 1)
+mouse_filter = 2
+color = Color(0.055, 0.052, 0.068, 1)
 
-[node name="ArtLayer" type="Control" parent="."]
+[node name="MainMargin" type="MarginContainer" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/margin_left = 28
+theme_override_constants/margin_top = 34
+theme_override_constants/margin_right = 28
+theme_override_constants/margin_bottom = 28
 
-[node name="Illustration" type="TextureRect" parent="ArtLayer"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-texture = ExtResource("2_img")
-expand_mode = 1
-stretch_mode = 6
+[node name="MainVBox" type="VBoxContainer" parent="MainMargin"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 14
 
-[node name="Vignette" type="ColorRect" parent="."]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-color = Color(0.05, 0.03, 0.08, 0.5)
+[node name="TopHeader" type="HBoxContainer" parent="MainMargin/MainVBox"]
+layout_mode = 2
+theme_override_constants/separation = 12
 
-[node name="BottomShade" type="ColorRect" parent="."]
-layout_mode = 1
-anchors_preset = 12
-anchor_top = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_top = -420.0
-grow_horizontal = 2
-grow_vertical = 0
-color = Color(0.04, 0.02, 0.06, 0.88)
+[node name="ChronicleTitle" type="Label" parent="MainMargin/MainVBox/TopHeader"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.86, 0.76, 0.54, 1)
+theme_override_font_sizes/font_size = 18
+text = "✦  CHRONICLES OF AETHELGARD"
+vertical_alignment = 1
 
-[node name="UILayer" type="Control" parent="."]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 1
+[node name="BtnSkip" type="Button" parent="MainMargin/MainVBox/TopHeader"]
+custom_minimum_size = Vector2(106, 40)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.88, 0.8, 0.62, 1)
+theme_override_font_sizes/font_size = 15
+theme_override_styles/normal = SubResource("StyleBoxFlat_skip")
+theme_override_styles/hover = SubResource("StyleBoxFlat_skip")
+text = "SKIP >>"
 
-[node name="TopBar" type="Control" parent="UILayer"]
-layout_mode = 1
-anchors_preset = 10
-anchor_right = 1.0
-offset_bottom = 80.0
-grow_horizontal = 2
-mouse_filter = 1
+[node name="SegmentsRow" type="HBoxContainer" parent="MainMargin/MainVBox"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 10
 
-[node name="ProgressBar" type="ProgressBar" parent="UILayer/TopBar"]
-layout_mode = 1
-anchors_preset = 10
-anchor_right = 1.0
-offset_bottom = 4.0
-grow_horizontal = 2
+[node name="Seg1" type="VBoxContainer" parent="MainMargin/MainVBox/SegmentsRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+
+[node name="Bar" type="ColorRect" parent="MainMargin/MainVBox/SegmentsRow/Seg1"]
+custom_minimum_size = Vector2(0, 4)
+layout_mode = 2
+color = Color(0.88, 0.74, 0.42, 1)
+
+[node name="Lbl" type="Label" parent="MainMargin/MainVBox/SegmentsRow/Seg1"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.84, 0.55, 1)
+theme_override_font_sizes/font_size = 13
+text = "1"
+horizontal_alignment = 1
+
+[node name="Seg2" type="VBoxContainer" parent="MainMargin/MainVBox/SegmentsRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+
+[node name="Bar" type="ColorRect" parent="MainMargin/MainVBox/SegmentsRow/Seg2"]
+custom_minimum_size = Vector2(0, 4)
+layout_mode = 2
+color = Color(0.24, 0.24, 0.29, 0.8)
+
+[node name="Lbl" type="Label" parent="MainMargin/MainVBox/SegmentsRow/Seg2"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.55, 0.54, 0.6, 0.85)
+theme_override_font_sizes/font_size = 13
+text = "2"
+horizontal_alignment = 1
+
+[node name="Seg3" type="VBoxContainer" parent="MainMargin/MainVBox/SegmentsRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+
+[node name="Bar" type="ColorRect" parent="MainMargin/MainVBox/SegmentsRow/Seg3"]
+custom_minimum_size = Vector2(0, 4)
+layout_mode = 2
+color = Color(0.24, 0.24, 0.29, 0.8)
+
+[node name="Lbl" type="Label" parent="MainMargin/MainVBox/SegmentsRow/Seg3"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.55, 0.54, 0.6, 0.85)
+theme_override_font_sizes/font_size = 13
+text = "3"
+horizontal_alignment = 1
+
+[node name="Seg4" type="VBoxContainer" parent="MainMargin/MainVBox/SegmentsRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+
+[node name="Bar" type="ColorRect" parent="MainMargin/MainVBox/SegmentsRow/Seg4"]
+custom_minimum_size = Vector2(0, 4)
+layout_mode = 2
+color = Color(0.24, 0.24, 0.29, 0.8)
+
+[node name="Lbl" type="Label" parent="MainMargin/MainVBox/SegmentsRow/Seg4"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.55, 0.54, 0.6, 0.85)
+theme_override_font_sizes/font_size = 13
+text = "4"
+horizontal_alignment = 1
+
+[node name="ProgressBar" type="ProgressBar" parent="MainMargin/MainVBox"]
+custom_minimum_size = Vector2(0, 3)
+layout_mode = 2
+mouse_filter = 2
+theme_override_styles/background = SubResource("StyleBoxFlat_bar_bg")
+theme_override_styles/fill = SubResource("StyleBoxFlat_bar_fill")
 max_value = 1.0
 show_percentage = false
 
-[node name="BtnSkip" type="Button" parent="UILayer/TopBar"]
-custom_minimum_size = Vector2(100, 44)
-layout_mode = 1
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -120.0
-offset_top = 18.0
-offset_right = -20.0
-offset_bottom = 62.0
-grow_horizontal = 0
-theme_override_font_sizes/font_size = 16
-text = "SKIP >>"
+[node name="IllustrationFrame" type="PanelContainer" parent="MainMargin/MainVBox"]
+custom_minimum_size = Vector2(0, 368)
+layout_mode = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_artframe")
 
-[node name="BottomVBox" type="VBoxContainer" parent="UILayer"]
+[node name="ArtClip" type="Control" parent="MainMargin/MainVBox/IllustrationFrame"]
+clip_contents = true
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Illustration" type="TextureRect" parent="MainMargin/MainVBox/IllustrationFrame/ArtClip"]
 layout_mode = 1
-anchors_preset = 12
-anchor_top = 1.0
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 32.0
-offset_top = -360.0
-offset_right = -32.0
-offset_bottom = -30.0
 grow_horizontal = 2
-grow_vertical = 0
+grow_vertical = 2
 mouse_filter = 2
-theme_override_constants/separation = 12
+texture = ExtResource("3_img")
+expand_mode = 1
+stretch_mode = 6
 
-[node name="ActTitle" type="Label" parent="UILayer/BottomVBox"]
+[node name="DotsRow" type="HBoxContainer" parent="MainMargin/MainVBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.85, 0.35, 1)
-theme_override_font_sizes/font_size = 22
-text = "ACT I : THE BLACK TOWER"
+mouse_filter = 2
+alignment = 1
+theme_override_constants/separation = 16
+
+[node name="Dot1" type="ColorRect" parent="MainMargin/MainVBox/DotsRow"]
+custom_minimum_size = Vector2(10, 10)
+layout_mode = 2
+mouse_filter = 2
+color = Color(0.95, 0.8, 0.36, 1)
+
+[node name="Dot2" type="ColorRect" parent="MainMargin/MainVBox/DotsRow"]
+custom_minimum_size = Vector2(10, 10)
+layout_mode = 2
+mouse_filter = 2
+color = Color(0.42, 0.42, 0.48, 0.6)
+
+[node name="Dot3" type="ColorRect" parent="MainMargin/MainVBox/DotsRow"]
+custom_minimum_size = Vector2(10, 10)
+layout_mode = 2
+mouse_filter = 2
+color = Color(0.42, 0.42, 0.48, 0.6)
+
+[node name="Dot4" type="ColorRect" parent="MainMargin/MainVBox/DotsRow"]
+custom_minimum_size = Vector2(10, 10)
+layout_mode = 2
+mouse_filter = 2
+color = Color(0.42, 0.42, 0.48, 0.6)
+
+[node name="HeadingVBox" type="VBoxContainer" parent="MainMargin/MainVBox"]
+layout_mode = 2
+mouse_filter = 2
+theme_override_constants/separation = 4
+
+[node name="ActNum" type="Label" parent="MainMargin/MainVBox/HeadingVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.82, 0.72, 0.5, 1)
+theme_override_font_sizes/font_size = 15
+text = "—  ACT I  —"
 horizontal_alignment = 1
 
-[node name="ActSubtitle" type="Label" parent="UILayer/BottomVBox"]
+[node name="ActTitle" type="Label" parent="MainMargin/MainVBox/HeadingVBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.78, 0.55, 1, 1)
+theme_override_colors/font_color = Color(0.94, 0.89, 0.76, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.85)
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 28
+text = "THE FALL OF AETHELGARD"
+horizontal_alignment = 1
+
+[node name="ActSubtitle" type="Label" parent="MainMargin/MainVBox/HeadingVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.75, 0.71, 0.63, 1)
 theme_override_font_sizes/font_size = 16
-text = "The Cursed Spire of Aethelgard"
+text = "When the heavens shattered, the kingdom fell."
 horizontal_alignment = 1
 
-[node name="NarrativePanel" type="PanelContainer" parent="UILayer/BottomVBox"]
+[node name="NarrativePanel" type="PanelContainer" parent="MainMargin/MainVBox"]
 layout_mode = 2
 size_flags_vertical = 3
 mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_narrative")
 
-[node name="NarrativeText" type="Label" parent="UILayer/BottomVBox/NarrativePanel"]
+[node name="NarrativeScroll" type="ScrollContainer" parent="MainMargin/MainVBox/NarrativePanel"]
 layout_mode = 2
-size_flags_vertical = 1
-theme_override_colors/font_color = Color(0.9, 0.9, 0.95, 1)
+mouse_filter = 2
+horizontal_scroll_mode = 0
+
+[node name="NarrativeText" type="Label" parent="MainMargin/MainVBox/NarrativePanel/NarrativeScroll"]
+custom_minimum_size = Vector2(600, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_colors/font_color = Color(0.88, 0.84, 0.76, 1)
+theme_override_constants/line_spacing = 5
 theme_override_font_sizes/font_size = 18
-text = "In the forgotten ages of Aethelgard, the Black Tower pierced the shattered heavens. An obsidian monolith built of condemned souls, rising from the void where sunlight dared not fall."
-horizontal_alignment = 1
-vertical_alignment = 1
+text = "When the ancient seals began to break, the sky turned black and the stars vanished. Abyssal creatures poured from beneath the kingdom, devouring cities, armies, and everything that stood in their path.
+The Tower awakened. And with it, an ancient power that had been buried for centuries.
+
+One hunter survived the fall. One soul was chosen to enter the abyss."
 autowrap_mode = 3
 
-[node name="TapHint" type="Label" parent="UILayer/BottomVBox"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.45, 0.45, 0.55, 1)
-theme_override_font_sizes/font_size = 14
-text = "Tap screen to advance"
-horizontal_alignment = 1
-
-[node name="DotsRow" type="HBoxContainer" parent="UILayer/BottomVBox"]
+[node name="BottomRow" type="HBoxContainer" parent="MainMargin/MainVBox"]
 layout_mode = 2
 alignment = 1
-theme_override_constants/separation = 14
 
-[node name="Dot1" type="ColorRect" parent="UILayer/BottomVBox/DotsRow"]
-custom_minimum_size = Vector2(8, 8)
+[node name="BtnNext" type="Button" parent="MainMargin/MainVBox/BottomRow"]
+custom_minimum_size = Vector2(310, 56)
 layout_mode = 2
-color = Color(1, 0.85, 0.2, 1)
-
-[node name="Dot2" type="ColorRect" parent="UILayer/BottomVBox/DotsRow"]
-custom_minimum_size = Vector2(8, 8)
-layout_mode = 2
-color = Color(0.4, 0.4, 0.5, 0.5)
-
-[node name="Dot3" type="ColorRect" parent="UILayer/BottomVBox/DotsRow"]
-custom_minimum_size = Vector2(8, 8)
-layout_mode = 2
-color = Color(0.4, 0.4, 0.5, 0.5)
-
-[node name="Dot4" type="ColorRect" parent="UILayer/BottomVBox/DotsRow"]
-custom_minimum_size = Vector2(8, 8)
-layout_mode = 2
-color = Color(0.4, 0.4, 0.5, 0.5)
+theme_override_colors/font_color = Color(0.95, 0.89, 0.74, 1)
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("StyleBoxFlat_cta")
+theme_override_styles/hover = SubResource("StyleBoxFlat_cta")
+text = "NEXT CHAPTER ▸"
