@@ -20,8 +20,10 @@ extends Control
 
 var current_arena: CombatManager = null
 var is_inventory_from_pause: bool = false
+var _pre_pause_time_scale: float = 1.0
 
 func _ready() -> void:
+	get_tree().set_auto_accept_quit(false)
 	_connect_subsystems()
 	if SaveManager and not SaveManager.active_character_id.is_empty():
 		GameManager.current_character = CharacterDatabase.get_character(SaveManager.active_character_id)
@@ -32,6 +34,100 @@ func _ready() -> void:
 		story_intro.start_story()
 	else:
 		_show_after_story()
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_WM_GO_BACK_REQUEST:
+		handle_back_navigation()
+	elif what == NOTIFICATION_WM_CLOSE_REQUEST:
+		get_tree().quit()
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("ui_cancel") or (event is InputEventKey and event.pressed and not event.echo and (event.keycode == KEY_ESCAPE or event.keycode == KEY_BACK)):
+		if handle_back_navigation():
+			get_viewport().set_input_as_handled()
+
+
+## Routes Escape / Android hardware back across active modals, combat pause, and meta screens.
+func handle_back_navigation() -> bool:
+	if settings_modal and settings_modal.visible:
+		if settings_modal.is_confirming_abandon:
+			settings_modal._reset_confirm_state()
+		else:
+			settings_modal.resume_requested.emit()
+		return true
+
+	if inventory_view and inventory_view.visible:
+		if inventory_view.is_move_mode:
+			inventory_view.cancel_move_mode()
+		elif is_inventory_from_pause:
+			_on_inventory_closed()
+		elif settings_modal:
+			if settings_modal.has_method("set_context"):
+				settings_modal.set_context(false)
+			_show_modal("settings")
+		return true
+
+	if reward_view and reward_view.visible:
+		if settings_modal:
+			if settings_modal.has_method("set_context"):
+				settings_modal.set_context(false)
+			_show_modal("settings")
+		return true
+
+	if shop_view and shop_view.visible:
+		shop_view.leave_shop_requested.emit()
+		return true
+
+	if game_over_view and game_over_view.visible:
+		game_over_view.sanctuary_requested.emit()
+		return true
+
+	if character_select_view and character_select_view.visible:
+		if not character_select_view.is_initial_selection:
+			character_select_view.back_requested.emit()
+		return true
+
+	if progression_view and progression_view.visible:
+		progression_view.back_requested.emit()
+		return true
+
+	if story_intro and story_intro.visible:
+		if story_intro.has_method("skip_story"):
+			story_intro.skip_story()
+		return true
+
+	if intro_screen and intro_screen.visible:
+		if intro_screen.has_method("skip_intro"):
+			intro_screen.skip_intro()
+		return true
+
+	if main_shell and main_shell.visible:
+		if main_shell.has_method("handle_back_navigation") and main_shell.handle_back_navigation():
+			return true
+		if settings_modal:
+			if settings_modal.has_method("set_context"):
+				settings_modal.set_context(false)
+			_show_modal("settings")
+		return true
+
+	if is_instance_valid(current_arena) and current_arena.visible:
+		var draft := current_arena.get_node_or_null("HUDLayer/CombatHUD/SkillDraftModal") as SkillDraftModal
+		if draft and draft.visible:
+			if draft.learned_drawer and draft.learned_drawer.visible and draft.has_method("close_learned_drawer"):
+				draft.close_learned_drawer()
+			return true
+		_pause_combat()
+		return true
+
+	if main_menu and main_menu.visible and settings_modal:
+		if settings_modal.has_method("set_context"):
+			settings_modal.set_context(false)
+		_show_modal("settings")
+		return true
+
+	return false
 
 func _connect_subsystems() -> void:
 	# 1. Intro Screen Signal -> transitions to Story Prologue
@@ -51,9 +147,15 @@ func _connect_subsystems() -> void:
 	# 1c. Main Shell Signals (Chrome Hub)
 	if main_shell:
 		main_shell.start_run_requested.connect(func():
-			var char_id: String = GameManager.current_character.id if GameManager.current_character else "shadow_hunter"
+			var char_id: String = GameManager.current_character.id if GameManager.current_character else "kael_varyn"
 			_on_start_run_requested(char_id)
 		)
+		if main_shell.has_signal("settings_requested"):
+			main_shell.settings_requested.connect(func():
+				if settings_modal and settings_modal.has_method("set_context"):
+					settings_modal.set_context(false)
+				_show_modal("settings")
+			)
 
 	# 2. Main Menu Signals
 	if main_menu:
@@ -83,6 +185,8 @@ func _connect_subsystems() -> void:
 				story_intro.start_story()
 		)
 		main_menu.settings_pressed.connect(func():
+			if settings_modal and settings_modal.has_method("set_context"):
+				settings_modal.set_context(false)
 			_show_modal("settings")
 		)
 
@@ -105,48 +209,75 @@ func _connect_subsystems() -> void:
 	# 6. Inventory View Signals
 	if inventory_view:
 		inventory_view.close_requested.connect(_on_inventory_closed)
+		if inventory_view.has_signal("settings_requested"):
+			inventory_view.settings_requested.connect(func():
+				if settings_modal and settings_modal.has_method("set_context"):
+					settings_modal.set_context(is_inventory_from_pause)
+				_show_modal("settings")
+			)
 
 	# 7. Shop Signals
 	if shop_view:
 		shop_view.leave_shop_requested.connect(func():
 			_show_screen("inventory")
 		)
+		if shop_view.has_signal("settings_requested"):
+			shop_view.settings_requested.connect(func():
+				if settings_modal and settings_modal.has_method("set_context"):
+					settings_modal.set_context(false)
+				_show_modal("settings")
+			)
 
 	# 8. Reward Signals
 	if reward_view:
 		reward_view.reward_claimed_and_continue.connect(func():
 			_show_screen("inventory")
 		)
+		if reward_view.has_signal("settings_requested"):
+			reward_view.settings_requested.connect(func():
+				if settings_modal and settings_modal.has_method("set_context"):
+					settings_modal.set_context(false)
+				_show_modal("settings")
+			)
 
 	# 9. Game Over Signals
 	if game_over_view:
 		game_over_view.retry_requested.connect(func():
+			Engine.time_scale = 1.0
+			get_tree().paused = false
+			is_inventory_from_pause = false
 			GameManager.retry_current_floor()
 		)
 		game_over_view.sanctuary_requested.connect(func():
-			_show_screen("shell" if main_shell else "menu")
+			_abandon_active_run_and_return("shell" if main_shell else "menu")
 		)
 		game_over_view.revive_requested.connect(func():
+			Engine.time_scale = 1.0
+			get_tree().paused = false
+			is_inventory_from_pause = false
 			_show_screen("combat")
+			if not is_instance_valid(current_arena):
+				_spawn_combat_arena()
 		)
 
 	# 10. Settings Modal Signals
 	if settings_modal:
-		settings_modal.resume_requested.connect(func():
-			get_tree().paused = false
-			settings_modal.visible = false
-		)
+		settings_modal.resume_requested.connect(_on_settings_resumed)
 		settings_modal.inventory_requested.connect(func():
 			is_inventory_from_pause = true
 			settings_modal.visible = false
 			_show_screen("inventory")
 		)
 		settings_modal.abandon_run_requested.connect(func():
-			get_tree().paused = false
-			settings_modal.visible = false
-			_clear_arena()
-			_show_screen("shell" if main_shell else "menu")
+			_abandon_active_run_and_return("shell" if main_shell else "menu")
 		)
+		if settings_modal.has_signal("main_menu_requested"):
+			settings_modal.main_menu_requested.connect(func():
+				get_tree().paused = false
+				Engine.time_scale = 1.0
+				settings_modal.visible = false
+				_show_screen("menu")
+			)
 
 func _show_after_story() -> void:
 	if SaveManager and not SaveManager.has_completed_initial_character_selection and character_select_view:
@@ -170,6 +301,8 @@ func _show_screen(screen_name: String) -> void:
 	_set_active_root_screen(screen_name)
 	if inventory_view:
 		inventory_view.process_mode = Node.PROCESS_MODE_ALWAYS if screen_name == "inventory" and is_inventory_from_pause else Node.PROCESS_MODE_INHERIT
+		if inventory_view.has_method("set_pause_mode"):
+			inventory_view.set_pause_mode(screen_name == "inventory" and is_inventory_from_pause)
 	if settings_modal: settings_modal.visible = false
 	
 	if is_instance_valid(current_arena):
@@ -180,6 +313,37 @@ func _show_screen(screen_name: String) -> void:
 	
 	if screen_name == "inventory" and inventory_view:
 		inventory_view.refresh_inventory_ui()
+
+
+func _pause_combat() -> void:
+	_pre_pause_time_scale = Engine.time_scale
+	Engine.time_scale = 1.0
+	get_tree().paused = true
+	if settings_modal and settings_modal.has_method("set_context"):
+		settings_modal.set_context(true)
+	_show_modal("settings")
+
+
+func _on_settings_resumed() -> void:
+	get_tree().paused = false
+	if settings_modal:
+		settings_modal.visible = false
+	if is_instance_valid(current_arena) and current_arena.visible:
+		var hud := current_arena.get_node_or_null("HUDLayer/CombatHUD") as CombatHUD
+		Engine.time_scale = hud.current_speed_scale if hud else _pre_pause_time_scale
+	else:
+		Engine.time_scale = 1.0
+
+
+func _abandon_active_run_and_return(target_screen: String) -> void:
+	get_tree().paused = false
+	Engine.time_scale = 1.0
+	is_inventory_from_pause = false
+	if settings_modal:
+		settings_modal.visible = false
+	_clear_arena()
+	GameManager.abandon_run()
+	_show_screen(target_screen)
 
 # Root-screen visibility is owned here so transitions cannot leave overlapping screens.
 func _set_active_root_screen(screen_name: String) -> void:
@@ -226,10 +390,16 @@ func _on_continue_pressed() -> void:
 
 func _on_start_run_requested(char_id: String) -> void:
 	_clear_arena()
+	Engine.time_scale = 1.0
+	is_inventory_from_pause = false
+	if shop_view and shop_view.has_method("reset_stock"):
+		shop_view.reset_stock()
 	GameManager.start_new_run(char_id, 1)
 
 func _on_level_started(_floor_num: int, _level_num: int, encounter_type: String) -> void:
 	_clear_arena()
+	Engine.time_scale = 1.0
+	is_inventory_from_pause = false
 	
 	if encounter_type == "shop":
 		_show_screen("shop")
@@ -250,10 +420,7 @@ func _spawn_combat_arena() -> void:
 	var hud := current_arena.get_node_or_null("HUDLayer/CombatHUD") as CombatHUD
 	if hud:
 		hud.setup(current_arena.player)
-		hud.pause_requested.connect(func():
-			get_tree().paused = true
-			_show_modal("settings")
-		)
+		hud.pause_requested.connect(_pause_combat)
 
 func _clear_arena() -> void:
 	if is_instance_valid(current_arena):

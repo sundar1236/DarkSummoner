@@ -11,6 +11,7 @@ extends Control
 
 signal start_run_requested()
 signal screen_selected(tab_index: int)
+signal settings_requested()
 
 @onready var top_bar = $TopResourceBar
 @onready var nav_dock = $BottomNavDock
@@ -61,6 +62,8 @@ func _ready() -> void:
 			)
 		if screen_campaign.has_signal("insufficient_energy"):
 			screen_campaign.insufficient_energy.connect(open_energy_modal)
+		if screen_campaign.has_signal("settings_requested"):
+			screen_campaign.settings_requested.connect(func(): settings_requested.emit())
 	if screen_loadout:
 		screen_loadout.character_changed.connect(func(_char_id):
 			if top_bar: top_bar.refresh_display()
@@ -106,6 +109,29 @@ func close_all_modals() -> void:
 	for modal in [modal_energy, modal_profile, modal_blacksmith]:
 		if is_instance_valid(modal):
 			modal.visible = false
+	if is_instance_valid(screen_loadout):
+		for submodal_name in ["_info_modal", "_gear_detail_modal"]:
+			var submodal = screen_loadout.get(submodal_name)
+			if is_instance_valid(submodal) and submodal is Control:
+				submodal.visible = false
+
+
+## Handles back navigation inside the hub: closes open modals first, then returns to Campaign tab.
+func handle_back_navigation() -> bool:
+	for modal in [modal_energy, modal_profile, modal_blacksmith]:
+		if is_instance_valid(modal) and modal.visible:
+			modal.visible = false
+			return true
+	if is_instance_valid(screen_loadout):
+		for submodal_name in ["_gear_detail_modal", "_info_modal"]:
+			var submodal = screen_loadout.get(submodal_name)
+			if is_instance_valid(submodal) and submodal is Control and submodal.visible:
+				submodal.visible = false
+				return true
+	if current_tab != 2:
+		_switch_to_tab(2)
+		return true
+	return false
 
 func open_energy_modal() -> void:
 	close_all_modals()

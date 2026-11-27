@@ -1,67 +1,124 @@
-[gd_scene load_steps=10 format=3 uid="uid://c6shopscreen01"]
+[gd_scene load_steps=34 format=3 uid="uid://c6shopscreen01"]
 
 [ext_resource type="Script" path="res://scripts/ui/shop_screen.gd" id="1_scr"]
+[ext_resource type="Texture2D" path="res://assets/art/ui_shop/banner_abyssal_bazaar.png" id="2_ban"]
+[ext_resource type="Texture2D" path="res://assets/art/ui_shop/icon_gem.png" id="3_gem"]
+[ext_resource type="Texture2D" path="res://assets/art/ui_shop/icon_key.png" id="4_key"]
+[ext_resource type="Texture2D" path="res://assets/art/ui_shop/icon_epic_sword.png" id="5_swd"]
+[ext_resource type="Texture2D" path="res://assets/art/ui_shop/icon_energy_bolt.png" id="6_eng"]
+[ext_resource type="Texture2D" path="res://assets/art/ui_shop/icon_scroll_deals.png" id="7_sd"]
+[ext_resource type="Texture2D" path="res://assets/art/ui_shop/icon_scroll_hunts.png" id="8_sh"]
+[ext_resource type="Texture2D" path="res://assets/art/ui_shop/deal_card_20off.png" id="9_c20"]
+[ext_resource type="Texture2D" path="res://assets/art/ui_shop/deal_card_gold_frame.png" id="10_cgf"]
+[ext_resource type="Texture2D" path="res://assets/art/ui_shop/deal_card_25off.png" id="11_c25"]
+[ext_resource type="Texture2D" path="res://assets/art/ui_shop/ribbon_30_off.png" id="12_r30"]
+[ext_resource type="Texture2D" path="res://assets/art/ui_shop/ribbon_free.png" id="13_rfr"]
+[ext_resource type="Texture2D" path="res://assets/art/ui_shop/icon_fire_rune.png" id="14_ifr"]
+[ext_resource type="Texture2D" path="res://assets/art/ui_shop/icon_wolf_core.png" id="15_iwc"]
+[ext_resource type="Texture2D" path="res://assets/art/ui_shop/icon_storm_shard.png" id="16_iss"]
+[ext_resource type="Texture2D" path="res://assets/art/ui_shop/icon_gold_cache.png" id="17_igc"]
+[ext_resource type="Texture2D" path="res://assets/art/ui_shop/icon_healing_elixir.png" id="18_ihe"]
+[ext_resource type="Texture2D" path="res://assets/art/ui_shop/pill_gold_blank.png" id="19_pg"]
+[ext_resource type="Texture2D" path="res://assets/art/ui_shop/pill_blue_blank.png" id="20_pb"]
+[ext_resource type="Texture2D" path="res://assets/art/ui_shop/pill_disabled_blank.png" id="21_pd"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bg"]
-bg_color = Color(0.04, 0.05, 0.09, 1)
+bg_color = Color(0.055, 0.06, 0.095, 1)
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_awning"]
-bg_color = Color(0.12, 0.32, 0.65, 0.95)
-border_width_bottom = 4
-border_color = Color(0.85, 0.72, 0.25, 1)
-corner_radius_bottom_right = 16
-corner_radius_bottom_left = 16
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_awning"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_chapterpack"]
-bg_color = Color(0.1, 0.14, 0.24, 0.95)
+bg_color = Color(0.09, 0.11, 0.17, 0.96)
 border_width_left = 2
 border_width_top = 2
 border_width_right = 2
 border_width_bottom = 2
-border_color = Color(0.85, 0.68, 0.25, 1)
-corner_radius_top_left = 12
-corner_radius_top_right = 12
-corner_radius_bottom_right = 12
-corner_radius_bottom_left = 12
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_valuebadge"]
-bg_color = Color(0.9, 0.2, 0.2, 1)
-corner_radius_top_left = 8
-corner_radius_bottom_right = 8
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dailycard"]
-bg_color = Color(0.12, 0.18, 0.28, 0.95)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.35, 0.55, 0.85, 0.85)
+border_color = Color(0.76, 0.6, 0.25, 0.95)
 corner_radius_top_left = 10
 corner_radius_top_right = 10
 corner_radius_bottom_right = 10
 corner_radius_bottom_left = 10
+content_margin_left = 10.0
+content_margin_top = 8.0
+content_margin_right = 10.0
+content_margin_bottom = 10.0
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_discount"]
-bg_color = Color(0.85, 0.25, 0.25, 1)
-corner_radius_top_left = 8
-corner_radius_bottom_right = 8
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_valuebadge"]
+bg_color = Color(0.55, 0.13, 0.15, 0.98)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.85, 0.45, 0.35, 0.8)
+corner_radius_top_left = 6
+corner_radius_top_right = 4
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 4
+content_margin_left = 10.0
+content_margin_right = 10.0
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_buybtn"]
-bg_color = Color(0.95, 0.95, 1, 1)
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_card20"]
+texture = ExtResource("9_c20")
+texture_margin_left = 16.0
+texture_margin_top = 16.0
+texture_margin_right = 16.0
+texture_margin_bottom = 16.0
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_cardgold"]
+texture = ExtResource("10_cgf")
+texture_margin_left = 16.0
+texture_margin_top = 16.0
+texture_margin_right = 16.0
+texture_margin_bottom = 16.0
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_card25"]
+texture = ExtResource("11_c25")
+texture_margin_left = 16.0
+texture_margin_top = 16.0
+texture_margin_right = 16.0
+texture_margin_bottom = 16.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_darkcard"]
+bg_color = Color(0.085, 0.095, 0.14, 0.96)
 border_width_left = 1
 border_width_top = 1
 border_width_right = 1
 border_width_bottom = 2
-border_color = Color(0.7, 0.75, 0.85, 1)
-corner_radius_top_left = 14
-corner_radius_top_right = 14
-corner_radius_bottom_right = 14
-corner_radius_bottom_left = 14
+border_color = Color(0.45, 0.38, 0.24, 0.85)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+content_margin_left = 12.0
+content_margin_top = 10.0
+content_margin_right = 12.0
+content_margin_bottom = 10.0
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_btn_gold"]
+texture = ExtResource("19_pg")
+texture_margin_left = 20.0
+texture_margin_top = 10.0
+texture_margin_right = 20.0
+texture_margin_bottom = 10.0
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_btn_blue"]
+texture = ExtResource("20_pb")
+texture_margin_left = 20.0
+texture_margin_top = 10.0
+texture_margin_right = 20.0
+texture_margin_bottom = 10.0
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_btn_disabled"]
+texture = ExtResource("21_pd")
+texture_margin_left = 20.0
+texture_margin_top = 10.0
+texture_margin_right = 20.0
+texture_margin_bottom = 10.0
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_subtabs"]
-bg_color = Color(0.06, 0.08, 0.13, 0.98)
+bg_color = Color(0.06, 0.07, 0.11, 0.98)
 border_width_top = 1
-border_color = Color(0.2, 0.25, 0.35, 0.8)
+border_color = Color(0.32, 0.28, 0.22, 0.85)
 
 [node name="ShopScreen" type="Control"]
 layout_mode = 3
@@ -82,16 +139,30 @@ grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_bg")
 
 [node name="MarketAwning" type="Panel" parent="."]
-custom_minimum_size = Vector2(0, 58)
+custom_minimum_size = Vector2(0, 66)
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
-offset_top = 10.0
-offset_bottom = 68.0
+offset_left = 8.0
+offset_top = 4.0
+offset_right = -8.0
+offset_bottom = 70.0
 grow_horizontal = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_awning")
+theme_override_styles/panel = SubResource("StyleBoxEmpty_awning")
+
+[node name="AwningBanner" type="TextureRect" parent="MarketAwning"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_ban")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="AwningTitle" type="Label" parent="MarketAwning"]
+visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -100,7 +171,7 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_colors/font_color = Color(1, 0.92, 0.5, 1)
 theme_override_font_sizes/font_size = 24
-text = "🎪 Abyssal Bazaar & Daily Armory"
+text = "Abyssal Bazaar & Daily Armory"
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -109,20 +180,20 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 16.0
+offset_left = 14.0
 offset_top = 74.0
-offset_right = -16.0
-offset_bottom = -72.0
+offset_right = -14.0
+offset_bottom = -60.0
 grow_horizontal = 2
 grow_vertical = 2
 
 [node name="VBox" type="VBoxContainer" parent="ScrollContainer"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_constants/separation = 16
+theme_override_constants/separation = 14
 
 [node name="ChapterPackCard" type="PanelContainer" parent="ScrollContainer/VBox"]
-custom_minimum_size = Vector2(0, 190)
+custom_minimum_size = Vector2(0, 198)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_chapterpack")
 
@@ -132,12 +203,13 @@ theme_override_constants/separation = 8
 
 [node name="TopRow" type="HBoxContainer" parent="ScrollContainer/VBox/ChapterPackCard/Content"]
 layout_mode = 2
+theme_override_constants/separation = 10
 
 [node name="ValueRibbon" type="Label" parent="ScrollContainer/VBox/ChapterPackCard/Content/TopRow"]
-custom_minimum_size = Vector2(130, 34)
+custom_minimum_size = Vector2(138, 30)
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0.98, 0.94, 0.9, 1)
+theme_override_font_sizes/font_size = 15
 theme_override_styles/normal = SubResource("StyleBoxFlat_valuebadge")
 text = "STORE OFFLINE"
 horizontal_alignment = 1
@@ -146,48 +218,104 @@ vertical_alignment = 1
 [node name="PackTitle" type="Label" parent="ScrollContainer/VBox/ChapterPackCard/Content/TopRow"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_colors/font_color = Color(1, 0.88, 0.45, 1)
-theme_override_font_sizes/font_size = 24
+theme_override_colors/font_color = Color(0.95, 0.8, 0.42, 1)
+theme_override_font_sizes/font_size = 21
 text = "Chapter 1 Conqueror Pack"
+vertical_alignment = 1
 
 [node name="Tag" type="Label" parent="ScrollContainer/VBox/ChapterPackCard/Content/TopRow"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.8, 0.85, 0.95, 1)
-theme_override_font_sizes/font_size = 17
+theme_override_colors/font_color = Color(0.65, 0.7, 0.8, 1)
+theme_override_font_sizes/font_size = 14
 text = "Billing integration pending"
+vertical_alignment = 1
 
 [node name="RewardsRow" type="HBoxContainer" parent="ScrollContainer/VBox/ChapterPackCard/Content"]
 layout_mode = 2
 alignment = 1
-theme_override_constants/separation = 16
+theme_override_constants/separation = 22
 
-[node name="Rew1" type="Label" parent="ScrollContainer/VBox/ChapterPackCard/Content/RewardsRow"]
+[node name="Rew1Box" type="HBoxContainer" parent="ScrollContainer/VBox/ChapterPackCard/Content/RewardsRow"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 38
-text = "💎 x500"
+theme_override_constants/separation = 6
 
-[node name="Rew2" type="Label" parent="ScrollContainer/VBox/ChapterPackCard/Content/RewardsRow"]
+[node name="IconTex" type="TextureRect" parent="ScrollContainer/VBox/ChapterPackCard/Content/RewardsRow/Rew1Box"]
+custom_minimum_size = Vector2(54, 54)
 layout_mode = 2
-theme_override_font_sizes/font_size = 38
-text = "🗝 x5"
+texture = ExtResource("3_gem")
+expand_mode = 1
+stretch_mode = 5
 
-[node name="Rew3" type="Label" parent="ScrollContainer/VBox/ChapterPackCard/Content/RewardsRow"]
+[node name="Val" type="Label" parent="ScrollContainer/VBox/ChapterPackCard/Content/RewardsRow/Rew1Box"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 38
-text = "🗡 Epic"
+theme_override_colors/font_color = Color(0.88, 0.94, 1, 1)
+theme_override_font_sizes/font_size = 26
+text = "x500"
+vertical_alignment = 1
 
-[node name="Rew4" type="Label" parent="ScrollContainer/VBox/ChapterPackCard/Content/RewardsRow"]
+[node name="Rew2Box" type="HBoxContainer" parent="ScrollContainer/VBox/ChapterPackCard/Content/RewardsRow"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 38
-text = "⚡ +50"
+theme_override_constants/separation = 6
+
+[node name="IconTex" type="TextureRect" parent="ScrollContainer/VBox/ChapterPackCard/Content/RewardsRow/Rew2Box"]
+custom_minimum_size = Vector2(52, 52)
+layout_mode = 2
+texture = ExtResource("4_key")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Val" type="Label" parent="ScrollContainer/VBox/ChapterPackCard/Content/RewardsRow/Rew2Box"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.9, 0.8, 1)
+theme_override_font_sizes/font_size = 26
+text = "x5"
+vertical_alignment = 1
+
+[node name="Rew3Box" type="HBoxContainer" parent="ScrollContainer/VBox/ChapterPackCard/Content/RewardsRow"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="IconTex" type="TextureRect" parent="ScrollContainer/VBox/ChapterPackCard/Content/RewardsRow/Rew3Box"]
+custom_minimum_size = Vector2(56, 56)
+layout_mode = 2
+texture = ExtResource("5_swd")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Val" type="Label" parent="ScrollContainer/VBox/ChapterPackCard/Content/RewardsRow/Rew3Box"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.56, 1, 1)
+theme_override_font_sizes/font_size = 26
+text = "Epic"
+vertical_alignment = 1
+
+[node name="Rew4Box" type="HBoxContainer" parent="ScrollContainer/VBox/ChapterPackCard/Content/RewardsRow"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="IconTex" type="TextureRect" parent="ScrollContainer/VBox/ChapterPackCard/Content/RewardsRow/Rew4Box"]
+custom_minimum_size = Vector2(52, 52)
+layout_mode = 2
+texture = ExtResource("6_eng")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Val" type="Label" parent="ScrollContainer/VBox/ChapterPackCard/Content/RewardsRow/Rew4Box"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.78, 0.35, 1)
+theme_override_font_sizes/font_size = 26
+text = "+50"
+vertical_alignment = 1
 
 [node name="BuyBtn" type="Button" parent="ScrollContainer/VBox/ChapterPackCard/Content"]
-custom_minimum_size = Vector2(250, 56)
+custom_minimum_size = Vector2(260, 48)
 layout_mode = 2
 size_flags_horizontal = 4
-theme_override_colors/font_color = Color(0.1, 0.1, 0.15, 1)
-theme_override_font_sizes/font_size = 22
-theme_override_styles/normal = SubResource("StyleBoxFlat_buybtn")
+theme_override_colors/font_color = Color(0.68, 0.7, 0.76, 1)
+theme_override_colors/font_disabled_color = Color(0.62, 0.65, 0.72, 1)
+theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("StyleBoxTexture_btn_disabled")
+theme_override_styles/disabled = SubResource("StyleBoxTexture_btn_disabled")
 text = "STORE UNAVAILABLE"
 disabled = true
 
@@ -197,319 +325,431 @@ theme_override_constants/separation = 8
 
 [node name="DailyHeader" type="HBoxContainer" parent="ScrollContainer/VBox/DailyShopSection"]
 layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="ScrollIcon" type="TextureRect" parent="ScrollContainer/VBox/DailyShopSection/DailyHeader"]
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 2
+texture = ExtResource("7_sd")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="DailyTitle" type="Label" parent="ScrollContainer/VBox/DailyShopSection/DailyHeader"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_colors/font_color = Color(1, 0.88, 0.35, 1)
-theme_override_font_sizes/font_size = 24
+theme_override_colors/font_color = Color(0.95, 0.8, 0.38, 1)
+theme_override_font_sizes/font_size = 21
 text = "Daily Deals"
 
 [node name="TimerLabel" type="Label" parent="ScrollContainer/VBox/DailyShopSection/DailyHeader"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.75, 0.85, 0.95, 1)
-theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0.72, 0.78, 0.88, 1)
+theme_override_font_sizes/font_size = 15
 text = "Refresh in 06:48:04"
 
 [node name="Grid3x2" type="GridContainer" parent="ScrollContainer/VBox/DailyShopSection"]
 layout_mode = 2
-theme_override_constants/h_separation = 12
-theme_override_constants/v_separation = 12
+theme_override_constants/h_separation = 10
+theme_override_constants/v_separation = 10
 columns = 3
 
 [node name="Item1" type="PanelContainer" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2"]
-custom_minimum_size = Vector2(216, 215)
+custom_minimum_size = Vector2(220, 222)
 layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_dailycard")
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxTexture_card20")
 
 [node name="VBox" type="VBoxContainer" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2/Item1"]
 layout_mode = 2
 alignment = 1
+theme_override_constants/separation = 4
 
 [node name="Discount" type="Label" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2/Item1/VBox"]
-custom_minimum_size = Vector2(80, 26)
+visible = false
 layout_mode = 2
-size_flags_horizontal = 0
-theme_override_font_sizes/font_size = 15
-theme_override_styles/normal = SubResource("StyleBoxFlat_discount")
 text = " 20% OFF "
 
 [node name="Icon" type="Label" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2/Item1/VBox"]
+visible = false
 layout_mode = 2
-theme_override_font_sizes/font_size = 54
 text = "🔥"
-horizontal_alignment = 1
+
+[node name="ArtIcon" type="TextureRect" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2/Item1/VBox"]
+custom_minimum_size = Vector2(72, 72)
+layout_mode = 2
+size_flags_horizontal = 4
+texture = ExtResource("14_ifr")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="Name" type="Label" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2/Item1/VBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 19
+theme_override_colors/font_color = Color(0.95, 0.95, 0.97, 1)
+theme_override_font_sizes/font_size = 17
 text = "Fire Rune"
 horizontal_alignment = 1
 
 [node name="Left" type="Label" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2/Item1/VBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.65, 0.7, 0.8, 1)
-theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.65, 0.7, 0.78, 1)
+theme_override_font_sizes/font_size = 13
 text = "Purchases left: 1"
 horizontal_alignment = 1
 
 [node name="Btn" type="Button" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2/Item1/VBox"]
-custom_minimum_size = Vector2(150, 48)
+custom_minimum_size = Vector2(158, 42)
 layout_mode = 2
 size_flags_horizontal = 4
-theme_override_colors/font_color = Color(0.1, 0.1, 0.15, 1)
-theme_override_font_sizes/font_size = 18
-theme_override_styles/normal = SubResource("StyleBoxFlat_buybtn")
+theme_override_colors/font_color = Color(1, 0.94, 0.78, 1)
+theme_override_colors/font_disabled_color = Color(0.58, 0.62, 0.7, 1)
+theme_override_font_sizes/font_size = 15
+theme_override_styles/normal = SubResource("StyleBoxTexture_btn_gold")
+theme_override_styles/hover = SubResource("StyleBoxTexture_btn_gold")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_gold")
+theme_override_styles/disabled = SubResource("StyleBoxTexture_btn_disabled")
 text = "🪙 80 Gold"
 
 [node name="Item2" type="PanelContainer" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2"]
-custom_minimum_size = Vector2(216, 215)
+custom_minimum_size = Vector2(220, 222)
 layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_dailycard")
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxTexture_card20")
 
 [node name="VBox" type="VBoxContainer" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2/Item2"]
 layout_mode = 2
 alignment = 1
+theme_override_constants/separation = 4
 
 [node name="Discount" type="Label" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2/Item2/VBox"]
-custom_minimum_size = Vector2(80, 26)
+visible = false
 layout_mode = 2
-size_flags_horizontal = 0
-theme_override_font_sizes/font_size = 15
-theme_override_styles/normal = SubResource("StyleBoxFlat_discount")
 text = " 20% OFF "
 
 [node name="Icon" type="Label" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2/Item2/VBox"]
+visible = false
 layout_mode = 2
-theme_override_font_sizes/font_size = 54
 text = "🐺"
-horizontal_alignment = 1
+
+[node name="ArtIcon" type="TextureRect" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2/Item2/VBox"]
+custom_minimum_size = Vector2(72, 72)
+layout_mode = 2
+size_flags_horizontal = 4
+texture = ExtResource("15_iwc")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="Name" type="Label" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2/Item2/VBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 19
+theme_override_colors/font_color = Color(0.95, 0.95, 0.97, 1)
+theme_override_font_sizes/font_size = 17
 text = "Wolf Core"
 horizontal_alignment = 1
 
 [node name="Left" type="Label" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2/Item2/VBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.65, 0.7, 0.8, 1)
-theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.65, 0.7, 0.78, 1)
+theme_override_font_sizes/font_size = 13
 text = "Purchases left: 1"
 horizontal_alignment = 1
 
 [node name="Btn" type="Button" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2/Item2/VBox"]
-custom_minimum_size = Vector2(150, 48)
+custom_minimum_size = Vector2(158, 42)
 layout_mode = 2
 size_flags_horizontal = 4
-theme_override_colors/font_color = Color(0.1, 0.1, 0.15, 1)
-theme_override_font_sizes/font_size = 18
-theme_override_styles/normal = SubResource("StyleBoxFlat_buybtn")
+theme_override_colors/font_color = Color(1, 0.94, 0.78, 1)
+theme_override_colors/font_disabled_color = Color(0.58, 0.62, 0.7, 1)
+theme_override_font_sizes/font_size = 15
+theme_override_styles/normal = SubResource("StyleBoxTexture_btn_gold")
+theme_override_styles/hover = SubResource("StyleBoxTexture_btn_gold")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_gold")
+theme_override_styles/disabled = SubResource("StyleBoxTexture_btn_disabled")
 text = "🪙 100 Gold"
 
 [node name="Item3" type="PanelContainer" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2"]
-custom_minimum_size = Vector2(216, 215)
+custom_minimum_size = Vector2(220, 222)
 layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_dailycard")
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxTexture_cardgold")
+
+[node name="Ribbon30" type="TextureRect" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2/Item3"]
+custom_minimum_size = Vector2(82, 82)
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+mouse_filter = 2
+texture = ExtResource("12_r30")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="VBox" type="VBoxContainer" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2/Item3"]
 layout_mode = 2
 alignment = 1
+theme_override_constants/separation = 4
 
 [node name="Discount" type="Label" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2/Item3/VBox"]
-custom_minimum_size = Vector2(80, 26)
+visible = false
 layout_mode = 2
-size_flags_horizontal = 0
-theme_override_font_sizes/font_size = 15
-theme_override_styles/normal = SubResource("StyleBoxFlat_discount")
 text = " 30% OFF "
 
 [node name="Icon" type="Label" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2/Item3/VBox"]
+visible = false
 layout_mode = 2
-theme_override_font_sizes/font_size = 54
 text = "⚡"
-horizontal_alignment = 1
+
+[node name="ArtIcon" type="TextureRect" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2/Item3/VBox"]
+custom_minimum_size = Vector2(72, 72)
+layout_mode = 2
+size_flags_horizontal = 4
+texture = ExtResource("16_iss")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="Name" type="Label" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2/Item3/VBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 19
+theme_override_colors/font_color = Color(0.95, 0.95, 0.97, 1)
+theme_override_font_sizes/font_size = 17
 text = "Storm Shard"
 horizontal_alignment = 1
 
 [node name="Left" type="Label" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2/Item3/VBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.65, 0.7, 0.8, 1)
-theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.65, 0.7, 0.78, 1)
+theme_override_font_sizes/font_size = 13
 text = "Purchases left: 2"
 horizontal_alignment = 1
 
 [node name="Btn" type="Button" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2/Item3/VBox"]
-custom_minimum_size = Vector2(150, 48)
+custom_minimum_size = Vector2(158, 42)
 layout_mode = 2
 size_flags_horizontal = 4
-theme_override_colors/font_color = Color(0.1, 0.1, 0.15, 1)
-theme_override_font_sizes/font_size = 18
-theme_override_styles/normal = SubResource("StyleBoxFlat_buybtn")
+theme_override_colors/font_color = Color(0.95, 0.97, 1, 1)
+theme_override_colors/font_disabled_color = Color(0.58, 0.62, 0.7, 1)
+theme_override_font_sizes/font_size = 15
+theme_override_styles/normal = SubResource("StyleBoxTexture_btn_blue")
+theme_override_styles/hover = SubResource("StyleBoxTexture_btn_blue")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_blue")
+theme_override_styles/disabled = SubResource("StyleBoxTexture_btn_disabled")
 text = "💎 50 Gems"
 
 [node name="Item4" type="PanelContainer" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2"]
-custom_minimum_size = Vector2(216, 215)
+custom_minimum_size = Vector2(220, 222)
 layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_dailycard")
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxTexture_card20")
 
 [node name="VBox" type="VBoxContainer" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2/Item4"]
 layout_mode = 2
 alignment = 1
+theme_override_constants/separation = 4
 
 [node name="Discount" type="Label" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2/Item4/VBox"]
-custom_minimum_size = Vector2(80, 26)
+visible = false
 layout_mode = 2
-size_flags_horizontal = 0
-theme_override_font_sizes/font_size = 15
-theme_override_styles/normal = SubResource("StyleBoxFlat_discount")
 text = " 20% OFF "
 
 [node name="Icon" type="Label" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2/Item4/VBox"]
+visible = false
 layout_mode = 2
-theme_override_font_sizes/font_size = 54
 text = "🪙"
-horizontal_alignment = 1
+
+[node name="ArtIcon" type="TextureRect" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2/Item4/VBox"]
+custom_minimum_size = Vector2(72, 72)
+layout_mode = 2
+size_flags_horizontal = 4
+texture = ExtResource("17_igc")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="Name" type="Label" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2/Item4/VBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 19
+theme_override_colors/font_color = Color(0.95, 0.95, 0.97, 1)
+theme_override_font_sizes/font_size = 17
 text = "Gold Cache"
 horizontal_alignment = 1
 
 [node name="Left" type="Label" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2/Item4/VBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.65, 0.7, 0.8, 1)
-theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.65, 0.7, 0.78, 1)
+theme_override_font_sizes/font_size = 13
 text = "Purchases left: 1"
 horizontal_alignment = 1
 
 [node name="Btn" type="Button" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2/Item4/VBox"]
-custom_minimum_size = Vector2(150, 48)
+custom_minimum_size = Vector2(158, 42)
 layout_mode = 2
 size_flags_horizontal = 4
-theme_override_colors/font_color = Color(0.1, 0.1, 0.15, 1)
-theme_override_font_sizes/font_size = 18
-theme_override_styles/normal = SubResource("StyleBoxFlat_buybtn")
+theme_override_colors/font_color = Color(0.95, 0.97, 1, 1)
+theme_override_colors/font_disabled_color = Color(0.58, 0.62, 0.7, 1)
+theme_override_font_sizes/font_size = 15
+theme_override_styles/normal = SubResource("StyleBoxTexture_btn_blue")
+theme_override_styles/hover = SubResource("StyleBoxTexture_btn_blue")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_blue")
+theme_override_styles/disabled = SubResource("StyleBoxTexture_btn_disabled")
 text = "💎 120 Gems"
 
 [node name="Item5" type="PanelContainer" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2"]
-custom_minimum_size = Vector2(216, 215)
+custom_minimum_size = Vector2(220, 222)
 layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_dailycard")
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxTexture_cardgold")
+
+[node name="RibbonFree" type="TextureRect" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2/Item5"]
+custom_minimum_size = Vector2(82, 82)
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+mouse_filter = 2
+texture = ExtResource("13_rfr")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="VBox" type="VBoxContainer" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2/Item5"]
 layout_mode = 2
 alignment = 1
+theme_override_constants/separation = 4
 
 [node name="Discount" type="Label" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2/Item5/VBox"]
-custom_minimum_size = Vector2(80, 26)
+visible = false
 layout_mode = 2
-size_flags_horizontal = 0
-theme_override_font_sizes/font_size = 15
-theme_override_styles/normal = SubResource("StyleBoxFlat_discount")
 text = " FREE "
 
 [node name="Icon" type="Label" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2/Item5/VBox"]
+visible = false
 layout_mode = 2
-theme_override_font_sizes/font_size = 54
 text = "⚡"
-horizontal_alignment = 1
+
+[node name="ArtIcon" type="TextureRect" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2/Item5/VBox"]
+custom_minimum_size = Vector2(72, 72)
+layout_mode = 2
+size_flags_horizontal = 4
+texture = ExtResource("6_eng")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="Name" type="Label" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2/Item5/VBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 19
+theme_override_colors/font_color = Color(0.95, 0.95, 0.97, 1)
+theme_override_font_sizes/font_size = 17
 text = "+20 Energy"
 horizontal_alignment = 1
 
 [node name="Left" type="Label" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2/Item5/VBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.65, 0.7, 0.8, 1)
-theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.65, 0.7, 0.78, 1)
+theme_override_font_sizes/font_size = 13
 text = "Purchases left: 1"
 horizontal_alignment = 1
 
 [node name="Btn" type="Button" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2/Item5/VBox"]
-custom_minimum_size = Vector2(150, 48)
+custom_minimum_size = Vector2(158, 42)
 layout_mode = 2
 size_flags_horizontal = 4
-theme_override_colors/font_color = Color(0.1, 0.1, 0.15, 1)
-theme_override_font_sizes/font_size = 18
-theme_override_styles/normal = SubResource("StyleBoxFlat_buybtn")
+theme_override_colors/font_color = Color(1, 0.94, 0.78, 1)
+theme_override_colors/font_disabled_color = Color(0.58, 0.62, 0.7, 1)
+theme_override_font_sizes/font_size = 15
+theme_override_styles/normal = SubResource("StyleBoxTexture_btn_gold")
+theme_override_styles/hover = SubResource("StyleBoxTexture_btn_gold")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_gold")
+theme_override_styles/disabled = SubResource("StyleBoxTexture_btn_disabled")
 text = "Claim Free"
 
 [node name="Item6" type="PanelContainer" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2"]
-custom_minimum_size = Vector2(216, 215)
+custom_minimum_size = Vector2(220, 222)
 layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_dailycard")
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxTexture_card25")
 
 [node name="VBox" type="VBoxContainer" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2/Item6"]
 layout_mode = 2
 alignment = 1
+theme_override_constants/separation = 4
 
 [node name="Discount" type="Label" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2/Item6/VBox"]
-custom_minimum_size = Vector2(80, 26)
+visible = false
 layout_mode = 2
-size_flags_horizontal = 0
-theme_override_font_sizes/font_size = 15
-theme_override_styles/normal = SubResource("StyleBoxFlat_discount")
 text = " 25% OFF "
 
 [node name="Icon" type="Label" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2/Item6/VBox"]
+visible = false
 layout_mode = 2
-theme_override_font_sizes/font_size = 54
 text = "🧪"
-horizontal_alignment = 1
+
+[node name="ArtIcon" type="TextureRect" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2/Item6/VBox"]
+custom_minimum_size = Vector2(72, 72)
+layout_mode = 2
+size_flags_horizontal = 4
+texture = ExtResource("18_ihe")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="Name" type="Label" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2/Item6/VBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 19
+theme_override_colors/font_color = Color(0.95, 0.95, 0.97, 1)
+theme_override_font_sizes/font_size = 17
 text = "Healing Elixir"
 horizontal_alignment = 1
 
 [node name="Left" type="Label" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2/Item6/VBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.65, 0.7, 0.8, 1)
-theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.65, 0.7, 0.78, 1)
+theme_override_font_sizes/font_size = 13
 text = "Purchases left: 3"
 horizontal_alignment = 1
 
 [node name="Btn" type="Button" parent="ScrollContainer/VBox/DailyShopSection/Grid3x2/Item6/VBox"]
-custom_minimum_size = Vector2(150, 48)
+custom_minimum_size = Vector2(158, 42)
 layout_mode = 2
 size_flags_horizontal = 4
-theme_override_colors/font_color = Color(0.1, 0.1, 0.15, 1)
-theme_override_font_sizes/font_size = 18
-theme_override_styles/normal = SubResource("StyleBoxFlat_buybtn")
+theme_override_colors/font_color = Color(1, 0.94, 0.78, 1)
+theme_override_colors/font_disabled_color = Color(0.58, 0.62, 0.7, 1)
+theme_override_font_sizes/font_size = 15
+theme_override_styles/normal = SubResource("StyleBoxTexture_btn_gold")
+theme_override_styles/hover = SubResource("StyleBoxTexture_btn_gold")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_btn_gold")
+theme_override_styles/disabled = SubResource("StyleBoxTexture_btn_disabled")
 text = "🪙 45 Gold"
 
 [node name="DailyMissionsCard" type="PanelContainer" parent="ScrollContainer/VBox"]
-custom_minimum_size = Vector2(0, 260)
+custom_minimum_size = Vector2(0, 230)
 layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_dailycard")
+theme_override_styles/panel = SubResource("StyleBoxFlat_darkcard")
 
 [node name="Content" type="VBoxContainer" parent="ScrollContainer/VBox/DailyMissionsCard"]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="Header" type="Label" parent="ScrollContainer/VBox/DailyMissionsCard/Content"]
+[node name="HeaderRow" type="HBoxContainer" parent="ScrollContainer/VBox/DailyMissionsCard/Content"]
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.88, 0.35, 1)
-theme_override_font_sizes/font_size = 23
-text = "📜 Daily Hunts"
+theme_override_constants/separation = 8
+
+[node name="ScrollIcon" type="TextureRect" parent="ScrollContainer/VBox/DailyMissionsCard/Content/HeaderRow"]
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 2
+texture = ExtResource("8_sh")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Header" type="Label" parent="ScrollContainer/VBox/DailyMissionsCard/Content/HeaderRow"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.8, 0.38, 1)
+theme_override_font_sizes/font_size = 21
+text = "Daily Hunts"
+
+[node name="Header" type="Label" parent="ScrollContainer/VBox/DailyMissionsCard/Content"]
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.8, 0.38, 1)
+theme_override_font_sizes/font_size = 21
+text = "Daily Hunts"
 
 [node name="MissionList" type="VBoxContainer" parent="ScrollContainer/VBox/DailyMissionsCard/Content"]
 layout_mode = 2
 theme_override_constants/separation = 8
 
 [node name="AchievementsCard" type="PanelContainer" parent="ScrollContainer/VBox"]
-custom_minimum_size = Vector2(0, 260)
+custom_minimum_size = Vector2(0, 230)
 layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_dailycard")
+theme_override_styles/panel = SubResource("StyleBoxFlat_darkcard")
 
 [node name="Content" type="VBoxContainer" parent="ScrollContainer/VBox/AchievementsCard"]
 layout_mode = 2
@@ -517,8 +757,8 @@ theme_override_constants/separation = 10
 
 [node name="Header" type="Label" parent="ScrollContainer/VBox/AchievementsCard/Content"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.65, 0.82, 1.0, 1)
-theme_override_font_sizes/font_size = 23
+theme_override_colors/font_color = Color(0.7, 0.84, 1, 1)
+theme_override_font_sizes/font_size = 21
 text = "🏆 Hunter Achievements"
 
 [node name="AchievementsList" type="VBoxContainer" parent="ScrollContainer/VBox/AchievementsCard/Content"]
@@ -526,14 +766,14 @@ layout_mode = 2
 theme_override_constants/separation = 8
 
 [node name="BottomSubTabs" type="Panel" parent="."]
-custom_minimum_size = Vector2(0, 56)
+custom_minimum_size = Vector2(0, 50)
 layout_mode = 1
 anchors_preset = 12
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = -68.0
-offset_bottom = -10.0
+offset_top = -54.0
+offset_bottom = -4.0
 grow_horizontal = 2
 grow_vertical = 0
 theme_override_styles/panel = SubResource("StyleBoxFlat_subtabs")
@@ -546,48 +786,47 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 alignment = 1
-theme_override_constants/separation = 16
+theme_override_constants/separation = 14
 
 [node name="Tab1" type="Button" parent="BottomSubTabs/HBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.88, 0.35, 1)
-theme_override_font_sizes/font_size = 19
+theme_override_colors/font_color = Color(0.96, 0.8, 0.36, 1)
+theme_override_font_sizes/font_size = 16
 flat = true
-text = "Daily Shop"
+text = "Shop"
 
 [node name="Tab2" type="Button" parent="BottomSubTabs/HBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.65, 0.7, 0.8, 1)
-theme_override_font_sizes/font_size = 19
+theme_override_colors/font_color = Color(0.62, 0.66, 0.74, 1)
+theme_override_font_sizes/font_size = 16
 flat = true
+disabled = true
+tooltip_text = "Not available in this build"
 text = "Gear Chest · Soon"
 
-disabled = true
-tooltip_text = "Not available in this build"
 [node name="Tab3" type="Button" parent="BottomSubTabs/HBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.65, 0.7, 0.8, 1)
-theme_override_font_sizes/font_size = 19
+theme_override_colors/font_color = Color(0.62, 0.66, 0.74, 1)
+theme_override_font_sizes/font_size = 16
 flat = true
+disabled = true
+tooltip_text = "Not available in this build"
 text = "Wish · Soon"
 
-disabled = true
-tooltip_text = "Not available in this build"
 [node name="Tab4" type="Button" parent="BottomSubTabs/HBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.65, 0.7, 0.8, 1)
-theme_override_font_sizes/font_size = 19
+theme_override_colors/font_color = Color(0.62, 0.66, 0.74, 1)
+theme_override_font_sizes/font_size = 16
 flat = true
+disabled = true
+tooltip_text = "Not available in this build"
 text = "Offers · Soon"
 
-disabled = true
-tooltip_text = "Not available in this build"
 [node name="Tab5" type="Button" parent="BottomSubTabs/HBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.65, 0.7, 0.8, 1)
-theme_override_font_sizes/font_size = 19
+theme_override_colors/font_color = Color(0.62, 0.66, 0.74, 1)
+theme_override_font_sizes/font_size = 16
 flat = true
-text = "Top Up · Soon"
-
 disabled = true
 tooltip_text = "Not available in this build"
+text = "Top Up"

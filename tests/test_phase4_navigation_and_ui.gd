@@ -18,6 +18,7 @@ func _ready() -> void:
 	await test_shop_screen_atomic_purchases()
 	await test_modals_functionality()
 	await test_pause_inventory_interaction()
+	await test_back_navigation_and_screen_leave_flows()
 	
 	print("\n==================================================")
 	print("  PHASE 4 TEST RESULTS: %d PASSED, %d FAILED" % [passed, failed])
@@ -528,5 +529,87 @@ func test_pause_inventory_interaction() -> void:
 	assert_test(get_tree().paused, "Combat remains paused after returning to settings")
 
 	get_tree().paused = was_paused
+	controller.queue_free()
+	await get_tree().process_frame
+
+
+func test_back_navigation_and_screen_leave_flows() -> void:
+	print("--- 9. Back Navigation, Leave Flows & UI Fixes ---")
+	var controller := MainController.new()
+	var shell_scene := load("res://scenes/main/main_shell.tscn") as PackedScene
+	var menu_scene := load("res://scenes/menus/main_menu.tscn") as PackedScene
+	var settings_scene := load("res://scenes/ui/settings_modal.tscn") as PackedScene
+	var inventory_scene := load("res://scenes/inventory/inventory_view.tscn") as PackedScene
+	var reward_scene := load("res://scenes/ui/reward_view.tscn") as PackedScene
+	assert_test(shell_scene != null and menu_scene != null and settings_scene != null and inventory_scene != null and reward_scene != null, "Navigation scenes load cleanly")
+
+	var shell := shell_scene.instantiate() as MainShellUI
+	var menu := menu_scene.instantiate() as MainMenu
+	var settings := settings_scene.instantiate() as SettingsModal
+	var inventory := inventory_scene.instantiate() as InventoryView
+	var reward := reward_scene.instantiate() as RewardView
+	controller.main_shell = shell
+	controller.main_menu = menu
+	controller.settings_modal = settings
+	controller.inventory_view = inventory
+	controller.reward_view = reward
+	add_child(controller)
+	controller.add_child(shell)
+	controller.add_child(menu)
+	controller.add_child(inventory)
+	controller.add_child(reward)
+	controller.add_child(settings)
+	await get_tree().process_frame
+
+	GameManager.abandon_run()
+	controller._show_screen("shell")
+	shell.open_energy_modal()
+	assert_test(shell.modal_energy != null and shell.modal_energy.visible, "Hub modal opens before back navigation test")
+	assert_test(controller.handle_back_navigation(), "Back navigation handles open hub modal")
+	assert_test(not shell.modal_energy.visible, "Back navigation closes open hub modal first")
+
+	shell._switch_to_tab(1)
+	assert_test(shell.current_tab == 1, "Hub switched to Hero Loadout tab")
+	assert_test(controller.handle_back_navigation(), "Back navigation handles non-campaign hub tab")
+	assert_test(shell.current_tab == 2, "Back navigation returns from non-campaign tab to Campaign hub")
+
+	assert_test(controller.handle_back_navigation(), "Back navigation on Campaign opens SettingsModal")
+	assert_test(settings.visible, "SettingsModal opens on Campaign back request")
+	assert_test(settings.btn_main_menu != null and settings.btn_main_menu.visible, "SettingsModal exposes Return to Main Menu outside runs")
+	settings.btn_main_menu.pressed.emit()
+	assert_test(menu.visible and not shell.visible, "Return to Main Menu navigates cleanly from Hub settings to MainMenu")
+
+	# Active run Inventory & Reward leave/menu flows
+	GameManager.start_new_run("kael_varyn", 1)
+	controller._show_screen("inventory")
+	assert_test(inventory.btn_menu != null and inventory.btn_menu.visible, "InventoryView shows Menu button during active run")
+	assert_test(inventory.btn_close.text == "DONE", "Between-levels inventory uses DONE close label")
+	inventory.btn_menu.pressed.emit()
+	assert_test(settings.visible, "Inventory Menu button opens SettingsModal")
+	assert_test(controller.handle_back_navigation(), "Back navigation closes open SettingsModal")
+	assert_test(not settings.visible, "SettingsModal closes cleanly on back navigation")
+
+	controller.is_inventory_from_pause = true
+	controller._show_screen("inventory")
+	assert_test(inventory.btn_close.text == "BACK TO PAUSE", "Pause inventory uses BACK TO PAUSE label")
+	controller.is_inventory_from_pause = false
+
+	controller._show_screen("reward")
+	reward.setup(false)
+	assert_test(reward.btn_menu != null and reward.btn_menu.visible, "RewardView exposes Menu button")
+	reward.btn_menu.pressed.emit()
+	assert_test(settings.visible, "Reward Menu button opens SettingsModal to allow leaving run")
+
+	Engine.time_scale = 2.0
+	settings.abandon_run_requested.emit()
+	assert_test(not GameManager.is_in_run, "Abandoning run clears GameManager.is_in_run")
+	assert_test(is_equal_approx(Engine.time_scale, 1.0), "Abandoning run resets Engine.time_scale to 1.0")
+
+	# Regression checks: Blacksmith _format_num and Collectible int-value handling
+	var bs_scene := load("res://scenes/ui/blacksmith_modal.tscn") as PackedScene
+	var bs := bs_scene.instantiate() as BlacksmithModal
+	assert_test(bs._format_num(450) == "450" and bs._format_num(1250) == "1,250", "BlacksmithModal formats sub-1000 and >=1000 values cleanly")
+	bs.free()
+
 	controller.queue_free()
 	await get_tree().process_frame

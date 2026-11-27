@@ -1,22 +1,28 @@
-[gd_scene load_steps=9 format=3 uid="uid://c6campaignscreen01"]
+[gd_scene load_steps=24 format=3 uid="uid://c6campaignscreen01"]
 
 [ext_resource type="Script" path="res://scripts/ui/campaign_screen.gd" id="1_scr"]
 [ext_resource type="Script" path="res://scripts/ui/diorama_island.gd" id="2_isl"]
+[ext_resource type="Texture2D" path="res://assets/art/ui_campaign/banner_expedition_frame.png" id="3_ban"]
+[ext_resource type="Texture2D" path="res://assets/art/ui_campaign/icon_castle_banner.png" id="4_cas"]
+[ext_resource type="Texture2D" path="res://assets/art/ui_campaign/chapter_plaque_frame.png" id="5_plq"]
+[ext_resource type="Texture2D" path="res://assets/art/ui_campaign/difficulty_scroll_frame.png" id="6_scr"]
+[ext_resource type="Texture2D" path="res://assets/art/ui_campaign/btn_sidebar_tasks.png" id="7_tsk"]
+[ext_resource type="Texture2D" path="res://assets/art/ui_campaign/btn_sidebar_gems.png" id="8_gem"]
+[ext_resource type="Texture2D" path="res://assets/art/ui_campaign/pill_patrol_blank.png" id="9_pat"]
+[ext_resource type="Texture2D" path="res://assets/art/ui_campaign/btn_camp_blank.png" id="10_cmp"]
+[ext_resource type="Texture2D" path="res://assets/art/ui_campaign/btn_start_gold_blank.png" id="11_str"]
+[ext_resource type="Texture2D" path="res://assets/art/ui_campaign/star_gold_single.png" id="12_stg"]
+[ext_resource type="Texture2D" path="res://assets/art/ui_campaign/icon_sword_clean.png" id="13_swd"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bg"]
-bg_color = Color(0.04, 0.05, 0.09, 1)
+bg_color = Color(0.055, 0.047, 0.105, 1)
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_banner"]
-bg_color = Color(0.14, 0.18, 0.32, 0.95)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.85, 0.7, 0.25, 0.95)
-corner_radius_top_left = 12
-corner_radius_top_right = 12
-corner_radius_bottom_right = 12
-corner_radius_bottom_left = 12
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_banner"]
+texture = ExtResource("3_ban")
+texture_margin_left = 26.0
+texture_margin_top = 18.0
+texture_margin_right = 26.0
+texture_margin_bottom = 18.0
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_sidebtn"]
 bg_color = Color(0.08, 0.1, 0.16, 0.9)
@@ -25,49 +31,53 @@ border_width_top = 1
 border_width_right = 1
 border_width_bottom = 1
 border_color = Color(0.35, 0.45, 0.65, 0.7)
-corner_radius_top_left = 16
-corner_radius_top_right = 16
-corner_radius_bottom_right = 16
-corner_radius_bottom_left = 16
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_shield"]
-bg_color = Color(0.1, 0.13, 0.22, 0.95)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.9, 0.75, 0.25, 1)
-corner_radius_top_left = 10
-corner_radius_top_right = 10
-corner_radius_bottom_right = 10
-corner_radius_bottom_left = 10
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_tasks"]
+texture = ExtResource("7_tsk")
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_startbtn"]
-bg_color = Color(0.95, 0.75, 0.18, 1)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 4
-border_color = Color(1, 0.92, 0.45, 1)
-corner_radius_top_left = 24
-corner_radius_top_right = 24
-corner_radius_bottom_right = 24
-corner_radius_bottom_left = 24
-shadow_color = Color(0, 0, 0, 0.4)
-shadow_size = 4
-shadow_offset = Vector2(0, 4)
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_gems"]
+texture = ExtResource("8_gem")
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pill"]
-bg_color = Color(0.1, 0.12, 0.18, 0.92)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.3, 0.38, 0.52, 0.8)
-corner_radius_top_left = 14
-corner_radius_top_right = 14
-corner_radius_bottom_right = 14
-corner_radius_bottom_left = 14
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_shield"]
+texture = ExtResource("5_plq")
+texture_margin_left = 28.0
+texture_margin_top = 12.0
+texture_margin_right = 28.0
+texture_margin_bottom = 12.0
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_scroll"]
+texture = ExtResource("6_scr")
+texture_margin_left = 28.0
+texture_margin_top = 10.0
+texture_margin_right = 28.0
+texture_margin_bottom = 10.0
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_diff"]
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_patrol"]
+texture = ExtResource("9_pat")
+texture_margin_left = 18.0
+texture_margin_top = 10.0
+texture_margin_right = 18.0
+texture_margin_bottom = 10.0
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_camp"]
+texture = ExtResource("10_cmp")
+texture_margin_left = 18.0
+texture_margin_top = 12.0
+texture_margin_right = 18.0
+texture_margin_bottom = 12.0
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_start"]
+texture = ExtResource("11_str")
+texture_margin_left = 24.0
+texture_margin_top = 14.0
+texture_margin_right = 24.0
+texture_margin_bottom = 14.0
 
 [node name="CampaignScreen" type="Control"]
 layout_mode = 3
@@ -88,14 +98,14 @@ grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_bg")
 
 [node name="TopBannerSection" type="Control" parent="."]
-custom_minimum_size = Vector2(0, 104)
+custom_minimum_size = Vector2(0, 112)
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
-offset_left = 18.0
-offset_top = 14.0
-offset_right = -18.0
-offset_bottom = 118.0
+offset_left = 10.0
+offset_top = 4.0
+offset_right = -10.0
+offset_bottom = 116.0
 grow_horizontal = 2
 
 [node name="EventBanner" type="Panel" parent="TopBannerSection"]
@@ -105,42 +115,55 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_banner")
+theme_override_styles/panel = SubResource("StyleBoxTexture_banner")
 
 [node name="HBox" type="HBoxContainer" parent="TopBannerSection/EventBanner"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 16.0
-offset_right = -16.0
+offset_left = 26.0
+offset_top = 14.0
+offset_right = -26.0
+offset_bottom = -14.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/separation = 16
+theme_override_constants/separation = 14
 
 [node name="Trophy" type="Label" parent="TopBannerSection/EventBanner/HBox"]
+visible = false
 layout_mode = 2
-theme_override_font_sizes/font_size = 48
-text = "🏆"
+theme_override_font_sizes/font_size = 38
+text = "🏰"
+
+[node name="CastleIcon" type="TextureRect" parent="TopBannerSection/EventBanner/HBox"]
+custom_minimum_size = Vector2(54, 54)
+layout_mode = 2
+size_flags_vertical = 4
+texture = ExtResource("4_cas")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="VBox" type="VBoxContainer" parent="TopBannerSection/EventBanner/HBox"]
 layout_mode = 2
 size_flags_horizontal = 3
 alignment = 1
+theme_override_constants/separation = 2
 
 [node name="Title" type="Label" parent="TopBannerSection/EventBanner/HBox/VBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.9, 0.5, 1)
-theme_override_font_sizes/font_size = 26
-text = "All-Star Cup — Season 4"
+theme_override_colors/font_color = Color(0.96, 0.82, 0.36, 1)
+theme_override_font_sizes/font_size = 21
+text = "Tower Expedition"
 
 [node name="Subtitle" type="Label" parent="TopBannerSection/EventBanner/HBox/VBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.75, 0.82, 0.95, 1)
-theme_override_font_sizes/font_size = 19
-text = "Climb the tower for Mythic Relics! (2d 14h left)"
+theme_override_colors/font_color = Color(0.88, 0.9, 0.96, 1)
+theme_override_font_sizes/font_size = 14
+text = "Clear five levels, defeat Lord Malakar, and unlock the next floor."
 
 [node name="Dots" type="Label" parent="TopBannerSection/EventBanner/HBox"]
+visible = false
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.85, 0.3, 0.9)
 theme_override_font_sizes/font_size = 18
@@ -148,6 +171,7 @@ text = "● ○ ○"
 vertical_alignment = 1
 
 [node name="BannerBtn" type="Button" parent="TopBannerSection/EventBanner"]
+visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -157,34 +181,32 @@ grow_vertical = 2
 flat = true
 
 [node name="LeftSidebar" type="VBoxContainer" parent="."]
+visible = false
 layout_mode = 1
 anchors_preset = 9
 anchor_bottom = 1.0
-offset_left = 16.0
-offset_top = 132.0
-offset_right = 92.0
-offset_bottom = -290.0
+offset_left = 14.0
+offset_top = 128.0
+offset_right = 86.0
+offset_bottom = -240.0
 grow_vertical = 2
-theme_override_constants/separation = 16
+theme_override_constants/separation = 12
 
 [node name="PrivilegeBtn" type="Button" parent="LeftSidebar"]
-custom_minimum_size = Vector2(74, 74)
+custom_minimum_size = Vector2(70, 70)
 layout_mode = 2
-theme_override_font_sizes/font_size = 38
 theme_override_styles/normal = SubResource("StyleBoxFlat_sidebtn")
 text = "👑"
 
 [node name="GreatValueBtn" type="Button" parent="LeftSidebar"]
-custom_minimum_size = Vector2(74, 74)
+custom_minimum_size = Vector2(70, 70)
 layout_mode = 2
-theme_override_font_sizes/font_size = 38
 theme_override_styles/normal = SubResource("StyleBoxFlat_sidebtn")
 text = "🎁"
 
 [node name="RankingsBtn" type="Button" parent="LeftSidebar"]
-custom_minimum_size = Vector2(74, 74)
+custom_minimum_size = Vector2(70, 70)
 layout_mode = 2
-theme_override_font_sizes/font_size = 38
 theme_override_styles/normal = SubResource("StyleBoxFlat_sidebtn")
 text = "🏅"
 
@@ -195,108 +217,153 @@ anchor_left = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = -92.0
-offset_top = 132.0
-offset_right = -16.0
-offset_bottom = -290.0
+offset_top = 126.0
+offset_right = -14.0
+offset_bottom = -240.0
 grow_horizontal = 0
 grow_vertical = 2
-theme_override_constants/separation = 16
+theme_override_constants/separation = 12
 
 [node name="TasksBtn" type="Button" parent="RightSidebar"]
 custom_minimum_size = Vector2(74, 74)
 layout_mode = 2
-theme_override_font_sizes/font_size = 38
-theme_override_styles/normal = SubResource("StyleBoxFlat_sidebtn")
-text = "📜"
+focus_mode = 0
+theme_override_styles/normal = SubResource("StyleBoxTexture_tasks")
+theme_override_styles/hover = SubResource("StyleBoxTexture_tasks")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_tasks")
+text = ""
 
 [node name="FriendsBtn" type="Button" parent="RightSidebar"]
+visible = false
 custom_minimum_size = Vector2(74, 74)
 layout_mode = 2
-theme_override_font_sizes/font_size = 38
 theme_override_styles/normal = SubResource("StyleBoxFlat_sidebtn")
 text = "👥"
 
 [node name="TopUpBtn" type="Button" parent="RightSidebar"]
 custom_minimum_size = Vector2(74, 74)
 layout_mode = 2
-theme_override_font_sizes/font_size = 38
-theme_override_styles/normal = SubResource("StyleBoxFlat_sidebtn")
-text = "💎"
+focus_mode = 0
+theme_override_styles/normal = SubResource("StyleBoxTexture_gems")
+theme_override_styles/hover = SubResource("StyleBoxTexture_gems")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_gems")
+text = ""
 
 [node name="IslandStage" type="Control" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = 126.0
-offset_bottom = -280.0
+offset_top = 122.0
+offset_bottom = -168.0
 grow_horizontal = 2
 grow_vertical = 2
-
-[node name="ChapterHeader" type="VBoxContainer" parent="IslandStage"]
-layout_mode = 1
-anchors_preset = 10
-anchor_right = 1.0
-offset_top = 6.0
-offset_bottom = 100.0
-grow_horizontal = 2
-alignment = 1
-
-[node name="ChapterShield" type="PanelContainer" parent="IslandStage/ChapterHeader"]
-custom_minimum_size = Vector2(400, 60)
-layout_mode = 2
-size_flags_horizontal = 4
-theme_override_styles/panel = SubResource("StyleBoxFlat_shield")
-
-[node name="ChapterLabel" type="Label" parent="IslandStage/ChapterHeader/ChapterShield"]
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.9, 0.45, 1)
-theme_override_font_sizes/font_size = 24
-text = "[1] Moonlight Forest — Cleared"
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="StarsRow" type="Label" parent="IslandStage/ChapterHeader"]
-layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
-theme_override_font_sizes/font_size = 32
-text = "★ ★ ★"
-horizontal_alignment = 1
-
-[node name="DifficultyHBox" type="HBoxContainer" parent="IslandStage/ChapterHeader"]
-layout_mode = 2
-alignment = 1
-theme_override_constants/separation = 12
-
-[node name="BtnNormal" type="Button" parent="IslandStage/ChapterHeader/DifficultyHBox"]
-custom_minimum_size = Vector2(126, 46)
-layout_mode = 2
-theme_override_font_sizes/font_size = 18
-theme_override_styles/normal = SubResource("StyleBoxFlat_pill")
-text = "Normal 1.0x"
-
-[node name="BtnHard" type="Button" parent="IslandStage/ChapterHeader/DifficultyHBox"]
-custom_minimum_size = Vector2(126, 46)
-layout_mode = 2
-theme_override_font_sizes/font_size = 18
-theme_override_styles/normal = SubResource("StyleBoxFlat_pill")
-text = "Hard 1.5x"
-
-[node name="BtnTorment" type="Button" parent="IslandStage/ChapterHeader/DifficultyHBox"]
-custom_minimum_size = Vector2(126, 46)
-layout_mode = 2
-theme_override_font_sizes/font_size = 18
-theme_override_styles/normal = SubResource("StyleBoxFlat_pill")
-text = "Torment 2.0x"
 
 [node name="DioramaIsland" type="Control" parent="IslandStage"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_top = 154.0
+offset_bottom = -4.0
 grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("2_isl")
+
+[node name="ChapterHeader" type="VBoxContainer" parent="IslandStage"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_top = 2.0
+offset_bottom = 152.0
+grow_horizontal = 2
+alignment = 1
+theme_override_constants/separation = 6
+
+[node name="ChapterShield" type="PanelContainer" parent="IslandStage/ChapterHeader"]
+custom_minimum_size = Vector2(464, 58)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_styles/panel = SubResource("StyleBoxTexture_shield")
+
+[node name="ChapterLabel" type="Label" parent="IslandStage/ChapterHeader/ChapterShield"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.96, 0.88, 0.62, 1)
+theme_override_font_sizes/font_size = 21
+text = "[1] Moonlight Forest — Cleared"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="StarsRow" type="Label" parent="IslandStage/ChapterHeader"]
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.85, 0.2, 1)
+theme_override_font_sizes/font_size = 26
+text = "★ ★ ★"
+horizontal_alignment = 1
+
+[node name="StarsIcons" type="HBoxContainer" parent="IslandStage/ChapterHeader"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 6
+
+[node name="Star1" type="TextureRect" parent="IslandStage/ChapterHeader/StarsIcons"]
+custom_minimum_size = Vector2(28, 28)
+layout_mode = 2
+texture = ExtResource("12_stg")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Star2" type="TextureRect" parent="IslandStage/ChapterHeader/StarsIcons"]
+custom_minimum_size = Vector2(28, 28)
+layout_mode = 2
+texture = ExtResource("12_stg")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Star3" type="TextureRect" parent="IslandStage/ChapterHeader/StarsIcons"]
+custom_minimum_size = Vector2(28, 28)
+layout_mode = 2
+texture = ExtResource("12_stg")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="DifficultyScrollBg" type="PanelContainer" parent="IslandStage/ChapterHeader"]
+custom_minimum_size = Vector2(448, 48)
+layout_mode = 2
+size_flags_horizontal = 4
+theme_override_styles/panel = SubResource("StyleBoxTexture_scroll")
+
+[node name="DifficultyHBox" type="HBoxContainer" parent="IslandStage/ChapterHeader"]
+custom_minimum_size = Vector2(420, 44)
+layout_mode = 2
+size_flags_horizontal = 4
+alignment = 1
+theme_override_constants/separation = 8
+
+[node name="BtnNormal" type="Button" parent="IslandStage/ChapterHeader/DifficultyHBox"]
+custom_minimum_size = Vector2(130, 38)
+layout_mode = 2
+focus_mode = 0
+theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("StyleBoxEmpty_diff")
+text = "Normal 1.0x"
+
+[node name="BtnHard" type="Button" parent="IslandStage/ChapterHeader/DifficultyHBox"]
+custom_minimum_size = Vector2(130, 38)
+layout_mode = 2
+focus_mode = 0
+theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("StyleBoxEmpty_diff")
+text = "Hard 1.5x"
+
+[node name="BtnTorment" type="Button" parent="IslandStage/ChapterHeader/DifficultyHBox"]
+custom_minimum_size = Vector2(130, 38)
+layout_mode = 2
+focus_mode = 0
+theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("StyleBoxEmpty_diff")
+text = "Torment 2.0x"
 
 [node name="BottomControls" type="VBoxContainer" parent="."]
 layout_mode = 1
@@ -305,12 +372,12 @@ anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 16.0
-offset_top = -280.0
+offset_top = -152.0
 offset_right = -16.0
-offset_bottom = -12.0
+offset_bottom = -10.0
 grow_horizontal = 2
 grow_vertical = 0
-theme_override_constants/separation = 12
+theme_override_constants/separation = 10
 
 [node name="QuickAccessRow" type="HBoxContainer" parent="BottomControls"]
 layout_mode = 2
@@ -318,58 +385,67 @@ alignment = 1
 theme_override_constants/separation = 16
 
 [node name="HuntBtn" type="Button" parent="BottomControls/QuickAccessRow"]
-custom_minimum_size = Vector2(142, 54)
+custom_minimum_size = Vector2(210, 48)
 layout_mode = 2
-theme_override_font_sizes/font_size = 19
-theme_override_styles/normal = SubResource("StyleBoxFlat_pill")
-text = "🗡 Hunt (+2.4k)"
+focus_mode = 0
+theme_override_colors/font_color = Color(0.94, 0.94, 0.98, 1)
+theme_override_font_sizes/font_size = 17
+theme_override_styles/normal = SubResource("StyleBoxTexture_patrol")
+theme_override_styles/hover = SubResource("StyleBoxTexture_patrol")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_patrol")
+icon = ExtResource("13_swd")
+expand_icon = true
+text = "Patrol Rewards"
 
 [node name="ChestBtn" type="Button" parent="BottomControls/QuickAccessRow"]
-custom_minimum_size = Vector2(142, 54)
+visible = false
+custom_minimum_size = Vector2(142, 48)
 layout_mode = 2
-theme_override_font_sizes/font_size = 19
-theme_override_styles/normal = SubResource("StyleBoxFlat_pill")
 text = "🎁 Stage Chest"
 
 [node name="GuildBtn" type="Button" parent="BottomControls/QuickAccessRow"]
-custom_minimum_size = Vector2(142, 54)
+visible = false
+custom_minimum_size = Vector2(142, 48)
 layout_mode = 2
-theme_override_font_sizes/font_size = 19
-theme_override_styles/normal = SubResource("StyleBoxFlat_pill")
 text = "🛡 Guild"
 
 [node name="MainActionRow" type="HBoxContainer" parent="BottomControls"]
 layout_mode = 2
 alignment = 1
-theme_override_constants/separation = 16
+theme_override_constants/separation = 12
 
 [node name="CampBtn" type="Button" parent="BottomControls/MainActionRow"]
-custom_minimum_size = Vector2(106, 74)
+custom_minimum_size = Vector2(150, 64)
 layout_mode = 2
-theme_override_font_sizes/font_size = 21
-theme_override_styles/normal = SubResource("StyleBoxFlat_pill")
+focus_mode = 0
+theme_override_colors/font_color = Color(0.94, 0.94, 0.97, 1)
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("StyleBoxTexture_camp")
+theme_override_styles/hover = SubResource("StyleBoxTexture_camp")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_camp")
 text = "⛺ Camp"
 
 [node name="StartButton" type="Button" parent="BottomControls/MainActionRow"]
-custom_minimum_size = Vector2(256, 80)
+custom_minimum_size = Vector2(268, 68)
 layout_mode = 2
-theme_override_colors/font_color = Color(0.1, 0.08, 0.04, 1)
-theme_override_font_sizes/font_size = 30
-theme_override_styles/normal = SubResource("StyleBoxFlat_startbtn")
-theme_override_styles/hover = SubResource("StyleBoxFlat_startbtn")
+focus_mode = 0
+theme_override_colors/font_color = Color(0.12, 0.08, 0.03, 1)
+theme_override_font_sizes/font_size = 26
+theme_override_styles/normal = SubResource("StyleBoxTexture_start")
+theme_override_styles/hover = SubResource("StyleBoxTexture_start")
+theme_override_styles/pressed = SubResource("StyleBoxTexture_start")
 text = "Start (x5 ⚡)"
 
 [node name="RumbleBtn" type="Button" parent="BottomControls/MainActionRow"]
-custom_minimum_size = Vector2(106, 74)
+visible = false
+custom_minimum_size = Vector2(106, 64)
 layout_mode = 2
-theme_override_font_sizes/font_size = 21
-theme_override_styles/normal = SubResource("StyleBoxFlat_pill")
 text = "⚔ Rumble"
 
 [node name="ChatTicker" type="PanelContainer" parent="BottomControls"]
+visible = false
 custom_minimum_size = Vector2(0, 42)
 layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxFlat_pill")
 
 [node name="HBox" type="HBoxContainer" parent="BottomControls/ChatTicker"]
 layout_mode = 2
@@ -377,7 +453,5 @@ layout_mode = 2
 [node name="ChatLabel" type="Label" parent="BottomControls/ChatTicker/HBox"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_colors/font_color = Color(0.7, 0.78, 0.9, 0.85)
-theme_override_font_sizes/font_size = 18
 text = " [System] Hunter Raven unlocked Hellhound Evolution on Floor 3!"
 vertical_alignment = 1

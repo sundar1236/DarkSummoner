@@ -3,7 +3,7 @@ extends Node2D
 
 # Lightweight authored 2.5D-style character rig. Each hero has a distinct
 # silhouette, palette, weapon language and animated pose; gameplay stays outside.
-@export_enum("shadow_hunter", "storm_reaper", "soul_binder") var character_id: String = "shadow_hunter"
+@export_enum("shadow_hunter", "storm_reaper", "soul_binder", "kael_varyn") var character_id: String = "shadow_hunter"
 
 var animation_player: AnimationPlayer
 var weapon_socket: Marker2D
@@ -24,6 +24,10 @@ const PALETTES: Dictionary = {
 	"soul_binder": {
 		"main": Color("#25483f"), "light": Color("#63a88b"), "dark": Color("#142923"),
 		"glow": Color("#8dffd0"), "metal": Color("#c3ead7"), "skin": Color("#e1d9c6")
+	},
+	"kael_varyn": {
+		"main": Color("#1a222b"), "light": Color("#38a8c9"), "dark": Color("#0e1218"),
+		"glow": Color("#4cf0ff"), "metal": Color("#9ecfe0"), "skin": Color("#e3eaf0")
 	}
 }
 
@@ -212,7 +216,7 @@ func _draw() -> void:
 			draw_line(Vector2(11, -12 + bob), Vector2(22 + pose * 7.0, -1 - pose * 4.0), metal, 4.0, true)
 			draw_line(Vector2(22 + pose * 7.0, -1 - pose * 4.0), Vector2(30 + pose * 10.0, -18 - pose * 3.0), glow, 2.2, true)
 			draw_arc(Vector2(0, -12), 24.0 + sin(_pulse * 7.0) * 2.0, 3.5, 5.7, 16, glow, 1.5)
-		"soul_binder":
+		"soul_binder", "kael_varyn":
 			draw_colored_polygon(PackedVector2Array([
 				Vector2(-14, -38 + bob), Vector2(-9, -49 + bob), Vector2(0, -44 + bob),
 				Vector2(9, -49 + bob), Vector2(14, -38 + bob), Vector2(8, -34 + bob), Vector2(-8, -34 + bob)
@@ -259,7 +263,7 @@ func _draw() -> void:
 			draw_line(Vector2(15, -18 + bob), Vector2(8, -23 + bob), metal, 2.0, true)
 			draw_line(Vector2(22 + pose * 7.0, -1 - pose * 4.0), Vector2(34 + pose * 9.0, -23 - pose * 4.0), glow, 3.0, true)
 			draw_circle(Vector2(34 + pose * 9.0, -23 - pose * 4.0), 2.0, Color.WHITE)
-		"soul_binder":
+		"soul_binder", "kael_varyn":
 			# Rune chains and a floating focus orb frame the support mage silhouette.
 			draw_arc(Vector2(0, -14 + bob), 11.0, 0.2, PI - 0.2, 18, glow, 1.2, true)
 			draw_line(Vector2(-16, -3), Vector2(-22, -12), glow, 1.5, true)

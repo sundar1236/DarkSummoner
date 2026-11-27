@@ -65,6 +65,10 @@ func _gui_input(event: InputEvent) -> void:
 	elif event is InputEventKey and event.pressed and (event.keycode == KEY_SPACE or event.keycode == KEY_ENTER):
 		_on_proceed()
 
+func skip_intro() -> void:
+	_on_proceed()
+
+
 func _on_proceed() -> void:
 	if _has_proceeded:
 		return

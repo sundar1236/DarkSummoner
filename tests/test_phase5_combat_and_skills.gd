@@ -26,6 +26,7 @@ func _ready() -> void:
 	test_learned_skills_drawer()
 	test_combat_feedback_announcements()
 	test_pause_confirmation_and_defeat_revive()
+	await test_revive_respawn_and_skill_accumulation()
 	
 	print("\n==================================================")
 	print("  PHASE 5 TEST RESULTS: %d PASSED, %d FAILED" % [tests_passed, tests_failed])
@@ -567,3 +568,63 @@ func test_pause_confirmation_and_defeat_revive() -> void:
 	assert_true(not gov.btn_revive.visible, "Revive button hidden when revives == 0")
 	
 	gov.free()
+
+
+func test_revive_respawn_and_skill_accumulation() -> void:
+	print("--- 9. Revive Respawn, Dead-HP Revive & Multi-Skill Accumulation ---")
+	# 1. Dead player revive (player_hp == 0.0) must restore HP > 0
+	GameManager.start_new_run("kael_varyn", 1)
+	GameManager.run_extra_revives = 1
+	GameManager.player_hp = 0.0
+	var revived := GameManager.use_revive()
+	assert_true(revived, "use_revive succeeds when revives > 0 even at 0 HP")
+	assert_true(GameManager.player_hp > 0.0, "use_revive restores positive HP from 0 HP")
+
+	# 2. Multi-skill modifier accumulation must not overwrite earlier skills sharing keys
+	GameManager.run_learned_skills.clear()
+	GameManager.run_skill_modifiers.clear()
+	GameManager.run_skill_evolutions.clear()
+	GameManager.run_skill_evolution_modifiers.clear()
+	GameManager.apply_run_skill("shadow_flurry")
+	var atk_after_first: float = float(GameManager.run_skill_modifiers.get("bonus_atk", 0.0))
+	GameManager.apply_run_skill("hellfire_infusion")
+	var atk_after_both: float = float(GameManager.run_skill_modifiers.get("bonus_atk", 0.0))
+	assert_true(atk_after_both > atk_after_first, "Second bonus_atk skill accumulates instead of overwriting earlier skill")
+
+	# 3. MainController revive_requested respawns combat arena when current_arena was cleared
+	var controller := MainController.new()
+	var combat_container := Node2D.new()
+	var gov_scene := load("res://scenes/ui/game_over_view.tscn") as PackedScene
+	var settings_scene := load("res://scenes/ui/settings_modal.tscn") as PackedScene
+	var gov := gov_scene.instantiate() as GameOverView
+	var settings := settings_scene.instantiate() as SettingsModal
+	controller.combat_container = combat_container
+	controller.game_over_view = gov
+	controller.settings_modal = settings
+	add_child(controller)
+	controller.add_child(combat_container)
+	controller.add_child(gov)
+	controller.add_child(settings)
+	await get_tree().process_frame
+
+	GameManager.run_extra_revives = 1
+	GameManager.on_player_death()
+	assert_true(controller.current_arena == null, "Arena is cleared on player defeat")
+	gov.btn_revive.pressed.emit()
+	await get_tree().process_frame
+	assert_true(is_instance_valid(controller.current_arena), "Revive respawns combat arena instead of showing blank screen")
+
+	# 4. AltarBoard supports relic/blood items on inner/outer sockets while keeping socket 0 strict
+	var board := AltarBoard.new()
+	var chalice := ItemInstance.new(ItemDatabase.get_item("blood_chalice"))
+	assert_true(not board.is_item_compatible(chalice, 0), "Socket 0 preserves strict rune-only restriction")
+	assert_true(board.is_item_compatible(chalice, 1) and board.is_item_compatible(chalice, 8), "Blood Chalice can equip on rune/spirit sockets")
+	board.free()
+
+	# 5. AudioManager registers coin_pickup SFX
+	assert_true(AudioManager != null and AudioManager.sfx_streams.has("coin_pickup"), "AudioManager registers coin_pickup SFX")
+
+	controller._clear_arena()
+	GameManager.abandon_run()
+	controller.queue_free()
+	await get_tree().process_frame

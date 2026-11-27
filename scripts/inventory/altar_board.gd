@@ -33,21 +33,21 @@ const SOCKET_DEFS: Array[Dictionary] = [
 		"id": 1, "name": "West-Northwest Rune Socket", "type": "rune",
 		"angle_deg": 195.0, "radius_ratio": 0.88, "shape": "hex",
 		"virtual_cell": Vector2i(0, 1),
-		"supported_tags": ["rune", "weapon", "defense", "shadow", "fire", "storm", "soul", "accessory"],
+		"supported_tags": ["rune", "weapon", "defense", "shadow", "fire", "storm", "soul", "accessory", "relic", "blood", "lightning"],
 		"unlocked_by_default": true, "connections": [0, 2, 8]
 	},
 	{
 		"id": 2, "name": "West-Southwest Rune Socket", "type": "rune",
 		"angle_deg": 165.0, "radius_ratio": 0.88, "shape": "hex",
 		"virtual_cell": Vector2i(0, 2),
-		"supported_tags": ["rune", "weapon", "defense", "shadow", "fire", "storm", "soul", "accessory"],
+		"supported_tags": ["rune", "weapon", "defense", "shadow", "fire", "storm", "soul", "accessory", "relic", "blood", "lightning"],
 		"unlocked_by_default": true, "connections": [1, 3, 8]
 	},
 	{
 		"id": 3, "name": "Southwest Rune Socket", "type": "rune",
 		"angle_deg": 140.0, "radius_ratio": 0.88, "shape": "hex",
 		"virtual_cell": Vector2i(0, 3),
-		"supported_tags": ["rune", "weapon", "defense", "shadow", "fire", "storm", "soul", "accessory"],
+		"supported_tags": ["rune", "weapon", "defense", "shadow", "fire", "storm", "soul", "accessory", "relic", "blood", "lightning"],
 		"unlocked_by_default": true, "connections": [2, 10]
 	},
 	# Outer Right Arc (4..7)
@@ -55,28 +55,28 @@ const SOCKET_DEFS: Array[Dictionary] = [
 		"id": 4, "name": "Northeast Rune Socket", "type": "rune",
 		"angle_deg": 320.0, "radius_ratio": 0.88, "shape": "hex",
 		"virtual_cell": Vector2i(3, 0),
-		"supported_tags": ["rune", "weapon", "defense", "shadow", "fire", "storm", "soul", "accessory"],
+		"supported_tags": ["rune", "weapon", "defense", "shadow", "fire", "storm", "soul", "accessory", "relic", "blood", "lightning"],
 		"unlocked_by_default": true, "connections": [5, 9]
 	},
 	{
 		"id": 5, "name": "East-Northeast Rune Socket", "type": "rune",
 		"angle_deg": 345.0, "radius_ratio": 0.88, "shape": "hex",
 		"virtual_cell": Vector2i(3, 1),
-		"supported_tags": ["rune", "weapon", "defense", "shadow", "fire", "storm", "soul", "accessory"],
+		"supported_tags": ["rune", "weapon", "defense", "shadow", "fire", "storm", "soul", "accessory", "relic", "blood", "lightning"],
 		"unlocked_by_default": true, "connections": [4, 6, 9]
 	},
 	{
 		"id": 6, "name": "East-Southeast Rune Socket", "type": "rune",
 		"angle_deg": 15.0, "radius_ratio": 0.88, "shape": "hex",
 		"virtual_cell": Vector2i(3, 2),
-		"supported_tags": ["rune", "weapon", "defense", "shadow", "fire", "storm", "soul", "accessory"],
+		"supported_tags": ["rune", "weapon", "defense", "shadow", "fire", "storm", "soul", "accessory", "relic", "blood", "lightning"],
 		"unlocked_by_default": true, "connections": [5, 7, 9]
 	},
 	{
 		"id": 7, "name": "Southeast Rune Socket", "type": "rune",
 		"angle_deg": 40.0, "radius_ratio": 0.88, "shape": "hex",
 		"virtual_cell": Vector2i(3, 3),
-		"supported_tags": ["rune", "weapon", "defense", "shadow", "fire", "storm", "soul", "accessory"],
+		"supported_tags": ["rune", "weapon", "defense", "shadow", "fire", "storm", "soul", "accessory", "relic", "blood", "lightning"],
 		"unlocked_by_default": true, "connections": [6, 11]
 	},
 	# Inner Spirit Sockets (8..9) - Flanking Hero
@@ -84,14 +84,14 @@ const SOCKET_DEFS: Array[Dictionary] = [
 		"id": 8, "name": "Left Spirit Vessel", "type": "spirit",
 		"angle_deg": 180.0, "radius_ratio": 0.46, "shape": "circle",
 		"virtual_cell": Vector2i(1, 1),
-		"supported_tags": ["core", "rune", "spirit", "essence", "accessory", "weapon", "defense"],
+		"supported_tags": ["core", "rune", "spirit", "essence", "accessory", "weapon", "defense", "relic", "blood", "lightning"],
 		"unlocked_by_default": true, "connections": [0, 1, 2, 9, 12]
 	},
 	{
 		"id": 9, "name": "Right Spirit Vessel", "type": "spirit",
 		"angle_deg": 0.0, "radius_ratio": 0.46, "shape": "circle",
 		"virtual_cell": Vector2i(2, 1),
-		"supported_tags": ["core", "rune", "spirit", "essence", "accessory", "weapon", "defense"],
+		"supported_tags": ["core", "rune", "spirit", "essence", "accessory", "weapon", "defense", "relic", "blood", "lightning"],
 		"unlocked_by_default": true, "connections": [4, 5, 6, 8, 12]
 	},
 	# Lower Diamond Core Sockets (10..12)
@@ -167,6 +167,8 @@ func _ready() -> void:
 	custom_minimum_size = Vector2(530, 530)
 
 func _process(delta: float) -> void:
+	if not is_visible_in_tree():
+		return
 	_anim_time += delta
 	queue_redraw()
 
@@ -451,12 +453,15 @@ func _draw_central_hero(center: Vector2, t: float) -> void:
 	# Hero base shadow
 	draw_circle(center + Vector2(0, 36), 32.0, Color(0.02, 0.04, 0.08, 0.85))
 	
-	var char_id := GameManager.current_character.id if GameManager and GameManager.current_character else "shadow_hunter"
+	var char_id := GameManager.current_character.id if GameManager and GameManager.current_character else "kael_varyn"
 	var iris_col := Color(0.7, 0.3, 1.0, 1.0)
-	if char_id == "storm_reaper": iris_col = Color(0.2, 0.85, 1.0, 1.0)
+	if char_id == "kael_varyn": iris_col = Color(0.22, 0.88, 1.0, 1.0)
+	elif char_id == "storm_reaper": iris_col = Color(0.2, 0.85, 1.0, 1.0)
 	elif char_id == "soul_binder": iris_col = Color(0.25, 0.95, 0.6, 1.0)
 	
-	var tex := TextureLoader.get_texture("res://assets/sprites/characters/player_" + char_id + ".png")
+	var tex := TextureLoader.get_texture("res://assets/art/characters/%s_portrait.png" % char_id)
+	if tex == null:
+		tex = TextureLoader.get_texture("res://assets/sprites/characters/player_" + char_id + ".png")
 	if tex:
 		var spr_size := Vector2(106, 106)
 		var spr_rect := Rect2(hero_pos - spr_size * 0.5 + Vector2(0, -6), spr_size)

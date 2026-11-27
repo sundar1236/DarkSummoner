@@ -97,8 +97,8 @@ func _refresh_state() -> void:
 		lbl_version.text = "Abyssal Altar v1.2.0 • Godot 4.3 Mobile"
 		
 	# Refresh Central Hero Display on Home Screen
-	var char_id := "shadow_hunter"
-	var char_name := "Shadow Hunter"
+	var char_id := "kael_varyn"
+	var char_name := "Kael Varyn"
 	if GameManager and GameManager.current_character:
 		char_id = GameManager.current_character.id
 		char_name = GameManager.current_character.name

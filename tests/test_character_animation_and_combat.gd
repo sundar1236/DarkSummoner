@@ -123,6 +123,7 @@ func test_timed_action_interrupts() -> void:
 func test_authored_character_visual_scenes() -> void:
 	print("\n--- Test: Authored Hero Visual Scenes & Animation Contract ---")
 	var scene_paths := {
+		"kael_varyn": "res://scenes/characters/kael_varyn_visual.tscn",
 		"shadow_hunter": "res://scenes/characters/shadow_hunter_visual.tscn",
 		"storm_reaper": "res://scenes/characters/storm_reaper_visual.tscn",
 		"soul_binder": "res://scenes/characters/soul_binder_visual.tscn"
@@ -298,8 +299,13 @@ func test_character_sprites_and_ambience() -> void:
 	assert_true(player.spirit_wisp == null, "Previous wisp cleanly cleaned up")
 	assert_true(player.shadow_trails == null, "Previous Shadow Hunter trail remains cleared")
 	
+	# Test Kael Varyn 64-pose multi-state strips & cyan Soulbound aura
+	GameManager.set_character("kael_varyn")
+	player._setup_character_ambience()
+	assert_true(is_instance_valid(player.soulbound_aura), "Kael Varyn spawns Soulbound arcane aura")
+
 	# Reset to default
-	GameManager.set_character("shadow_hunter")
+	GameManager.set_character("kael_varyn")
 	player.queue_free()
 
 func test_enemy_visual_distinctions_and_telegraphs() -> void:
@@ -444,8 +450,20 @@ func test_summoning_circle_hero_presentation() -> void:
 
 
 func test_eight_directional_split_assets_and_floors() -> void:
-	print("\n--- Test: 8-Directional Split Sprites & 5-Floor Environments ---")
-	for cid in ["shadow_hunter", "storm_reaper", "soul_binder"]:
+	print("\n--- Test: 8-Directional Split Sprites, Kael Varyn 64-Pose Sheet & 5-Floor Environments ---")
+	var kael_manifest_path := "res://assets/art/characters/kael_varyn/manifest.json"
+	assert_true(FileAccess.file_exists(kael_manifest_path), "Kael Varyn 64-pose manifest exists")
+	if FileAccess.file_exists(kael_manifest_path):
+		var kf := FileAccess.open(kael_manifest_path, FileAccess.READ)
+		var parsed: Variant = JSON.parse_string(kf.get_as_text())
+		kf.close()
+		assert_true(parsed is Dictionary and int(parsed.get("pose_count", 0)) == 64, "Kael Varyn manifest registers all 64 poses")
+		var poses: Array = parsed.get("poses", []) if parsed is Dictionary else []
+		assert_eq(poses.size(), 64, "All 64 Kael Varyn pose entries present")
+		for p in poses:
+			assert_true(FileAccess.file_exists(str(p.get("file", ""))), "Kael pose file exists: %s" % str(p.get("file", "")))
+
+	for cid in ["kael_varyn", "shadow_hunter", "storm_reaper", "soul_binder"]:
 		GameManager.current_character = CharacterDatabase.get_character(cid)
 		var player := PlayerController.new()
 		add_child(player)

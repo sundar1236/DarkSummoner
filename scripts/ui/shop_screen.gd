@@ -162,6 +162,7 @@ func _buy_daily_item(btn: Button, item_id: String, cost: int, is_gems: bool, suc
 	if AudioManager: AudioManager.play_sfx("shop_buy")
 	btn.text = "SOLD OUT"
 	btn.disabled = true
+	_update_offer_left_label(btn, 0)
 	show_toast(success_msg)
 	item_purchased.emit(item_id)
 
@@ -169,13 +170,22 @@ func _claim_free_energy(btn: Button) -> void:
 	if not SaveManager or not SaveManager.claim_daily_free_energy(20):
 		btn.text = "CLAIMED"
 		btn.disabled = true
+		_update_offer_left_label(btn, 0)
 		show_toast("Free energy has already been claimed today.")
 		return
 	if AudioManager: AudioManager.play_sfx("shop_buy")
 	btn.text = "CLAIMED"
 	btn.disabled = true
+	_update_offer_left_label(btn, 0)
 	show_toast("⚡ Claimed +20 Free Energy!")
 	item_purchased.emit("free_energy")
+
+func _update_offer_left_label(btn: Button, remaining: int) -> void:
+	if not btn or not btn.get_parent():
+		return
+	var left_lbl := btn.get_parent().get_node_or_null("Left") as Label
+	if left_lbl:
+		left_lbl.text = "Purchases left: %d" % maxi(0, remaining)
 
 func _refresh_daily_offer_buttons() -> void:
 	if not SaveManager:
@@ -223,13 +233,24 @@ func _populate_progress_rows(container: VBoxContainer, entries: Array[Dictionary
 		container.remove_child(child)
 		child.queue_free()
 
+	var pill_gold_tex := TextureLoader.get_texture("res://assets/art/ui_shop/pill_gold_blank.png")
+	var pill_dis_tex := TextureLoader.get_texture("res://assets/art/ui_shop/pill_disabled_blank.png")
+	var bar_bg := StyleBoxFlat.new()
+	bar_bg.bg_color = Color(0.11, 0.12, 0.16, 0.95)
+	bar_bg.border_color = Color(0.45, 0.36, 0.2, 0.75)
+	bar_bg.set_border_width_all(1)
+	bar_bg.set_corner_radius_all(5)
+	var bar_fill := StyleBoxFlat.new()
+	bar_fill.bg_color = Color(0.88, 0.64, 0.2, 0.96)
+	bar_fill.set_corner_radius_all(5)
+
 	for entry in entries:
 		var row := HBoxContainer.new()
 		row.custom_minimum_size = Vector2(0, 64)
 		row.add_theme_constant_override("separation", 10)
 		var details := VBoxContainer.new()
 		details.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		details.add_theme_constant_override("separation", 2)
+		details.add_theme_constant_override("separation", 3)
 
 		var title_label := Label.new()
 		title_label.text = str(entry.get("title", "Hunter Feat"))
@@ -241,6 +262,8 @@ func _populate_progress_rows(container: VBoxContainer, entries: Array[Dictionary
 		progress_bar.custom_minimum_size = Vector2(0, 10)
 		progress_bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		progress_bar.show_percentage = false
+		progress_bar.add_theme_stylebox_override("background", bar_bg)
+		progress_bar.add_theme_stylebox_override("fill", bar_fill)
 		progress_bar.max_value = maxi(1, int(entry.get("target", 1)))
 		progress_bar.value = int(entry.get("progress", 0))
 		details.add_child(progress_bar)
@@ -252,23 +275,39 @@ func _populate_progress_rows(container: VBoxContainer, entries: Array[Dictionary
 			int(entry.get("reward_gold", 0)),
 			int(entry.get("reward_shades", 0))
 		]
-		reward_label.add_theme_font_size_override("font_size", 11)
-		reward_label.add_theme_color_override("font_color", Color(0.68, 0.74, 0.84, 1.0))
+		reward_label.add_theme_font_size_override("font_size", 12)
+		reward_label.add_theme_color_override("font_color", Color(0.72, 0.74, 0.82, 1.0))
 		details.add_child(reward_label)
 		row.add_child(details)
 
 		var claim_button := Button.new()
-		claim_button.custom_minimum_size = Vector2(104, 42)
+		claim_button.custom_minimum_size = Vector2(138, 42)
 		claim_button.add_theme_font_size_override("font_size", 13)
+		var btn_tex: Texture2D = pill_dis_tex
 		if bool(entry.get("claimed", false)):
 			claim_button.text = "CLAIMED"
 			claim_button.disabled = true
+			claim_button.add_theme_color_override("font_disabled_color", Color(0.6, 0.64, 0.7, 1.0))
 		elif bool(entry.get("completed", false)):
 			claim_button.text = "CLAIM"
 			claim_button.disabled = false
+			btn_tex = pill_gold_tex
+			claim_button.add_theme_color_override("font_color", Color(1.0, 0.94, 0.78, 1.0))
 		else:
 			claim_button.text = "IN PROGRESS"
 			claim_button.disabled = true
+			claim_button.add_theme_color_override("font_disabled_color", Color(0.65, 0.68, 0.74, 1.0))
+		if btn_tex:
+			var c_sb := StyleBoxTexture.new()
+			c_sb.texture = btn_tex
+			c_sb.texture_margin_left = 18.0
+			c_sb.texture_margin_right = 18.0
+			c_sb.texture_margin_top = 10.0
+			c_sb.texture_margin_bottom = 10.0
+			claim_button.add_theme_stylebox_override("normal", c_sb)
+			claim_button.add_theme_stylebox_override("hover", c_sb)
+			claim_button.add_theme_stylebox_override("pressed", c_sb)
+			claim_button.add_theme_stylebox_override("disabled", c_sb)
 		var entry_id: String = str(entry.get("id", ""))
 		claim_button.pressed.connect(_on_progress_reward_claimed.bind(entry_id, is_achievement))
 		row.add_child(claim_button)

@@ -1,0 +1,1024 @@
+{
+  "schema_version": 1,
+  "character_id": "kael_varyn",
+  "name": "Kael Varyn",
+  "title": "The Soulbound",
+  "pose_count": 64,
+  "cell_size": 128,
+  "sheet_64": "res://assets/art/characters/kael_varyn/kael_varyn_64_sheet.png",
+  "strip_8dir": "res://assets/art/characters/8dir/kael_varyn_8dir.png",
+  "portrait": "res://assets/art/characters/kael_varyn_portrait.png",
+  "card": "res://assets/art/ui_reference/card_full_kael_varyn.png",
+  "strips": {
+    "idle": {
+      "file": "res://assets/art/characters/kael_varyn/strips/idle_8dir.png",
+      "hframes": 8,
+      "cell_size": 256,
+      "directional_8": true
+    },
+    "run": {
+      "file": "res://assets/art/characters/kael_varyn/strips/run_8dir.png",
+      "hframes": 8,
+      "cell_size": 256,
+      "directional_8": true
+    },
+    "attack": {
+      "file": "res://assets/art/characters/kael_varyn/strips/attack_8dir.png",
+      "hframes": 8,
+      "cell_size": 256,
+      "directional_8": true
+    },
+    "dodge": {
+      "file": "res://assets/art/characters/kael_varyn/strips/dodge_8dir.png",
+      "hframes": 8,
+      "cell_size": 256,
+      "directional_8": true
+    },
+    "hurt": {
+      "file": "res://assets/art/characters/kael_varyn/strips/hurt_8dir.png",
+      "hframes": 8,
+      "cell_size": 256,
+      "directional_8": true
+    },
+    "skill": {
+      "file": "res://assets/art/characters/kael_varyn/strips/skill_frames.png",
+      "hframes": 8,
+      "cell_size": 256,
+      "directional_8": false
+    },
+    "defeat": {
+      "file": "res://assets/art/characters/kael_varyn/strips/defeat_frames.png",
+      "hframes": 6,
+      "cell_size": 256,
+      "directional_8": false
+    },
+    "victory": {
+      "file": "res://assets/art/characters/kael_varyn/strips/victory_frames.png",
+      "hframes": 8,
+      "cell_size": 256,
+      "directional_8": false
+    }
+  },
+  "poses": [
+    {
+      "index": 0,
+      "row": 0,
+      "col": 0,
+      "action": "idle",
+      "direction": "s",
+      "description": "Front idle stance with floating grimoire",
+      "source_box": [
+        0,
+        0,
+        128,
+        128
+      ],
+      "file": "res://assets/art/characters/kael_varyn/poses/pose_00_idle_s.png"
+    },
+    {
+      "index": 1,
+      "row": 0,
+      "col": 1,
+      "action": "idle",
+      "direction": "se",
+      "description": "Front-right 3/4 idle stance",
+      "source_box": [
+        128,
+        0,
+        256,
+        128
+      ],
+      "file": "res://assets/art/characters/kael_varyn/poses/pose_01_idle_se.png"
+    },
+    {
+      "index": 2,
+      "row": 0,
+      "col": 2,
+      "action": "idle",
+      "direction": "e",
+      "description": "Right profile idle stance",
+      "source_box": [
+        256,
+        0,
+        384,
+        128
+      ],
+      "file": "res://assets/art/characters/kael_varyn/poses/pose_02_idle_e.png"
+    },
+    {
+      "index": 3,
+      "row": 0,
+      "col": 3,
+      "action": "idle",
+      "direction": "w",
+      "description": "Left profile idle stance",
+      "source_box": [
+        384,
+        0,
+        512,
+        128
+      ],
+      "file": "res://assets/art/characters/kael_varyn/poses/pose_03_idle_w.png"
+    },
+    {
+      "index": 4,
+      "row": 0,
+      "col": 4,
+      "action": "idle",
+      "direction": "n",
+      "description": "Back idle stance",
+      "source_box": [
+        512,
+        0,
+        640,
+        128
+      ],
+      "file": "res://assets/art/characters/kael_varyn/poses/pose_04_idle_n.png"
+    },
+    {
+      "index": 5,
+      "row": 0,
+      "col": 5,
+      "action": "idle",
+      "direction": "sw",
+      "description": "Front-left 3/4 idle stance",
+      "source_box": [
+        640,
+        0,
+        768,
+        128
+      ],
+      "file": "res://assets/art/characters/kael_varyn/poses/pose_05_idle_sw.png"
+    },
+    {
+      "index": 6,
+      "row": 0,
+      "col": 6,
+      "action": "idle",
+      "direction": "e_alt",
+      "description": "Right profile alternate idle stance",
+      "source_box": [
+        768,
+        0,
+        896,
+        128
+      ],
+      "file": "res://assets/art/characters/kael_varyn/poses/pose_06_idle_e_alt.png"
+    },
+    {
+      "index": 7,
+      "row": 0,
+      "col": 7,
+      "action": "idle",
+      "direction": "s_alt",
+      "description": "Front idle stance (grimoire left)",
+      "source_box": [
+        896,
+        0,
+        1024,
+        128
+      ],
+      "file": "res://assets/art/characters/kael_varyn/poses/pose_07_idle_s_alt.png"
+    },
+    {
+      "index": 8,
+      "row": 1,
+      "col": 0,
+      "action": "attack",
+      "direction": "s",
+      "description": "Front cast-ready stance",
+      "source_box": [
+        0,
+        128,
+        128,
+        256
+      ],
+      "file": "res://assets/art/characters/kael_varyn/poses/pose_08_attack_s.png"
+    },
+    {
+      "index": 9,
+      "row": 1,
+      "col": 1,
+      "action": "attack",
+      "direction": "se",
+      "description": "Front-right grimoire spell cast",
+      "source_box": [
+        128,
+        128,
+        256,
+        256
+      ],
+      "file": "res://assets/art/characters/kael_varyn/poses/pose_09_attack_se.png"
+    },
+    {
+      "index": 10,
+      "row": 1,
+      "col": 2,
+      "action": "attack",
+      "direction": "e",
+      "description": "Rightward grimoire spell cast",
+      "source_box": [
+        256,
+        128,
+        384,
+        256
+      ],
+      "file": "res://assets/art/characters/kael_varyn/poses/pose_10_attack_e.png"
+    },
+    {
+      "index": 11,
+      "row": 1,
+      "col": 3,
+      "action": "attack",
+      "direction": "e_lunge",
+      "description": "Rightward wide spell cast",
+      "source_box": [
+        384,
+        128,
+        512,
+        256
+      ],
+      "file": "res://assets/art/characters/kael_varyn/poses/pose_11_attack_e_lunge.png"
+    },
+    {
+      "index": 12,
+      "row": 1,
+      "col": 4,
+      "action": "attack",
+      "direction": "n",
+      "description": "Back cast stance",
+      "source_box": [
+        512,
+        128,
+        640,
+        256
+      ],
+      "file": "res://assets/art/characters/kael_varyn/poses/pose_12_attack_n.png"
+    },
+    {
+      "index": 13,
+      "row": 1,
+      "col": 5,
+      "action": "attack",
+      "direction": "e_orb",
+      "description": "Rightward cyan orb cast",
+      "source_box": [
+        640,
+        128,
+        768,
+        256
+      ],
+      "file": "res://assets/art/characters/kael_varyn/poses/pose_13_attack_e_orb.png"
+    },
+    {
+      "index": 14,
+      "row": 1,
+      "col": 6,
+      "action": "attack",
+      "direction": "w",
+      "description": "Leftward grimoire spell cast",
+      "source_box": [
+        768,
+        128,
+        896,
+        256
+      ],
+      "file": "res://assets/art/characters/kael_varyn/poses/pose_14_attack_w.png"
+    },
+    {
+      "index": 15,
+      "row": 1,
+      "col": 7,
+      "action": "attack",
+      "direction": "sw",
+      "description": "Front-left grimoire spell cast",
+      "source_box": [
+        896,
+        128,
+        1024,
+        256
+      ],
+      "file": "res://assets/art/characters/kael_varyn/poses/pose_15_attack_sw.png"
+    },
+    {
+      "index": 16,
+      "row": 2,
+      "col": 0,
+      "action": "run",
+      "direction": "w",
+      "description": "Leftward sprint",
+      "source_box": [
+        0,
+        256,
+        128,
+        384
+      ],
+      "file": "res://assets/art/characters/kael_varyn/poses/pose_16_run_w.png"
+    },
+    {
+      "index": 17,
+      "row": 2,
+      "col": 1,
+      "action": "run",
+      "direction": "se",
+      "description": "Front-right sprint",
+      "source_box": [
+        128,
+        256,
+        256,
+        384
+      ],
+      "file": "res://assets/art/characters/kael_varyn/poses/pose_17_run_se.png"
+    },
+    {
+      "index": 18,
+      "row": 2,
+      "col": 2,
+      "action": "run",
+      "direction": "e",
+      "description": "Rightward sprint",
+      "source_box": [
+        256,
+        256,
+        384,
+        384
+      ],
+      "file": "res://assets/art/characters/kael_varyn/poses/pose_18_run_e.png"
+    },
+    {
+      "index": 19,
+      "row": 2,
+      "col": 3,
+      "action": "run",
+      "direction": "e_stride",
+      "description": "Rightward sprint stride",
+      "source_box": [
+        384,
+        256,
+        512,
+        384
+      ],
+      "file": "res://assets/art/characters/kael_varyn/poses/pose_19_run_e_stride.png"
+    },
+    {
+      "index": 20,
+      "row": 2,
+      "col": 4,
+      "action": "run",
+      "direction": "n",
+      "description": "Back sprint",
+      "source_box": [
+        512,
+        256,
+        640,
+        384
+      ],
+      "file": "res://assets/art/characters/kael_varyn/poses/pose_20_run_n.png"
+    },
+    {
+      "index": 21,
+      "row": 2,
+      "col": 5,
+      "action": "run",
+      "direction": "w_stride",
+      "description": "Leftward sprint stride",
+      "source_box": [
+        640,
+        256,
+        768,
+        384
+      ],
+      "file": "res://assets/art/characters/kael_varyn/poses/pose_21_run_w_stride.png"
+    },
+    {
+      "index": 22,
+      "row": 2,
+      "col": 6,
+      "action": "run",
+      "direction": "se_stride",
+      "description": "Front-right dynamic sprint",
+      "source_box": [
+        768,
+        256,
+        896,
+        384
+      ],
+      "file": "res://assets/art/characters/kael_varyn/poses/pose_22_run_se_stride.png"
+    },
+    {
+      "index": 23,
+      "row": 2,
+      "col": 7,
+      "action": "run",
+      "direction": "sw",
+      "description": "Front-left sprint",
+      "source_box": [
+        896,
+        256,
+        1024,
+        384
+      ],
+      "file": "res://assets/art/characters/kael_varyn/poses/pose_23_run_sw.png"
+    },
+    {
+      "index": 24,
+      "row": 3,
+      "col": 0,
+      "action": "hurt",
+      "direction": "s",
+      "description": "Front flinch",
+      "source_box": [
+        0,
+        384,
+        128,
+        512
+      ],
+      "file": "res://assets/art/characters/kael_varyn/poses/pose_24_hurt_s.png"
+    },
+    {
+      "index": 25,
+      "row": 3,
+      "col": 1,
+      "action": "hurt",
+      "direction": "se",
+      "description": "Front-right clutching shoulder",
+      "source_box": [
+        128,
+        384,
+        256,
+        512
+      ],
+      "file": "res://assets/art/characters/kael_varyn/poses/pose_25_hurt_se.png"
+    },
+    {
+      "index": 26,
+      "row": 3,
+      "col": 2,
+      "action": "hurt",
+      "direction": "w",
+      "description": "Left profile stagger",
+      "source_box": [
+        256,
+        384,
+        384,
+        512
+      ],
+      "file": "res://assets/art/characters/kael_varyn/poses/pose_26_hurt_w.png"
+    },
+    {
+      "index": 27,
+      "row": 3,
+      "col": 3,
+      "action": "hurt",
+      "direction": "sw_recoil",
+      "description": "Front-left eyes-closed recoil",
+      "source_box": [
+        384,
+        384,
+        512,
+        512
+      ],
+      "file": "res://assets/art/characters/kael_varyn/poses/pose_27_hurt_sw_recoil.png"
+    },
+    {
+      "index": 28,
+      "row": 3,
+      "col": 4,
+      "action": "hurt",
+      "direction": "n",
+      "description": "Back stagger",
+      "source_box": [
+        512,
+        384,
+        640,
+        512
+      ],
+      "file": "res://assets/art/characters/kael_varyn/poses/pose_28_hurt_n.png"
+    },
+    {
+      "index": 29,
+      "row": 3,
+      "col": 5,
+      "action": "hurt",
+      "direction": "se_recoil",
+      "description": "Front-right eyes-closed recoil",
+      "source_box": [
+        640,
+        384,
+        768,
+        512
+      ],
+      "file": "res://assets/art/characters/kael_varyn/poses/pose_29_hurt_se_recoil.png"
+    },
+    {
+      "index": 30,
+      "row": 3,
+      "col": 6,
+      "action": "hurt",
+      "direction": "e",
+      "description": "Right profile stagger",
+      "source_box": [
+        768,
+        384,
+        896,
+        512
+      ],
+      "file": "res://assets/art/characters/kael_varyn/poses/pose_30_hurt_e.png"
+    },
+    {
+      "index": 31,
+      "row": 3,
+      "col": 7,
+      "action": "hurt",
+      "direction": "sw",
+      "description": "Front-left stagger",
+      "source_box": [
+        896,
+        384,
+        1024,
+        512
+      ],
+      "file": "res://assets/art/characters/kael_varyn/poses/pose_31_hurt_sw.png"
+    },
+    {
+      "index": 32,
+      "row": 4,
+      "col": 0,
+      "action": "defeat",
+      "direction": "knock_1",
+      "description": "Fallen pose 1 with grimoire on ground",
+      "source_box": [
+        0,
+        512,
+        128,
+        640
+      ],
+      "file": "res://assets/art/characters/kael_varyn/poses/pose_32_defeat_knock_1.png"
+    },
+    {
+      "index": 33,
+      "row": 4,
+      "col": 1,
+      "action": "defeat",
+      "direction": "knock_2",
+      "description": "Fallen pose 2 with grimoire on ground",
+      "source_box": [
+        128,
+        512,
+        256,
+        640
+      ],
+      "file": "res://assets/art/characters/kael_varyn/poses/pose_33_defeat_knock_2.png"
+    },
+    {
+      "index": 34,
+      "row": 4,
+      "col": 2,
+      "action": "defeat",
+      "direction": "knock_3",
+      "description": "Fallen pose 3 with grimoire on ground",
+      "source_box": [
+        256,
+        512,
+        384,
+        640
+      ],
+      "file": "res://assets/art/characters/kael_varyn/poses/pose_34_defeat_knock_3.png"
+    },
+    {
+      "index": 35,
+      "row": 4,
+      "col": 3,
+      "action": "defeat",
+      "direction": "knock_4",
+      "description": "Fallen pose 4 with grimoire on ground",
+      "source_box": [
+        384,
+        512,
+        512,
+        640
+      ],
+      "file": "res://assets/art/characters/kael_varyn/poses/pose_35_defeat_knock_4.png"
+    },
+    {
+      "index": 36,
+      "row": 4,
+      "col": 4,
+      "action": "defeat",
+      "direction": "n_slump",
+      "description": "Back slumped defeat pose",
+      "source_box": [
+        512,
+        512,
+        640,
+        640
+      ],
+      "file": "res://assets/art/characters/kael_varyn/poses/pose_36_defeat_n_slump.png"
+    },
+    {
+      "index": 37,
+      "row": 4,
+      "col": 5,
+      "action": "defeat",
+      "direction": "knock_5",
+      "description": "Fallen pose 5 with grimoire on ground",
+      "source_box": [
+        640,
+        512,
+        768,
+        640
+      ],
+      "file": "res://assets/art/characters/kael_varyn/poses/pose_37_defeat_knock_5.png"
+    },
+    {
+      "index": 38,
+      "row": 4,
+      "col": 6,
+      "action": "defeat",
+      "direction": "knock_6",
+      "description": "Fallen pose 6 with grimoire on ground",
+      "source_box": [
+        768,
+        512,
+        896,
+        640
+      ],
+      "file": "res://assets/art/characters/kael_varyn/poses/pose_38_defeat_knock_6.png"
+    },
+    {
+      "index": 39,
+      "row": 4,
+      "col": 7,
+      "action": "defeat",
+      "direction": "knock_7",
+      "description": "Fallen pose 7 with grimoire on ground",
+      "source_box": [
+        896,
+        512,
+        1024,
+        640
+      ],
+      "file": "res://assets/art/characters/kael_varyn/poses/pose_39_defeat_knock_7.png"
+    },
+    {
+      "index": 40,
+      "row": 5,
+      "col": 0,
+      "action": "skill",
+      "direction": "charge_1",
+      "description": "Grimoire cyan awakening frame 1",
+      "source_box": [
+        0,
+        640,
+        128,
+        768
+      ],
+      "file": "res://assets/art/characters/kael_varyn/poses/pose_40_skill_charge_1.png"
+    },
+    {
+      "index": 41,
+      "row": 5,
+      "col": 1,
+      "action": "skill",
+      "direction": "charge_2",
+      "description": "Grimoire cyan awakening frame 2",
+      "source_box": [
+        128,
+        640,
+        256,
+        768
+      ],
+      "file": "res://assets/art/characters/kael_varyn/poses/pose_41_skill_charge_2.png"
+    },
+    {
+      "index": 42,
+      "row": 5,
+      "col": 2,
+      "action": "skill",
+      "direction": "charge_3",
+      "description": "Grimoire cyan awakening frame 3",
+      "source_box": [
+        256,
+        640,
+        384,
+        768
+      ],
+      "file": "res://assets/art/characters/kael_varyn/poses/pose_42_skill_charge_3.png"
+    },
+    {
+      "index": 43,
+      "row": 5,
+      "col": 3,
+      "action": "skill",
+      "direction": "charge_4",
+      "description": "Grimoire cyan awakening frame 4",
+      "source_box": [
+        384,
+        640,
+        512,
+        768
+      ],
+      "file": "res://assets/art/characters/kael_varyn/poses/pose_43_skill_charge_4.png"
+    },
+    {
+      "index": 44,
+      "row": 5,
+      "col": 4,
+      "action": "skill",
+      "direction": "charge_5",
+      "description": "Grimoire cyan awakening frame 5",
+      "source_box": [
+        512,
+        640,
+        640,
+        768
+      ],
+      "file": "res://assets/art/characters/kael_varyn/poses/pose_44_skill_charge_5.png"
+    },
+    {
+      "index": 45,
+      "row": 5,
+      "col": 5,
+      "action": "skill",
+      "direction": "charge_6",
+      "description": "Grimoire cyan awakening frame 6",
+      "source_box": [
+        640,
+        640,
+        768,
+        768
+      ],
+      "file": "res://assets/art/characters/kael_varyn/poses/pose_45_skill_charge_6.png"
+    },
+    {
+      "index": 46,
+      "row": 5,
+      "col": 6,
+      "action": "skill",
+      "direction": "charge_7",
+      "description": "Grimoire cyan awakening frame 7",
+      "source_box": [
+        768,
+        640,
+        896,
+        768
+      ],
+      "file": "res://assets/art/characters/kael_varyn/poses/pose_46_skill_charge_7.png"
+    },
+    {
+      "index": 47,
+      "row": 5,
+      "col": 7,
+      "action": "skill",
+      "direction": "charge_8",
+      "description": "Grimoire cyan awakening frame 8",
+      "source_box": [
+        896,
+        640,
+        1024,
+        768
+      ],
+      "file": "res://assets/art/characters/kael_varyn/poses/pose_47_skill_charge_8.png"
+    },
+    {
+      "index": 48,
+      "row": 6,
+      "col": 0,
+      "action": "skill",
+      "direction": "blast_1",
+      "description": "Arcane cyan blast frame 1",
+      "source_box": [
+        0,
+        768,
+        128,
+        896
+      ],
+      "file": "res://assets/art/characters/kael_varyn/poses/pose_48_skill_blast_1.png"
+    },
+    {
+      "index": 49,
+      "row": 6,
+      "col": 1,
+      "action": "skill",
+      "direction": "blast_2",
+      "description": "Arcane cyan blast frame 2",
+      "source_box": [
+        128,
+        768,
+        256,
+        896
+      ],
+      "file": "res://assets/art/characters/kael_varyn/poses/pose_49_skill_blast_2.png"
+    },
+    {
+      "index": 50,
+      "row": 6,
+      "col": 2,
+      "action": "skill",
+      "direction": "blast_3",
+      "description": "Arcane cyan blast frame 3",
+      "source_box": [
+        256,
+        768,
+        384,
+        896
+      ],
+      "file": "res://assets/art/characters/kael_varyn/poses/pose_50_skill_blast_3.png"
+    },
+    {
+      "index": 51,
+      "row": 6,
+      "col": 3,
+      "action": "skill",
+      "direction": "blast_4",
+      "description": "Arcane cyan blast frame 4",
+      "source_box": [
+        384,
+        768,
+        512,
+        896
+      ],
+      "file": "res://assets/art/characters/kael_varyn/poses/pose_51_skill_blast_4.png"
+    },
+    {
+      "index": 52,
+      "row": 6,
+      "col": 4,
+      "action": "skill",
+      "direction": "blast_5",
+      "description": "Arcane cyan blast frame 5",
+      "source_box": [
+        512,
+        768,
+        640,
+        896
+      ],
+      "file": "res://assets/art/characters/kael_varyn/poses/pose_52_skill_blast_5.png"
+    },
+    {
+      "index": 53,
+      "row": 6,
+      "col": 5,
+      "action": "skill",
+      "direction": "blast_6",
+      "description": "Arcane cyan blast frame 6",
+      "source_box": [
+        640,
+        768,
+        768,
+        896
+      ],
+      "file": "res://assets/art/characters/kael_varyn/poses/pose_53_skill_blast_6.png"
+    },
+    {
+      "index": 54,
+      "row": 6,
+      "col": 6,
+      "action": "skill",
+      "direction": "blast_7",
+      "description": "Arcane cyan blast frame 7",
+      "source_box": [
+        768,
+        768,
+        896,
+        896
+      ],
+      "file": "res://assets/art/characters/kael_varyn/poses/pose_54_skill_blast_7.png"
+    },
+    {
+      "index": 55,
+      "row": 6,
+      "col": 7,
+      "action": "skill",
+      "direction": "blast_8",
+      "description": "Arcane cyan blast frame 8",
+      "source_box": [
+        896,
+        768,
+        1024,
+        896
+      ],
+      "file": "res://assets/art/characters/kael_varyn/poses/pose_55_skill_blast_8.png"
+    },
+    {
+      "index": 56,
+      "row": 7,
+      "col": 0,
+      "action": "victory",
+      "direction": "pose_1",
+      "description": "Victory raise frame 1",
+      "source_box": [
+        0,
+        896,
+        128,
+        1024
+      ],
+      "file": "res://assets/art/characters/kael_varyn/poses/pose_56_victory_pose_1.png"
+    },
+    {
+      "index": 57,
+      "row": 7,
+      "col": 1,
+      "action": "victory",
+      "direction": "pose_2",
+      "description": "Victory raise frame 2",
+      "source_box": [
+        128,
+        896,
+        256,
+        1024
+      ],
+      "file": "res://assets/art/characters/kael_varyn/poses/pose_57_victory_pose_2.png"
+    },
+    {
+      "index": 58,
+      "row": 7,
+      "col": 2,
+      "action": "victory",
+      "direction": "pose_3",
+      "description": "Victory raise frame 3",
+      "source_box": [
+        256,
+        896,
+        384,
+        1024
+      ],
+      "file": "res://assets/art/characters/kael_varyn/poses/pose_58_victory_pose_3.png"
+    },
+    {
+      "index": 59,
+      "row": 7,
+      "col": 3,
+      "action": "victory",
+      "direction": "pose_4",
+      "description": "Victory raise frame 4",
+      "source_box": [
+        384,
+        896,
+        512,
+        1024
+      ],
+      "file": "res://assets/art/characters/kael_varyn/poses/pose_59_victory_pose_4.png"
+    },
+    {
+      "index": 60,
+      "row": 7,
+      "col": 4,
+      "action": "victory",
+      "direction": "pose_5",
+      "description": "Victory raise frame 5",
+      "source_box": [
+        512,
+        896,
+        640,
+        1024
+      ],
+      "file": "res://assets/art/characters/kael_varyn/poses/pose_60_victory_pose_5.png"
+    },
+    {
+      "index": 61,
+      "row": 7,
+      "col": 5,
+      "action": "victory",
+      "direction": "pose_6",
+      "description": "Victory raise frame 6",
+      "source_box": [
+        640,
+        896,
+        768,
+        1024
+      ],
+      "file": "res://assets/art/characters/kael_varyn/poses/pose_61_victory_pose_6.png"
+    },
+    {
+      "index": 62,
+      "row": 7,
+      "col": 6,
+      "action": "victory",
+      "direction": "pose_7",
+      "description": "Victory raise frame 7",
+      "source_box": [
+        768,
+        896,
+        896,
+        1024
+      ],
+      "file": "res://assets/art/characters/kael_varyn/poses/pose_62_victory_pose_7.png"
+    },
+    {
+      "index": 63,
+      "row": 7,
+      "col": 7,
+      "action": "victory",
+      "direction": "pose_8",
+      "description": "Victory raise frame 8",
+      "source_box": [
+        896,
+        896,
+        1024,
+        1024
+      ],
+      "file": "res://assets/art/characters/kael_varyn/poses/pose_63_victory_pose_8.png"
+    }
+  ]
+}

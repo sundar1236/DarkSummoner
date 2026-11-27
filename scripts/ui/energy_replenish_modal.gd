@@ -52,10 +52,7 @@ func refresh_modal() -> void:
 			btn_free.disabled = false
 
 func _on_claim_free() -> void:
-	if SaveManager and not SaveManager.daily_free_energy_claimed:
-		SaveManager.add_energy(20)
-		SaveManager.daily_free_energy_claimed = true
-		SaveManager.save_profile()
+	if SaveManager and SaveManager.claim_daily_free_energy(20):
 		if AudioManager: AudioManager.play_sfx("upgrade")
 		refresh_modal()
 		energy_purchased.emit(20)

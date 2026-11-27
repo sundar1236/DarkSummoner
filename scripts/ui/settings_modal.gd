@@ -6,6 +6,7 @@ extends Control
 signal resume_requested()
 signal inventory_requested()
 signal abandon_run_requested()
+signal main_menu_requested()
 
 @export var slider_master: HSlider
 @export var slider_music: HSlider
@@ -19,24 +20,60 @@ signal abandon_run_requested()
 @export var btn_inventory: Button
 @export var btn_abandon: Button
 
+var btn_main_menu: Button = null
 var is_confirming_abandon: bool = false
+var _can_open_inventory: bool = true
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	_ensure_main_menu_button()
 	_setup_signals()
 	_load_current_values()
 
+func set_context(can_open_inventory: bool) -> void:
+	_can_open_inventory = can_open_inventory
+
 func _notification(what: int) -> void:
-	if what == NOTIFICATION_VISIBILITY_CHANGED and is_visible_in_tree():
+	if what == NOTIFICATION_VISIBILITY_CHANGED:
+		if not is_visible_in_tree():
+			_can_open_inventory = true
+			return
 		_load_current_values()
 		_reset_confirm_state()
 		var in_run: bool = GameManager and GameManager.is_in_run
 		if btn_inventory:
-			btn_inventory.visible = in_run
+			btn_inventory.visible = in_run and _can_open_inventory
 		if btn_abandon:
 			btn_abandon.visible = in_run
+		if btn_main_menu:
+			btn_main_menu.visible = not in_run
 		if btn_resume:
 			btn_resume.text = "RESUME" if in_run else "CLOSE"
+
+
+func _ensure_main_menu_button() -> void:
+	if btn_main_menu or not btn_resume or not btn_resume.get_parent():
+		return
+	var container := btn_resume.get_parent()
+	btn_main_menu = container.get_node_or_null("BtnMainMenu") as Button
+	if btn_main_menu:
+		return
+	btn_main_menu = Button.new()
+	btn_main_menu.name = "BtnMainMenu"
+	btn_main_menu.custom_minimum_size = Vector2(0, 46)
+	btn_main_menu.text = "RETURN TO MAIN MENU"
+	btn_main_menu.add_theme_font_size_override("font_size", 17)
+	btn_main_menu.add_theme_color_override("font_color", Color(0.88, 0.9, 0.98, 1.0))
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = Color(0.16, 0.17, 0.25, 0.95)
+	sb.border_color = Color(0.42, 0.46, 0.62, 0.85)
+	sb.set_border_width_all(1)
+	sb.set_corner_radius_all(8)
+	btn_main_menu.add_theme_stylebox_override("normal", sb)
+	btn_main_menu.add_theme_stylebox_override("hover", sb)
+	btn_main_menu.add_theme_stylebox_override("pressed", sb)
+	btn_main_menu.visible = false
+	container.add_child(btn_main_menu)
 
 func _setup_signals() -> void:
 	if btn_resume:
@@ -51,6 +88,11 @@ func _setup_signals() -> void:
 		)
 	if btn_abandon:
 		btn_abandon.pressed.connect(_on_abandon_clicked)
+	if btn_main_menu:
+		btn_main_menu.pressed.connect(func():
+			_reset_confirm_state()
+			main_menu_requested.emit()
+		)
 		
 	if slider_master:
 		slider_master.value_changed.connect(func(val: float):

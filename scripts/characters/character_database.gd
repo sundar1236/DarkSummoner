@@ -11,6 +11,30 @@ static func init_database() -> void:
 		return
 	_initialized = true
 
+	# 0. Kael Varyn — The Soulbound (Main Hero)
+	var kael := CharacterData.new()
+	kael.id = "kael_varyn"
+	kael.name = "Kael Varyn"
+	kael.title = "The Soulbound"
+	kael.description = "The Soulbound arcanist wielding the Living Grimoire. Channels cyan soulfire bolts, spectral wards, and forbidden bindings."
+	kael.passive_desc = "Soulbound Resonance: Every 3rd attack unleashes twin homing soul bolts and empowers bound companions."
+	kael.active_desc = "Grimoire Nova: Channels the Soulbound Orb to fire 8 piercing homing cyan bolts in every direction."
+	kael.unlocked_by_default = true
+	kael.unlock_cost_shades = 0
+	kael.unlock_floor_required = 1
+	kael.base_hp = 130.0
+	kael.base_speed = 245.0
+	kael.base_atk = 20.0
+	kael.base_crit_chance = 0.14
+	kael.base_attack_rate = 2.2
+	kael.attack_type = "soul_missiles"
+	kael.primary_color = Color(0.22, 0.88, 1.0)
+	kael.accent_color = Color(0.55, 0.96, 1.0)
+	kael.active_skill_name = "Grimoire Nova"
+	kael.active_skill_cooldown = 6.5
+	kael.starter_item_ids = ["soul_urn", "fire_rune"]
+	_characters[kael.id] = kael
+
 	# 1. Shadow Hunter (Default)
 	var hunter := CharacterData.new()
 	hunter.id = "shadow_hunter"
@@ -87,7 +111,7 @@ static func get_character(id: String) -> CharacterData:
 	init_database()
 	if _characters.has(id):
 		return _characters[id]
-	return _characters["shadow_hunter"]
+	return _characters["kael_varyn"]
 
 static func get_all_characters() -> Array[CharacterData]:
 	init_database()

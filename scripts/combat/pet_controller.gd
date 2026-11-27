@@ -84,7 +84,7 @@ func _attack_target(target: Node2D) -> void:
 	parent_node.add_child(proj)
 	proj.global_position = global_position
 	
-	var is_soul_binder: bool = (GameManager.current_character and GameManager.current_character.id == "soul_binder")
+	var is_soul_binder: bool = (GameManager.current_character and GameManager.current_character.id in ["soul_binder", "kael_varyn"])
 	var final_dmg: float = damage * (1.4 if is_soul_binder else 1.0)
 	
 	var p_type := "fireball" if pet_type == "hellhound" else "slash"

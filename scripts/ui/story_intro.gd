@@ -142,6 +142,10 @@ func _gui_input(event: InputEvent) -> void:
 	elif event is InputEventKey and event.pressed and (event.keycode == KEY_SPACE or event.keycode == KEY_ENTER):
 		_advance_act()
 
+func skip_story() -> void:
+	_finish_story()
+
+
 func _finish_story() -> void:
 	if has_finished:
 		return

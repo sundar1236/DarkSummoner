@@ -5,6 +5,7 @@ extends Control
 # Validates gold, updates inventory safely, and handles purchases.
 
 signal leave_shop_requested()
+signal settings_requested()
 
 @export var btn_tab_blacksmith: Button
 @export var btn_tab_potion: Button
@@ -30,6 +31,13 @@ func _ready() -> void:
 	_update_category("blacksmith")
 	_refresh_gold_label()
 
+
+func reset_stock() -> void:
+	_init_shop_stock()
+	_update_category("blacksmith")
+	_refresh_gold_label()
+
+
 func _setup_signals() -> void:
 	if btn_tab_blacksmith:
 		btn_tab_blacksmith.pressed.connect(func(): _update_category("blacksmith"))
@@ -39,7 +47,10 @@ func _setup_signals() -> void:
 		btn_tab_relic.pressed.connect(func(): _update_category("relic_merchant"))
 	if btn_leave:
 		btn_leave.pressed.connect(func(): leave_shop_requested.emit())
-	GameManager.gold_changed.connect(func(_g: int): _refresh_gold_label())
+	if btn_altar:
+		btn_altar.pressed.connect(func(): leave_shop_requested.emit())
+	if GameManager:
+		GameManager.gold_changed.connect(func(_g: int): _refresh_gold_label())
 
 func _init_shop_stock() -> void:
 	# Blacksmith: Weapons, shields, upgrades
