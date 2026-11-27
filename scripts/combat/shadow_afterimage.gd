@@ -3,8 +3,11 @@ extends Sprite2D
 
 # Fading shadow afterimage left during dodge dash.
 
-func setup(p_texture: Texture2D, p_pos: Vector2, p_rot: float, p_flip_h: bool, tint: Color = Color(0.6, 0.2, 0.9, 0.55)) -> void:
+func setup(p_texture: Texture2D, p_pos: Vector2, p_rot: float, p_flip_h: bool, tint: Color = Color(0.6, 0.2, 0.9, 0.55), p_scale: Vector2 = Vector2.ONE, p_hframes: int = 1, p_frame: int = 0) -> void:
 	texture = p_texture
+	hframes = p_hframes
+	frame = p_frame
+	scale = p_scale
 	global_position = p_pos
 	rotation = p_rot
 	flip_h = p_flip_h

@@ -2,7 +2,7 @@
 
 Official Repository: [https://github.com/sundar1236/DarkSummoner.git](https://github.com/sundar1236/DarkSummoner.git)
 
-A dark-fantasy action roguelike built with **Godot Engine 4.3** and **GDScript**, targeted for **Android first** in portrait mode (720×1280 reference resolution). The Shadow Hunter presentation now supports a Blender-authored, armature-rigged 3D GLB rendered through a Godot SubViewport while the existing 2D combat, collision, and joystick systems remain in place.
+A 2.5D dark-fantasy action roguelike built with **Godot Engine 4.3+** and **GDScript**, targeted for **Android first** in portrait mode (720×1280 reference resolution). Characters, enemies, and floor bosses use 8-directional pre-rendered 3D sprite strips (`DirectionalSprite8`) with 5 themed 4-layer arena environments.
 
 ---
 
@@ -205,17 +205,16 @@ All sound effects, ambience loops, and music tracks are synthesised procedurally
 
 ---
 
-## 8. Blender 3D Character and Android CI Build
+## 8. 8-Directional 3D Sprite Pipeline and Android CI Build
 
-The Shadow Hunter model is generated from the Blender source script at `tools/blender/generate_shadow_hunter.py`. It exports a skinned GLB with the idle, run, three attack, skill, hurt, dodge, defeat, and victory clips. Godot displays the model through `scripts/combat/glb_character_visual.gd`; the existing CharacterBody2D remains responsible for movement, hitboxes, combat, and targeting.
+Playable heroes, floor enemies, and floor bosses use 8-directional (`e, se, s, sw, w, nw, n, ne`) sprite strips rendered from 3D turnaround sheets via `tools/split_drive_8dir_assets.py` and driven at runtime by `scripts/combat/directional_sprite_8.gd`.
 
-Generate the model locally with Blender 4.x:
+Rebuild the 8-directional strips and 5-floor arena layers locally:
 
 ```bash
-mkdir -p assets/generated
-blender --background --factory-startup --python tools/blender/generate_shadow_hunter.py
+python tools/split_drive_8dir_assets.py
 ```
 
-The **CI Tests** GitHub Actions workflow imports and validates the GLB, runs the five existing Godot test suites, and exports an Android debug APK. The workflow uploads the APK and generated GLB together as `dark-summoner-android-debug-and-glb`. Build artifacts are automatically retained for **1 day** and then deleted by GitHub Actions; source code and the Blender generator are not deleted.
+The **CI Tests** GitHub Actions workflow imports the project, runs the five Godot test suites, and exports an Android debug APK (`dark-summoner-android-debug`, retained for **1 day**).
 
 The Android package identity is `com.darksummoner.game` and the exported app name is **Dark Summoner**. CI creates a temporary debug keystore for each build; no developer machine keystore path or signing secret is stored in the repository.

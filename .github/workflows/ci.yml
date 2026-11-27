@@ -16,20 +16,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v5
 
-      - name: Install Blender 4.3.2 for GLB generation
-        run: |
-          apt-get update
-          apt-get install -y xz-utils libsm6 libxrender1 libxext6 libxi6 libxfixes3 libxkbcommon0 libgl1 libegl1 libxxf86vm1 libxcb1 libxrandr2 libxinerama1 libxcursor1 libxcomposite1 libxdamage1 libxss1 libasound2 libwayland-client0 xvfb libgl1-mesa-dri
-          wget -q https://download.blender.org/release/Blender4.3/blender-4.3.2-linux-x64.tar.xz -O "$RUNNER_TEMP/blender.tar.xz"
-          tar -xJf "$RUNNER_TEMP/blender.tar.xz" -C "$RUNNER_TEMP"
-          echo "$RUNNER_TEMP/blender-4.3.2-linux-x64" >> "$GITHUB_PATH"
-
-      - name: Generate rigged Shadow Hunter GLB
-        run: |
-          mkdir -p assets/generated
-          DARK_SUMMONER_GLB_OUT="$PWD/assets/generated/shadow_hunter.glb" blender --background --factory-startup --python tools/blender/generate_shadow_hunter.py
-          test -s assets/generated/shadow_hunter.glb
-
       - name: Scan project, generate global class cache, and import assets
         shell: bash
         run: |
@@ -41,12 +27,6 @@ jobs:
             echo "Godot project import reported script errors."
             exit 1
           fi
-
-      - name: Validate generated GLB rig and animation clips
-        run: godot --headless --path . --script tools/ci/validate_generated_glb.gd
-
-      - name: Validate visible GLB character in combat and UI previews
-        run: xvfb-run -a env LIBGL_ALWAYS_SOFTWARE=1 godot --path . --rendering-method gl_compatibility --script tools/ci/validate_character_render.gd
 
       - name: Run Core Gameplay Test Suite (116 tests)
         run: >-
@@ -117,12 +97,10 @@ jobs:
           godot --headless --path . --export-debug "Android" export/DarkSummoner-debug.apk
           test -s export/DarkSummoner-debug.apk
 
-      - name: Upload APK and generated GLB (expires after 1 day)
+      - name: Upload Android debug APK (expires after 1 day)
         uses: actions/upload-artifact@v4
         with:
-          name: dark-summoner-android-debug-and-glb
-          path: |
-            export/DarkSummoner-debug.apk
-            assets/generated/shadow_hunter.glb
+          name: dark-summoner-android-debug
+          path: export/DarkSummoner-debug.apk
           if-no-files-found: error
           retention-days: 1

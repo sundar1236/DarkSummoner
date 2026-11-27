@@ -1,49 +1,84 @@
 class_name HeroPedestalView
 extends Control
 
-const GLBCharacterPreviewClass = preload("res://scripts/combat/glb_character_preview.gd")
+const DirectionalSprite8Class = preload("res://scripts/combat/directional_sprite_8.gd")
 
-# Renders the Chibi Hero on a glowing elemental pedestal with breathing bob,
-# oversized weapon, and a floating elemental spirit companion (Ref Images 4, 5, 6).
+const HERO_8DIR_STRIPS: Dictionary = {
+	"shadow_hunter": "res://assets/art/characters/8dir/shadow_hunter_8dir.png",
+	"storm_reaper": "res://assets/art/characters/8dir/storm_reaper_8dir.png",
+	"soul_binder": "res://assets/art/characters/8dir/soul_binder_8dir.png",
+	"1": "res://assets/art/characters/8dir/soul_binder_8dir.png",
+	"summaner": "res://assets/art/characters/8dir/soul_binder_8dir.png"
+}
+
+# Renders the Hero on a glowing 2.5D elemental pedestal using the 8-directional
+# pre-rendered 3D sprite strip with subtle idle breathing and arcane rings.
 
 @export var character_id: String = "shadow_hunter"
+@export var enable_diorama_stage: bool = true
+@export var diorama_include_pillars: bool = true
+
 var _t: float = 0.0
 var _loaded_character_id: String = ""
 var _portrait_texture: Texture2D
-var _model_preview: Control
-var _model_preview_loaded := false
-var _preview_character_id := ""
+var _sprite_8dir: DirectionalSprite8Class
+var _model_preview_loaded: bool = false
+var _preview_character_id: String = ""
+var _dir_cycle_index: int = 2 # Start facing South (front)
 
 func _ready() -> void:
-	var preview := GLBCharacterPreviewClass.new() as Control
-	preview.name = "GeneratedHeroPreview"
-	preview.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	preview.set("model_scale", 1.0)
-	preview.set("camera_orthographic_size", 3.1)
-	_model_preview = preview
-	add_child(preview)
-	_sync_character_visual()
+	mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var s8 := DirectionalSprite8Class.new()
+	s8.name = "HeroPedestal8Dir"
+	s8.visible = false
+	_sprite_8dir = s8
+	add_child(s8)
+	if is_visible_in_tree():
+		_sync_character_visual()
 	_update_preview_rect()
+
+func set_character(next_character_id: String) -> bool:
+	character_id = next_character_id
+	_preview_character_id = ""
+	if is_inside_tree():
+		_sync_character_visual()
+	return _model_preview_loaded
+
+func rotate_preview_step(step: int = 1) -> void:
+	_dir_cycle_index = posmod(_dir_cycle_index + step, 8)
+	if is_instance_valid(_sprite_8dir) and _model_preview_loaded:
+		_sprite_8dir.set_direction_name(DirectionalSprite8Class.DIRECTION_NAMES[_dir_cycle_index])
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_RESIZED:
 		_update_preview_rect()
+	elif what == NOTIFICATION_VISIBILITY_CHANGED and is_visible_in_tree():
+		_sync_character_visual()
 
 func _update_preview_rect() -> void:
-	if not is_instance_valid(_model_preview):
+	if not is_instance_valid(_sprite_8dir):
 		return
-	_model_preview.position = size * 0.5 + Vector2(-82.0, -73.0)
-	_model_preview.size = Vector2(164.0, 190.0)
+	var target_h := clampf(minf(size.x, size.y) * 0.72, 180.0, 320.0)
+	_sprite_8dir.position = size * 0.5 + Vector2(0.0, 22.0)
+	if _model_preview_loaded:
+		var strip_path := str(HERO_8DIR_STRIPS.get(character_id, HERO_8DIR_STRIPS["shadow_hunter"]))
+		_sprite_8dir.setup(strip_path, target_h, target_h * 0.36)
+		_sprite_8dir.set_direction_name(DirectionalSprite8Class.DIRECTION_NAMES[_dir_cycle_index])
 
 func _sync_character_visual() -> void:
-	if _preview_character_id == character_id:
+	if not is_visible_in_tree() or not is_instance_valid(_sprite_8dir):
+		return
+	if _preview_character_id == character_id and _model_preview_loaded:
 		return
 	_preview_character_id = character_id
 	_ensure_character_portrait()
-	_model_preview_loaded = false
-	if is_instance_valid(_model_preview):
-		_model_preview_loaded = bool(_model_preview.call("set_character", character_id))
-		_model_preview.visible = _model_preview_loaded
+	var strip_path := str(HERO_8DIR_STRIPS.get(character_id, HERO_8DIR_STRIPS["shadow_hunter"]))
+	var target_h := clampf(minf(size.x, size.y) * 0.72, 180.0, 320.0)
+	_sprite_8dir.position = size * 0.5 + Vector2(0.0, 22.0)
+	_model_preview_loaded = _sprite_8dir.setup(strip_path, target_h, target_h * 0.36)
+	_sprite_8dir.visible = _model_preview_loaded
+	if _model_preview_loaded:
+		_sprite_8dir.set_direction_name(DirectionalSprite8Class.DIRECTION_NAMES[_dir_cycle_index])
 	queue_redraw()
 
 func _ensure_character_portrait() -> void:
@@ -56,6 +91,8 @@ func _process(delta: float) -> void:
 	_t += delta
 	if _preview_character_id != character_id:
 		_sync_character_visual()
+	if _model_preview_loaded and is_instance_valid(_sprite_8dir):
+		_sprite_8dir.update_pose("idle", _t, delta)
 	queue_redraw()
 
 func _draw() -> void:
@@ -95,7 +132,7 @@ func _draw() -> void:
 		
 	_ensure_character_portrait()
 	if _model_preview_loaded:
-		pass # The live GLB viewport renders the selected Shadow Hunter here.
+		pass # The 8-directional hero sprite renders above the pedestal.
 	elif _portrait_texture:
 		var source_size := _portrait_texture.get_size()
 		var target_size := Vector2(150, 174)

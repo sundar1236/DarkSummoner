@@ -1,0 +1,124 @@
+{
+  "schema_version": 1,
+  "canvas": {
+    "width": 720,
+    "height": 1280
+  },
+  "floors": [
+    {
+      "id": "floor_1_abyssal_ruins",
+      "name": "Abyssal Ruins",
+      "floor_number": 1,
+      "layers": [
+        {
+          "role": "background",
+          "source": "res://assets/art/environments/floors/floor_1_background.png"
+        },
+        {
+          "role": "floor",
+          "source": "res://assets/art/environments/floors/floor_1_floor.png"
+        },
+        {
+          "role": "props",
+          "source": "res://assets/art/environments/floors/floor_1_props.png"
+        },
+        {
+          "role": "foreground",
+          "source": "res://assets/art/environments/floors/floor_1_foreground.png"
+        }
+      ]
+    },
+    {
+      "id": "floor_2_ember_catacombs",
+      "name": "Ember Catacombs",
+      "floor_number": 2,
+      "layers": [
+        {
+          "role": "background",
+          "source": "res://assets/art/environments/floors/floor_2_background.png"
+        },
+        {
+          "role": "floor",
+          "source": "res://assets/art/environments/floors/floor_2_floor.png"
+        },
+        {
+          "role": "props",
+          "source": "res://assets/art/environments/floors/floor_2_props.png"
+        },
+        {
+          "role": "foreground",
+          "source": "res://assets/art/environments/floors/floor_2_foreground.png"
+        }
+      ]
+    },
+    {
+      "id": "floor_3_frostbound_crypt",
+      "name": "Frostbound Crypt",
+      "floor_number": 3,
+      "layers": [
+        {
+          "role": "background",
+          "source": "res://assets/art/environments/floors/floor_3_background.png"
+        },
+        {
+          "role": "floor",
+          "source": "res://assets/art/environments/floors/floor_3_floor.png"
+        },
+        {
+          "role": "props",
+          "source": "res://assets/art/environments/floors/floor_3_props.png"
+        },
+        {
+          "role": "foreground",
+          "source": "res://assets/art/environments/floors/floor_3_foreground.png"
+        }
+      ]
+    },
+    {
+      "id": "floor_4_blighted_sanctum",
+      "name": "Blighted Sanctum",
+      "floor_number": 4,
+      "layers": [
+        {
+          "role": "background",
+          "source": "res://assets/art/environments/floors/floor_4_background.png"
+        },
+        {
+          "role": "floor",
+          "source": "res://assets/art/environments/floors/floor_4_floor.png"
+        },
+        {
+          "role": "props",
+          "source": "res://assets/art/environments/floors/floor_4_props.png"
+        },
+        {
+          "role": "foreground",
+          "source": "res://assets/art/environments/floors/floor_4_foreground.png"
+        }
+      ]
+    },
+    {
+      "id": "floor_5_crimson_throne",
+      "name": "Crimson Throne",
+      "floor_number": 5,
+      "layers": [
+        {
+          "role": "background",
+          "source": "res://assets/art/environments/floors/floor_5_background.png"
+        },
+        {
+          "role": "floor",
+          "source": "res://assets/art/environments/floors/floor_5_floor.png"
+        },
+        {
+          "role": "props",
+          "source": "res://assets/art/environments/floors/floor_5_props.png"
+        },
+        {
+          "role": "foreground",
+          "source": "res://assets/art/environments/floors/floor_5_foreground.png"
+        }
+      ]
+    }
+  ]
+}

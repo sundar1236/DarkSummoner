@@ -1,8 +1,6 @@
 class_name CharacterSelectView
 extends Control
 
-const GLBCharacterPreviewClass = preload("res://scripts/combat/glb_character_preview.gd")
-
 # Dedicated Character Selection Screen for Abyssal Altar.
 # Displays high-detail character portraits, lore, combat identity, weapon,
 # active/passive abilities, unlock status/costs, and starts gameplay runs.
@@ -26,7 +24,6 @@ signal back_requested()
 
 var selected_character_id: String = "shadow_hunter"
 var is_initial_selection: bool = false
-var _model_preview: Control
 
 const CARD_ART_PATHS: Dictionary = {
 	"shadow_hunter": "res://assets/art/ui_reference/card_full_shadow_hunter.png",
@@ -44,15 +41,7 @@ func _ready() -> void:
 	CharacterDatabase.init_database()
 	if portrait_rect:
 		portrait_rect.clip_contents = true
-		var preview := GLBCharacterPreviewClass.new() as Control
-		preview.name = "GeneratedCharacterSelectionPreview"
-		preview.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-		preview.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		preview.set("model_scale", 1.12)
-		preview.set("camera_orthographic_size", 3.0)
-		preview.visible = false
-		_model_preview = preview
-		portrait_rect.add_child(preview)
+		portrait_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	_sync_selected_character()
 	_setup_signals()
 	_refresh_tabs()
@@ -194,18 +183,14 @@ func _update_view() -> void:
 	_update_shades_display()
 	
 	var is_unlocked: bool = is_initial_selection or (SaveManager.is_character_unlocked(ch.id) if SaveManager else true)
-	var has_glb_preview := false
-	if is_instance_valid(_model_preview):
-		has_glb_preview = bool(_model_preview.call("set_character", ch.id))
-		_model_preview.visible = has_glb_preview and is_unlocked
 
-	# 1. Portrait fallback; the 3D model replaces the large selected-character art when available.
+	# Show the clean 2D/3D-rendered character portrait cutout for the selected hero.
 	var path: String = PORTRAIT_PATHS.get(ch.id, "res://assets/art/characters/shadow_hunter_portrait.png")
 	if portrait_rect:
 		var tex := TextureLoader.get_texture(path)
 		if tex == null:
 			tex = load(str(CARD_ART_PATHS.get(ch.id, ""))) as Texture2D
-		portrait_rect.texture = null if has_glb_preview and is_unlocked else tex
+		portrait_rect.texture = tex
 	
 	# 2. Locked silhouette and overlay
 	if locked_overlay:

@@ -1,4 +1,4 @@
-class_name VirtualJoystick
+class_name MobileVirtualJoystick
 extends Control
 
 # Responsive Mobile Virtual Joystick for Abyssal Altar.
