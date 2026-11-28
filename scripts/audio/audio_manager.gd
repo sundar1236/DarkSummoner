@@ -75,6 +75,7 @@ func _init_sound_effects() -> void:
 	sfx_streams["shoot_slash"] = SoundGenerator.gen_shoot_slash()
 	sfx_streams["shoot_lightning"] = SoundGenerator.gen_shoot_lightning()
 	sfx_streams["shoot_soul"] = SoundGenerator.gen_shoot_soul()
+	sfx_streams["coin_pickup"] = SoundGenerator.gen_coin_pickup()
 	
 	# Music and Ambience
 	ambience_stream = SoundGenerator.gen_dark_ambience()
@@ -89,8 +90,16 @@ func play_sfx(sound_name: String, pitch_range: float = 0.05) -> void:
 		return
 	
 	var stream: AudioStreamWAV = sfx_streams[sound_name]
-	var p: AudioStreamPlayer = sfx_players[next_sfx_player]
-	next_sfx_player = (next_sfx_player + 1) % SFX_POOL_SIZE
+	var p: AudioStreamPlayer = null
+	for offset in range(SFX_POOL_SIZE):
+		var candidate := sfx_players[(next_sfx_player + offset) % SFX_POOL_SIZE]
+		if not candidate.playing:
+			p = candidate
+			next_sfx_player = (next_sfx_player + offset + 1) % SFX_POOL_SIZE
+			break
+	if not p:
+		p = sfx_players[next_sfx_player]
+		next_sfx_player = (next_sfx_player + 1) % SFX_POOL_SIZE
 	
 	p.stream = stream
 	if pitch_range > 0.0:

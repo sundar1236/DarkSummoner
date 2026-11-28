@@ -29,14 +29,15 @@ func _ready() -> void:
 	set_reduced_motion(bool(SaveManager.settings_data.get("reduced_motion", false)) if SaveManager else false)
 	if get_tree() and get_tree().root and not get_tree().root.size_changed.is_connected(_update_authored_art_scale):
 		get_tree().root.size_changed.connect(_update_authored_art_scale)
+	call_deferred("_update_authored_art_scale")
 
 func _update_authored_art_scale() -> void:
 	var art_root := get_node_or_null("AuthoredFloorArt") as Node2D
 	if art_root == null:
 		return
-	var vp_size := get_viewport_rect().size
+	var vp_size := get_viewport_rect().size if is_inside_tree() else Vector2(720.0, 1280.0)
 	if vp_size.x <= 0.0 or vp_size.y <= 0.0:
-		return
+		vp_size = Vector2(720.0, 1280.0)
 	var cover_scale := maxf(vp_size.x / 720.0, vp_size.y / 1280.0)
 	art_root.position = Vector2(360.0, 640.0)
 	art_root.scale = Vector2(cover_scale, cover_scale)
@@ -102,66 +103,65 @@ func set_floor_theme(floor_num: int) -> String:
 	queue_redraw()
 	return floor_theme_name
 
+func _load_floor_layer_texture(source: String) -> Texture2D:
+	if source.is_empty():
+		return null
+	if ResourceLoader.exists(source):
+		var res := ResourceLoader.load(source)
+		if res is Texture2D:
+			return res
+	return TextureLoader.get_texture(source)
+
+func _resolve_floor_layer_sources(theme_floor_number: int) -> Dictionary:
+	var sources: Dictionary = {}
+	if FileAccess.file_exists(FLOOR_ART_MANIFEST):
+		var file := FileAccess.open(FLOOR_ART_MANIFEST, FileAccess.READ)
+		if file != null:
+			var parser := JSON.new()
+			var parse_error := parser.parse(file.get_as_text())
+			file.close()
+			if parse_error == OK and parser.data is Dictionary and int(parser.data.get("schema_version", 0)) == 1:
+				var floors: Variant = parser.data.get("floors", null)
+				if floors is Array:
+					for entry in floors:
+						if entry is Dictionary and int(entry.get("floor_number", -1)) == theme_floor_number:
+							var layers: Variant = entry.get("layers", null)
+							if layers is Array:
+								for layer in layers:
+									if layer is Dictionary:
+										var role := str(layer.get("role", ""))
+										var source := str(layer.get("source", ""))
+										if role in FLOOR_ART_ROLES and not source.is_empty():
+											sources[role] = source
+							break
+	if sources.size() == FLOOR_ART_ROLES.size():
+		return sources
+	# Built-in fallback if manifest.json is missing from an exported bundle.
+	sources.clear()
+	for role in FLOOR_ART_ROLES:
+		sources[role] = "res://assets/art/environments/floors/floor_%d_%s.png" % [theme_floor_number, role]
+	return sources
+
 func _install_authored_floor_art(floor_num: int) -> bool:
 	var old_art := get_node_or_null("AuthoredFloorArt")
 	if old_art != null:
 		remove_child(old_art)
 		old_art.queue_free()
-	if not FileAccess.file_exists(FLOOR_ART_MANIFEST):
-		return false
-
-	var file := FileAccess.open(FLOOR_ART_MANIFEST, FileAccess.READ)
-	if file == null:
-		push_warning("Could not open floor art manifest; using procedural arena.")
-		return false
-
-	var parser := JSON.new()
-	var parse_error := parser.parse(file.get_as_text())
-	file.close()
-	if parse_error != OK or not parser.data is Dictionary:
-		push_warning("Floor art manifest is invalid; using procedural arena.")
-		return false
-
-	if int(parser.data.get("schema_version", 0)) != 1:
-		push_warning("Floor art manifest schema is unsupported; using procedural arena.")
-		return false
-
-	var floors: Variant = parser.data.get("floors", null)
-	if not floors is Array:
-		return false
 
 	# Five authored themes repeat as the tower continues beyond floor five.
 	var theme_floor_number := posmod(maxi(floor_num, 1) - 1, 5) + 1
-	var selected_floor: Dictionary = {}
-	for entry in floors:
-		if entry is Dictionary and int(entry.get("floor_number", -1)) == theme_floor_number:
-			selected_floor = entry
-			break
-	if selected_floor.is_empty():
-		return false
-
-	var layers: Variant = selected_floor.get("layers", null)
-	if not layers is Array:
+	var layer_sources := _resolve_floor_layer_sources(theme_floor_number)
+	if layer_sources.size() != FLOOR_ART_ROLES.size():
 		return false
 
 	var textures: Dictionary = {}
-	for layer in layers:
-		if not layer is Dictionary:
-			return false
-		var role := str(layer.get("role", ""))
-		var source := str(layer.get("source", ""))
-		if role not in FLOOR_ART_ROLES or textures.has(role) or source.is_empty():
-			return false
-		var texture := load(source) as Texture2D
+	for role in FLOOR_ART_ROLES:
+		var source := str(layer_sources.get(role, ""))
+		var texture := _load_floor_layer_texture(source)
 		if texture == null or texture.get_width() != 720 or texture.get_height() != 1280:
 			push_warning("Floor theme %d art layer '%s' is missing or not 720x1280; using procedural arena." % [theme_floor_number, role])
 			return false
 		textures[role] = texture
-
-	for role in FLOOR_ART_ROLES:
-		if not textures.has(role):
-			push_warning("Floor theme %d art is missing '%s'; using procedural arena." % [theme_floor_number, role])
-			return false
 
 	var art_root := Node2D.new()
 	art_root.name = "AuthoredFloorArt"

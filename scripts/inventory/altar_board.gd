@@ -13,6 +13,7 @@ extends Control
 # - Compatible with MoveTransaction, item selection, drag-and-drop, tap-to-move,
 #   rotation, rollback, active synergy conduits, and save/load persistence.
 
+@warning_ignore("unused_signal")
 signal item_selected(item: ItemInstance, source: String)
 signal socket_clicked(socket_id: int)
 signal cell_clicked(grid_pos: Vector2i)
@@ -33,21 +34,21 @@ const SOCKET_DEFS: Array[Dictionary] = [
 		"id": 1, "name": "West-Northwest Rune Socket", "type": "rune",
 		"angle_deg": 195.0, "radius_ratio": 0.88, "shape": "hex",
 		"virtual_cell": Vector2i(0, 1),
-		"supported_tags": ["rune", "weapon", "defense", "shadow", "fire", "storm", "soul", "accessory"],
+		"supported_tags": ["rune", "weapon", "defense", "shadow", "fire", "storm", "soul", "accessory", "relic", "blood", "lightning"],
 		"unlocked_by_default": true, "connections": [0, 2, 8]
 	},
 	{
 		"id": 2, "name": "West-Southwest Rune Socket", "type": "rune",
 		"angle_deg": 165.0, "radius_ratio": 0.88, "shape": "hex",
 		"virtual_cell": Vector2i(0, 2),
-		"supported_tags": ["rune", "weapon", "defense", "shadow", "fire", "storm", "soul", "accessory"],
+		"supported_tags": ["rune", "weapon", "defense", "shadow", "fire", "storm", "soul", "accessory", "relic", "blood", "lightning"],
 		"unlocked_by_default": true, "connections": [1, 3, 8]
 	},
 	{
 		"id": 3, "name": "Southwest Rune Socket", "type": "rune",
 		"angle_deg": 140.0, "radius_ratio": 0.88, "shape": "hex",
 		"virtual_cell": Vector2i(0, 3),
-		"supported_tags": ["rune", "weapon", "defense", "shadow", "fire", "storm", "soul", "accessory"],
+		"supported_tags": ["rune", "weapon", "defense", "shadow", "fire", "storm", "soul", "accessory", "relic", "blood", "lightning"],
 		"unlocked_by_default": true, "connections": [2, 10]
 	},
 	# Outer Right Arc (4..7)
@@ -55,28 +56,28 @@ const SOCKET_DEFS: Array[Dictionary] = [
 		"id": 4, "name": "Northeast Rune Socket", "type": "rune",
 		"angle_deg": 320.0, "radius_ratio": 0.88, "shape": "hex",
 		"virtual_cell": Vector2i(3, 0),
-		"supported_tags": ["rune", "weapon", "defense", "shadow", "fire", "storm", "soul", "accessory"],
+		"supported_tags": ["rune", "weapon", "defense", "shadow", "fire", "storm", "soul", "accessory", "relic", "blood", "lightning"],
 		"unlocked_by_default": true, "connections": [5, 9]
 	},
 	{
 		"id": 5, "name": "East-Northeast Rune Socket", "type": "rune",
 		"angle_deg": 345.0, "radius_ratio": 0.88, "shape": "hex",
 		"virtual_cell": Vector2i(3, 1),
-		"supported_tags": ["rune", "weapon", "defense", "shadow", "fire", "storm", "soul", "accessory"],
+		"supported_tags": ["rune", "weapon", "defense", "shadow", "fire", "storm", "soul", "accessory", "relic", "blood", "lightning"],
 		"unlocked_by_default": true, "connections": [4, 6, 9]
 	},
 	{
 		"id": 6, "name": "East-Southeast Rune Socket", "type": "rune",
 		"angle_deg": 15.0, "radius_ratio": 0.88, "shape": "hex",
 		"virtual_cell": Vector2i(3, 2),
-		"supported_tags": ["rune", "weapon", "defense", "shadow", "fire", "storm", "soul", "accessory"],
+		"supported_tags": ["rune", "weapon", "defense", "shadow", "fire", "storm", "soul", "accessory", "relic", "blood", "lightning"],
 		"unlocked_by_default": true, "connections": [5, 7, 9]
 	},
 	{
 		"id": 7, "name": "Southeast Rune Socket", "type": "rune",
 		"angle_deg": 40.0, "radius_ratio": 0.88, "shape": "hex",
 		"virtual_cell": Vector2i(3, 3),
-		"supported_tags": ["rune", "weapon", "defense", "shadow", "fire", "storm", "soul", "accessory"],
+		"supported_tags": ["rune", "weapon", "defense", "shadow", "fire", "storm", "soul", "accessory", "relic", "blood", "lightning"],
 		"unlocked_by_default": true, "connections": [6, 11]
 	},
 	# Inner Spirit Sockets (8..9) - Flanking Hero
@@ -84,14 +85,14 @@ const SOCKET_DEFS: Array[Dictionary] = [
 		"id": 8, "name": "Left Spirit Vessel", "type": "spirit",
 		"angle_deg": 180.0, "radius_ratio": 0.46, "shape": "circle",
 		"virtual_cell": Vector2i(1, 1),
-		"supported_tags": ["core", "rune", "spirit", "essence", "accessory", "weapon", "defense"],
+		"supported_tags": ["core", "rune", "spirit", "essence", "accessory", "weapon", "defense", "relic", "blood", "lightning"],
 		"unlocked_by_default": true, "connections": [0, 1, 2, 9, 12]
 	},
 	{
 		"id": 9, "name": "Right Spirit Vessel", "type": "spirit",
 		"angle_deg": 0.0, "radius_ratio": 0.46, "shape": "circle",
 		"virtual_cell": Vector2i(2, 1),
-		"supported_tags": ["core", "rune", "spirit", "essence", "accessory", "weapon", "defense"],
+		"supported_tags": ["core", "rune", "spirit", "essence", "accessory", "weapon", "defense", "relic", "blood", "lightning"],
 		"unlocked_by_default": true, "connections": [4, 5, 6, 8, 12]
 	},
 	# Lower Diamond Core Sockets (10..12)
@@ -167,6 +168,8 @@ func _ready() -> void:
 	custom_minimum_size = Vector2(530, 530)
 
 func _process(delta: float) -> void:
+	if not is_visible_in_tree():
+		return
 	_anim_time += delta
 	queue_redraw()
 
@@ -364,7 +367,7 @@ func _draw() -> void:
 			draw_texture_rect(tex, g_rect, false, Color(ghost_col.r, ghost_col.g, ghost_col.b, 0.75))
 		draw_arc(cpos, 34.0, 0.0, TAU, 32, ghost_col, 2.5, true)
 
-func _draw_socket_shape(pos: Vector2, shape: String, unlocked: bool, item: ItemInstance, selected: bool, valid: bool, invalid: bool, candidate: bool, pulse: float) -> void:
+func _draw_socket_shape(pos: Vector2, shape: String, unlocked: bool, _item: ItemInstance, selected: bool, valid: bool, invalid: bool, candidate: bool, pulse: float) -> void:
 	var r := 32.0
 	var fill_color := Color(0.06, 0.08, 0.15, 0.94)
 	var border_color := Color(0.25, 0.55, 0.9, 0.75)
@@ -411,15 +414,9 @@ func _draw_socket_shape(pos: Vector2, shape: String, unlocked: bool, item: ItemI
 			draw_arc(pos, r, 0.0, TAU, 36, border_color, border_width, true)
 			draw_arc(pos, r * 0.75, 0.0, TAU, 24, Color(border_color.r, border_color.g, border_color.b, 0.3), 1.0, true)
 
-func _draw_socket_item(pos: Vector2, item: ItemInstance, selected: bool, candidate: bool) -> void:
+func _draw_socket_item(pos: Vector2, item: ItemInstance, selected: bool, _candidate: bool) -> void:
 	var d := item.data
-	# Rarity border tint
-	var rarity_col := Color(0.65, 0.7, 0.8, 1.0)
-	match item.rarity:
-		"rare": rarity_col = Color(0.2, 0.75, 1.0, 1.0)
-		"epic": rarity_col = Color(0.85, 0.35, 1.0, 1.0)
-		"legendary": rarity_col = Color(1.0, 0.85, 0.25, 1.0)
-		
+	
 	# Draw item icon texture
 	var icon_tex := d.get_icon_texture()
 	var draw_size := 48.0
@@ -438,7 +435,7 @@ func _draw_socket_item(pos: Vector2, item: ItemInstance, selected: bool, candida
 	for s in range(d.tier): stars_str += "★"
 	draw_string(ThemeDB.fallback_font, pos + Vector2(-20, -18), stars_str, HORIZONTAL_ALIGNMENT_CENTER, -1, 12, Color(1.0, 0.85, 0.25, alpha))
 
-func _draw_empty_glyph(pos: Vector2, shape: String) -> void:
+func _draw_empty_glyph(pos: Vector2, _shape: String) -> void:
 	var glyph_col := Color(0.35, 0.5, 0.75, 0.45)
 	draw_line(pos + Vector2(-8, 0), pos + Vector2(8, 0), glyph_col, 1.2)
 	draw_line(pos + Vector2(0, -8), pos + Vector2(0, 8), glyph_col, 1.2)
@@ -451,12 +448,15 @@ func _draw_central_hero(center: Vector2, t: float) -> void:
 	# Hero base shadow
 	draw_circle(center + Vector2(0, 36), 32.0, Color(0.02, 0.04, 0.08, 0.85))
 	
-	var char_id := GameManager.current_character.id if GameManager and GameManager.current_character else "shadow_hunter"
+	var char_id := GameManager.current_character.id if GameManager and GameManager.current_character else "kael_varyn"
 	var iris_col := Color(0.7, 0.3, 1.0, 1.0)
-	if char_id == "storm_reaper": iris_col = Color(0.2, 0.85, 1.0, 1.0)
+	if char_id == "kael_varyn": iris_col = Color(0.22, 0.88, 1.0, 1.0)
+	elif char_id == "storm_reaper": iris_col = Color(0.2, 0.85, 1.0, 1.0)
 	elif char_id == "soul_binder": iris_col = Color(0.25, 0.95, 0.6, 1.0)
 	
-	var tex := TextureLoader.get_texture("res://assets/sprites/characters/player_" + char_id + ".png")
+	var tex := TextureLoader.get_texture("res://assets/art/characters/%s_portrait.png" % char_id)
+	if tex == null:
+		tex = TextureLoader.get_texture("res://assets/sprites/characters/player_" + char_id + ".png")
 	if tex:
 		var spr_size := Vector2(106, 106)
 		var spr_rect := Rect2(hero_pos - spr_size * 0.5 + Vector2(0, -6), spr_size)
@@ -514,7 +514,7 @@ func _draw_central_hero(center: Vector2, t: float) -> void:
 	draw_circle(comp_pos, 6.0, Color(iris_col.r, iris_col.g, iris_col.b, 0.9))
 	draw_circle(comp_pos + Vector2(-1.5, -1.5), 2.0, Color.WHITE)
 
-func _draw_synergy_conduits(t: float, pulse: float) -> void:
+func _draw_synergy_conduits(_t: float, pulse: float) -> void:
 	if not GameManager: return
 	var items := GameManager.altar_items
 	

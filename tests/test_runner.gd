@@ -542,8 +542,8 @@ func test_storage_reset_and_clean_uninstall() -> void:
 
 	assert_true(SaveManager.shades == 0, "Player shades reset cleanly to 0")
 	assert_true(SaveManager.profile_gold == 5000, "Player gold reset to default initial 5000")
-	assert_true(SaveManager.player_level == 5, "Player level reset to default initial 5")
-	assert_true(SaveManager.equipment_levels["weapon"] == 60, "Equipment reset to clean baseline")
+	assert_true(SaveManager.player_level == 1, "Player level reset to default initial 1")
+	assert_true(SaveManager.equipment_levels["weapon"] == 0, "Equipment reset to clean baseline")
 	assert_true(SaveManager.calculate_combat_power() < high_power, "Player combat power reset cleanly on reinstall/data wipe")
 	assert_true(not FileAccess.file_exists(SaveManager.SAVE_PATH), "Save file removed completely from disk")
 
@@ -578,13 +578,17 @@ func test_audio_buses_and_volumes() -> void:
 # 14. Test Dedicated Character Selection & Unlock Requirement Validation
 func test_character_selection_and_unlock_flow() -> void:
 	print("--- Test 14: Dedicated Character Selection & Unlock Flow ---")
+	var orig_char := GameManager.current_character
+	var orig_active := SaveManager.active_character_id
+	GameManager.current_character = null
+	SaveManager.active_character_id = "kael_varyn"
 	var scene := load("res://scenes/characters/character_select_view.tscn") as PackedScene
 	assert_true(scene != null, "CharacterSelectView scene loads cleanly")
 	var csv := scene.instantiate() as CharacterSelectView
 	add_child(csv)
 	
-	assert_true(csv.selected_character_id == "shadow_hunter", "Shadow Hunter selected by default")
-	assert_true(not csv.btn_action.disabled, "Shadow Hunter action button enabled for entry")
+	assert_true(csv.selected_character_id == "kael_varyn", "Kael Varyn selected by default")
+	assert_true(not csv.btn_action.disabled, "Kael Varyn action button enabled for entry")
 	
 	# Select Storm Reaper
 	csv._select_character("storm_reaper")
@@ -603,6 +607,8 @@ func test_character_selection_and_unlock_flow() -> void:
 		assert_true(csv.lbl_unlock_requirement.text.contains("80 SHADES"), "Shows 80 Shades unlock requirement")
 		
 	csv.free()
+	GameManager.current_character = orig_char
+	SaveManager.active_character_id = orig_active
 
 # 14b. Test First-Run Three-Champion Selection
 func test_initial_three_character_draft() -> void:
@@ -616,6 +622,7 @@ func test_initial_three_character_draft() -> void:
 	assert_true(scene != null, "First-run character selection scene loads")
 	if not scene:
 		return
+	assert_true(ResourceLoader.exists("res://assets/art/ui_reference/card_full_kael_varyn.png"), "Kael Varyn full character artwork is available")
 	assert_true(ResourceLoader.exists("res://assets/art/ui_reference/card_full_shadow_hunter.png"), "Shadow Hunter full character artwork is available")
 	assert_true(ResourceLoader.exists("res://assets/art/ui_reference/card_full_storm_reaper.png"), "Storm Reaper full character artwork is available")
 	assert_true(ResourceLoader.exists("res://assets/art/ui_reference/card_full_soul_binder.png"), "Soul Binder full character artwork is available")
@@ -627,7 +634,7 @@ func test_initial_three_character_draft() -> void:
 	picker.start_run_requested.connect(controller._on_character_selection_confirmed)
 	assert_true(picker.visible and picker.is_initial_selection, "First launch opens the character draft after the story")
 	assert_true(not picker.btn_back.visible, "Initial character choice cannot be skipped")
-	assert_true(picker.tabs_container.get_child_count() == 3, "All three illustrated champions are displayed together")
+	assert_true(picker.tabs_container.get_child_count() == 4, "All four illustrated champions are displayed together")
 	assert_true(not picker.btn_action.disabled, "Any of the three champions can be chosen on first launch")
 	picker._select_character("soul_binder")
 	var chosen_signal := {"character_id": ""}
@@ -874,7 +881,7 @@ func test_authored_character_animation_fallbacks() -> void:
 	]:
 		var animation := Animation.new()
 		animation.length = float(clip_data[1])
-		animation.loop_mode = int(clip_data[2])
+		animation.loop_mode = clip_data[2] as Animation.LoopMode
 		library.add_animation(str(clip_data[0]), animation)
 	animation_player.add_animation_library("", library)
 
@@ -904,7 +911,8 @@ func test_authored_character_animation_fallbacks() -> void:
 # 21. Test generated visual scene mapping for each playable hero.
 func test_selected_character_visual_scene_mapping() -> void:
 	print("--- Test 21: Selected Character Visual Scene Mapping ---")
-	assert_true(PlayerController.AUTHORED_CHARACTER_SCENES.size() == 3, "All three playable characters have authored scene slots")
+	assert_true(PlayerController.AUTHORED_CHARACTER_SCENES.size() == 4, "All four playable characters have authored scene slots")
+	assert_true(PlayerController.AUTHORED_CHARACTER_SCENES.get("kael_varyn") == "res://scenes/characters/kael_varyn_visual.tscn", "Kael Varyn maps to his generated visual scene")
 	assert_true(PlayerController.AUTHORED_CHARACTER_SCENES.get("shadow_hunter") == "res://scenes/characters/shadow_hunter_visual.tscn", "Shadow Hunter maps to its generated visual scene")
 	assert_true(PlayerController.AUTHORED_CHARACTER_SCENES.get("storm_reaper") == "res://scenes/characters/storm_reaper_visual.tscn", "Storm Reaper maps to its generated visual scene")
 	assert_true(PlayerController.AUTHORED_CHARACTER_SCENES.get("soul_binder") == "res://scenes/characters/soul_binder_visual.tscn", "Soul Binder maps to its generated visual scene")

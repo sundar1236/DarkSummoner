@@ -10,7 +10,7 @@ extends Control
 signal skill_chosen(skill_offer: Dictionary)
 signal learned_skills_requested()
 
-const SafeAreaHelper = preload("res://scripts/ui/safe_area_helper.gd")
+const SafeAreaHelperClass = preload("res://scripts/ui/safe_area_helper.gd")
 const RunSkillDatabaseClass = preload("res://scripts/combat/run_skill_database.gd")
 
 @export var is_modal_active: bool = false
@@ -61,7 +61,7 @@ func _ready() -> void:
 	if learned_btn:
 		learned_btn.pressed.connect(_on_learned_pressed)
 	if close_drawer_btn:
-		close_drawer_btn.pressed.connect(func(): if learned_drawer: learned_drawer.visible = false)
+		close_drawer_btn.pressed.connect(close_learned_drawer)
 	if card_1_btn:
 		card_1_btn.pressed.connect(func(): _choose_card(1))
 	if card_2_btn:
@@ -220,6 +220,11 @@ func _choose_card(slot: int) -> void:
 	get_tree().paused = false
 	skill_chosen.emit(chosen)
 
+func close_learned_drawer() -> void:
+	if learned_drawer:
+		learned_drawer.visible = false
+
+
 func _on_learned_pressed() -> void:
 	if not learned_drawer:
 		return
@@ -296,7 +301,7 @@ func _populate_learned_drawer() -> void:
 		learned_list.add_child(card)
 
 func _apply_safe_area() -> void:
-	var safe: Dictionary = SafeAreaHelper.get_safe_margins()
+	var safe: Dictionary = SafeAreaHelperClass.get_safe_margins()
 	var top_inset: float = safe.get("top", 46.0)
 	var bot_inset: float = safe.get("bottom", 28.0)
 	var right_inset: float = safe.get("right", 14.0)

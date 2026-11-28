@@ -7,6 +7,7 @@ extends Control
 # item details, and active synergy displays.
 
 signal close_requested()
+signal settings_requested()
 
 # Grid rendering constants
 const CELL_SIZE: float = 68.0
@@ -41,10 +42,48 @@ var preview_cell: Vector2i = Vector2i(-999, -999)
 @export var lbl_backpack_cap: Label
 
 var _toast_tween: Tween
+var btn_menu: Button = null
+var _is_pause_mode: bool = false
 
 func _ready() -> void:
+	_ensure_menu_button()
 	_setup_signals()
 	refresh_inventory_ui()
+
+
+func set_pause_mode(from_pause: bool) -> void:
+	_is_pause_mode = from_pause
+	if btn_close:
+		btn_close.text = "BACK TO PAUSE" if from_pause else "DONE"
+	if btn_menu:
+		btn_menu.visible = GameManager and GameManager.is_in_run
+
+
+func _ensure_menu_button() -> void:
+	if btn_menu:
+		return
+	var header := get_node_or_null("MainLayout/Header") as HBoxContainer
+	if not header:
+		return
+	btn_menu = header.get_node_or_null("BtnMenu") as Button
+	if btn_menu:
+		return
+	btn_menu = Button.new()
+	btn_menu.name = "BtnMenu"
+	btn_menu.text = "MENU"
+	btn_menu.custom_minimum_size = Vector2(96, 40)
+	btn_menu.add_theme_font_size_override("font_size", 15)
+	btn_menu.add_theme_color_override("font_color", Color(0.95, 0.88, 0.65, 1.0))
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = Color(0.14, 0.13, 0.22, 0.92)
+	sb.border_color = Color(0.55, 0.45, 0.72, 0.85)
+	sb.set_border_width_all(1)
+	sb.set_corner_radius_all(8)
+	btn_menu.add_theme_stylebox_override("normal", sb)
+	btn_menu.add_theme_stylebox_override("hover", sb)
+	btn_menu.add_theme_stylebox_override("pressed", sb)
+	btn_menu.pressed.connect(func(): settings_requested.emit())
+	header.add_child(btn_menu)
 
 func _setup_signals() -> void:
 	if btn_rotate:

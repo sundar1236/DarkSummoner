@@ -204,7 +204,7 @@ func recalculate_stats_and_synergies() -> void:
 	# Calculate total player max HP
 	var base_hp: float = current_character.base_hp if current_character else 100.0
 	var perm_hp: float = SaveManager.get_permanent_hp_bonus() if SaveManager else 0.0
-	var gear_stats: Dictionary = SaveManager.get_equipped_gear_stats() if SaveManager else {}
+	var gear_stats: Dictionary = SaveManager.get_total_gear_stats() if SaveManager else {}
 	var item_hp: float = cached_synergies.get("total_hp", 0.0) + gear_stats.get("bonus_hp", 0.0)
 	var skill_hp: float = float(run_skill_modifiers.get("bonus_hp", 0.0)) + float(run_skill_evolution_modifiers.get("bonus_hp", 0.0))
 	
@@ -224,7 +224,7 @@ func get_player_effective_stats() -> Dictionary:
 	var perm_spd_mult: float = SaveManager.get_permanent_speed_multiplier() if SaveManager else 1.0
 	var perm_crit: float = SaveManager.get_permanent_crit_bonus() if SaveManager else 0.0
 	
-	var gear_stats: Dictionary = SaveManager.get_equipped_gear_stats() if SaveManager else {}
+	var gear_stats: Dictionary = SaveManager.get_total_gear_stats() if SaveManager else {}
 	var item_atk: float = cached_synergies.get("total_atk", 0.0) + gear_stats.get("bonus_atk", 0.0) + float(run_skill_modifiers.get("bonus_atk", 0.0)) + float(run_skill_evolution_modifiers.get("bonus_atk", 0.0))
 	var item_crit: float = cached_synergies.get("total_crit", 0.0) + gear_stats.get("bonus_crit", 0.0) + float(run_skill_modifiers.get("bonus_crit", 0.0)) + float(run_skill_evolution_modifiers.get("bonus_crit", 0.0))
 	var item_speed: float = cached_synergies.get("total_speed", 0.0) + gear_stats.get("bonus_speed", 0.0) + float(run_skill_modifiers.get("bonus_speed", 0.0)) + float(run_skill_evolution_modifiers.get("bonus_speed", 0.0))
@@ -293,27 +293,38 @@ func apply_run_skill(skill_id: String) -> bool:
 	var cur_lvl: int = run_learned_skills.get(skill_id, 0)
 	var new_lvl: int = mini(cur_lvl + 1, skill.max_level)
 	run_learned_skills[skill_id] = new_lvl
-	
-	# Apply rank stat modifications atomically
+
 	var rank_info := skill.get_rank_info(new_lvl)
 	var mods: Dictionary = rank_info.get("mods", {})
-	for k in mods:
-		if mods[k] is bool:
-			run_skill_modifiers[k] = mods[k]
-		elif mods[k] is int:
-			run_skill_modifiers[k] = int(mods[k])
-		elif mods[k] is float:
-			run_skill_modifiers[k] = float(mods[k])
-			
 	if mods.has("extra_revive"):
 		run_extra_revives += int(mods["extra_revive"])
 
 	_update_skill_evolutions()
+	_rebuild_run_skill_modifiers()
 	recalculate_stats_and_synergies()
 	run_skill_applied.emit(skill_id, new_lvl)
 	if AudioManager:
 		AudioManager.play_sfx("item_place")
 	return true
+
+
+func _rebuild_run_skill_modifiers() -> void:
+	run_skill_modifiers.clear()
+	for learned_id in run_learned_skills:
+		var learned_lvl: int = int(run_learned_skills[learned_id])
+		var skill_def = RunSkillDatabaseClass.get_skill(learned_id)
+		if not skill_def:
+			continue
+		var rank_info: Dictionary = skill_def.get_rank_info(learned_lvl)
+		_accumulate_modifiers(rank_info.get("mods", {}))
+
+
+func _accumulate_modifiers(mods: Dictionary) -> void:
+	for k in mods:
+		if mods[k] is bool:
+			run_skill_modifiers[k] = run_skill_modifiers.get(k, false) or bool(mods[k])
+		elif mods[k] is int or mods[k] is float:
+			run_skill_modifiers[k] = float(run_skill_modifiers.get(k, 0.0)) + float(mods[k])
 
 
 func _update_skill_evolutions() -> void:
@@ -385,8 +396,9 @@ func use_revive() -> bool:
 	if run_extra_revives <= 0:
 		return false
 	run_extra_revives -= 1
-	heal_player(player_max_hp * 0.6)
+	player_hp = clampf(maxf(player_max_hp * 0.6, 1.0), 1.0, maxf(player_max_hp, 1.0))
 	is_combat_active = true
+	player_hp_changed.emit(player_hp, player_max_hp)
 	if AudioManager:
 		AudioManager.play_sfx("potion")
 	return true
@@ -491,6 +503,24 @@ func on_player_death() -> void:
 		run_shades = 0
 		
 	player_defeated.emit(floor_number, level_number)
+
+## Ends an active run cleanly (e.g. abandoning from pause or returning to Sanctuary).
+func abandon_run() -> void:
+	if is_in_run and run_shades > 0 and SaveManager:
+		SaveManager.add_shades(run_shades)
+		run_shades = 0
+	is_in_run = false
+	is_combat_active = false
+	has_claimed_level_reward = false
+	active_move_tx = null
+	run_gold = 0
+	potions = 0
+	run_xp = 0.0
+	run_learned_skills.clear()
+	run_skill_evolutions.clear()
+	run_skill_evolution_modifiers.clear()
+	run_skill_modifiers.clear()
+	run_extra_revives = 0
 
 # Retry same floor on death
 func retry_current_floor() -> void:

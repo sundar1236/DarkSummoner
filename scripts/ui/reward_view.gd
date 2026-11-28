@@ -6,6 +6,7 @@ extends Control
 # bold ability icons, stat arrow ratings (ATK PWR ↑↑↑), refresh rolls, and run spoils.
 
 signal reward_claimed_and_continue()
+signal settings_requested()
 
 @export var lbl_title: Label
 @export var lbl_gold_earned: Label
@@ -19,12 +20,46 @@ var selected_item_choice: ItemData = null
 var is_claimed: bool = false
 var is_boss_reward: bool = false
 var refreshes_left: int = 1
+var btn_menu: Button = null
 
 func _ready() -> void:
 	if btn_continue:
 		btn_continue.pressed.connect(_on_continue_pressed)
 	if btn_refresh:
 		btn_refresh.pressed.connect(_on_refresh_pressed)
+	_ensure_menu_button()
+
+
+func _ensure_menu_button() -> void:
+	if btn_menu:
+		return
+	btn_menu = get_node_or_null("BtnMenu") as Button
+	if btn_menu:
+		return
+	btn_menu = Button.new()
+	btn_menu.name = "BtnMenu"
+	btn_menu.text = "MENU"
+	btn_menu.custom_minimum_size = Vector2(96, 40)
+	btn_menu.anchor_left = 1.0
+	btn_menu.anchor_right = 1.0
+	btn_menu.anchor_top = 0.0
+	btn_menu.anchor_bottom = 0.0
+	btn_menu.offset_left = -114.0
+	btn_menu.offset_right = -18.0
+	btn_menu.offset_top = 18.0
+	btn_menu.offset_bottom = 58.0
+	btn_menu.add_theme_font_size_override("font_size", 15)
+	btn_menu.add_theme_color_override("font_color", Color(0.95, 0.88, 0.65, 1.0))
+	var sb := StyleBoxFlat.new()
+	sb.bg_color = Color(0.14, 0.13, 0.22, 0.92)
+	sb.border_color = Color(0.55, 0.45, 0.72, 0.85)
+	sb.set_border_width_all(1)
+	sb.set_corner_radius_all(8)
+	btn_menu.add_theme_stylebox_override("normal", sb)
+	btn_menu.add_theme_stylebox_override("hover", sb)
+	btn_menu.add_theme_stylebox_override("pressed", sb)
+	btn_menu.pressed.connect(func(): settings_requested.emit())
+	add_child(btn_menu)
 
 func setup(is_boss: bool) -> void:
 	is_claimed = false

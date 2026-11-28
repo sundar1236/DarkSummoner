@@ -1,12 +1,119 @@
-[gd_scene load_steps=8 format=3 uid="uid://c6charselectview01"]
+[gd_scene load_steps=13 format=3 uid="uid://c6charselectview01"]
 
 [ext_resource type="Script" path="res://scripts/characters/character_select_view.gd" id="1_csv"]
 [ext_resource type="Texture2D" path="res://assets/art/backgrounds/tower_altar_bg.png" id="2_bg"]
-[ext_resource type="Texture2D" path="res://assets/art/characters/shadow_hunter_portrait.png" id="3_por"]
+[ext_resource type="Texture2D" path="res://assets/art/characters/kael_varyn_portrait.png" id="3_por"]
 [ext_resource type="Texture2D" path="res://assets/art/ui/icon_padlock.png" id="4_lck"]
-[ext_resource type="Texture2D" path="res://assets/art/ui_reference/card_full_shadow_hunter.png" id="5_hunter"]
-[ext_resource type="Texture2D" path="res://assets/art/ui_reference/card_full_storm_reaper.png" id="6_reaper"]
-[ext_resource type="Texture2D" path="res://assets/art/ui_reference/card_full_soul_binder.png" id="7_binder"]
+[ext_resource type="Texture2D" path="res://assets/art/ui/icon_shade.png" id="5_shd"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_backbtn"]
+content_margin_left = 12.0
+content_margin_top = 6.0
+content_margin_right = 12.0
+content_margin_bottom = 6.0
+bg_color = Color(0.08, 0.07, 0.12, 0.92)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.66, 0.54, 0.32, 0.88)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+shadow_color = Color(0, 0, 0, 0.55)
+shadow_size = 4
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_showcase"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_infocard"]
+content_margin_left = 18.0
+content_margin_top = 26.0
+content_margin_right = 18.0
+content_margin_bottom = 14.0
+bg_color = Color(0.055, 0.075, 0.11, 0.94)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.45, 0.62, 0.72, 0.85)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+shadow_color = Color(0, 0, 0, 0.75)
+shadow_size = 12
+shadow_offset = Vector2(0, 4)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_abilitycard"]
+content_margin_left = 12.0
+content_margin_top = 9.0
+content_margin_right = 12.0
+content_margin_bottom = 9.0
+bg_color = Color(0.085, 0.115, 0.16, 0.9)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.32, 0.45, 0.56, 0.75)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ctanorm"]
+content_margin_left = 18.0
+content_margin_top = 10.0
+content_margin_right = 18.0
+content_margin_bottom = 10.0
+bg_color = Color(0.56, 0.31, 0.1, 0.98)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 4
+border_color = Color(0.95, 0.76, 0.36, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+shadow_color = Color(0.85, 0.45, 0.12, 0.35)
+shadow_size = 10
+shadow_offset = Vector2(0, 3)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ctahover"]
+content_margin_left = 18.0
+content_margin_top = 10.0
+content_margin_right = 18.0
+content_margin_bottom = 10.0
+bg_color = Color(0.68, 0.39, 0.14, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 4
+border_color = Color(1, 0.86, 0.48, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+shadow_color = Color(0.95, 0.55, 0.18, 0.45)
+shadow_size = 12
+shadow_offset = Vector2(0, 3)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ctadisabled"]
+content_margin_left = 18.0
+content_margin_top = 10.0
+content_margin_right = 18.0
+content_margin_bottom = 10.0
+bg_color = Color(0.16, 0.17, 0.22, 0.92)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.35, 0.36, 0.44, 0.8)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
 
 [node name="CharacterSelectView" type="Control" node_paths=PackedStringArray("btn_back", "lbl_shades", "tabs_container", "portrait_rect", "locked_overlay", "lbl_char_name", "lbl_char_title", "lbl_char_weapon", "lbl_char_passive", "lbl_char_active", "lbl_char_stats", "lbl_unlock_requirement", "btn_action")]
 layout_mode = 3
@@ -19,13 +126,13 @@ script = ExtResource("1_csv")
 btn_back = NodePath("VBoxMain/TopBar/BtnBack")
 lbl_shades = NodePath("VBoxMain/TopBar/ShadesBadge/LblShades")
 tabs_container = NodePath("VBoxMain/TabsRow")
-portrait_rect = NodePath("VBoxMain/ShowcasePanel/PortraitRect")
-locked_overlay = NodePath("VBoxMain/ShowcasePanel/LockedOverlay")
+portrait_rect = NodePath("VBoxMain/ShowcasePanel/StageControl/PortraitRect")
+locked_overlay = NodePath("VBoxMain/ShowcasePanel/StageControl/LockedOverlay")
 lbl_char_name = NodePath("VBoxMain/InfoCard/VBoxInfo/LblCharName")
 lbl_char_title = NodePath("VBoxMain/InfoCard/VBoxInfo/LblCharTitle")
 lbl_char_weapon = NodePath("VBoxMain/InfoCard/VBoxInfo/LblCharWeapon")
-lbl_char_passive = NodePath("VBoxMain/InfoCard/VBoxInfo/PassiveCard/LblCharPassive")
-lbl_char_active = NodePath("VBoxMain/InfoCard/VBoxInfo/ActiveCard/LblCharActive")
+lbl_char_passive = NodePath("VBoxMain/InfoCard/VBoxInfo/PassiveCard/HBox/LblCharPassive")
+lbl_char_active = NodePath("VBoxMain/InfoCard/VBoxInfo/ActiveCard/HBox/LblCharActive")
 lbl_char_stats = NodePath("VBoxMain/InfoCard/VBoxInfo/LblCharStats")
 lbl_unlock_requirement = NodePath("VBoxMain/InfoCard/VBoxInfo/LblUnlockReq")
 btn_action = NodePath("VBoxMain/BtnAction")
@@ -49,111 +156,157 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-color = Color(0.04, 0.02, 0.07, 0.78)
+color = Color(0.03, 0.035, 0.06, 0.42)
 
 [node name="VBoxMain" type="VBoxContainer" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 28.0
-offset_top = 32.0
-offset_right = -28.0
-offset_bottom = -28.0
+offset_left = 20.0
+offset_top = 24.0
+offset_right = -20.0
+offset_bottom = -22.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/separation = 12
+theme_override_constants/separation = 10
 
 [node name="TopBar" type="HBoxContainer" parent="VBoxMain"]
 layout_mode = 2
-theme_override_constants/separation = 12
+theme_override_constants/separation = 10
 
 [node name="BtnBack" type="Button" parent="VBoxMain/TopBar"]
-custom_minimum_size = Vector2(110, 50)
+custom_minimum_size = Vector2(104, 44)
 layout_mode = 2
-theme_override_font_sizes/font_size = 19
+theme_override_colors/font_color = Color(0.92, 0.85, 0.65, 1)
+theme_override_font_sizes/font_size = 17
+theme_override_styles/normal = SubResource("StyleBoxFlat_backbtn")
+theme_override_styles/hover = SubResource("StyleBoxFlat_backbtn")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_backbtn")
 text = "< BACK"
 
 [node name="Title" type="Label" parent="VBoxMain/TopBar"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_colors/font_color = Color(1, 0.9, 0.5, 1)
+theme_override_colors/font_color = Color(0.96, 0.84, 0.52, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.9)
+theme_override_constants/shadow_offset_y = 2
 theme_override_font_sizes/font_size = 24
 text = "CHOOSE YOUR CHAMPION"
 horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="ShadesBadge" type="HBoxContainer" parent="VBoxMain/TopBar"]
 layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="ShadeIcon" type="TextureRect" parent="VBoxMain/TopBar/ShadesBadge"]
+custom_minimum_size = Vector2(22, 22)
+layout_mode = 2
+size_flags_vertical = 4
+texture = ExtResource("5_shd")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="LblShades" type="Label" parent="VBoxMain/TopBar/ShadesBadge"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.85, 0.75, 1, 1)
-theme_override_font_sizes/font_size = 19
-text = "◆ 0 Shades"
+theme_override_colors/font_color = Color(0.88, 0.8, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.9)
+theme_override_font_sizes/font_size = 18
+text = "0 Shades"
+vertical_alignment = 1
 
 [node name="TabsRow" type="HBoxContainer" parent="VBoxMain"]
-custom_minimum_size = Vector2(0, 250)
+custom_minimum_size = Vector2(0, 218)
 layout_mode = 2
 theme_override_constants/separation = 10
 
 [node name="ShowcasePanel" type="PanelContainer" parent="VBoxMain"]
-custom_minimum_size = Vector2(0, 350)
+custom_minimum_size = Vector2(0, 360)
 layout_mode = 2
 size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxEmpty_showcase")
 
-[node name="PortraitRect" type="TextureRect" parent="VBoxMain/ShowcasePanel"]
+[node name="StageControl" type="Control" parent="VBoxMain/ShowcasePanel"]
 layout_mode = 2
+
+[node name="PortraitRect" type="TextureRect" parent="VBoxMain/ShowcasePanel/StageControl"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 40.0
+offset_top = 0.0
+offset_right = -40.0
+offset_bottom = -16.0
+grow_horizontal = 2
+grow_vertical = 2
 texture = ExtResource("3_por")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="LockedOverlay" type="VBoxContainer" parent="VBoxMain/ShowcasePanel"]
+[node name="LockedOverlay" type="VBoxContainer" parent="VBoxMain/ShowcasePanel/StageControl"]
 visible = false
-layout_mode = 2
-size_flags_horizontal = 4
-size_flags_vertical = 4
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -120.0
+offset_top = -50.0
+offset_right = 120.0
+offset_bottom = 50.0
+grow_horizontal = 2
+grow_vertical = 2
 theme_override_constants/separation = 8
 alignment = 1
 
-[node name="LockIcon" type="TextureRect" parent="VBoxMain/ShowcasePanel/LockedOverlay"]
-custom_minimum_size = Vector2(64, 64)
+[node name="LockIcon" type="TextureRect" parent="VBoxMain/ShowcasePanel/StageControl/LockedOverlay"]
+custom_minimum_size = Vector2(60, 60)
 layout_mode = 2
+size_flags_horizontal = 4
 texture = ExtResource("4_lck")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="LblLock" type="Label" parent="VBoxMain/ShowcasePanel/LockedOverlay"]
+[node name="LblLock" type="Label" parent="VBoxMain/ShowcasePanel/StageControl/LockedOverlay"]
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.8, 0.45, 1)
-theme_override_font_sizes/font_size = 22
+theme_override_colors/font_color = Color(1, 0.82, 0.45, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.95)
+theme_override_font_sizes/font_size = 20
 text = "CHAMPION LOCKED"
 horizontal_alignment = 1
 
 [node name="InfoCard" type="PanelContainer" parent="VBoxMain"]
 layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_infocard")
 
 [node name="VBoxInfo" type="VBoxContainer" parent="VBoxMain/InfoCard"]
 layout_mode = 2
-theme_override_constants/separation = 8
+theme_override_constants/separation = 7
 
 [node name="LblCharName" type="Label" parent="VBoxMain/InfoCard/VBoxInfo"]
 layout_mode = 2
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.9)
+theme_override_constants/shadow_offset_y = 2
 theme_override_font_sizes/font_size = 28
-text = "SHADOW HUNTER"
+text = "KAEL VARYN"
 horizontal_alignment = 1
 
 [node name="LblCharTitle" type="Label" parent="VBoxMain/InfoCard/VBoxInfo"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.8, 0.75, 0.9, 1)
-theme_override_font_sizes/font_size = 18
-text = "— The Veiled Blade —"
+theme_override_colors/font_color = Color(0.76, 0.81, 0.88, 1)
+theme_override_font_sizes/font_size = 16
+text = "— The Soulbound —"
 horizontal_alignment = 1
 
 [node name="LblCharWeapon" type="Label" parent="VBoxMain/InfoCard/VBoxInfo"]
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.85, 0.45, 1)
-theme_override_font_sizes/font_size = 17
-text = "WEAPON: Dual Obsidian Slashes   •   STYLE: Swift Critical Flurries"
+theme_override_colors/font_color = Color(0.98, 0.82, 0.44, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.8)
+theme_override_font_sizes/font_size = 15
+text = "WEAPON: Living Soulbound Grimoire   •   STYLE: Cyan Soulfire & Arcane Bindings"
 horizontal_alignment = 1
 
 [node name="HSeparator" type="HSeparator" parent="VBoxMain/InfoCard/VBoxInfo"]
@@ -161,39 +314,72 @@ layout_mode = 2
 
 [node name="PassiveCard" type="PanelContainer" parent="VBoxMain/InfoCard/VBoxInfo"]
 layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_abilitycard")
 
-[node name="LblCharPassive" type="Label" parent="VBoxMain/InfoCard/VBoxInfo/PassiveCard"]
+[node name="HBox" type="HBoxContainer" parent="VBoxMain/InfoCard/VBoxInfo/PassiveCard"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 17
-text = "PASSIVE: Flurry Instinct: Consecutive attacks grant +25% Attack Speed."
+theme_override_constants/separation = 10
+
+[node name="LblCharPassive" type="Label" parent="VBoxMain/InfoCard/VBoxInfo/PassiveCard/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.9, 0.93, 0.97, 1)
+theme_override_font_sizes/font_size = 15
+text = "PASSIVE: Soulbound Resonance"
 autowrap_mode = 2
+
+[node name="Badge" type="Label" parent="VBoxMain/InfoCard/VBoxInfo/PassiveCard/HBox"]
+layout_mode = 2
+size_flags_vertical = 0
+theme_override_colors/font_color = Color(0.35, 0.88, 1, 0.9)
+theme_override_font_sizes/font_size = 18
+text = "◈"
 
 [node name="ActiveCard" type="PanelContainer" parent="VBoxMain/InfoCard/VBoxInfo"]
 layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_abilitycard")
 
-[node name="LblCharActive" type="Label" parent="VBoxMain/InfoCard/VBoxInfo/ActiveCard"]
+[node name="HBox" type="HBoxContainer" parent="VBoxMain/InfoCard/VBoxInfo/ActiveCard"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 17
-text = "ULTIMATE: Shadow Flurry: Explosive 360° ring of 8 piercing blades."
+theme_override_constants/separation = 10
+
+[node name="LblCharActive" type="Label" parent="VBoxMain/InfoCard/VBoxInfo/ActiveCard/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.9, 0.93, 0.97, 1)
+theme_override_font_sizes/font_size = 15
+text = "ULTIMATE: Grimoire Nova"
 autowrap_mode = 2
+
+[node name="Badge" type="Label" parent="VBoxMain/InfoCard/VBoxInfo/ActiveCard/HBox"]
+layout_mode = 2
+size_flags_vertical = 0
+theme_override_colors/font_color = Color(0.55, 0.95, 1, 0.9)
+theme_override_font_sizes/font_size = 18
+text = "✦"
 
 [node name="LblCharStats" type="Label" parent="VBoxMain/InfoCard/VBoxInfo"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.8, 0.8, 0.88, 1)
-theme_override_font_sizes/font_size = 16
-text = "HEALTH: 120   |   DAMAGE: 18   |   SPEED: 250   |   CRIT: 15%"
+theme_override_colors/font_color = Color(0.82, 0.86, 0.92, 1)
+theme_override_font_sizes/font_size = 15
+text = "HEALTH: 130   |   DAMAGE: 20   |   SPEED: 245   |   CRIT: 14%"
 horizontal_alignment = 1
 
 [node name="LblUnlockReq" type="Label" parent="VBoxMain/InfoCard/VBoxInfo"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.4, 1, 0.6, 1)
-theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0.35, 1, 0.58, 1)
+theme_override_font_sizes/font_size = 16
 text = "CHAMPION UNLOCKED & READY"
 horizontal_alignment = 1
 
 [node name="BtnAction" type="Button" parent="VBoxMain"]
-custom_minimum_size = Vector2(0, 70)
+custom_minimum_size = Vector2(0, 68)
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.92, 0.55, 1)
-theme_override_font_sizes/font_size = 23
-text = "ENTER THE TOWER WITH SHADOW HUNTER"
+theme_override_colors/font_color = Color(1, 0.95, 0.82, 1)
+theme_override_colors/font_shadow_color = Color(0.18, 0.08, 0.02, 0.95)
+theme_override_font_sizes/font_size = 21
+theme_override_styles/normal = SubResource("StyleBoxFlat_ctanorm")
+theme_override_styles/hover = SubResource("StyleBoxFlat_ctahover")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_ctahover")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_ctadisabled")
+text = "ENTER THE TOWER AS KAEL VARYN"

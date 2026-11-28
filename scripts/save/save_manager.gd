@@ -34,8 +34,8 @@ var energy: int = 45
 var max_energy: int = 50
 var profile_gold: int = 5000
 var player_name: String = "Hunter Raven"
-var player_level: int = 5
-var active_character_id: String = "shadow_hunter"
+var player_level: int = 1
+var active_character_id: String = "kael_varyn"
 var has_completed_initial_character_selection: bool = false
 var difficulty: String = "normal" # "normal", "hard", "torment"
 var patrol_last_claim: int = 0
@@ -52,8 +52,9 @@ var achievement_claimed: Dictionary = {}
 var chapter_pack_purchased: bool = false
 
 var highest_floor_unlocked: int = 1
-var unlocked_characters: Array[String] = ["shadow_hunter"]
+var unlocked_characters: Array[String] = ["kael_varyn", "shadow_hunter"]
 var character_levels: Dictionary = {
+	"kael_varyn": 1,
 	"shadow_hunter": 1,
 	"storm_reaper": 1,
 	"soul_binder": 1,
@@ -61,6 +62,7 @@ var character_levels: Dictionary = {
 }
 
 var character_shards: Dictionary = {
+	"kael_varyn": 30,
 	"shadow_hunter": 45,
 	"storm_reaper": 20,
 	"soul_binder": 12,
@@ -68,9 +70,10 @@ var character_shards: Dictionary = {
 }
 
 var character_stars: Dictionary = {
-	"shadow_hunter": 2,
-	"storm_reaper": 3,
-	"soul_binder": 2,
+	"kael_varyn": 1,
+	"shadow_hunter": 1,
+	"storm_reaper": 1,
+	"soul_binder": 1,
 	"frost_valkyrie": 1
 }
 
@@ -81,21 +84,21 @@ var equipped_gear: Dictionary = {
 var _gear_profile_initialized: bool = false
 
 var equipment_levels: Dictionary = {
-	"weapon": 60,
-	"amulet": 55,
-	"ring": 58,
-	"helmet": 60,
-	"armor": 60,
-	"boots": 55
+	"weapon": 0,
+	"amulet": 0,
+	"ring": 0,
+	"helmet": 0,
+	"armor": 0,
+	"boots": 0
 }
 
 var talent_cards: Dictionary = {
-	"glory": 5,
-	"tactics": 4,
-	"swift_wind": 3,
-	"super_crit": 4,
-	"iron_will": 3,
-	"vampiric": 3,
+	"glory": 0,
+	"tactics": 0,
+	"swift_wind": 0,
+	"super_crit": 0,
+	"iron_will": 0,
+	"vampiric": 0,
 	"storm_call": 0,
 	"flame_burst": 0
 }
@@ -179,7 +182,7 @@ func is_character_unlocked(char_id: String) -> bool:
 func complete_initial_character_selection(char_id: String) -> bool:
 	if has_completed_initial_character_selection:
 		return false
-	if not ["shadow_hunter", "storm_reaper", "soul_binder"].has(char_id):
+	if not ["kael_varyn", "shadow_hunter", "storm_reaper", "soul_binder"].has(char_id):
 		return false
 	if not unlocked_characters.has(char_id):
 		unlocked_characters.append(char_id)
@@ -870,8 +873,8 @@ func reset_all_data() -> void:
 	max_energy = 50
 	profile_gold = 5000
 	player_name = "Hunter Raven"
-	player_level = 5
-	active_character_id = "shadow_hunter"
+	player_level = 1
+	active_character_id = "kael_varyn"
 	has_completed_initial_character_selection = false
 	difficulty = "normal"
 	patrol_last_claim = 0
@@ -887,43 +890,46 @@ func reset_all_data() -> void:
 	achievement_claimed.clear()
 	chapter_pack_purchased = false
 	highest_floor_unlocked = 1
-	unlocked_characters = ["shadow_hunter"]
+	unlocked_characters = ["kael_varyn", "shadow_hunter"]
 	character_levels = {
+		"kael_varyn": 1,
 		"shadow_hunter": 1,
 		"storm_reaper": 1,
 		"soul_binder": 1,
 		"frost_valkyrie": 1
 	}
 	character_shards = {
+		"kael_varyn": 30,
 		"shadow_hunter": 45,
 		"storm_reaper": 20,
 		"soul_binder": 12,
 		"frost_valkyrie": 0
 	}
 	character_stars = {
-		"shadow_hunter": 2,
-		"storm_reaper": 3,
-		"soul_binder": 2,
+		"kael_varyn": 1,
+		"shadow_hunter": 1,
+		"storm_reaper": 1,
+		"soul_binder": 1,
 		"frost_valkyrie": 1
 	}
 	gear_inventory.clear()
 	equipped_gear = {"weapon": "", "helmet": "", "armor": "", "boots": "", "amulet": "", "ring": ""}
 	_gear_profile_initialized = false
 	equipment_levels = {
-		"weapon": 60,
-		"amulet": 55,
-		"ring": 58,
-		"helmet": 60,
-		"armor": 60,
-		"boots": 55
+		"weapon": 0,
+		"amulet": 0,
+		"ring": 0,
+		"helmet": 0,
+		"armor": 0,
+		"boots": 0
 	}
 	talent_cards = {
-		"glory": 5,
-		"tactics": 4,
-		"swift_wind": 3,
-		"super_crit": 4,
-		"iron_will": 3,
-		"vampiric": 3,
+		"glory": 0,
+		"tactics": 0,
+		"swift_wind": 0,
+		"super_crit": 0,
+		"iron_will": 0,
+		"vampiric": 0,
 		"storm_call": 0,
 		"flame_burst": 0
 	}
@@ -1034,8 +1040,8 @@ func load_profile() -> void:
 	max_energy = dict.get("max_energy", 50)
 	profile_gold = dict.get("profile_gold", 5000)
 	player_name = dict.get("player_name", "Hunter Raven")
-	player_level = dict.get("player_level", 5)
-	active_character_id = dict.get("active_character_id", "shadow_hunter")
+	player_level = dict.get("player_level", 1)
+	active_character_id = dict.get("active_character_id", "kael_varyn")
 	has_completed_initial_character_selection = bool(dict.get("has_completed_initial_character_selection", false))
 	difficulty = dict.get("difficulty", "normal")
 	patrol_last_claim = dict.get("patrol_last_claim", 0)
@@ -1093,11 +1099,13 @@ func load_profile() -> void:
 		for k in t_cards.keys():
 			talent_cards[str(k)] = t_cards[k]
 	
-	var chars: Variant = dict.get("unlocked_characters", ["shadow_hunter"])
+	var chars: Variant = dict.get("unlocked_characters", ["kael_varyn", "shadow_hunter"])
 	if chars is Array:
 		unlocked_characters = []
 		for c in chars:
 			unlocked_characters.append(str(c))
+		if not unlocked_characters.has("kael_varyn"):
+			unlocked_characters.append("kael_varyn")
 		if not unlocked_characters.has("shadow_hunter"):
 			unlocked_characters.append("shadow_hunter")
 			

@@ -4,6 +4,7 @@ extends Control
 const DirectionalSprite8Class = preload("res://scripts/combat/directional_sprite_8.gd")
 
 const HERO_8DIR_STRIPS: Dictionary = {
+	"kael_varyn": "res://assets/art/characters/8dir/kael_varyn_8dir.png",
 	"shadow_hunter": "res://assets/art/characters/8dir/shadow_hunter_8dir.png",
 	"storm_reaper": "res://assets/art/characters/8dir/storm_reaper_8dir.png",
 	"soul_binder": "res://assets/art/characters/8dir/soul_binder_8dir.png",
@@ -14,7 +15,7 @@ const HERO_8DIR_STRIPS: Dictionary = {
 # Renders the Hero on a glowing 2.5D elemental pedestal using the 8-directional
 # pre-rendered 3D sprite strip with subtle idle breathing and arcane rings.
 
-@export var character_id: String = "shadow_hunter"
+@export var character_id: String = "kael_varyn"
 @export var enable_diorama_stage: bool = true
 @export var diorama_include_pillars: bool = true
 
@@ -88,6 +89,8 @@ func _ensure_character_portrait() -> void:
 	_portrait_texture = TextureLoader.get_texture("res://assets/art/characters/%s_portrait.png" % character_id)
 
 func _process(delta: float) -> void:
+	if not is_visible_in_tree():
+		return
 	_t += delta
 	if _preview_character_id != character_id:
 		_sync_character_visual()
@@ -101,31 +104,74 @@ func _draw() -> void:
 	var pulse := (1.0 + sin(t * 3.0)) * 0.5
 	var bob := sin(t * 2.5) * 4.0
 	
-	# 1. Glowing Elemental Pedestal (Tiered Hexagonal / Oval Stone with Runic Rim)
-	var ped_center := center + Vector2(0, 50)
-	draw_arc(ped_center, 90.0, 0.0, TAU, 32, Color(0.2, 0.65, 1.0, 0.25 * pulse), 3.0)
-	draw_arc(ped_center, 70.0, 0.0, TAU, 32, Color(0.4, 0.8, 1.0, 0.5), 2.0)
-	
-	# Pedestal Base Polygon
-	var ped_pts := PackedVector2Array([
-		ped_center + Vector2(-80, 0),
-		ped_center + Vector2(-55, 25),
-		ped_center + Vector2(55, 25),
-		ped_center + Vector2(80, 0),
-		ped_center + Vector2(55, -20),
-		ped_center + Vector2(-55, -20)
+	# 1. Glowing Elemental Pedestal (Tiered Octagonal Runic Stone Platform)
+	var ped_center := center + Vector2(0, 58)
+	draw_arc(ped_center, 96.0, 0.0, TAU, 36, Color(0.95, 0.65, 0.2, 0.16 * pulse), 4.0)
+	draw_arc(ped_center, 74.0, 0.0, TAU, 36, Color(0.95, 0.76, 0.3, 0.38), 2.0)
+
+	# Outer beveled octagonal skirt
+	var skirt_pts := PackedVector2Array([
+		ped_center + Vector2(-92, 4),
+		ped_center + Vector2(-62, 30),
+		ped_center + Vector2(62, 30),
+		ped_center + Vector2(92, 4),
+		ped_center + Vector2(92, -6),
+		ped_center + Vector2(62, -22),
+		ped_center + Vector2(-62, -22),
+		ped_center + Vector2(-92, -6)
 	])
-	draw_colored_polygon(ped_pts, Color(0.1, 0.12, 0.2, 0.95))
-	draw_polyline(ped_pts, Color(0.85, 0.72, 0.3, 0.9), 2.5)
-	
-	# Pedestal runic glow
-	draw_circle(ped_center, 40.0, Color(0.15, 0.5, 0.9, 0.25 * pulse))
+	draw_colored_polygon(skirt_pts, Color(0.06, 0.07, 0.11, 0.96))
+
+	# Top octagonal stone face
+	var ped_pts := PackedVector2Array([
+		ped_center + Vector2(-88, -2),
+		ped_center + Vector2(-58, 22),
+		ped_center + Vector2(58, 22),
+		ped_center + Vector2(88, -2),
+		ped_center + Vector2(58, -22),
+		ped_center + Vector2(-58, -22)
+	])
+	draw_colored_polygon(ped_pts, Color(0.11, 0.13, 0.19, 0.96))
+	draw_polyline(ped_pts, Color(0.86, 0.7, 0.32, 0.92), 2.5)
+	draw_line(ped_pts[0], ped_pts[1], Color(0.96, 0.82, 0.42, 0.95), 2.5)
+	draw_line(ped_pts[1], ped_pts[2], Color(0.96, 0.82, 0.42, 0.95), 2.5)
+	draw_line(ped_pts[2], ped_pts[3], Color(0.96, 0.82, 0.42, 0.95), 2.5)
+
+	# Inner glowing golden rune ellipse + star sigil
+	var ring_col := Color(0.98, 0.76, 0.28, 0.52 + 0.24 * pulse)
+	for seg in range(24):
+		var a0 := float(seg) / 24.0 * TAU
+		var a1 := float(seg + 1) / 24.0 * TAU
+		var p0 := ped_center + Vector2(cos(a0) * 54.0, sin(a0) * 14.0)
+		var p1 := ped_center + Vector2(cos(a1) * 54.0, sin(a1) * 14.0)
+		draw_line(p0, p1, ring_col, 1.8)
+	for star_i in range(5):
+		var sa0 := -PI * 0.5 + float(star_i) * TAU / 5.0
+		var sa1 := -PI * 0.5 + float(star_i + 2) * TAU / 5.0
+		draw_line(
+			ped_center + Vector2(cos(sa0) * 44.0, sin(sa0) * 11.0),
+			ped_center + Vector2(cos(sa1) * 44.0, sin(sa1) * 11.0),
+			Color(0.98, 0.72, 0.22, 0.36 + 0.18 * pulse),
+			1.4
+		)
+
+	# Core aura + subtle rising ember flecks
+	var aura_col := Color(0.22, 0.88, 1.0, 0.22 * pulse) if character_id == "kael_varyn" else Color(0.92, 0.58, 0.2, 0.22 * pulse)
+	draw_circle(ped_center, 36.0, aura_col)
+	for ember_i in range(8):
+		var phase := fmod(t * 0.55 + float(ember_i) * 0.17, 1.0)
+		var ex := sin(float(ember_i) * 2.3 + t * 1.4) * 58.0
+		var ey := -phase * 95.0
+		var ea := sin(phase * PI) * 0.65
+		draw_circle(ped_center + Vector2(ex, ey), 1.8, Color(1.0, 0.65, 0.25, ea))
 
 	# 2. Hero Body — Chibi Proportions (2.2 heads tall)
 	var hero_pos := center + Vector2(0, bob)
 	
 	var iris_col := Color(0.65, 0.3, 0.95, 1.0)
-	if character_id == "storm_reaper":
+	if character_id == "kael_varyn":
+		iris_col = Color(0.22, 0.88, 1.0, 1.0)
+	elif character_id == "storm_reaper":
 		iris_col = Color(0.2, 0.85, 1.0, 1.0)
 	elif character_id == "soul_binder":
 		iris_col = Color(0.3, 0.95, 0.65, 1.0)
@@ -202,6 +248,6 @@ func _draw() -> void:
 	draw_circle(comp_pos, 8.0, Color(iris_col.r, iris_col.g, iris_col.b, 0.9))
 	draw_circle(comp_pos + Vector2(-2, -2), 3.0, Color.WHITE)
 	# Tiny wisp trail
-	for tr in range(3):
-		var tra := comp_pos + Vector2(float(tr) * 4.0, 10.0 + float(tr) * 5.0)
-		draw_circle(tra, (3.0 - float(tr)) * 0.8, Color(iris_col.r, iris_col.g, iris_col.b, 0.5 - float(tr) * 0.15))
+	for trail_idx in range(3):
+		var tra := comp_pos + Vector2(float(trail_idx) * 4.0, 10.0 + float(trail_idx) * 5.0)
+		draw_circle(tra, (3.0 - float(trail_idx)) * 0.8, Color(iris_col.r, iris_col.g, iris_col.b, 0.5 - float(trail_idx) * 0.15))

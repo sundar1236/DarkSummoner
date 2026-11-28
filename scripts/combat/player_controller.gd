@@ -7,6 +7,7 @@ const OverheadHealthBarClass = preload("res://scripts/combat/overhead_health_bar
 const DirectionalSprite8Class = preload("res://scripts/combat/directional_sprite_8.gd")
 
 const HERO_8DIR_STRIPS: Dictionary = {
+	"kael_varyn": "res://assets/art/characters/8dir/kael_varyn_8dir.png",
 	"shadow_hunter": "res://assets/art/characters/8dir/shadow_hunter_8dir.png",
 	"storm_reaper": "res://assets/art/characters/8dir/storm_reaper_8dir.png",
 	"soul_binder": "res://assets/art/characters/8dir/soul_binder_8dir.png",
@@ -14,8 +15,22 @@ const HERO_8DIR_STRIPS: Dictionary = {
 	"summaner": "res://assets/art/characters/8dir/soul_binder_8dir.png"
 }
 
+const HERO_MULTI_STATE_STRIPS: Dictionary = {
+	"kael_varyn": {
+		"idle": {"path": "res://assets/art/characters/kael_varyn/strips/idle_8dir.png", "hframes": 8, "directional_8": true},
+		"run": {"path": "res://assets/art/characters/kael_varyn/strips/run_8dir.png", "hframes": 8, "directional_8": true},
+		"attack": {"path": "res://assets/art/characters/kael_varyn/strips/attack_8dir.png", "hframes": 8, "directional_8": true},
+		"dodge": {"path": "res://assets/art/characters/kael_varyn/strips/dodge_8dir.png", "hframes": 8, "directional_8": true},
+		"hurt": {"path": "res://assets/art/characters/kael_varyn/strips/hurt_8dir.png", "hframes": 8, "directional_8": true},
+		"skill": {"path": "res://assets/art/characters/kael_varyn/strips/skill_frames.png", "hframes": 8, "directional_8": false},
+		"defeat": {"path": "res://assets/art/characters/kael_varyn/strips/defeat_frames.png", "hframes": 6, "directional_8": false},
+		"victory": {"path": "res://assets/art/characters/kael_varyn/strips/victory_frames.png", "hframes": 8, "directional_8": false}
+	}
+}
+
 # Optional generated character scenes. Missing files intentionally keep the legacy sprite.
 const AUTHORED_CHARACTER_SCENES: Dictionary = {
+	"kael_varyn": "res://scenes/characters/kael_varyn_visual.tscn",
 	"shadow_hunter": "res://scenes/characters/shadow_hunter_visual.tscn",
 	"storm_reaper": "res://scenes/characters/storm_reaper_visual.tscn",
 	"soul_binder": "res://scenes/characters/soul_binder_visual.tscn"
@@ -84,6 +99,20 @@ class ShadowTrailsVisual extends Node2D:
 		draw_arc(Vector2(-2, -8), 28.0 + pulse * 3.0, 0.25, 2.75, 24, trail_color, 2.0)
 		draw_arc(Vector2(2, -8), 34.0 + pulse * 2.0, 3.3, 5.8, 24, Color(0.72, 0.42, 1.0, 0.2 + pulse * 0.18), 1.4)
 
+class SoulboundAuraVisual extends Node2D:
+	var player_ref: CharacterBody2D
+	func _draw() -> void:
+		if not is_instance_valid(player_ref):
+			return
+		var t: float = player_ref.anim_time
+		var pulse := 0.5 + 0.5 * sin(t * 4.0)
+		var cyan := Color(0.22, 0.88, 1.0, 0.35 + pulse * 0.25)
+		draw_arc(Vector2(0, 18), 26.0 + pulse * 2.0, t * 1.4, t * 1.4 + 2.2, 20, cyan, 1.8)
+		draw_arc(Vector2(0, 18), 26.0 + pulse * 2.0, t * 1.4 + PI, t * 1.4 + PI + 2.2, 20, Color(0.55, 0.96, 1.0, 0.3 + pulse * 0.2), 1.8)
+		var rune_pos := Vector2(cos(t * 2.6) * 32.0, -14.0 + sin(t * 2.6) * 10.0)
+		draw_circle(rune_pos, 6.5, Color(0.22, 0.88, 1.0, 0.3))
+		draw_circle(rune_pos, 3.2, Color(0.72, 0.98, 1.0, 0.9))
+
 signal skill_cooldown_updated(current: float, max_val: float)
 signal dodge_cooldown_updated(current: float, max_val: float)
 
@@ -138,9 +167,11 @@ var weapon_socket: Marker2D
 var spirit_wisp: Node2D
 var storm_sparks: Node2D
 var shadow_trails: Node2D
+var soulbound_aura: Node2D
 var combo_streak: int = 0
 var combo_streak_timer: float = 0.0
 var combo_streak_label: Label
+var _kael_cast_count: int = 0
 
 func _ready() -> void:
 	add_to_group("player")
@@ -340,7 +371,7 @@ func _clear_selected_character_visual() -> void:
 		sprite.visible = true
 
 func _setup_character_ambience() -> void:
-	var char_id := "shadow_hunter"
+	var char_id := "kael_varyn"
 	if GameManager.current_character:
 		char_id = GameManager.current_character.id
 		
@@ -354,8 +385,17 @@ func _setup_character_ambience() -> void:
 	if shadow_trails:
 		shadow_trails.queue_free()
 		shadow_trails = null
+	if soulbound_aura:
+		soulbound_aura.queue_free()
+		soulbound_aura = null
 		
 	match char_id:
+		"kael_varyn":
+			var aura := SoulboundAuraVisual.new()
+			aura.z_index = 4
+			aura.player_ref = self
+			soulbound_aura = aura
+			visual_root.add_child(soulbound_aura)
 		"shadow_hunter":
 			var trails := ShadowTrailsVisual.new()
 			trails.z_index = 3
@@ -392,7 +432,7 @@ func _draw_storm_sparks() -> void:
 func _update_character_sprite() -> void:
 	if not sprite:
 		return
-	var char_id := "shadow_hunter"
+	var char_id := "kael_varyn"
 	if GameManager.current_character:
 		char_id = GameManager.current_character.id
 		
@@ -400,6 +440,10 @@ func _update_character_sprite() -> void:
 	var weap_path := "res://assets/art/items/item_shadow_blade.png"
 	var hero_tint := Color.WHITE
 	match char_id:
+		"kael_varyn":
+			tex_path = "res://assets/art/characters/kael_varyn_portrait.png"
+			weap_path = "res://assets/art/items/item_lightning_orb.png"
+			hero_tint = Color.WHITE
 		"storm_reaper":
 			tex_path = "res://assets/sprites/characters/player_storm_reaper.png"
 			weap_path = "res://assets/art/items/item_abyssal_scythe.png"
@@ -418,8 +462,13 @@ func _update_character_sprite() -> void:
 	if weapon_sprite:
 		weapon_sprite.texture = TextureLoader.get_texture(weap_path)
 	if is_instance_valid(sprite_8dir):
-		var strip_path := str(HERO_8DIR_STRIPS.get(char_id, HERO_8DIR_STRIPS["shadow_hunter"]))
-		if sprite_8dir.setup(strip_path, 96.0, 24.0):
+		var loaded_8dir := false
+		if HERO_MULTI_STATE_STRIPS.has(char_id):
+			loaded_8dir = sprite_8dir.setup_multi_state(HERO_MULTI_STATE_STRIPS[char_id], 96.0, 24.0)
+		if not loaded_8dir:
+			var strip_path := str(HERO_8DIR_STRIPS.get(char_id, HERO_8DIR_STRIPS["kael_varyn"]))
+			loaded_8dir = sprite_8dir.setup(strip_path, 96.0, 24.0)
+		if loaded_8dir:
 			_model_ready = true
 			sprite_8dir.visible = true
 			if is_instance_valid(sprite):
@@ -487,6 +536,8 @@ func _physics_process(delta: float) -> void:
 		storm_sparks.queue_redraw()
 	if is_instance_valid(spirit_wisp):
 		spirit_wisp.queue_redraw()
+	if is_instance_valid(soulbound_aura):
+		soulbound_aura.queue_redraw()
 	_handle_movement(delta)
 	_handle_aim_and_attack(delta)
 	_handle_animations(delta)
@@ -670,8 +721,8 @@ func _fire_basic_attack() -> void:
 		final_dmg *= 1.30
 		_trigger_camera_impact(2.0, 0.1)
 		
-	# Shadow Hunter consecutive streak tracking
-	var char_id := "shadow_hunter"
+	# Shadow Hunter consecutive streak tracking / Kael Varyn Soulbound Resonance
+	var char_id := "kael_varyn"
 	if GameManager.current_character:
 		char_id = GameManager.current_character.id
 	if char_id == "shadow_hunter":
@@ -682,6 +733,19 @@ func _fire_basic_attack() -> void:
 			combo_streak_label.visible = true
 			if combo_streak >= 4:
 				_spawn_afterimage()
+	elif char_id == "kael_varyn":
+		_kael_cast_count += 1
+		if _kael_cast_count >= 3:
+			_kael_cast_count = 0
+			for offset_angle in [-0.24, 0.24]:
+				if not ProjectileController.can_spawn_projectile():
+					break
+				var extra_soul := ProjectileController.new()
+				get_parent().add_child(extra_soul)
+				extra_soul.global_position = _get_weapon_spawn_position()
+				extra_soul.setup(final_dmg * 0.7, is_crit, aim_direction.rotated(offset_angle), 560.0, "soul", true)
+				extra_soul.is_homing = true
+				extra_soul.modulate = Color(0.45, 0.95, 1.0, 1.0)
 		
 	# Slash crescent visual swing and projectile muzzle share the active rig socket.
 	var attack_origin := _get_weapon_spawn_position()
@@ -704,7 +768,7 @@ func _fire_basic_attack() -> void:
 	var extra_projs: int = stats.get("extra_projectiles", 0)
 	for i in range(extra_projs):
 		var sign_mult := 1.0 if i % 2 == 0 else -1.0
-		var spread_angle := (float(i / 2 + 1) * 0.18) * sign_mult
+		var spread_angle := (float((i >> 1) + 1) * 0.18) * sign_mult
 		var side_dir := aim_direction.rotated(spread_angle)
 		if not ProjectileController.can_spawn_projectile():
 			break
@@ -895,6 +959,23 @@ func trigger_active_skill() -> bool:
 				vfx.setup(chain_points)
 				if AudioManager: AudioManager.play_sfx("lightning_zap")
 				
+		"kael_varyn":
+			# Grimoire Nova: Cyan summoning ring & 8 homing arcane soul bolts in 360°
+			_spawn_summon_circle()
+			if AudioManager: AudioManager.play_sfx("summon_chime")
+			for i in range(8):
+				var angle := (TAU / 8.0) * float(i)
+				var dir := Vector2.RIGHT.rotated(angle)
+				if not ProjectileController.can_spawn_projectile():
+					break
+				var proj := ProjectileController.new()
+				get_parent().add_child(proj)
+				proj.global_position = global_position
+				proj.setup(atk * 1.45, true, dir, 520.0, "soul", true)
+				proj.is_homing = true
+				proj.modulate = Color(0.45, 0.95, 1.0, 1.0)
+			_spawn_afterimage()
+
 		"soul_binder":
 			# Soul Swarm: Spawns summoning circle decal & 6 homing soul spirits
 			_spawn_summon_circle()

@@ -28,14 +28,14 @@ signal back_requested()
 @export var upgrades_list: VBoxContainer
 @export var btn_back: Button
 
-var selected_character_id: String = "shadow_hunter"
+var selected_character_id: String = "kael_varyn"
 
 func _ready() -> void:
 	_setup_signals()
 	_update_shades_display()
 	_init_characters_ui()
 	_init_upgrades_ui()
-	_select_character("shadow_hunter")
+	_select_character("kael_varyn")
 	_switch_tab("chars")
 
 func _setup_signals() -> void:

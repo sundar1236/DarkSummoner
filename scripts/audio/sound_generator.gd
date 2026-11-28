@@ -28,6 +28,16 @@ static func create_pcm_stream(samples: PackedFloat32Array) -> AudioStreamWAV:
 	stream.data = byte_array
 	return stream
 
+
+static func _create_looping_pcm_stream(samples: PackedFloat32Array) -> AudioStreamWAV:
+	var stream := create_pcm_stream(samples)
+	stream.loop_mode = AudioStreamWAV.LOOP_FORWARD
+	stream.loop_begin = 0
+	# Keep loop_end safely inside sample bounds so Android's AudioTrack resampler
+	# never reads past the end of the PCM buffer during multi-tap interpolation.
+	stream.loop_end = maxi(1, samples.size() - 4)
+	return stream
+
 # 1. UI Click
 static func gen_ui_click() -> AudioStreamWAV:
 	var duration: float = 0.05
@@ -394,11 +404,7 @@ static func gen_dark_ambience() -> AudioStreamWAV:
 		var pulse: float = (1.0 + sin(t * 0.5 * TAU)) * 0.5
 		var whisper: float = (randf() * 2.0 - 1.0) * 0.04
 		samples[i] = (drone1 + drone2 * pulse + whisper) * 0.5
-	var stream: AudioStreamWAV = create_pcm_stream(samples)
-	stream.loop_mode = AudioStreamWAV.LOOP_FORWARD
-	stream.loop_begin = 0
-	stream.loop_end = count
-	return stream
+	return _create_looping_pcm_stream(samples)
 
 # 24. Combat Music Loop
 static func gen_combat_music() -> AudioStreamWAV:
@@ -408,10 +414,10 @@ static func gen_combat_music() -> AudioStreamWAV:
 	samples.resize(count)
 	var bpm: float = 130.0
 	var beat_sec: float = 60.0 / bpm
+	var notes: Array[float] = [146.83, 174.61, 220.00, 261.63, 220.00, 174.61, 146.83, 130.81]
 	for i in range(count):
 		var t: float = float(i) / float(SAMPLE_RATE)
 		var beat_pos: float = fmod(t, beat_sec)
-		var beat_idx: int = int(t / beat_sec)
 		
 		# Kick / bass hit on beats
 		var kick_env: float = exp(-beat_pos * 18.0)
@@ -423,18 +429,13 @@ static func gen_combat_music() -> AudioStreamWAV:
 		var hat: float = (randf() * 2.0 - 1.0) * hat_env * 0.15
 		
 		# Synth melody arpeggio in D minor (D3, F3, A3, C4)
-		var notes := [146.83, 174.61, 220.00, 261.63, 220.00, 174.61, 146.83, 130.81]
 		var note_idx: int = int(t / (beat_sec * 0.5)) % notes.size()
 		var note_pos: float = fmod(t, beat_sec * 0.5)
 		var synth_env: float = exp(-note_pos * 8.0)
 		var synth: float = sin(note_pos * notes[note_idx] * TAU) * synth_env * 0.35
 		
 		samples[i] = kick + hat + synth
-	var stream: AudioStreamWAV = create_pcm_stream(samples)
-	stream.loop_mode = AudioStreamWAV.LOOP_FORWARD
-	stream.loop_begin = 0
-	stream.loop_end = count
-	return stream
+	return _create_looping_pcm_stream(samples)
 
 # 25. Boss Music Loop (Intense, aggressive tempo)
 static func gen_boss_music() -> AudioStreamWAV:
@@ -444,6 +445,7 @@ static func gen_boss_music() -> AudioStreamWAV:
 	samples.resize(count)
 	var bpm: float = 145.0
 	var beat_sec: float = 60.0 / bpm
+	var arp_notes: Array[float] = [130.81, 155.56, 196.00, 246.94] # C minor chord
 	for i in range(count):
 		var t: float = float(i) / float(SAMPLE_RATE)
 		var beat_pos: float = fmod(t, beat_sec)
@@ -456,17 +458,12 @@ static func gen_boss_music() -> AudioStreamWAV:
 		
 		# Intense bell / sting
 		var eighth_pos: float = fmod(t, beat_sec * 0.25)
-		var arp_notes := [130.81, 155.56, 196.00, 246.94] # C minor chord
 		var arp_idx: int = int(t / (beat_sec * 0.25)) % arp_notes.size()
 		var arp_env: float = exp(-eighth_pos * 12.0)
 		var arp: float = sin(eighth_pos * arp_notes[arp_idx] * TAU) * arp_env * 0.4
 		
 		samples[i] = kick + sub + arp
-	var stream: AudioStreamWAV = create_pcm_stream(samples)
-	stream.loop_mode = AudioStreamWAV.LOOP_FORWARD
-	stream.loop_begin = 0
-	stream.loop_end = count
-	return stream
+	return _create_looping_pcm_stream(samples)
 
 # 26. Gothic Horror Menu & Intro Music (Tense, dark, ominous horror)
 static func gen_horror_menu_music() -> AudioStreamWAV:
@@ -474,6 +471,7 @@ static func gen_horror_menu_music() -> AudioStreamWAV:
 	var count: int = int(duration * SAMPLE_RATE)
 	var samples := PackedFloat32Array()
 	samples.resize(count)
+	var notes: Array[float] = [523.25, 622.25, 783.99, 830.61, 493.88, 622.25, 523.25, 392.00]
 	
 	for i in range(count):
 		var t: float = float(i) / float(SAMPLE_RATE)
@@ -496,7 +494,6 @@ static func gen_horror_menu_music() -> AudioStreamWAV:
 		
 		# 4. Eerie Music Box chime in high octave (C5, Eb5, G5, Ab5, B4)
 		var chime_step: float = fmod(t, 0.75)
-		var notes := [523.25, 622.25, 783.99, 830.61, 493.88, 622.25, 523.25, 392.00]
 		var chime_idx: int = int(t / 0.75) % notes.size()
 		var chime_env: float = exp(-chime_step * 5.5)
 		var chime: float = sin(chime_step * notes[chime_idx] * TAU) * chime_env * 0.22
@@ -506,11 +503,7 @@ static func gen_horror_menu_music() -> AudioStreamWAV:
 		
 		samples[i] = clampf(bell + drone + (tritone * chord_env) + chime + wind, -1.0, 1.0) * 0.8
 		
-	var stream: AudioStreamWAV = create_pcm_stream(samples)
-	stream.loop_mode = AudioStreamWAV.LOOP_FORWARD
-	stream.loop_begin = 0
-	stream.loop_end = count
-	return stream
+	return _create_looping_pcm_stream(samples)
 
 # 27. Crisp Punchy Player Weapon Slash & Projectile Launch
 static func gen_shoot_slash() -> AudioStreamWAV:
@@ -554,4 +547,19 @@ static func gen_shoot_soul() -> AudioStreamWAV:
 		var sweep: float = sin(t * (600.0 + sin(t * 40.0) * 120.0) * TAU) * 0.45
 		var whisper: float = (randf() * 2.0 - 1.0) * 0.25
 		samples[i] = (sweep + whisper) * env * 0.65
+	return create_pcm_stream(samples)
+
+
+# 30. Crisp Gold Coin Clink
+static func gen_coin_pickup() -> AudioStreamWAV:
+	var duration: float = 0.16
+	var count: int = int(duration * SAMPLE_RATE)
+	var samples := PackedFloat32Array()
+	samples.resize(count)
+	for i in range(count):
+		var t: float = float(i) / float(SAMPLE_RATE)
+		var env: float = exp(-t * 24.0)
+		var f1: float = 1318.51 if t < 0.045 else 1760.0 # E6 -> A6 shimmer
+		var tone: float = sin(t * f1 * TAU) * 0.5 + sin(t * f1 * 2.0 * TAU) * 0.2
+		samples[i] = tone * env * 0.55
 	return create_pcm_stream(samples)

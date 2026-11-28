@@ -1,11 +1,80 @@
-[gd_scene load_steps=5 format=3 uid="uid://c6introscreen01"]
+[gd_scene load_steps=13 format=3 uid="uid://c6introscreen01"]
 
 [ext_resource type="Script" path="res://scripts/ui/intro_screen.gd" id="1_intro"]
 [ext_resource type="Theme" path="res://assets/themes/dark_fantasy_theme.tres" id="2_thm"]
-[ext_resource type="Texture2D" path="res://assets/art/backgrounds/tower_altar_bg.png" id="3_bg"]
-[ext_resource type="Texture2D" path="res://assets/art/ui/abyssal_altar_logo.png" id="4_logo"]
+[ext_resource type="Texture2D" path="res://assets/art/backgrounds/intro_splash_keyart.png" id="3_bg"]
+[ext_resource type="Texture2D" path="res://assets/art/ui/dark_summoner_logo.png" id="4_logo"]
 
-[node name="IntroScreen" type="Control" node_paths=PackedStringArray("logo_rect", "subtitle_label", "prompt_label", "btn_skip")]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_skip"]
+content_margin_left = 14.0
+content_margin_top = 6.0
+content_margin_right = 14.0
+content_margin_bottom = 6.0
+bg_color = Color(0.08, 0.06, 0.09, 0.72)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.68, 0.54, 0.3, 0.75)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bartrack"]
+bg_color = Color(0.06, 0.05, 0.08, 0.92)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.55, 0.44, 0.25, 0.85)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_barfill"]
+bg_color = Color(0.88, 0.56, 0.22, 1)
+border_width_top = 1
+border_color = Color(1, 0.85, 0.52, 0.9)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pill"]
+content_margin_left = 20.0
+content_margin_top = 8.0
+content_margin_right = 20.0
+content_margin_bottom = 8.0
+bg_color = Color(0.06, 0.06, 0.09, 0.86)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.58, 0.48, 0.3, 0.78)
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
+
+[sub_resource type="Gradient" id="Gradient_topshade"]
+colors = PackedColorArray(0.03, 0.03, 0.045, 0.62, 0.03, 0.03, 0.045, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_topshade"]
+gradient = SubResource("Gradient_topshade")
+fill_from = Vector2(0.5, 0)
+fill_to = Vector2(0.5, 1)
+
+[sub_resource type="Gradient" id="Gradient_botshade"]
+colors = PackedColorArray(0.025, 0.025, 0.04, 0, 0.025, 0.025, 0.04, 0.88)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_botshade"]
+gradient = SubResource("Gradient_botshade")
+fill_from = Vector2(0.5, 0)
+fill_to = Vector2(0.5, 1)
+
+[node name="IntroScreen" type="Control" node_paths=PackedStringArray("logo_rect", "subtitle_label", "prompt_label", "btn_skip", "status_label", "loading_bar", "profile_pill_label", "version_label")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -14,10 +83,14 @@ grow_horizontal = 2
 grow_vertical = 2
 theme = ExtResource("2_thm")
 script = ExtResource("1_intro")
-logo_rect = NodePath("CenterContent/LogoRect")
-subtitle_label = NodePath("CenterContent/Subtitle")
-prompt_label = NodePath("PromptContainer/PromptLabel")
+logo_rect = NodePath("HeaderLogoBlock/LogoRect")
+subtitle_label = NodePath("HeaderLogoBlock/Subtitle")
+prompt_label = NodePath("BottomBlock/PromptLabel")
 btn_skip = NodePath("TopBar/BtnSkip")
+status_label = NodePath("BottomBlock/StatusLabel")
+loading_bar = NodePath("BottomBlock/LoadingBar")
+profile_pill_label = NodePath("BottomBlock/ProfilePill/LblProfile")
+version_label = NodePath("BottomBlock/VersionLabel")
 
 [node name="BgTexture" type="TextureRect" parent="."]
 layout_mode = 1
@@ -26,143 +99,175 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 texture = ExtResource("3_bg")
 expand_mode = 1
 stretch_mode = 6
 
-[node name="VignetteOverlay" type="ColorRect" parent="."]
+[node name="TopShade" type="TextureRect" parent="."]
 layout_mode = 1
-anchors_preset = 15
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 360.0
+grow_horizontal = 2
+mouse_filter = 2
+texture = SubResource("GradientTexture2D_topshade")
+expand_mode = 1
+
+[node name="BottomShade" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_top = -460.0
 grow_horizontal = 2
-grow_vertical = 2
+grow_vertical = 0
 mouse_filter = 2
-color = Color(0.04, 0.02, 0.07, 0.4)
-
-[node name="MistParticles" type="CPUParticles2D" parent="."]
-position = Vector2(360, 640)
-amount = 32
-lifetime = 7.5
-preprocess = 2.0
-emission_shape = 3
-emission_rect_extents = Vector2(360, 600)
-direction = Vector2(1, 0)
-spread = 45.0
-gravity = Vector2(0, -4)
-initial_velocity_min = 10.0
-initial_velocity_max = 25.0
-scale_amount_min = 18.0
-scale_amount_max = 34.0
-color = Color(0.35, 0.2, 0.55, 0.18)
+texture = SubResource("GradientTexture2D_botshade")
+expand_mode = 1
 
 [node name="EmberParticles" type="CPUParticles2D" parent="."]
-position = Vector2(360, 1260)
-amount = 60
-lifetime = 4.2
+position = Vector2(360, 1250)
+amount = 50
+lifetime = 4.6
 preprocess = 1.5
 emission_shape = 3
 emission_rect_extents = Vector2(340, 20)
 direction = Vector2(0, -1)
-spread = 30.0
-gravity = Vector2(0, -15)
+spread = 28.0
+gravity = Vector2(0, -16)
 initial_velocity_min = 45.0
-initial_velocity_max = 120.0
-scale_amount_min = 2.5
-scale_amount_max = 6.0
-color = Color(1.0, 0.65, 0.25, 0.75)
-
-[node name="ArcaneEmbers" type="CPUParticles2D" parent="."]
-position = Vector2(360, 1260)
-amount = 35
-lifetime = 3.6
-preprocess = 1.0
-emission_shape = 3
-emission_rect_extents = Vector2(320, 20)
-direction = Vector2(0, -1)
-spread = 24.0
-gravity = Vector2(0, -22)
-initial_velocity_min = 60.0
-initial_velocity_max = 140.0
-scale_amount_min = 1.8
-scale_amount_max = 4.5
-color = Color(0.85, 0.35, 0.95, 0.8)
-
-[node name="CenterContent" type="VBoxContainer" parent="."]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -260.0
-offset_top = -280.0
-offset_right = 260.0
-offset_bottom = -30.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_constants/separation = 16
-alignment = 1
-
-[node name="LogoRect" type="TextureRect" parent="CenterContent"]
-custom_minimum_size = Vector2(500, 200)
-layout_mode = 2
-texture = ExtResource("4_logo")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="Subtitle" type="Label" parent="CenterContent"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.9, 0.78, 1, 1)
-theme_override_colors/font_shadow_color = Color(0.3, 0.08, 0.45, 0.9)
-theme_override_constants/shadow_offset_y = 2
-theme_override_font_sizes/font_size = 16
-text = "DARK-FANTASY ACTION ROGUELIKE"
-horizontal_alignment = 1
-
-[node name="PromptContainer" type="Control" parent="."]
-layout_mode = 1
-anchors_preset = 7
-anchor_left = 0.5
-anchor_top = 1.0
-anchor_right = 0.5
-anchor_bottom = 1.0
-offset_left = -250.0
-offset_top = -200.0
-offset_right = 250.0
-offset_bottom = -130.0
-grow_horizontal = 2
-grow_vertical = 0
-
-[node name="PromptLabel" type="Label" parent="PromptContainer"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-theme_override_colors/font_color = Color(1, 0.9, 0.45, 1)
-theme_override_colors/font_shadow_color = Color(0.4, 0.1, 0.6, 0.9)
-theme_override_constants/shadow_offset_y = 2
-theme_override_font_sizes/font_size = 20
-text = "— TAP ANYWHERE TO ENTER —"
-horizontal_alignment = 1
-vertical_alignment = 1
+initial_velocity_max = 115.0
+scale_amount_min = 2.0
+scale_amount_max = 5.0
+color = Color(1, 0.58, 0.2, 0.78)
 
 [node name="TopBar" type="HBoxContainer" parent="."]
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
-offset_left = 30.0
-offset_top = 40.0
-offset_right = -30.0
-offset_bottom = 85.0
+offset_left = 24.0
+offset_top = 34.0
+offset_right = -24.0
+offset_bottom = 78.0
 grow_horizontal = 2
 alignment = 2
 
 [node name="BtnSkip" type="Button" parent="TopBar"]
-custom_minimum_size = Vector2(100, 42)
+custom_minimum_size = Vector2(106, 40)
 layout_mode = 2
-theme_override_colors/font_color = Color(0.85, 0.8, 0.9, 1)
-theme_override_font_sizes/font_size = 15
+theme_override_colors/font_color = Color(0.95, 0.86, 0.62, 1)
+theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("StyleBoxFlat_skip")
+theme_override_styles/hover = SubResource("StyleBoxFlat_skip")
 text = "SKIP >>"
+
+[node name="HeaderLogoBlock" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -260.0
+offset_top = 64.0
+offset_right = 260.0
+offset_bottom = 360.0
+grow_horizontal = 2
+mouse_filter = 2
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="LogoRect" type="TextureRect" parent="HeaderLogoBlock"]
+custom_minimum_size = Vector2(460, 250)
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("4_logo")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Subtitle" type="Label" parent="HeaderLogoBlock"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.8, 0.58, 1)
+theme_override_colors/font_shadow_color = Color(0.05, 0.04, 0.06, 0.95)
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 15
+text = "✦  RISE OF THE ABYSSAL SUMMONER  ✦"
+horizontal_alignment = 1
+
+[node name="BottomBlock" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 56.0
+offset_top = -340.0
+offset_right = -56.0
+offset_bottom = -28.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+theme_override_constants/separation = 16
+alignment = 1
+
+[node name="StatusLabel" type="Label" parent="BottomBlock"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.92, 0.87, 0.78, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.9)
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 17
+text = "UNSEALING THE ABYSSAL TOWER..."
+horizontal_alignment = 1
+
+[node name="LoadingBar" type="ProgressBar" parent="BottomBlock"]
+custom_minimum_size = Vector2(0, 12)
+layout_mode = 2
+mouse_filter = 2
+theme_override_styles/background = SubResource("StyleBoxFlat_bartrack")
+theme_override_styles/fill = SubResource("StyleBoxFlat_barfill")
+max_value = 100.0
+value = 50.0
+show_percentage = false
+
+[node name="DividerTop" type="ColorRect" parent="BottomBlock"]
+custom_minimum_size = Vector2(360, 1)
+layout_mode = 2
+size_flags_horizontal = 4
+mouse_filter = 2
+color = Color(0.68, 0.54, 0.3, 0.45)
+
+[node name="PromptLabel" type="Label" parent="BottomBlock"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.84, 0.44, 1)
+theme_override_colors/font_shadow_color = Color(0.28, 0.14, 0.04, 0.95)
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 24
+text = "✦  TAP ANYWHERE TO ENTER  ✦"
+horizontal_alignment = 1
+
+[node name="DividerBottom" type="ColorRect" parent="BottomBlock"]
+custom_minimum_size = Vector2(360, 1)
+layout_mode = 2
+size_flags_horizontal = 4
+mouse_filter = 2
+color = Color(0.68, 0.54, 0.3, 0.45)
+
+[node name="ProfilePill" type="PanelContainer" parent="BottomBlock"]
+layout_mode = 2
+size_flags_horizontal = 4
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_pill")
+
+[node name="LblProfile" type="Label" parent="BottomBlock/ProfilePill"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.82, 0.84, 0.9, 1)
+theme_override_font_sizes/font_size = 15
+text = "Hunter Raven • Lv. 1 • Online: Realm Abyss-1"
+horizontal_alignment = 1
+
+[node name="VersionLabel" type="Label" parent="BottomBlock"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.6, 0.58, 0.62, 0.9)
+theme_override_font_sizes/font_size = 14
+text = "DARK SUMMONER • v1.2.0"
+horizontal_alignment = 1

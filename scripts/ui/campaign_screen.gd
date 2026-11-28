@@ -11,6 +11,7 @@ signal difficulty_changed(diff_name: String)
 signal hunt_clicked()
 signal camp_clicked()
 signal daily_tasks_requested()
+signal settings_requested()
 
 @onready var island_container: Control = $IslandStage/DioramaIsland
 @onready var chapter_label: Label = $IslandStage/ChapterHeader/ChapterShield/ChapterLabel
@@ -37,6 +38,7 @@ signal daily_tasks_requested()
 @onready var btn_topup: Button = $RightSidebar/TopUpBtn
 
 var _t: float = 0.0
+var _diorama_base_y: float = 152.0
 var current_chapter: int = 1
 var is_cleared: bool = true
 var _toast_label: Label = null
@@ -61,7 +63,7 @@ func _ready() -> void:
 
 	var hunt_button := $BottomControls/QuickAccessRow/HuntBtn as Button
 	if hunt_button:
-		hunt_button.text = "🗡 Patrol Rewards"
+		hunt_button.text = "Patrol Rewards"
 
 	var chat_ticker := get_node_or_null("BottomControls/ChatTicker") as Control
 	if chat_ticker:
@@ -78,10 +80,33 @@ func _ready() -> void:
 		camp_clicked.emit()
 	)
 	
+	_nest_difficulty_buttons_in_scroll()
+	_refresh_stars_display()
 	_setup_difficulty_buttons()
 	_setup_event_banner()
 	_setup_sidebar_buttons()
 	_setup_toast_label()
+	if island_container:
+		_diorama_base_y = island_container.position.y
+
+func _nest_difficulty_buttons_in_scroll() -> void:
+	var scroll_bg := get_node_or_null("IslandStage/ChapterHeader/DifficultyScrollBg") as PanelContainer
+	var diff_hbox := get_node_or_null("IslandStage/ChapterHeader/DifficultyHBox") as HBoxContainer
+	if scroll_bg and diff_hbox and diff_hbox.get_parent() != scroll_bg:
+		diff_hbox.get_parent().remove_child(diff_hbox)
+		scroll_bg.add_child(diff_hbox)
+
+func _refresh_stars_display() -> void:
+	var stars_count: int = SaveManager.chapter_stars.get(current_chapter, 3) if SaveManager else 3
+	var gold_star := TextureLoader.get_texture("res://assets/art/ui_campaign/star_gold_single.png")
+	if not gold_star:
+		gold_star = TextureLoader.get_texture("res://assets/art/ui_campaign/star_gold.png")
+	for i in range(1, 4):
+		var star_node := get_node_or_null("IslandStage/ChapterHeader/StarsIcons/Star%d" % i) as TextureRect
+		if star_node:
+			var earned := i <= stars_count
+			star_node.texture = gold_star
+			star_node.modulate = Color(1.0, 1.0, 1.0, 1.0) if earned else Color(0.42, 0.45, 0.54, 0.65)
 
 func _setup_difficulty_buttons() -> void:
 	if btn_diff_normal:
@@ -112,15 +137,56 @@ func _select_difficulty(diff: String) -> void:
 	difficulty_changed.emit(diff)
 
 func _update_difficulty_visuals(active_diff: String) -> void:
-	var active_col := Color(1.0, 0.9, 0.35, 1.0)
-	var inactive_col := Color(0.65, 0.72, 0.85, 0.75)
-	
-	if btn_diff_normal:
-		btn_diff_normal.add_theme_color_override("font_color", active_col if active_diff == "normal" else inactive_col)
-	if btn_diff_hard:
-		btn_diff_hard.add_theme_color_override("font_color", active_col if active_diff == "hard" else inactive_col)
-	if btn_diff_torment:
-		btn_diff_torment.add_theme_color_override("font_color", active_col if active_diff == "torment" else inactive_col)
+	var active_col := Color(1.0, 0.94, 0.65, 1.0)
+	var inactive_col := Color(0.75, 0.78, 0.85, 0.85)
+	var diff_active_tex := TextureLoader.get_texture("res://assets/art/ui_campaign/diff_pill_active.png")
+	var diff_idle_tex := TextureLoader.get_texture("res://assets/art/ui_campaign/diff_pill_idle.png")
+	var active_sb: StyleBox
+	if diff_active_tex:
+		var sbt := StyleBoxTexture.new()
+		sbt.texture = diff_active_tex
+		sbt.texture_margin_left = 14.0
+		sbt.texture_margin_right = 14.0
+		sbt.texture_margin_top = 8.0
+		sbt.texture_margin_bottom = 8.0
+		active_sb = sbt
+	else:
+		var sbf := StyleBoxFlat.new()
+		sbf.bg_color = Color(0.45, 0.34, 0.14, 0.92)
+		sbf.border_color = Color(0.92, 0.76, 0.36, 0.98)
+		sbf.set_border_width_all(2)
+		sbf.set_corner_radius_all(18)
+		active_sb = sbf
+	var inactive_sb: StyleBox
+	if diff_idle_tex:
+		var sbi := StyleBoxTexture.new()
+		sbi.texture = diff_idle_tex
+		sbi.texture_margin_left = 14.0
+		sbi.texture_margin_right = 14.0
+		sbi.texture_margin_top = 8.0
+		sbi.texture_margin_bottom = 8.0
+		inactive_sb = sbi
+	else:
+		inactive_sb = StyleBoxEmpty.new()
+
+	var pairs := [
+		[btn_diff_normal, "normal"],
+		[btn_diff_hard, "hard"],
+		[btn_diff_torment, "torment"]
+	]
+	for pair in pairs:
+		var btn: Button = pair[0]
+		var diff_id: String = pair[1]
+		if not btn:
+			continue
+		var is_act := (active_diff == diff_id)
+		btn.add_theme_color_override("font_color", active_col if is_act else inactive_col)
+		btn.add_theme_color_override("font_hover_color", active_col)
+		var sb: StyleBox = active_sb if is_act else inactive_sb
+		btn.add_theme_stylebox_override("normal", sb)
+		btn.add_theme_stylebox_override("hover", sb)
+		btn.add_theme_stylebox_override("pressed", sb)
+		btn.add_theme_stylebox_override("focus", sb)
 
 func _setup_event_banner() -> void:
 	if banner_trophy:
@@ -157,6 +223,28 @@ func _setup_sidebar_buttons() -> void:
 			else:
 				show_toast("💎 Opening Shop Treasury...")
 		)
+	var right_sidebar := get_node_or_null("RightSidebar") as Control
+	if right_sidebar and not right_sidebar.get_node_or_null("SettingsBtn"):
+		var settings_btn := Button.new()
+		settings_btn.name = "SettingsBtn"
+		settings_btn.text = "⚙ MENU"
+		settings_btn.tooltip_text = "Audio settings and Main Menu"
+		settings_btn.custom_minimum_size = Vector2(96, 48)
+		settings_btn.add_theme_font_size_override("font_size", 14)
+		settings_btn.add_theme_color_override("font_color", Color(0.95, 0.9, 0.72, 1.0))
+		var sb := StyleBoxFlat.new()
+		sb.bg_color = Color(0.10, 0.12, 0.20, 0.92)
+		sb.border_color = Color(0.55, 0.50, 0.72, 0.85)
+		sb.set_border_width_all(1)
+		sb.set_corner_radius_all(10)
+		settings_btn.add_theme_stylebox_override("normal", sb)
+		settings_btn.add_theme_stylebox_override("hover", sb)
+		settings_btn.add_theme_stylebox_override("pressed", sb)
+		settings_btn.pressed.connect(func():
+			if AudioManager: AudioManager.play_sfx("ui_click")
+			settings_requested.emit()
+		)
+		right_sidebar.add_child(settings_btn)
 
 func _setup_toast_label() -> void:
 	_toast_label = Label.new()
@@ -209,7 +297,9 @@ func _on_hunt_pressed() -> void:
 	var claimed: Dictionary = SaveManager.claim_patrol_rewards()
 	if not bool(claimed.get("ready", false)):
 		var remaining: int = int(claimed.get("seconds_remaining", 0))
+		@warning_ignore("integer_division")
 		var hours: int = remaining / 3600
+		@warning_ignore("integer_division")
 		var minutes: int = (remaining % 3600) / 60
 		show_toast("Patrol rewards ready in %02d:%02d" % [hours, minutes])
 		return
@@ -220,4 +310,4 @@ func _on_hunt_pressed() -> void:
 func _process(delta: float) -> void:
 	_t += delta
 	if island_container:
-		island_container.position.y = sin(_t * 1.5) * 6.0
+		island_container.position.y = _diorama_base_y + sin(_t * 1.5) * 5.0

@@ -28,6 +28,7 @@ var player_level: int = 24
 
 func _ready() -> void:
 	custom_minimum_size = Vector2(0, 116)
+	_apply_cartouche_frame()
 	_setup_signals()
 	refresh_display()
 	if SaveManager:
@@ -38,6 +39,23 @@ func _ready() -> void:
 		SaveManager.profile_changed.connect(func(): refresh_display())
 	if GameManager:
 		GameManager.gold_changed.connect(func(_g): refresh_display())
+
+func _apply_cartouche_frame() -> void:
+	var left_cluster := get_node_or_null("HeaderContent/LeftCluster") as Control
+	var crt_tex := TextureLoader.get_texture("res://assets/art/ui_header/profile_cartouche_left.png")
+	if not left_cluster or not crt_tex:
+		return
+	var frame_rect := left_cluster.get_node_or_null("CartoucheFrameRect") as TextureRect
+	if not frame_rect:
+		frame_rect = TextureRect.new()
+		frame_rect.name = "CartoucheFrameRect"
+		frame_rect.texture = crt_tex
+		frame_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		frame_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		frame_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		left_cluster.add_child(frame_rect)
+		left_cluster.move_child(frame_rect, 0)
+		frame_rect.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 
 func _setup_signals() -> void:
 	var btn_energy := $HeaderContent/RightCluster/EnergyPill/HBox/PlusBtn as Button
@@ -53,13 +71,18 @@ func _setup_signals() -> void:
 	if btn_avatar: btn_avatar.pressed.connect(func(): avatar_clicked.emit())
 
 func refresh_display() -> void:
-	var lvl: int = SaveManager.player_level if SaveManager else 5
+	var lvl: int = SaveManager.player_level if SaveManager else 1
 	var p_name: String = SaveManager.player_name if SaveManager else "Hunter Raven"
-	var power: int = SaveManager.calculate_combat_power() if SaveManager else 14850
+	var power: int = SaveManager.calculate_combat_power() if SaveManager else 6420
 	var cur_eng: int = SaveManager.energy if SaveManager else 45
 	var max_eng: int = SaveManager.max_energy if SaveManager else 50
 	var g: int = GameManager.run_gold if (GameManager and GameManager.is_in_run) else (SaveManager.profile_gold if SaveManager else 5000)
 	var gem_val: int = SaveManager.gems if SaveManager else 150
+	var active_hero: String = SaveManager.active_character_id if (SaveManager and not SaveManager.active_character_id.is_empty()) else "kael_varyn"
+	if avatar_rect:
+		var portrait := TextureLoader.get_texture("res://assets/art/characters/%s_portrait.png" % active_hero)
+		if portrait:
+			avatar_rect.texture = portrait
 	
 	if level_label:
 		level_label.text = "%d" % lvl
@@ -105,6 +128,7 @@ func _format_number(val: int) -> String:
 	if val >= 1000000:
 		return "%.1fM" % (float(val) / 1000000.0)
 	elif val >= 1000:
+		@warning_ignore("integer_division")
 		var thousands := val / 1000
 		var remainder := val % 1000
 		return "%d,%03d" % [thousands, remainder]

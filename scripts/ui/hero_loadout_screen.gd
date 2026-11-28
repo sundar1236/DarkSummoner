@@ -4,10 +4,12 @@ extends Control
 # Hero Loadout Screen (Screen B - Ref Images 4, 5, 6)
 # Houses the 3 sub-tabs: Characters (0), Gear (1), Runes / Summoning Circle (2).
 
+@warning_ignore("unused_signal")
 signal back_requested()
 signal character_changed(char_id: String)
 signal star_up_requested(char_id: String)
 signal blacksmith_requested()
+@warning_ignore("unused_signal")
 signal rune_workshop_requested()
 
 @export var active_subtab: int = 1 # Default to Gear or Runes
@@ -49,8 +51,42 @@ signal rune_workshop_requested()
 @onready var btn_select_binder: Button = $ContentContainer/ViewCharacters/BottomRoster/Grid/CardBinder/VBox/SelectBtn
 @onready var btn_unlock_valkyrie: Button = $ContentContainer/ViewCharacters/BottomRoster/Grid/CardValkyrie/VBox/UnlockBtn
 
-var current_char_id: String = "shadow_hunter"
-var hunter_stars: int = 2
+const GEAR_ART_TEXTURES: Dictionary = {
+	"shadow_dagger": "res://assets/art/ui_gear/gear_shadow_dagger.png",
+	"shadow_blade": "res://assets/art/ui_gear/gear_fire_sword.png",
+	"abyssal_scythe": "res://assets/art/ui_gear/gear_fire_sword.png",
+	"ember_amulet": "res://assets/art/ui_gear/gear_ember_amulet.png",
+	"void_pendant": "res://assets/art/ui_gear/gear_void_amulet.png",
+	"wraith_ring": "res://assets/art/ui_gear/gear_wraith_ring.png",
+	"soul_band": "res://assets/art/ui_gear/gear_wraith_ring.png",
+	"void_helm": "res://assets/art/ui_gear/gear_void_helm.png",
+	"storm_circlet": "res://assets/art/ui_gear/gear_void_helm.png",
+	"iron_shield": "res://assets/art/ui_gear/gear_iron_shield.png",
+	"void_shield": "res://assets/art/ui_gear/gear_iron_shield.png",
+	"ranger_boots": "res://assets/art/ui_gear/gear_ranger_boots.png",
+	"titan_greaves": "res://assets/art/ui_gear/gear_ranger_boots.png"
+}
+
+const SLOT_FALLBACK_ART: Dictionary = {
+	"weapon": "res://assets/art/ui_gear/gear_starter_sword.png",
+	"amulet": "res://assets/art/ui_gear/gear_ember_amulet.png",
+	"ring": "res://assets/art/ui_gear/gear_wraith_ring.png",
+	"helmet": "res://assets/art/ui_gear/gear_void_helm.png",
+	"armor": "res://assets/art/ui_gear/gear_iron_shield.png",
+	"boots": "res://assets/art/ui_gear/gear_ranger_boots.png"
+}
+
+const SLOT_ACCENT_COLORS: Dictionary = {
+	"weapon": Color(0.76, 0.34, 0.96, 0.95),
+	"amulet": Color(0.92, 0.68, 0.25, 0.95),
+	"ring": Color(0.32, 0.72, 0.98, 0.95),
+	"helmet": Color(0.88, 0.74, 0.34, 0.95),
+	"armor": Color(0.86, 0.72, 0.34, 0.95),
+	"boots": Color(0.86, 0.72, 0.34, 0.95)
+}
+
+var current_char_id: String = "kael_varyn"
+var hunter_stars: int = 1
 var gear_sort_index: int = 0
 var runes_sort_index: int = 0
 var _toast_label: Label = null
@@ -80,9 +116,11 @@ func _ready() -> void:
 		
 	var btn_blacksmith := $ContentContainer/ViewGear/MiddleBar/BlacksmithBtn as Button
 	if btn_blacksmith:
+		_apply_pill_texture_style(btn_blacksmith, "res://assets/art/ui_gear/pill_steel_blank.png")
+		btn_blacksmith.focus_mode = Control.FOCUS_NONE
 		btn_blacksmith.pressed.connect(func():
 			if AudioManager: AudioManager.play_sfx("ui_click")
-			show_toast("🔨 Blacksmith: Equipment Forge ready!")
+			show_toast("Blacksmith: Equipment Forge ready!")
 			blacksmith_requested.emit()
 		)
 		
@@ -101,14 +139,33 @@ func _ready() -> void:
 	if btn_sacred:
 		btn_sacred.visible = false
 
-	# Stat Pill Info Button
+	# Stat Pill Styling & Info Button
+	var stat_pill := $ContentContainer/ViewGear/TopHalf/StatPill as PanelContainer
+	if stat_pill:
+		var sp_style := StyleBoxFlat.new()
+		sp_style.bg_color = Color(0.08, 0.09, 0.13, 0.95)
+		sp_style.border_color = Color(0.76, 0.58, 0.25, 0.92)
+		sp_style.set_border_width_all(2)
+		sp_style.set_corner_radius_all(14)
+		stat_pill.add_theme_stylebox_override("panel", sp_style)
 	var btn_info := $ContentContainer/ViewGear/TopHalf/StatPill/HBox.get_node_or_null("InfoBtn") as Button
 	if btn_info:
+		var info_sb := StyleBoxFlat.new()
+		info_sb.bg_color = Color(0.14, 0.17, 0.24, 0.95)
+		info_sb.border_color = Color(0.65, 0.55, 0.3, 0.85)
+		info_sb.set_border_width_all(1)
+		info_sb.set_corner_radius_all(6)
+		btn_info.add_theme_stylebox_override("normal", info_sb)
+		btn_info.add_theme_stylebox_override("hover", info_sb)
+		btn_info.add_theme_stylebox_override("pressed", info_sb)
+		btn_info.focus_mode = Control.FOCUS_NONE
 		btn_info.pressed.connect(_toggle_combat_power_modal)
 
 	# Sort Buttons on Gear and Runes subtabs
 	var btn_gear_sort := $ContentContainer/ViewGear/MiddleBar.get_node_or_null("SortBtn") as Button
 	if btn_gear_sort:
+		_apply_pill_texture_style(btn_gear_sort, "res://assets/art/ui_gear/pill_steel_blank.png")
+		btn_gear_sort.focus_mode = Control.FOCUS_NONE
 		var sort_names := ["▼ By Quality", "▼ By Upgrade", "▼ By Slot"]
 		btn_gear_sort.text = sort_names[gear_sort_index]
 		btn_gear_sort.pressed.connect(func():
@@ -139,6 +196,36 @@ func _setup_runes_dock_wiring() -> void:
 	if rune_inventory:
 		rune_inventory.visible = false
 
+func _apply_pill_texture_style(btn: Button, tex_path: String) -> void:
+	var tex := TextureLoader.get_texture(tex_path)
+	if not tex or not btn:
+		return
+	var sb := StyleBoxTexture.new()
+	sb.texture = tex
+	sb.texture_margin_left = 20.0
+	sb.texture_margin_right = 20.0
+	sb.texture_margin_top = 10.0
+	sb.texture_margin_bottom = 10.0
+	btn.add_theme_stylebox_override("normal", sb)
+	btn.add_theme_stylebox_override("hover", sb)
+	btn.add_theme_stylebox_override("pressed", sb)
+	btn.add_theme_stylebox_override("focus", sb)
+
+func _get_gear_card_texture(item: ItemInstance) -> Texture2D:
+	if item and item.data:
+		var mapped_path: String = str(GEAR_ART_TEXTURES.get(item.data.id, ""))
+		if not mapped_path.is_empty():
+			var tex := TextureLoader.get_texture(mapped_path)
+			if tex:
+				return tex
+		var fallback_path: String = str(SLOT_FALLBACK_ART.get(item.data.equipment_slot, ""))
+		if not fallback_path.is_empty():
+			var slot_tex := TextureLoader.get_texture(fallback_path)
+			if slot_tex:
+				return slot_tex
+		return item.data.get_icon_texture()
+	return TextureLoader.get_texture("res://assets/art/ui_gear/slot_empty_rune.png")
+
 func refresh_loadout() -> void:
 	if not SaveManager:
 		return
@@ -151,25 +238,51 @@ func refresh_loadout() -> void:
 		"armor": $ContentContainer/ViewGear/TopHalf/RightSlots/SlotArmor,
 		"boots": $ContentContainer/ViewGear/TopHalf/RightSlots/SlotBoots
 	}
-	var slot_icons := {
-		"weapon": "🗡", "amulet": "📿", "ring": "💍",
-		"helmet": "👑", "armor": "🥋", "boots": "👢"
-	}
 	for slot_name in slots:
-		var slot: Control = slots[slot_name]
+		var slot: PanelContainer = slots[slot_name] as PanelContainer
+		if not slot:
+			continue
 		var item: ItemInstance = SaveManager.get_equipped_gear(slot_name)
+		var slot_style := StyleBoxFlat.new()
+		slot_style.bg_color = Color(0.08, 0.09, 0.14, 0.96)
+		slot_style.border_color = SLOT_ACCENT_COLORS.get(slot_name, Color(0.75, 0.62, 0.3, 0.9)) if item else Color(0.28, 0.32, 0.42, 0.7)
+		slot_style.set_border_width_all(2)
+		slot_style.set_corner_radius_all(8)
+		slot.add_theme_stylebox_override("panel", slot_style)
+
+		var vbox := slot.get_node_or_null("VBox") as VBoxContainer
 		var icon_lbl := slot.get_node_or_null("VBox/Icon") as Label
 		var level_lbl := slot.get_node_or_null("VBox/Level") as Label
+		var art_rect := slot.get_node_or_null("VBox/ArtIcon") as TextureRect
+		if vbox and not art_rect:
+			art_rect = TextureRect.new()
+			art_rect.name = "ArtIcon"
+			art_rect.custom_minimum_size = Vector2(64, 64)
+			art_rect.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+			art_rect.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+			art_rect.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+			art_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			vbox.add_child(art_rect)
+			vbox.move_child(art_rect, 0)
+
+		if art_rect:
+			art_rect.texture = _get_gear_card_texture(item) if (item and item.data) else TextureLoader.get_texture("res://assets/art/ui_gear/slot_empty_rune.png")
 		if icon_lbl:
-			icon_lbl.text = slot_icons[slot_name] if not item else slot_icons[slot_name]
+			icon_lbl.visible = false
 		if level_lbl:
 			if item and item.data:
 				level_lbl.text = "%s\n+%d" % [item.data.name, item.upgrade_level]
+				level_lbl.add_theme_font_size_override("font_size", 11)
+				level_lbl.add_theme_color_override("font_color", Color(1.0, 0.88, 0.48, 1.0) if slot_name != "ring" else Color(0.55, 0.86, 1.0, 1.0))
 			else:
 				level_lbl.text = "Empty"
+				level_lbl.add_theme_font_size_override("font_size", 12)
+				level_lbl.add_theme_color_override("font_color", Color(0.55, 0.6, 0.7, 0.85))
 				
 	_update_character_ui()
 	_refresh_gear_inventory_grid()
+	if gear_pedestal:
+		gear_pedestal.set_character(current_char_id)
 
 func _refresh_gear_inventory_grid() -> void:
 	var gear_grid := $ContentContainer/ViewGear/BottomInventory/Grid as GridContainer
@@ -179,68 +292,100 @@ func _refresh_gear_inventory_grid() -> void:
 		gear_grid.remove_child(child)
 		child.queue_free()
 
-	var slot_icons := {
-		"weapon": "🗡", "amulet": "📿", "ring": "💍",
-		"helmet": "👑", "armor": "🥋", "boots": "👢"
-	}
+	var empty_rune_tex := TextureLoader.get_texture("res://assets/art/ui_gear/slot_empty_rune.png")
+	var ribbon_eq_tex := TextureLoader.get_texture("res://assets/art/ui_gear/ribbon_equipped.png")
 	var items: Array[ItemInstance] = _get_sorted_gear_items(SaveManager.get_gear_items(), gear_sort_index)
 	for item in items:
 		if not item or not item.data:
 			continue
 		var slot_name := item.data.equipment_slot
+		var equipped := str(SaveManager.equipped_gear.get(slot_name, "")) == item.uid
+		var is_selected := (item.uid == _selected_gear_uid)
+
 		var button := Button.new()
-		button.custom_minimum_size = Vector2(104, 104)
+		button.custom_minimum_size = Vector2(124, 118)
 		button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		button.focus_mode = Control.FOCUS_NONE
-		var equipped := str(SaveManager.equipped_gear.get(slot_name, "")) == item.uid
-		
+		button.text = ""
+
 		var style := StyleBoxFlat.new()
-		style.bg_color = Color(0.1, 0.12, 0.18, 0.95) if equipped else Color(0.06, 0.08, 0.13, 0.92)
-		style.border_color = Color(0.95, 0.78, 0.25, 1.0) if equipped else Color(0.32, 0.4, 0.55, 0.75)
-		style.set_border_width_all(2 if equipped else 1)
-		style.set_corner_radius_all(10)
-		
+		style.bg_color = Color(0.08, 0.09, 0.13, 0.96)
+		if is_selected:
+			style.border_color = Color(0.28, 0.88, 1.0, 1.0)
+		elif equipped:
+			style.border_color = Color(0.92, 0.74, 0.28, 0.96)
+		else:
+			style.border_color = Color(0.32, 0.38, 0.5, 0.8)
+		style.set_border_width_all(2)
+		style.set_corner_radius_all(6)
 		button.add_theme_stylebox_override("normal", style)
 		button.add_theme_stylebox_override("hover", style)
 		button.add_theme_stylebox_override("pressed", style)
 		button.add_theme_stylebox_override("focus", style)
-		
-		var title_col := Color(1.0, 0.9, 0.45, 1.0) if equipped else Color(0.85, 0.88, 0.95, 1.0)
-		button.add_theme_color_override("font_color", title_col)
-		button.text = "%s\n%s\n%s" % [
-			slot_icons.get(slot_name, "◆"),
-			item.data.name,
-			"★ Equipped" if equipped else item.rarity.capitalize()
-		]
-		button.add_theme_font_size_override("font_size", 12)
+
+		var art := TextureRect.new()
+		art.texture = _get_gear_card_texture(item)
+		art.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		art.offset_left = 4.0
+		art.offset_top = 4.0
+		art.offset_right = -4.0
+		art.offset_bottom = -4.0
+		art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		art.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		button.add_child(art)
+
+		if equipped and ribbon_eq_tex:
+			var eq_ribbon := TextureRect.new()
+			eq_ribbon.texture = ribbon_eq_tex
+			eq_ribbon.set_anchors_and_offsets_preset(Control.PRESET_TOP_LEFT)
+			eq_ribbon.offset_left = 0.0
+			eq_ribbon.offset_top = 0.0
+			eq_ribbon.offset_right = 88.0
+			eq_ribbon.offset_bottom = 84.0
+			eq_ribbon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+			eq_ribbon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT
+			eq_ribbon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			button.add_child(eq_ribbon)
+
+		var footer_lbl := Label.new()
+		footer_lbl.text = "★" if equipped else "%s +%d" % [item.data.name, item.upgrade_level]
+		footer_lbl.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
+		footer_lbl.offset_top = -22.0
+		footer_lbl.offset_bottom = -3.0
+		footer_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		footer_lbl.add_theme_font_size_override("font_size", 14 if equipped else 11)
+		footer_lbl.add_theme_color_override("font_color", Color(1.0, 0.84, 0.25, 1.0) if equipped else Color(0.9, 0.92, 0.96, 1.0))
+		footer_lbl.add_theme_color_override("font_shadow_color", Color(0.0, 0.0, 0.0, 0.95))
+		footer_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		button.add_child(footer_lbl)
+
 		var item_uid := item.uid
-		if item.uid == _selected_gear_uid:
-			button.text += "\n[Selected]"
 		button.pressed.connect(func():
 			_show_gear_details(item_uid)
 		)
 		gear_grid.add_child(button)
 
-	# Fill remaining slots up to at least 25 (5 full rows of 5) with clean gothic empty backpack slots
-	var total_slots := maxi(25, ((items.size() + 4) / 5) * 5)
+	# Fill remaining slots up to at least 20 (4 full rows of 5) with carved stone rune empty slots
+	@warning_ignore("integer_division")
+	var total_slots := maxi(20, ((items.size() + 4) / 5) * 5)
 	for i in range(items.size(), total_slots):
 		var empty_panel := PanelContainer.new()
-		empty_panel.custom_minimum_size = Vector2(104, 104)
+		empty_panel.custom_minimum_size = Vector2(124, 118)
 		empty_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		var empty_style := StyleBoxFlat.new()
-		empty_style.bg_color = Color(0.04, 0.05, 0.08, 0.55)
-		empty_style.border_color = Color(0.18, 0.22, 0.32, 0.5)
+		empty_style.bg_color = Color(0.06, 0.07, 0.1, 0.85)
+		empty_style.border_color = Color(0.2, 0.22, 0.28, 0.65)
 		empty_style.set_border_width_all(1)
-		empty_style.set_corner_radius_all(8)
+		empty_style.set_corner_radius_all(6)
 		empty_panel.add_theme_stylebox_override("panel", empty_style)
-		
-		var empty_lbl := Label.new()
-		empty_lbl.text = "✦"
-		empty_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		empty_lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-		empty_lbl.add_theme_font_size_override("font_size", 16)
-		empty_lbl.add_theme_color_override("font_color", Color(0.25, 0.3, 0.4, 0.45))
-		empty_panel.add_child(empty_lbl)
+		if empty_rune_tex:
+			var empty_tex := TextureRect.new()
+			empty_tex.texture = empty_rune_tex
+			empty_tex.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+			empty_tex.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+			empty_tex.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			empty_panel.add_child(empty_tex)
 		gear_grid.add_child(empty_panel)
 
 
@@ -432,8 +577,8 @@ func _format_gear_stat(value: float) -> String:
 
 func _format_gear_delta(value: float, as_percent: bool) -> String:
 	var display_value := value * 100.0 if as_percent else value
-	var sign := "+" if display_value >= 0.0 else ""
-	return "%s%.1f%s" % [sign, display_value, "%" if as_percent else ""]
+	var prefix_sign := "+" if display_value >= 0.0 else ""
+	return "%s%.1f%s" % [prefix_sign, display_value, "%" if as_percent else ""]
 
 func _on_gear_detail_equip_pressed() -> void:
 	if not SaveManager or _selected_gear_uid.is_empty():
@@ -562,10 +707,10 @@ func _toggle_combat_power_modal() -> void:
 		var bonus: Dictionary = set_info.get("bonus", {})
 		if not bonus.is_empty():
 			set_lines.append("  Active: %s" % _format_gear_set_bonus(bonus))
-	var set_text := "\\n".join(set_lines) if not set_lines.is_empty() else "No gear sets equipped."
+	var set_text := "\n".join(set_lines) if not set_lines.is_empty() else "No gear sets equipped."
 	var desc_lbl := _info_modal.find_child("StatDescLabel", true, false) as Label
 	if desc_lbl:
-		desc_lbl.text = "TOTAL COMBAT POWER  %s\\n\\nPOWER SOURCES\\nHunter level       %s\\nEquipment (legacy)  %s\\nEquipped gear       %s\\nGear set bonuses    %s\\nCharacter stars     %s\\nTalent cards        %s\\n\\nTOTAL EQUIPPED BONUSES\\nATK  +%s     HP  +%s\\nCRIT  +%.1f%%     MOVE SPD  +%s\\nATK SPD  +%.1f%%\\n\\nGEAR SET PROGRESS\\n%s\\n\\nEquipment slots: %d/6\\nRune resonance is calculated separately during runs." % [
+		desc_lbl.text = "TOTAL COMBAT POWER  %s\n\nPOWER SOURCES\nHunter level       %s\nEquipment (legacy)  %s\nEquipped gear       %s\nGear set bonuses    %s\nCharacter stars     %s\nTalent cards        %s\n\nTOTAL EQUIPPED BONUSES\nATK  +%s     HP  +%s\nCRIT  +%.1f%%     MOVE SPD  +%s\nATK SPD  +%.1f%%\n\nGEAR SET PROGRESS\n%s\n\nEquipment slots: %d/6\nRune resonance is calculated separately during runs." % [
 			_format_num(int(breakdown.get("total", 0))),
 			_format_num(int(breakdown.get("base", 0))),
 			_format_num(int(breakdown.get("legacy_gear", 0))),
@@ -615,8 +760,8 @@ func _select_character(char_id: String) -> void:
 	if AudioManager:
 		AudioManager.play_sfx("ui_click")
 		
-	if char_pedestal: char_pedestal.character_id = char_id
-	if gear_pedestal: gear_pedestal.character_id = char_id
+	if char_pedestal: char_pedestal.set_character(char_id)
+	if gear_pedestal: gear_pedestal.set_character(char_id)
 	
 	_update_character_ui()
 	character_changed.emit(char_id)
@@ -670,6 +815,16 @@ func _on_unlock_valkyrie() -> void:
 
 func _update_character_ui() -> void:
 	match current_char_id:
+		"kael_varyn":
+			if char_name_badge: char_name_badge.text = "Kael Varyn"
+			if star_rating_row: star_rating_row.text = "★ ★ ★ ☆ ☆ ☆"
+			if ribbon_hunter: ribbon_hunter.text = "Select"
+			if ribbon_reaper: ribbon_reaper.text = "Select"
+			if ribbon_binder: ribbon_binder.text = "Select"
+			if skill_lbl_1: skill_lbl_1.text = "✦ Lv.1 Soulbound Resonance [Unlocked]\nEvery 3rd cast launches twin homing cyan bolts."
+			if skill_lbl_2: skill_lbl_2.text = "✦ Lv.2 Living Grimoire [Unlocked]\nCompanions gain +40% DMG and siphon life."
+			if skill_lbl_3: skill_lbl_3.text = "✧ Lv.3 Grimoire Nova [Unlocked]\nUnleashes 8 piercing homing arcane bolts."
+			if skill_lbl_4: skill_lbl_4.text = "✧ Lv.4 Soul Ward [Locked - 5★]\nGenerates an arcane barrier every 12 seconds."
 		"storm_reaper":
 			if char_name_badge: char_name_badge.text = "Storm Reaper"
 			if star_rating_row: star_rating_row.text = "★ ★ ★ ★ ☆ ☆"
@@ -710,7 +865,7 @@ func _update_character_ui() -> void:
 func _refresh_gear_stat_labels() -> void:
 	if not SaveManager:
 		return
-	var gear_stats: Dictionary = SaveManager.get_equipped_gear_stats()
+	var gear_stats: Dictionary = SaveManager.get_total_gear_stats()
 	if stat_atk_label:
 		stat_atk_label.text = "⚔ Gear ATK: +%d" % int(gear_stats.get("bonus_atk", 0.0))
 	if stat_hp_label:
@@ -743,6 +898,9 @@ func _on_gear_slot_pressed(slot_name: String) -> void:
 
 
 func _format_num(val: int) -> String:
+	if val < 1000:
+		return str(val)
+	@warning_ignore("integer_division")
 	var thousands := val / 1000
 	var rem := val % 1000
 	return "%d,%03d" % [thousands, rem]
@@ -790,7 +948,7 @@ func _switch_subtab(idx: int) -> void:
 			btn.add_theme_color_override("font_hover_color", active_color)
 			btn.add_theme_color_override("font_pressed_color", active_color)
 			btn.add_theme_color_override("font_focus_color", cur_col)
-			var cur_style: StyleBox = active_style if is_cur else empty_style
+			var cur_style: StyleBox = (active_style as StyleBox) if is_cur else (empty_style as StyleBox)
 			btn.add_theme_stylebox_override("normal", cur_style)
 			btn.add_theme_stylebox_override("hover", cur_style)
 			btn.add_theme_stylebox_override("pressed", cur_style)

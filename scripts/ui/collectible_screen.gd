@@ -81,9 +81,14 @@ func _setup_card_clicks() -> void:
 					var is_unlocked := true
 					var stars: int = info.stars
 					if SaveManager and SaveManager.talent_cards.has(key):
-						var tc: Dictionary = SaveManager.talent_cards[key]
-						is_unlocked = tc.get("unlocked", true)
-						stars = tc.get("stars", stars)
+						var tc_val: Variant = SaveManager.talent_cards[key]
+						if tc_val is Dictionary:
+							is_unlocked = bool(tc_val.get("unlocked", true))
+							stars = int(tc_val.get("stars", stars))
+						else:
+							var tc_level: int = int(tc_val)
+							is_unlocked = tc_level > 0
+							stars = maxi(stars, tc_level)
 					var txt := ""
 					if is_unlocked:
 						txt = "✦ %s (%d★): %s [ACTIVE]" % [info.name, stars, info.desc]

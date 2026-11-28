@@ -1,57 +1,70 @@
-[gd_scene load_steps=9 format=3 uid="uid://c6topresbar01"]
+[gd_scene load_steps=16 format=3 uid="uid://c6topresbar01"]
 
 [ext_resource type="Script" path="res://scripts/ui/top_resource_bar.gd" id="1_scr"]
 [ext_resource type="Texture2D" path="res://assets/art/ui_reference/ref_top_bar_full.png" id="2_bar"]
-[ext_resource type="Texture2D" path="res://assets/art/ui_reference/header_profile_cartouche.png" id="2_crt"]
-[ext_resource type="Texture2D" path="res://assets/art/ui_reference/header_resource_capsules.png" id="3_cps"]
+[ext_resource type="Texture2D" path="res://assets/art/ui_header/profile_cartouche_left.png" id="3_crt"]
+[ext_resource type="Texture2D" path="res://assets/art/ui_header/pill_energy_template.png" id="4_pe"]
+[ext_resource type="Texture2D" path="res://assets/art/ui_header/pill_gold_template.png" id="5_pg"]
+[ext_resource type="Texture2D" path="res://assets/art/ui_header/pill_gems_template.png" id="6_pd"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bg"]
-bg_color = Color(0.06, 0.08, 0.12, 0.98)
+bg_color = Color(0.055, 0.06, 0.1, 0.98)
 border_width_bottom = 2
-border_color = Color(0.28, 0.32, 0.44, 0.7)
+border_color = Color(0.24, 0.28, 0.38, 0.7)
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_cartouche"]
+texture = ExtResource("3_crt")
+texture_margin_left = 18.0
+texture_margin_top = 10.0
+texture_margin_right = 18.0
+texture_margin_bottom = 10.0
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_avatar"]
-bg_color = Color(0.12, 0.15, 0.24, 1)
+bg_color = Color(0.1, 0.12, 0.2, 0.85)
 border_width_left = 2
 border_width_top = 2
 border_width_right = 2
 border_width_bottom = 2
-border_color = Color(0.92, 0.75, 0.28, 1)
-corner_radius_top_left = 28
-corner_radius_top_right = 28
-corner_radius_bottom_right = 28
-corner_radius_bottom_left = 28
+border_color = Color(0.65, 0.72, 0.85, 0.9)
+corner_radius_top_left = 36
+corner_radius_top_right = 36
+corner_radius_bottom_right = 36
+corner_radius_bottom_left = 36
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_lvl"]
-bg_color = Color(0.18, 0.38, 0.82, 1)
+bg_color = Color(0.16, 0.36, 0.78, 1)
 border_width_left = 1
 border_width_top = 1
 border_width_right = 1
 border_width_bottom = 1
-border_color = Color(1, 0.88, 0.35, 1)
+border_color = Color(0.95, 0.85, 0.45, 1)
 corner_radius_top_left = 8
 corner_radius_top_right = 8
 corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pill"]
-bg_color = Color(0.08, 0.11, 0.18, 0.94)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.32, 0.4, 0.55, 0.85)
-corner_radius_top_left = 16
-corner_radius_top_right = 16
-corner_radius_bottom_right = 16
-corner_radius_bottom_left = 16
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_energy"]
+texture = ExtResource("4_pe")
+texture_margin_left = 32.0
+texture_margin_top = 8.0
+texture_margin_right = 32.0
+texture_margin_bottom = 8.0
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_btnplus"]
-bg_color = Color(0.24, 0.68, 0.32, 1)
-corner_radius_top_left = 10
-corner_radius_top_right = 10
-corner_radius_bottom_right = 10
-corner_radius_bottom_left = 10
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_gold"]
+texture = ExtResource("5_pg")
+texture_margin_left = 32.0
+texture_margin_top = 8.0
+texture_margin_right = 32.0
+texture_margin_bottom = 8.0
+
+[sub_resource type="StyleBoxTexture" id="StyleBoxTexture_gems"]
+texture = ExtResource("6_pd")
+texture_margin_left = 32.0
+texture_margin_top = 8.0
+texture_margin_right = 32.0
+texture_margin_bottom = 8.0
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_plus"]
 
 [node name="TopResourceBar" type="Control"]
 custom_minimum_size = Vector2(0, 116)
@@ -72,6 +85,7 @@ grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_bg")
 
 [node name="BarFullTex" type="TextureRect" parent="Background"]
+visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -86,43 +100,52 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 16.0
-offset_top = 10.0
-offset_right = -16.0
-offset_bottom = -10.0
+offset_left = 10.0
+offset_top = 8.0
+offset_right = -10.0
+offset_bottom = -8.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/separation = 12
+theme_override_constants/separation = 8
+
+[node name="CartoucheFrame" type="Panel" parent="HeaderContent"]
+visible = false
+layout_mode = 2
 
 [node name="LeftCluster" type="HBoxContainer" parent="HeaderContent"]
+custom_minimum_size = Vector2(276, 94)
 layout_mode = 2
-theme_override_constants/separation = 0
+theme_override_constants/separation = 10
+
+[node name="CartoucheBg" type="Panel" parent="HeaderContent/LeftCluster"]
+visible = false
+layout_mode = 2
 
 [node name="CartoucheTex" type="TextureRect" parent="HeaderContent/LeftCluster"]
 visible = false
 custom_minimum_size = Vector2(266, 84)
 layout_mode = 2
-texture = ExtResource("2_crt")
+texture = ExtResource("3_crt")
 expand_mode = 1
 stretch_mode = 5
 
 [node name="AvatarAnchor" type="Control" parent="HeaderContent/LeftCluster"]
-modulate = Color(1, 1, 1, 0)
-custom_minimum_size = Vector2(84, 84)
+custom_minimum_size = Vector2(82, 82)
 layout_mode = 2
+size_flags_vertical = 4
 
 [node name="AvatarFrame" type="Panel" parent="HeaderContent/LeftCluster/AvatarAnchor"]
-custom_minimum_size = Vector2(80, 80)
+custom_minimum_size = Vector2(76, 76)
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -40.0
-offset_top = -40.0
-offset_right = 40.0
-offset_bottom = 40.0
+offset_left = -38.0
+offset_top = -38.0
+offset_right = 38.0
+offset_bottom = 38.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_avatar")
@@ -144,15 +167,15 @@ expand_mode = 1
 stretch_mode = 5
 
 [node name="LevelBadge" type="Panel" parent="HeaderContent/LeftCluster/AvatarAnchor"]
-custom_minimum_size = Vector2(36, 28)
+custom_minimum_size = Vector2(28, 24)
 layout_mode = 1
 anchors_preset = 3
 anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -32.0
-offset_top = -26.0
+offset_left = -28.0
+offset_top = -24.0
 grow_horizontal = 0
 grow_vertical = 0
 theme_override_styles/panel = SubResource("StyleBoxFlat_lvl")
@@ -164,8 +187,8 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_font_sizes/font_size = 18
-text = "24"
+theme_override_font_sizes/font_size = 15
+text = "1"
 horizontal_alignment = 1
 vertical_alignment = 1
 
@@ -179,14 +202,14 @@ grow_vertical = 2
 flat = true
 
 [node name="InfoCluster" type="VBoxContainer" parent="HeaderContent/LeftCluster"]
-modulate = Color(1, 1, 1, 0)
 layout_mode = 2
+size_flags_horizontal = 3
 alignment = 1
 
 [node name="PlayerNameLabel" type="Label" parent="HeaderContent/LeftCluster/InfoCluster"]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.96, 0.96, 1, 1)
-theme_override_font_sizes/font_size = 24
+theme_override_font_sizes/font_size = 19
 text = "Hunter Raven"
 
 [node name="PowerPill" type="HBoxContainer" parent="HeaderContent/LeftCluster/InfoCluster"]
@@ -194,9 +217,9 @@ layout_mode = 2
 
 [node name="PowerLabel" type="Label" parent="HeaderContent/LeftCluster/InfoCluster/PowerPill"]
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.85, 0.3, 1)
-theme_override_font_sizes/font_size = 20
-text = "⚔ 47,745"
+theme_override_colors/font_color = Color(1, 0.85, 0.35, 1)
+theme_override_font_sizes/font_size = 17
+text = "⚔ 6,420"
 
 [node name="Spacer" type="Control" parent="HeaderContent"]
 layout_mode = 2
@@ -204,118 +227,119 @@ size_flags_horizontal = 3
 
 [node name="RightCluster" type="HBoxContainer" parent="HeaderContent"]
 layout_mode = 2
-theme_override_constants/separation = 10
+theme_override_constants/separation = 6
 
 [node name="CapsulesTex" type="TextureRect" parent="HeaderContent/RightCluster"]
 visible = false
 custom_minimum_size = Vector2(356, 52)
 layout_mode = 2
-texture = ExtResource("3_cps")
 expand_mode = 1
 stretch_mode = 5
 
 [node name="EnergyPill" type="PanelContainer" parent="HeaderContent/RightCluster"]
-visible = false
-custom_minimum_size = Vector2(136, 52)
+custom_minimum_size = Vector2(142, 54)
 layout_mode = 2
 size_flags_vertical = 4
-theme_override_styles/panel = SubResource("StyleBoxFlat_pill")
-custom_minimum_size = Vector2(136, 52)
-layout_mode = 2
-size_flags_vertical = 4
-theme_override_styles/panel = SubResource("StyleBoxFlat_pill")
+theme_override_styles/panel = SubResource("StyleBoxTexture_energy")
 
 [node name="HBox" type="HBoxContainer" parent="HeaderContent/RightCluster/EnergyPill"]
 layout_mode = 2
-theme_override_constants/separation = 4
+theme_override_constants/separation = 2
 
 [node name="Icon" type="Label" parent="HeaderContent/RightCluster/EnergyPill/HBox"]
+visible = false
 layout_mode = 2
-theme_override_colors/font_color = Color(0.2, 0.92, 0.38, 1)
-theme_override_font_sizes/font_size = 26
-text = " ⚡"
+text = "⚡"
 
 [node name="ValueLabel" type="Label" parent="HeaderContent/RightCluster/EnergyPill/HBox"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_colors/font_color = Color(0.92, 1, 0.92, 1)
-theme_override_font_sizes/font_size = 20
-text = "201/36"
+theme_override_colors/font_color = Color(0.98, 0.98, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.9)
+theme_override_font_sizes/font_size = 16
+text = "45/50"
 horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="PlusBtn" type="Button" parent="HeaderContent/RightCluster/EnergyPill/HBox"]
-custom_minimum_size = Vector2(36, 36)
+custom_minimum_size = Vector2(28, 32)
 layout_mode = 2
 size_flags_vertical = 4
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 22
-theme_override_styles/normal = SubResource("StyleBoxFlat_btnplus")
-text = "+"
+focus_mode = 0
+theme_override_styles/normal = SubResource("StyleBoxEmpty_plus")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_plus")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_plus")
+flat = true
+text = ""
 
 [node name="GoldPill" type="PanelContainer" parent="HeaderContent/RightCluster"]
-visible = false
-custom_minimum_size = Vector2(136, 52)
+custom_minimum_size = Vector2(134, 54)
 layout_mode = 2
 size_flags_vertical = 4
-theme_override_styles/panel = SubResource("StyleBoxFlat_pill")
+theme_override_styles/panel = SubResource("StyleBoxTexture_gold")
 
 [node name="HBox" type="HBoxContainer" parent="HeaderContent/RightCluster/GoldPill"]
 layout_mode = 2
-theme_override_constants/separation = 4
+theme_override_constants/separation = 2
 
 [node name="Icon" type="Label" parent="HeaderContent/RightCluster/GoldPill/HBox"]
+visible = false
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.86, 0.28, 1)
-theme_override_font_sizes/font_size = 26
-text = " 🪙"
+text = "🪙"
 
 [node name="ValueLabel" type="Label" parent="HeaderContent/RightCluster/GoldPill/HBox"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_colors/font_color = Color(1, 0.95, 0.82, 1)
-theme_override_font_sizes/font_size = 20
-text = "48,250"
+theme_override_colors/font_color = Color(1, 0.96, 0.86, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.9)
+theme_override_font_sizes/font_size = 16
+text = "5,000"
 horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="PlusBtn" type="Button" parent="HeaderContent/RightCluster/GoldPill/HBox"]
-custom_minimum_size = Vector2(36, 36)
+custom_minimum_size = Vector2(28, 32)
 layout_mode = 2
 size_flags_vertical = 4
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 22
-theme_override_styles/normal = SubResource("StyleBoxFlat_btnplus")
-text = "+"
+focus_mode = 0
+theme_override_styles/normal = SubResource("StyleBoxEmpty_plus")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_plus")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_plus")
+flat = true
+text = ""
 
 [node name="GemsPill" type="PanelContainer" parent="HeaderContent/RightCluster"]
-visible = false
-custom_minimum_size = Vector2(136, 52)
+custom_minimum_size = Vector2(130, 54)
 layout_mode = 2
 size_flags_vertical = 4
-theme_override_styles/panel = SubResource("StyleBoxFlat_pill")
+theme_override_styles/panel = SubResource("StyleBoxTexture_gems")
 
 [node name="HBox" type="HBoxContainer" parent="HeaderContent/RightCluster/GemsPill"]
 layout_mode = 2
-theme_override_constants/separation = 4
+theme_override_constants/separation = 2
 
 [node name="Icon" type="Label" parent="HeaderContent/RightCluster/GemsPill/HBox"]
+visible = false
 layout_mode = 2
-theme_override_colors/font_color = Color(0.35, 0.8, 1, 1)
-theme_override_font_sizes/font_size = 26
-text = " 💎"
+text = "💎"
 
 [node name="ValueLabel" type="Label" parent="HeaderContent/RightCluster/GemsPill/HBox"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_colors/font_color = Color(0.88, 0.96, 1, 1)
-theme_override_font_sizes/font_size = 20
-text = "1,850"
+theme_override_colors/font_color = Color(0.9, 0.97, 1, 1)
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 0.9)
+theme_override_font_sizes/font_size = 16
+text = "150"
 horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="PlusBtn" type="Button" parent="HeaderContent/RightCluster/GemsPill/HBox"]
-custom_minimum_size = Vector2(36, 36)
+custom_minimum_size = Vector2(28, 32)
 layout_mode = 2
 size_flags_vertical = 4
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_font_sizes/font_size = 22
-theme_override_styles/normal = SubResource("StyleBoxFlat_btnplus")
-text = "+"
+focus_mode = 0
+theme_override_styles/normal = SubResource("StyleBoxEmpty_plus")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_plus")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_plus")
+flat = true
+text = ""

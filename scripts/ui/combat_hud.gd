@@ -12,7 +12,7 @@ extends Control
 
 signal pause_requested()
 
-const SafeAreaHelper = preload("res://scripts/ui/safe_area_helper.gd")
+const SafeAreaHelperClass = preload("res://scripts/ui/safe_area_helper.gd")
 
 @export var move_joystick: MobileVirtualJoystick
 @export var skill_draft_modal: SkillDraftModal = null
@@ -43,20 +43,29 @@ const SafeAreaHelper = preload("res://scripts/ui/safe_area_helper.gd")
 
 var player_ref: PlayerController
 var battle_seconds: float = 0.0
+var _last_displayed_second: int = -1
 var current_speed_scale: float = 1.0
 var feedback_tween: Tween = null
+var _hp_tween: Tween = null
+var _xp_tween: Tween = null
+var _pending_drafts: int = 0
 
 func _process(delta: float) -> void:
 	battle_seconds += delta
-	if timer_label:
-		var mins := int(battle_seconds) / 60
-		var secs := int(battle_seconds) % 60
+	var total_secs := int(battle_seconds)
+	if timer_label and total_secs != _last_displayed_second:
+		_last_displayed_second = total_secs
+		@warning_ignore("integer_division")
+		var mins := total_secs / 60
+		var secs := total_secs % 60
 		timer_label.text = "%02d:%02d" % [mins, secs]
 
 func _ready() -> void:
 	_apply_safe_area()
 	if not get_tree().root.size_changed.is_connected(_apply_safe_area):
 		get_tree().root.size_changed.connect(_apply_safe_area)
+	if skill_draft_modal and not skill_draft_modal.skill_chosen.is_connected(_on_skill_draft_chosen):
+		skill_draft_modal.skill_chosen.connect(_on_skill_draft_chosen)
 		
 	if btn_dodge:
 		btn_dodge.icon = TextureLoader.get_texture("res://assets/art/ui/btn_dash.png")
@@ -138,27 +147,49 @@ func _exit_tree() -> void:
 func _on_hp_changed(curr: float, max_v: float) -> void:
 	if player_hp_bar:
 		player_hp_bar.max_value = max_v
-		var tween := create_tween()
-		tween.tween_property(player_hp_bar, "value", curr, 0.22).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		if _hp_tween and _hp_tween.is_valid():
+			_hp_tween.kill()
+		_hp_tween = create_tween()
+		_hp_tween.tween_property(player_hp_bar, "value", curr, 0.22).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	if player_hp_label:
 		player_hp_label.text = "%d / %d" % [int(curr), int(max_v)]
 
 func _on_xp_changed(curr_xp: float, max_xp: float) -> void:
 	if xp_bar:
 		xp_bar.max_value = max_xp
-		var tween := create_tween()
-		tween.tween_property(xp_bar, "value", curr_xp, 0.25).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		if _xp_tween and _xp_tween.is_valid():
+			_xp_tween.kill()
+		_xp_tween = create_tween()
+		_xp_tween.tween_property(xp_bar, "value", curr_xp, 0.25).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	if xp_label:
 		xp_label.text = "XP %d / %d (Lv.%d)" % [int(curr_xp), int(max_xp), GameManager.run_player_level]
 
 func _on_level_up(new_lvl: int) -> void:
 	show_announcement("✦ LEVEL UP! (Lv.%d) Choose a Blessing ✦" % new_lvl, 2.2, Color(1.0, 0.88, 0.3))
-	if skill_draft_modal:
-		# Brief delay to allow level-up chime, then present draft modal
-		get_tree().create_timer(0.35, true, false, true).timeout.connect(func():
-			if is_instance_valid(skill_draft_modal):
-				skill_draft_modal.show_draft()
-		)
+	if not skill_draft_modal:
+		return
+	if skill_draft_modal.visible or _pending_drafts > 0:
+		_pending_drafts += 1
+		return
+	_pending_drafts = 1
+	# Brief delay to allow level-up chime, then present draft modal
+	get_tree().create_timer(0.35, true, false, true).timeout.connect(func():
+		if is_instance_valid(skill_draft_modal) and not skill_draft_modal.visible:
+			_pending_drafts = maxi(0, _pending_drafts - 1)
+			skill_draft_modal.show_draft()
+	)
+
+
+func _on_skill_draft_chosen(_offer: Dictionary) -> void:
+	if _pending_drafts <= 0 or not is_instance_valid(skill_draft_modal):
+		return
+	_pending_drafts -= 1
+	call_deferred("_present_queued_draft")
+
+
+func _present_queued_draft() -> void:
+	if is_instance_valid(skill_draft_modal) and not skill_draft_modal.visible:
+		skill_draft_modal.show_draft()
 
 func _on_skill_applied(skill_id: String, new_lvl: int) -> void:
 	var skill_data := RunSkillDatabase.get_skill(skill_id)
@@ -246,7 +277,7 @@ func _on_skill_cooldown(current: float, _max_v: float) -> void:
 			btn_skill.disabled = false
 
 func _apply_safe_area() -> void:
-	var safe: Dictionary = SafeAreaHelper.get_safe_margins()
+	var safe: Dictionary = SafeAreaHelperClass.get_safe_margins()
 	var top_inset: float = safe.get("top", 46.0)
 	var bot_inset: float = safe.get("bottom", 28.0)
 	var right_inset: float = safe.get("right", 14.0)

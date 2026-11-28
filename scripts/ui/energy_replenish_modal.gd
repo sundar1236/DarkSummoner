@@ -52,10 +52,7 @@ func refresh_modal() -> void:
 			btn_free.disabled = false
 
 func _on_claim_free() -> void:
-	if SaveManager and not SaveManager.daily_free_energy_claimed:
-		SaveManager.add_energy(20)
-		SaveManager.daily_free_energy_claimed = true
-		SaveManager.save_profile()
+	if SaveManager and SaveManager.claim_daily_free_energy(20):
 		if AudioManager: AudioManager.play_sfx("upgrade")
 		refresh_modal()
 		energy_purchased.emit(20)
@@ -89,4 +86,6 @@ func _process(delta: float) -> void:
 			if SaveManager and SaveManager.energy < SaveManager.max_energy:
 				SaveManager.add_energy(1)
 		if lbl_timer:
-			lbl_timer.text = "Next +1 Energy in: %02d:%02d" % [_timer_secs / 60, _timer_secs % 60]
+			@warning_ignore("integer_division")
+			var mins := _timer_secs / 60
+			lbl_timer.text = "Next +1 Energy in: %02d:%02d" % [mins, _timer_secs % 60]

@@ -283,7 +283,7 @@ func _process_attack(delta: float) -> void:
 	procedural_scale = procedural_scale.move_toward(Vector2.ONE, 6.0 * delta)
 	procedural_rotation = lerp_angle(procedural_rotation, 0.0, 12.0 * delta)
 
-func _process_skill(delta: float) -> void:
+func _process_skill(_delta: float) -> void:
 	# Levitation pulse
 	var float_y: float = sin(anim_time * 8.0) * 3.0 - 4.0
 	procedural_offset = Vector2(0, float_y)
@@ -305,7 +305,7 @@ func _process_defeat(delta: float) -> void:
 	procedural_scale = procedural_scale.move_toward(Vector2(1.2, 0.4), 4.0 * delta)
 	procedural_rotation = lerp_angle(procedural_rotation, 0.4, 5.0 * delta)
 
-func _process_victory(delta: float) -> void:
+func _process_victory(_delta: float) -> void:
 	# Celebration jump bob
 	var jump_y: float = -abs(sin(anim_time * 6.0)) * 12.0
 	procedural_offset = Vector2(0, jump_y)
